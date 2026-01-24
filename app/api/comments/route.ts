@@ -1,0 +1,60 @@
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function GET(request: Request) {
+  try {
+    const supabase = await createClient()
+    const { searchParams } = new URL(request.url)
+    const postId = searchParams.get('post_id')
+
+    if (!postId) {
+      return NextResponse.json({ error: 'post_id is required' }, { status: 400 })
+    }
+
+    const { data: comments, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ comments })
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient()
+    const body = await request.json()
+    const { post_id, content, author_email, author_name, is_from_admin } = body
+
+    if (!post_id || !content) {
+      return NextResponse.json({ error: 'post_id and content are required' }, { status: 400 })
+    }
+
+    const { data: comment, error } = await supabase
+      .from('comments')
+      .insert({
+        post_id,
+        content,
+        author_email: author_email || null,
+        author_name: author_name || null,
+        is_from_admin: is_from_admin || false
+      })
+      .select()
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ comment }, { status: 201 })
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
