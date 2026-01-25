@@ -1315,7 +1315,7 @@
         "Step 6: Run: npm run build",
         "Step 7: Run: git add -A && git commit -m 'feat: add changelog subscribe form'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 60,

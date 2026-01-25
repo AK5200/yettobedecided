@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
+import { ChangelogSubscribeForm } from '@/components/changelog/changelog-subscribe-form'
 import Link from 'next/link'
 
 export default async function PublicChangelogPage({
@@ -45,6 +46,10 @@ export default async function PublicChangelogPage({
         </nav>
       </header>
       <h2 className="text-xl font-semibold mb-6">Changelog</h2>
+      <div className="mb-8 space-y-2">
+        <h3 className="text-lg font-semibold">Subscribe for updates</h3>
+        <ChangelogSubscribeForm orgId={org.id} />
+      </div>
       <div className="space-y-6">
         {entries?.map((entry) => (
           <div key={entry.id} className="space-y-2">
