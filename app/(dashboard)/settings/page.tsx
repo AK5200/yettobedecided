@@ -10,7 +10,7 @@ export default async function SettingsPage() {
 
   const { data: membership } = await supabase
     .from('org_members')
-    .select('org_id, organizations(name, slug, plan)')
+    .select('org_id, role, organizations(name, slug, plan)')
     .eq('user_id', user!.id)
     .single()
 
@@ -46,6 +46,10 @@ export default async function SettingsPage() {
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Email</span>
             <span>{user?.email || 'Unknown'}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Role</span>
+            <span>{membership?.role || 'Member'}</span>
           </div>
         </CardContent>
       </Card>
