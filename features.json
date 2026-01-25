@@ -1,209 +1,209 @@
 [
-  {
-    "id": 1,
-    "category": "setup",
-    "description": "Initialize shadcn/ui",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest init -y --defaults",
-      "If prompted, select: Default style, Slate color, Yes to CSS variables",
-      "Verify components.json exists",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: init shadcn'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 2,
-    "category": "setup",
-    "description": "Install button",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add button -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add button'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 3,
-    "category": "setup",
-    "description": "Install input",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add input -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add input'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 4,
-    "category": "setup",
-    "description": "Install label",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add label -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add label'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 5,
-    "category": "setup",
-    "description": "Install card",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add card -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add card'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 6,
-    "category": "setup",
-    "description": "Install textarea",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add textarea -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add textarea'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 7,
-    "category": "setup",
-    "description": "Install badge",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add badge -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add badge'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 8,
-    "category": "setup",
-    "description": "Install select",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add select -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add select'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 9,
-    "category": "setup",
-    "description": "Install separator",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add separator -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add separator'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 10,
-    "category": "setup",
-    "description": "Install dropdown-menu",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add dropdown-menu -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add dropdown-menu'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 11,
-    "category": "setup",
-    "description": "Install dialog",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add dialog -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add dialog'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 12,
-    "category": "setup",
-    "description": "Install tabs",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add tabs -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add tabs'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 13,
-    "category": "setup",
-    "description": "Install avatar",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add avatar -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add avatar'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 14,
-    "category": "setup",
-    "description": "Install skeleton",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add skeleton -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add skeleton'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 15,
-    "category": "setup",
-    "description": "Install toast and sonner",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npx shadcn@latest add toast -y",
-      "Run: npx shadcn@latest add sonner -y",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add toast'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 16,
-    "category": "setup",
-    "description": "Install lucide-react icons",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npm install lucide-react",
-      "Run: npm run build",
-      "Run: git add -A && git commit -m 'feat: add lucide icons'"
-    ],
-    "passes": true
-  },
-  {
-    "id": 17,
-    "category": "setup",
-    "description": "Final build check",
-    "steps": [
-      "Run: cd feedbackhub",
-      "Run: npm run build",
-      "Verify no errors",
-      "Run: git add -A && git commit -m 'feat: shadcn setup complete'"
-    ],
-    "passes": false
-  }
+    {
+        "id":  1,
+        "category":  "setup",
+        "description":  "Initialize shadcn/ui",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest init -y --defaults",
+                      "If prompted, select: Default style, Slate color, Yes to CSS variables",
+                      "Verify components.json exists",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: init shadcn\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  2,
+        "category":  "setup",
+        "description":  "Install button",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add button -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add button\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  3,
+        "category":  "setup",
+        "description":  "Install input",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add input -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add input\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  4,
+        "category":  "setup",
+        "description":  "Install label",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add label -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add label\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  5,
+        "category":  "setup",
+        "description":  "Install card",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add card -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add card\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  6,
+        "category":  "setup",
+        "description":  "Install textarea",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add textarea -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add textarea\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  7,
+        "category":  "setup",
+        "description":  "Install badge",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add badge -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add badge\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  8,
+        "category":  "setup",
+        "description":  "Install select",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add select -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add select\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  9,
+        "category":  "setup",
+        "description":  "Install separator",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add separator -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add separator\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  10,
+        "category":  "setup",
+        "description":  "Install dropdown-menu",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add dropdown-menu -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add dropdown-menu\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  11,
+        "category":  "setup",
+        "description":  "Install dialog",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add dialog -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add dialog\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  12,
+        "category":  "setup",
+        "description":  "Install tabs",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add tabs -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add tabs\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  13,
+        "category":  "setup",
+        "description":  "Install avatar",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add avatar -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add avatar\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  14,
+        "category":  "setup",
+        "description":  "Install skeleton",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add skeleton -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add skeleton\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  15,
+        "category":  "setup",
+        "description":  "Install toast and sonner",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npx shadcn@latest add toast -y",
+                      "Run: npx shadcn@latest add sonner -y",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add toast\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  16,
+        "category":  "setup",
+        "description":  "Install lucide-react icons",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npm install lucide-react",
+                      "Run: npm run build",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: add lucide icons\u0027"
+                  ],
+        "passes":  true
+    },
+    {
+        "id":  17,
+        "category":  "setup",
+        "description":  "Final build check",
+        "steps":  [
+                      "Run: cd feedbackhub",
+                      "Run: npm run build",
+                      "Verify no errors",
+                      "Run: git add -A \u0026\u0026 git commit -m \u0027feat: shadcn setup complete\u0027"
+                  ],
+        "passes":  true
+    }
 ]
