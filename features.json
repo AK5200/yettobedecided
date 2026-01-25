@@ -495,7 +495,7 @@
       "Step 4: Inside app/[orgSlug], create folder named roadmap",
       "Step 5: Run: git add -A && git commit -m 'feat: create public pages folder structure'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 19,
