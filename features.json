@@ -622,7 +622,7 @@
       "Step 5: Run: npm run build",
       "Step 6: Run: git add -A && git commit -m 'fix: vote button stopPropagation'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 27,
