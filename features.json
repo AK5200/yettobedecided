@@ -648,7 +648,7 @@
       "Step 8: Run: npm run build",
       "Step 9: Run: git add -A && git commit -m 'feat: style widget components'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 28,

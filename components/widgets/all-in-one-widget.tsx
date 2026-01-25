@@ -28,7 +28,7 @@ export function AllInOneWidget({
   showBranding = true,
 }: AllInOneWidgetProps) {
   return (
-    <div className="space-y-4">
+    <div className="bg-white rounded-lg p-4 space-y-4">
       <div>
         <div className="text-lg font-semibold">Have something to say?</div>
         <p className="text-sm text-gray-600">
@@ -40,7 +40,7 @@ export function AllInOneWidget({
           <TabsTrigger value="feedback">Feedback</TabsTrigger>
           <TabsTrigger value="changelog">Changelog</TabsTrigger>
         </TabsList>
-        <TabsContent value="feedback" className="pt-4">
+        <TabsContent value="feedback" className="pt-4 transition-all">
           <FeedbackWidget
             boards={boards}
             orgSlug={orgSlug}
@@ -48,7 +48,7 @@ export function AllInOneWidget({
             showBranding={showBranding}
           />
         </TabsContent>
-        <TabsContent value="changelog" className="pt-4">
+        <TabsContent value="changelog" className="pt-4 transition-all">
           <div className="max-h-80 overflow-y-auto space-y-4">
             {changelog.map((entry) => (
               <div key={entry.id} className="border-b pb-4 last:border-b-0">

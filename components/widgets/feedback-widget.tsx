@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Check } from 'lucide-react'
 
 interface FeedbackBoard {
   id: string
@@ -119,10 +120,16 @@ export function FeedbackWidget({
           type="submit"
           disabled={loading || !title.trim()}
           style={{ backgroundColor: accentColor }}
+          className="text-white"
         >
           {loading ? 'Submitting...' : 'Submit Feedback'}
         </Button>
-        {success && <p className="text-sm text-gray-600">Thanks for the feedback!</p>}
+        {success && (
+          <p className="text-sm text-gray-600 flex items-center gap-2">
+            <Check className="h-4 w-4" />
+            Thanks for the feedback!
+          </p>
+        )}
       </form>
       {showBranding && (
         <div className="text-xs text-gray-500 text-center">Powered by FeedbackHub</div>

@@ -26,7 +26,7 @@ export function FloatingButton({
     <button
       type="button"
       onClick={onClick}
-      className={`fixed z-50 ${positionClasses[position]} flex items-center gap-2 rounded-full px-4 py-2 text-white shadow`}
+      className={`fixed z-50 ${positionClasses[position]} flex items-center gap-2 rounded-full px-4 py-2 text-white shadow-lg transition-transform hover:scale-105`}
       style={{ backgroundColor: accentColor }}
     >
       <MessageSquare className="h-4 w-4" />
