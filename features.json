@@ -113,7 +113,7 @@
       "Step 9: Inside app/(dashboard), create folder named onboarding",
       "Step 10: Run: git add -A && git commit -m 'feat: create dashboard folder structure'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 6,
