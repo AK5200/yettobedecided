@@ -127,3 +127,15 @@ export interface NotificationPreferences {
   created_at: string
   updated_at: string
 }
+
+export interface Webhook {
+  id: string
+  org_id: string
+  name: string
+  url: string
+  secret: string | null
+  events: string[]
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}

@@ -951,7 +951,7 @@
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: add password reset API'"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": 37,
