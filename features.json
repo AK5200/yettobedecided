@@ -1083,7 +1083,7 @@
         "Step 7: Run: npm run build",
         "Step 8: Run: git add -A && git commit -m 'feat: add BoardSettingsForm component'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 45,
@@ -1097,14 +1097,14 @@
         "Step 5: Save the file",
         "Step 6: Run: npm run build",
         "Step 7: Run: git add -A && git commit -m 'feat: add team settings page'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 46,
       "category": "components",
       "description": "Create InviteMemberForm component",
-      "steps": [
+    "steps": [
         "Step 1: Create file components/settings/invite-member-form.tsx",
         "Step 2: Add 'use client'",
         "Step 3: Add form with email input and role select (admin/member)",
