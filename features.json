@@ -587,7 +587,7 @@
         "Step 7: Run: npm run build",
         "Step 8: Run: git add -A && git commit -m 'feat: add invitations API'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 23,
@@ -983,7 +983,7 @@
         "Step 7: Show success message after submission",
         "Step 8: Add link back to login",
         "Step 9: Save the file",
-        "Step 10: Run: npm run build",
+      "Step 10: Run: npm run build",
         "Step 11: Run: git add -A && git commit -m 'feat: add forgot password page'"
       ],
       "passes": true
@@ -1003,14 +1003,14 @@
         "Step 8: Save the file",
         "Step 9: Run: npm run build",
         "Step 10: Run: git add -A && git commit -m 'feat: add reset password page'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 40,
       "category": "pages",
       "description": "Update login page with forgot password link",
-      "steps": [
+    "steps": [
         "Step 1: Open file app/(auth)/login/page.tsx",
         "Step 2: Add Link import if not present",
         "Step 3: Add forgot password link below password field:",
@@ -1048,12 +1048,12 @@
         "Step 5: On submit, PATCH to /api/organizations/[id]",
         "Step 6: Show success toast",
         "Step 7: Save the file",
-        "Step 8: Run: npm run build",
+      "Step 8: Run: npm run build",
         "Step 9: Run: git add -A && git commit -m 'feat: add OrgSettingsForm component'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 43,
       "category": "pages",
       "description": "Create board settings page",
