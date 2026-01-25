@@ -45,6 +45,16 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
     fetchWidgetData()
   }, [apiUrl, orgSlug])
 
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data === 'open') setIsOpen(true)
+      if (event.data === 'close') setIsOpen(false)
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
   if (loading || !settings) {
     return null
   }
