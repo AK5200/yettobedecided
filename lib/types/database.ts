@@ -116,3 +116,14 @@ export interface Invitation {
   accepted_at: string | null
   created_at: string
 }
+
+export interface NotificationPreferences {
+  id: string
+  user_id: string
+  email_on_status_change: boolean
+  email_on_comment: boolean
+  email_on_new_feedback: boolean
+  email_digest: boolean
+  created_at: string
+  updated_at: string
+}
