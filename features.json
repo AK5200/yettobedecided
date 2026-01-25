@@ -28,7 +28,7 @@
       "Step 4: Run in terminal: git add -A",
       "Step 5: Run in terminal: git commit -m 'feat: create auth folder structure'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 3,
