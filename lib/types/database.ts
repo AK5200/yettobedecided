@@ -96,3 +96,11 @@ export interface WidgetSettings {
   created_at: string
   updated_at: string
 }
+
+export interface Tag {
+  id: string
+  org_id: string
+  name: string
+  color: string
+  created_at: string
+}
