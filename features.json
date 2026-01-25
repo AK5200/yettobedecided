@@ -1019,7 +1019,7 @@
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: add forgot password link to login'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 41,
@@ -1033,14 +1033,14 @@
         "Step 5: Save the file",
         "Step 6: Run: npm run build",
         "Step 7: Run: git add -A && git commit -m 'feat: add org settings page'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 42,
       "category": "components",
       "description": "Create OrgSettingsForm component",
-      "steps": [
+    "steps": [
         "Step 1: Create folder components/settings",
         "Step 2: Create file components/settings/org-settings-form.tsx",
         "Step 3: Add 'use client'",
