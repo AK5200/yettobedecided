@@ -376,7 +376,7 @@
       "Step 7: Run: npm run build",
       "Step 8: Run: git add -A && git commit -m 'feat: board detail passes admin info'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 15,

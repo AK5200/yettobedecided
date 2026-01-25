@@ -10,6 +10,9 @@ export default async function BoardDetailPage({
 }) {
   const { id } = await params
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const { data: board } = await supabase
     .from('boards')
@@ -39,7 +42,12 @@ export default async function BoardDetailPage({
         {board.description || 'No description'}
       </p>
       <div className="mt-8">
-        <BoardPostsList boardId={id} initialPosts={posts || []} />
+        <BoardPostsList
+          boardId={id}
+          initialPosts={posts || []}
+          isAdmin={true}
+          adminEmail={user?.email || ''}
+        />
       </div>
     </div>
   )
