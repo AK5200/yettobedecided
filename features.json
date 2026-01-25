@@ -482,7 +482,7 @@
       "Step 10: Run: npm run build",
       "Step 11: Run: git add -A && git commit -m 'feat: add settings page'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 18,
