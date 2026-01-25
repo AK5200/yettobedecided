@@ -47,6 +47,7 @@ export async function PATCH(
     if (status !== undefined) updates.status = status
     if (is_approved !== undefined) updates.is_approved = is_approved
     if (is_pinned !== undefined) updates.is_pinned = is_pinned
+    if (body.admin_note !== undefined) updates.admin_note = body.admin_note
 
     const { data: post, error } = await supabase
       .from('posts')
