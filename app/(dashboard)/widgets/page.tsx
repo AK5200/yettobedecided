@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { WidgetSettingsForm } from '@/components/dashboard/widget-settings-form'
+import { WidgetCodeGenerator } from '@/components/dashboard/widget-code-generator'
 
 const defaultSettings = {
   widget_type: 'all-in-one',
@@ -54,21 +55,8 @@ export default async function WidgetsPage() {
         <CardHeader>
           <CardTitle>Embed Code</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm text-gray-600 mb-2">Script Tag</p>
-            <pre className="text-xs bg-gray-50 p-3 rounded border">
-              {`<script src="${baseUrl}/widget.js" data-org="${org?.slug}"></script>`}
-            </pre>
-            <button className="mt-2 text-sm underline">Copy</button>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600 mb-2">iFrame</p>
-            <pre className="text-xs bg-gray-50 p-3 rounded border">
-              {`<iframe src="${baseUrl}/embed/widget?org=${org?.slug}" width="420" height="640"></iframe>`}
-            </pre>
-            <button className="mt-2 text-sm underline">Copy</button>
-          </div>
+        <CardContent>
+          <WidgetCodeGenerator orgSlug={org?.slug || ''} baseUrl={baseUrl} />
         </CardContent>
       </Card>
       <Card>
