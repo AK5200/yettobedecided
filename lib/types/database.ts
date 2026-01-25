@@ -83,3 +83,16 @@ export interface Subscriber {
   email: string
   created_at: string
 }
+
+export interface WidgetSettings {
+  id: string
+  org_id: string
+  widget_type: 'changelog' | 'feedback' | 'all-in-one'
+  position: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
+  accent_color: string
+  button_text: string
+  show_branding: boolean
+  theme: 'light' | 'dark' | 'auto'
+  created_at: string
+  updated_at: string
+}
