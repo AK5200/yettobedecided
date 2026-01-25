@@ -1330,6 +1330,6 @@
       "Step 6: Run: git add -A",
         "Step 7: Run: git commit -m 'feat: overnight batch complete - email, settings, team, search, tags, webhooks, api keys, integrations'"
     ],
-    "passes": false
+    "passes": true
   }
 ]
