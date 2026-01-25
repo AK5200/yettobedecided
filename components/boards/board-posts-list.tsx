@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { PostCard } from './post-card'
+import { EmptyState } from '@/components/ui/empty-state'
 import type { Post } from '@/lib/types/database'
 
 interface BoardPostsListProps {
@@ -35,7 +36,7 @@ export function BoardPostsList({
   }
 
   if (posts.length === 0) {
-    return <p className="text-sm text-gray-600">No feedback yet</p>
+    return <EmptyState title="No feedback yet" description="Be the first to add feedback." />
   }
 
   return (

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/ui/empty-state'
 import Link from 'next/link'
 
 export default async function BoardsPage() {
@@ -30,7 +31,12 @@ export default async function BoardsPage() {
         </Link>
       </div>
       {!boards || boards.length === 0 ? (
-        <p>No boards yet. Create your first board!</p>
+        <EmptyState
+          title="No boards yet"
+          description="Create your first board to start collecting feedback."
+          actionLabel="New Board"
+          actionHref="/boards/new"
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {boards.map((board) => (

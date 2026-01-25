@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
 import Link from 'next/link'
 
 export default async function ChangelogPage() {
@@ -31,7 +32,12 @@ export default async function ChangelogPage() {
         </Link>
       </div>
       {!entries || entries.length === 0 ? (
-        <p>No changelog entries yet.</p>
+        <EmptyState
+          title="No changelog entries"
+          description="Publish your first update to keep users informed."
+          actionLabel="New Entry"
+          actionHref="/changelog/new"
+        />
       ) : (
         <div className="space-y-4">
           {entries.map((entry) => {
