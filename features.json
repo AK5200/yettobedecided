@@ -286,7 +286,7 @@
       "Step 14: Run: npm run build",
       "Step 15: Run: git add -A && git commit -m 'feat: add dashboard home page'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 12,
