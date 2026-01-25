@@ -284,7 +284,7 @@
       "Step 9: Run: npm run build",
       "Step 10: Run: git add -A && git commit -m 'feat: FloatingButton component'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 12,
