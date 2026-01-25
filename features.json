@@ -562,7 +562,7 @@
       "Step 11: Run: npm run build",
       "Step 12: Run: git add -A && git commit -m 'feat: add public board page with voting'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 21,
