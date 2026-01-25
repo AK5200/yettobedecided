@@ -191,7 +191,7 @@
       "Step 13: Run: npm run build",
       "Step 14: Run: git add -A && git commit -m 'feat: add dashboard layout with auth'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 9,
