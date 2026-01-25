@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 type Org = { id: string; name: string }
 type Board = { id: string; name: string }
@@ -30,6 +31,9 @@ export default function PublicBoardPage({
   const [loading, setLoading] = useState(true)
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
+  const [authorName, setAuthorName] = useState('')
+  const [authorEmail, setAuthorEmail] = useState('')
+  const [submitLoading, setSubmitLoading] = useState(false)
 
   const fetchPosts = async (boardId: string) => {
     const { data } = await supabase
@@ -99,6 +103,8 @@ export default function PublicBoardPage({
   const handleSubmitPost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!board?.id) return
+    if (!newTitle.trim()) return
+    setSubmitLoading(true)
 
     await fetch('/api/posts', {
       method: 'POST',
@@ -107,13 +113,17 @@ export default function PublicBoardPage({
         board_id: board.id,
         title: newTitle,
         content: newContent,
-        author_email: voterEmail,
+        author_name: authorName,
+        author_email: authorEmail,
       }),
     })
 
     setNewTitle('')
     setNewContent('')
+    setAuthorName('')
+    setAuthorEmail('')
     await fetchPosts(board.id)
+    setSubmitLoading(false)
   }
 
   if (loading) {
@@ -127,6 +137,36 @@ export default function PublicBoardPage({
         <h1 className="text-2xl font-bold">{board?.name}</h1>
       </div>
 
+      <div className="border p-4 rounded mb-8 max-w-2xl">
+        <h3 className="font-semibold mb-4">Submit Feedback</h3>
+        <form onSubmit={handleSubmitPost} className="space-y-3">
+          <Input
+            placeholder="Your name (optional)"
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+          />
+          <Input
+            placeholder="Your email (optional)"
+            value={authorEmail}
+            onChange={(e) => setAuthorEmail(e.target.value)}
+          />
+          <Input
+            placeholder="Feedback title"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            required
+          />
+          <Textarea
+            placeholder="Describe your feedback..."
+            value={newContent}
+            onChange={(e) => setNewContent(e.target.value)}
+          />
+          <Button type="submit" disabled={submitLoading || !newTitle.trim()}>
+            {submitLoading ? 'Submitting...' : 'Submit Feedback'}
+          </Button>
+        </form>
+      </div>
+
       <div className="max-w-md">
         <Input
           placeholder="Your email"
@@ -134,26 +174,6 @@ export default function PublicBoardPage({
           onChange={(e) => setVoterEmail(e.target.value)}
         />
       </div>
-
-      <Card className="p-4 max-w-2xl">
-        <form onSubmit={handleSubmitPost} className="space-y-3">
-          <Input
-            placeholder="Feedback title"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            required
-          />
-          <textarea
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            rows={4}
-            placeholder="Describe your feedback"
-            value={newContent}
-            onChange={(e) => setNewContent(e.target.value)}
-            required
-          />
-          <Button type="submit">Submit Feedback</Button>
-        </form>
-      </Card>
 
       <div className="space-y-4">
         {posts.map((post) => (
