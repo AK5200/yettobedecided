@@ -213,7 +213,7 @@
       "Step 12: Run: npm run build",
       "Step 13: Run: git add -A && git commit -m 'feat: add onboarding layout'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 10,
