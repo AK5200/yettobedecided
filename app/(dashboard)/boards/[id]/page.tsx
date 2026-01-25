@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { BoardPostsList } from '@/components/boards/board-posts-list'
+import { BoardDetailTabs } from '@/components/boards/board-detail-tabs'
 import Link from 'next/link'
 
 export default async function BoardDetailPage({
@@ -39,6 +39,12 @@ export default async function BoardDetailPage({
     .order('is_pinned', { ascending: false })
     .order('vote_count', { ascending: false })
 
+  const { data: allPosts } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('board_id', id)
+    .order('created_at', { ascending: false })
+
   return (
     <div className="p-8">
       <div className="mb-4">
@@ -50,25 +56,12 @@ export default async function BoardDetailPage({
       <p className="text-muted-foreground mt-2">
         {board.description || 'No description'}
       </p>
-      <h2 className="text-lg font-semibold mb-4 mt-8">
-        Pending Approval ({pendingPosts?.length || 0})
-      </h2>
-      <div>
-        <BoardPostsList
+      <div className="mt-8">
+        <BoardDetailTabs
           boardId={id}
-          initialPosts={pendingPosts || []}
-          isAdmin={true}
-          adminEmail={user?.email || ''}
-        />
-      </div>
-      <h2 className="text-lg font-semibold mb-4 mt-8">
-        Approved Posts ({approvedPosts?.length || 0})
-      </h2>
-      <div>
-        <BoardPostsList
-          boardId={id}
-          initialPosts={approvedPosts || []}
-          isAdmin={true}
+          pendingPosts={pendingPosts || []}
+          approvedPosts={approvedPosts || []}
+          allPosts={allPosts || []}
           adminEmail={user?.email || ''}
         />
       </div>
