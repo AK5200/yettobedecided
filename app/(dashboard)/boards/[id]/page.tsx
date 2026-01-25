@@ -24,10 +24,19 @@ export default async function BoardDetailPage({
     notFound()
   }
 
-  const { data: posts } = await supabase
+  const { data: pendingPosts } = await supabase
     .from('posts')
     .select('*')
     .eq('board_id', id)
+    .eq('is_approved', false)
+    .order('created_at', { ascending: false })
+
+  const { data: approvedPosts } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('board_id', id)
+    .eq('is_approved', true)
+    .order('is_pinned', { ascending: false })
     .order('vote_count', { ascending: false })
 
   return (
@@ -41,10 +50,24 @@ export default async function BoardDetailPage({
       <p className="text-muted-foreground mt-2">
         {board.description || 'No description'}
       </p>
-      <div className="mt-8">
+      <h2 className="text-lg font-semibold mb-4 mt-8">
+        Pending Approval ({pendingPosts?.length || 0})
+      </h2>
+      <div>
         <BoardPostsList
           boardId={id}
-          initialPosts={posts || []}
+          initialPosts={pendingPosts || []}
+          isAdmin={true}
+          adminEmail={user?.email || ''}
+        />
+      </div>
+      <h2 className="text-lg font-semibold mb-4 mt-8">
+        Approved Posts ({approvedPosts?.length || 0})
+      </h2>
+      <div>
+        <BoardPostsList
+          boardId={id}
+          initialPosts={approvedPosts || []}
           isAdmin={true}
           adminEmail={user?.email || ''}
         />
