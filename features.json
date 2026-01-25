@@ -1212,7 +1212,7 @@
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: update settings page with navigation'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 53,
@@ -1225,10 +1225,10 @@
         "Step 4: Save all files",
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: add search and filter components'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 54,
       "category": "pages",
       "description": "Add search and filters to board detail page",
