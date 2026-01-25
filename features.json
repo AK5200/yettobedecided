@@ -483,6 +483,6 @@
       "Step 6: Run: git add -A",
       "Step 7: Run: git commit -m 'feat: post management and comments complete'"
     ],
-    "passes": false
+    "passes": true
   }
 ]
