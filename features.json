@@ -37,7 +37,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add post_tags table'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 3,
@@ -61,7 +61,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add invitations table'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 4,
@@ -85,7 +85,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add notification_preferences table'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 5,
@@ -109,7 +109,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add webhooks table'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 6,
@@ -132,7 +132,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add api_keys table'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 7,
@@ -154,7 +154,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add changelog_subscribers table'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 8,
@@ -181,7 +181,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add integrations table'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 9,
@@ -197,7 +197,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add org description and logo columns'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 10,
@@ -211,7 +211,7 @@
         "Step 4: Log: User must run this SQL in Supabase SQL Editor",
         "Step 5: Run: git add -A && git commit -m 'feat: add is_archived to boards'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 11,
@@ -231,7 +231,7 @@
         "Step 4: Run: npm run build",
         "Step 5: Run: git add -A && git commit -m 'feat: add Tag type'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 12,
@@ -255,7 +255,7 @@
         "Step 4: Run: npm run build",
         "Step 5: Run: git add -A && git commit -m 'feat: add Invitation type'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 13,
@@ -278,7 +278,7 @@
         "Step 4: Run: npm run build",
         "Step 5: Run: git add -A && git commit -m 'feat: add NotificationPreferences type'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 14,
@@ -302,7 +302,7 @@
         "Step 4: Run: npm run build",
         "Step 5: Run: git add -A && git commit -m 'feat: add Webhook type'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 15,
@@ -325,7 +325,7 @@
         "Step 4: Run: npm run build",
         "Step 5: Run: git add -A && git commit -m 'feat: add ApiKey type'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 16,
@@ -351,7 +351,7 @@
         "Step 4: Run: npm run build",
         "Step 5: Run: git add -A && git commit -m 'feat: add Integration type'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 17,
