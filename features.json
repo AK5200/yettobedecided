@@ -446,7 +446,7 @@
       "Step 5: Run: npm run build",
       "Step 6: Run: git add -A && git commit -m 'feat: add widgets to sidebar'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 19,
