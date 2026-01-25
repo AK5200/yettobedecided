@@ -1271,7 +1271,7 @@
         "Step 6: Run: npm run build",
         "Step 7: Run: git add -A && git commit -m 'feat: add tags settings page'"
       ],
-      "passes": false
+    "passes": true
     },
     {
       "id": 57,
@@ -1283,10 +1283,10 @@
         "Step 3: Save the file",
         "Step 4: Run: npm run build",
         "Step 5: Run: git add -A && git commit -m 'feat: add 404 page'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 58,
       "category": "components",
       "description": "Create empty state component",
