@@ -1051,7 +1051,7 @@
       "Step 8: Run: npm run build",
         "Step 9: Run: git add -A && git commit -m 'feat: add OrgSettingsForm component'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 43,
@@ -1066,14 +1066,14 @@
         "Step 6: Save the file",
         "Step 7: Run: npm run build",
         "Step 8: Run: git add -A && git commit -m 'feat: add board settings page'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 44,
       "category": "components",
       "description": "Create BoardSettingsForm component",
-      "steps": [
+    "steps": [
         "Step 1: Create file components/settings/board-settings-form.tsx",
         "Step 2: Add 'use client'",
         "Step 3: Add form with fields: name, slug, description, is_public toggle",
