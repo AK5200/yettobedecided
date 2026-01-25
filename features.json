@@ -163,7 +163,7 @@
       "Step 8: Run: npm run build",
       "Step 9: Run: git add -A && git commit -m 'feat: ChangelogPopup component'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 8,
