@@ -1004,7 +1004,7 @@
         "Step 9: Run: npm run build",
         "Step 10: Run: git add -A && git commit -m 'feat: add reset password page'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 40,
@@ -1018,14 +1018,14 @@
         "Step 4: Save the file",
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: add forgot password link to login'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 41,
       "category": "pages",
       "description": "Create organization settings page",
-      "steps": [
+    "steps": [
         "Step 1: Create folder app/(dashboard)/settings/organization",
         "Step 2: Create file app/(dashboard)/settings/organization/page.tsx",
         "Step 3: Fetch org data from supabase",
