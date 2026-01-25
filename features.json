@@ -1226,7 +1226,7 @@
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: add search and filter components'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 54,
@@ -1241,10 +1241,10 @@
         "Step 6: Save the file",
         "Step 7: Run: npm run build",
         "Step 8: Run: git add -A && git commit -m 'feat: add search and filters to board page'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 55,
       "category": "components",
       "description": "Create tag components",
