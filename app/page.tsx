@@ -2,6 +2,7 @@ export default function Home() {
   return (
     <main className="min-h-screen p-8">
       <h1 className="text-2xl font-bold mb-4">FeedbackHub Backend Ready</h1>
+      <p>URL: {process.env.NEXT_PUBLIC_SUPABASE_URL}</p>
       <p className="text-gray-600 mb-4">All API routes created. Backend setup complete.</p>
       <div className="bg-gray-100 p-4 rounded">
         <h2 className="font-semibold mb-2">Available API Routes:</h2>
