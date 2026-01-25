@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { BoardPostsList } from '@/components/boards/board-posts-list'
 import Link from 'next/link'
 
 export default async function BoardDetailPage({
@@ -39,27 +38,9 @@ export default async function BoardDetailPage({
       <p className="text-muted-foreground mt-2">
         {board.description || 'No description'}
       </p>
-      {!posts || posts.length === 0 ? (
-        <p className="mt-8">No feedback yet</p>
-      ) : (
-        <div className="space-y-4 mt-8">
-          {posts.map((post) => (
-            <Card key={post.id}>
-              <CardContent className="flex items-start gap-4 pt-6">
-                <div className="text-center min-w-[48px]">
-                  <div className="text-lg font-semibold">{post.vote_count ?? 0}</div>
-                  <div className="text-xs text-muted-foreground">votes</div>
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium">{post.title}</div>
-                  <p className="text-sm text-muted-foreground mt-1">{post.content}</p>
-                </div>
-                <Badge variant="secondary">{post.status}</Badge>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <div className="mt-8">
+        <BoardPostsList boardId={id} initialPosts={posts || []} />
+      </div>
     </div>
   )
 }
