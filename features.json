@@ -766,7 +766,7 @@
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: add webhook firing utility'"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": 29,
