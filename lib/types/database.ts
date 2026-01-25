@@ -104,3 +104,15 @@ export interface Tag {
   color: string
   created_at: string
 }
+
+export interface Invitation {
+  id: string
+  org_id: string
+  email: string
+  role: 'owner' | 'admin' | 'member'
+  invited_by: string
+  token: string
+  expires_at: string
+  accepted_at: string | null
+  created_at: string
+}
