@@ -1197,7 +1197,7 @@
         "Step 7: Run: npm run build",
         "Step 8: Run: git add -A && git commit -m 'feat: add integrations settings page'"
       ],
-      "passes": false
+    "passes": true
     },
     {
       "id": 52,
@@ -1211,10 +1211,10 @@
         "Step 4: Save the file",
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: update settings page with navigation'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 53,
       "category": "components",
       "description": "Create search and filter components",
