@@ -1284,7 +1284,7 @@
         "Step 4: Run: npm run build",
         "Step 5: Run: git add -A && git commit -m 'feat: add 404 page'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 58,
@@ -1299,10 +1299,10 @@
         "Step 6: Save the file",
         "Step 7: Run: npm run build",
         "Step 8: Run: git add -A && git commit -m 'feat: add empty state component'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 59,
       "category": "pages",
       "description": "Add changelog subscribe form to public changelog",
