@@ -42,6 +42,7 @@ export interface Post {
   author_name: string | null
   is_approved: boolean
   is_pinned: boolean
+  admin_note: string | null
   vote_count: number
   created_at: string
   updated_at: string
