@@ -165,7 +165,7 @@
       "Step 16: Run: npm run build",
       "Step 17: Run: git add -A && git commit -m 'feat: add sidebar component'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 8,
