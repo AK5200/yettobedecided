@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -33,7 +33,7 @@ export default function PublicBoardPage({
 }: {
   params: Promise<{ orgSlug: string; boardSlug: string }>
 }) {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [org, setOrg] = useState<Org | null>(null)
   const [board, setBoard] = useState<Board | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
@@ -45,6 +45,8 @@ export default function PublicBoardPage({
   const [authorEmail, setAuthorEmail] = useState('')
   const [submitLoading, setSubmitLoading] = useState(false)
   const [commentRefresh, setCommentRefresh] = useState(0)
+  const [votingIds, setVotingIds] = useState<string[]>([])
+  const [votedPostIds, setVotedPostIds] = useState<string[]>([])
 
   const fetchPosts = async (boardId: string) => {
     const { data } = await supabase
@@ -55,6 +57,23 @@ export default function PublicBoardPage({
       .order('vote_count', { ascending: false })
 
     setPosts((data as Post[]) || [])
+  }
+
+  const fetchVoteStatuses = async (email: string, boardId?: string) => {
+    if (!email || !boardId) {
+      setVotedPostIds([])
+      return
+    }
+
+    const response = await fetch(
+      `/api/votes/by-email?board_id=${boardId}&voter_email=${encodeURIComponent(email)}`
+    )
+    if (!response.ok) {
+      setVotedPostIds([])
+      return
+    }
+    const data = await response.json()
+    setVotedPostIds(data?.post_ids || [])
   }
 
   useEffect(() => {
@@ -92,7 +111,15 @@ export default function PublicBoardPage({
     }
 
     fetchData()
-  }, [params, supabase])
+  }, [params])
+
+  useEffect(() => {
+    if (!voterEmail) {
+      setVotedPostIds([])
+      return
+    }
+    fetchVoteStatuses(voterEmail, board?.id)
+  }, [voterEmail, board?.id])
 
   const handleVote = async (postId: string) => {
     if (!voterEmail) {
@@ -100,14 +127,30 @@ export default function PublicBoardPage({
       return
     }
 
-    await fetch('/api/votes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ post_id: postId, voter_email: voterEmail }),
-    })
+    if (votingIds.includes(postId)) return
+    setVotingIds((prev) => [...prev, postId])
 
-    if (board?.id) {
-      await fetchPosts(board.id)
+    try {
+      const response = await fetch('/api/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId, voter_email: voterEmail }),
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}))
+        window.alert(errorBody?.error || 'Unable to update vote. Please try again.')
+        return
+      }
+
+      await response.json()
+
+      if (board?.id) {
+        await fetchPosts(board.id)
+      }
+      await fetchVoteStatuses(voterEmail, board?.id)
+    } finally {
+      setVotingIds((prev) => prev.filter((id) => id !== postId))
     }
   }
 
@@ -191,7 +234,14 @@ export default function PublicBoardPage({
           <Dialog key={post.id}>
             <DialogTrigger asChild>
               <Card className="p-4 flex items-start gap-4 cursor-pointer">
-                <Button variant="outline" onClick={() => handleVote(post.id)}>
+                <Button
+                  variant={votedPostIds.includes(post.id) ? 'default' : 'outline'}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    handleVote(post.id)
+                  }}
+                  disabled={votingIds.includes(post.id)}
+                >
                   {post.vote_count ?? 0}
                 </Button>
                 <div className="flex-1">

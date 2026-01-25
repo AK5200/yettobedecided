@@ -11,27 +11,52 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'post_id and voter_email are required' }, { status: 400 })
     }
 
-    // Check if already voted
-    const { data: existingVote } = await supabase
+    // Check if already voted (count in case of duplicates)
+    const { count: existingCount, error: existingError } = await supabase
       .from('votes')
-      .select('id')
+      .select('id', { count: 'exact' })
       .eq('post_id', post_id)
       .eq('voter_email', voter_email)
-      .single()
 
-    if (existingVote) {
-      // Remove vote (toggle off)
-      const { error: deleteError } = await supabase
+    if (existingError) {
+      return NextResponse.json({ error: existingError.message }, { status: 500 })
+    }
+
+    if (existingCount && existingCount > 0) {
+      // Remove all votes for this post/email (toggle off)
+      const { data: deletedVotes, error: deleteError } = await supabase
         .from('votes')
         .delete()
-        .eq('id', existingVote.id)
+        .eq('post_id', post_id)
+        .eq('voter_email', voter_email)
+        .select('id')
 
       if (deleteError) {
         return NextResponse.json({ error: deleteError.message }, { status: 500 })
       }
 
-      // Decrement vote count
-      await supabase.rpc('decrement_vote_count', { post_id_input: post_id })
+      const deleteCount = deletedVotes?.length ?? existingCount
+      const { error: adjustError } = await supabase.rpc('adjust_vote_count', {
+        post_id_input: post_id,
+        delta_input: -deleteCount,
+      })
+
+      if (adjustError) {
+        const { data: post } = await supabase
+          .from('posts')
+          .select('vote_count')
+          .eq('id', post_id)
+          .single()
+        const { error: updateError } = await supabase
+          .from('posts')
+          .update({
+            vote_count: Math.max(0, (post?.vote_count ?? 0) - deleteCount),
+          })
+          .eq('id', post_id)
+        if (updateError) {
+          return NextResponse.json({ error: updateError.message }, { status: 500 })
+        }
+      }
 
       return NextResponse.json({ voted: false, message: 'Vote removed' })
     }
@@ -46,7 +71,27 @@ export async function POST(request: Request) {
     }
 
     // Increment vote count
-    await supabase.rpc('increment_vote_count', { post_id_input: post_id })
+    const { error: incrementError } = await supabase.rpc('adjust_vote_count', {
+      post_id_input: post_id,
+      delta_input: 1,
+    })
+
+    if (incrementError) {
+      const { data: post } = await supabase
+        .from('posts')
+        .select('vote_count')
+        .eq('id', post_id)
+        .single()
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({
+          vote_count: (post?.vote_count ?? 0) + 1,
+        })
+        .eq('id', post_id)
+      if (updateError) {
+        return NextResponse.json({ error: updateError.message }, { status: 500 })
+      }
+    }
 
     return NextResponse.json({ voted: true, message: 'Vote added' }, { status: 201 })
   } catch (error) {
