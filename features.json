@@ -359,7 +359,7 @@
       "Step 6: Run: npm run build",
       "Step 7: Run: git add -A && git commit -m 'feat: BoardPostsList passes admin props'"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": 14,

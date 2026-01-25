@@ -8,9 +8,16 @@ import type { Post } from '@/lib/types/database'
 interface BoardPostsListProps {
   boardId: string
   initialPosts: Post[]
+  isAdmin?: boolean
+  adminEmail?: string
 }
 
-export function BoardPostsList({ boardId, initialPosts }: BoardPostsListProps) {
+export function BoardPostsList({
+  boardId,
+  initialPosts,
+  isAdmin,
+  adminEmail,
+}: BoardPostsListProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
 
   const fetchPosts = async () => {
@@ -34,7 +41,13 @@ export function BoardPostsList({ boardId, initialPosts }: BoardPostsListProps) {
   return (
     <div className="space-y-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
+        <PostCard
+          key={post.id}
+          post={post}
+          onUpdate={fetchPosts}
+          isAdmin={isAdmin}
+          adminEmail={adminEmail}
+        />
       ))}
     </div>
   )
