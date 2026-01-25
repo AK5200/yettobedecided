@@ -150,3 +150,17 @@ export interface ApiKey {
   expires_at: string | null
   created_at: string
 }
+
+export interface Integration {
+  id: string
+  org_id: string
+  type: 'slack' | 'discord'
+  webhook_url: string | null
+  channel_name: string | null
+  notify_on_new_feedback: boolean
+  notify_on_status_change: boolean
+  notify_on_new_comment: boolean
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
