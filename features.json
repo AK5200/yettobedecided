@@ -1242,7 +1242,7 @@
         "Step 7: Run: npm run build",
         "Step 8: Run: git add -A && git commit -m 'feat: add search and filters to board page'"
     ],
-    "passes": false
+    "passes": true
   },
   {
       "id": 55,
@@ -1255,10 +1255,10 @@
         "Step 4: Save all files",
         "Step 5: Run: npm run build",
         "Step 6: Run: git add -A && git commit -m 'feat: add tag components'"
-      ],
-      "passes": false
-    },
-    {
+    ],
+    "passes": false
+  },
+  {
       "id": 56,
       "category": "pages",
       "description": "Create tags settings page",

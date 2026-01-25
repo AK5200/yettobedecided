@@ -1,0 +1,36 @@
+'use client'
+
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { SearchInput } from './search-input'
+import { StatusFilter } from './status-filter'
+import { SortSelect } from './sort-select'
+
+interface BoardFiltersProps {
+  search: string
+  status: string
+  sort: string
+}
+
+export function BoardFilters({ search, status, sort }: BoardFiltersProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const updateParam = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value) {
+      params.set(key, value)
+    } else {
+      params.delete(key)
+    }
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
+  return (
+    <div className="flex flex-col md:flex-row gap-3">
+      <SearchInput value={search} onSearch={(value) => updateParam('search', value)} />
+      <StatusFilter value={status} onChange={(value) => updateParam('status', value)} />
+      <SortSelect value={sort} onChange={(value) => updateParam('sort', value)} />
+    </div>
+  )
+}
