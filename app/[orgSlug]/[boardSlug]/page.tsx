@@ -7,6 +7,16 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { CommentList } from '@/components/boards/comment-list'
+import { CommentForm } from '@/components/boards/comment-form'
+import { Separator } from '@/components/ui/separator'
 
 type Org = { id: string; name: string }
 type Board = { id: string; name: string }
@@ -34,6 +44,7 @@ export default function PublicBoardPage({
   const [authorName, setAuthorName] = useState('')
   const [authorEmail, setAuthorEmail] = useState('')
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [commentRefresh, setCommentRefresh] = useState(0)
 
   const fetchPosts = async (boardId: string) => {
     const { data } = await supabase
@@ -177,16 +188,39 @@ export default function PublicBoardPage({
 
       <div className="space-y-4">
         {posts.map((post) => (
-          <Card key={post.id} className="p-4 flex items-start gap-4">
-            <Button variant="outline" onClick={() => handleVote(post.id)}>
-              {post.vote_count ?? 0}
-            </Button>
-            <div className="flex-1">
-              <div className="font-medium">{post.title}</div>
-              <p className="text-sm text-muted-foreground mt-1">{post.content}</p>
-            </div>
-            <Badge variant="secondary">{post.status}</Badge>
-          </Card>
+          <Dialog key={post.id}>
+            <DialogTrigger asChild>
+              <Card className="p-4 flex items-start gap-4 cursor-pointer">
+                <Button variant="outline" onClick={() => handleVote(post.id)}>
+                  {post.vote_count ?? 0}
+                </Button>
+                <div className="flex-1">
+                  <div className="font-medium">{post.title}</div>
+                  <p className="text-sm text-muted-foreground mt-1">{post.content}</p>
+                </div>
+                <Badge variant="secondary">{post.status}</Badge>
+              </Card>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{post.title}</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-gray-600">{post.content}</p>
+              <p className="text-sm text-gray-500">
+                By {authorName || 'Anonymous'} • {post.vote_count ?? 0} votes
+              </p>
+              <Separator className="my-4" />
+              <h3 className="font-semibold">Comments</h3>
+              <CommentList postId={post.id} refreshTrigger={commentRefresh} />
+              <Separator className="my-4" />
+              <CommentForm
+                postId={post.id}
+                authorEmail={authorEmail}
+                authorName={authorName}
+                onCommentAdded={() => setCommentRefresh((prev) => prev + 1)}
+              />
+            </DialogContent>
+          </Dialog>
         ))}
       </div>
     </div>
