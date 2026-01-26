@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { fireWebhooks } from '@/lib/webhooks/fire'
 
 export async function GET(request: Request) {
   try {
@@ -79,6 +80,15 @@ export async function POST(request: Request) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Fire webhook for changelog published
+    if (is_published) {
+      fireWebhooks({
+        orgId: org_id,
+        event: 'changelog.published',
+        payload: entry
+      })
     }
 
     return NextResponse.json({ entry }, { status: 201 })

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { fireWebhooks } from '@/lib/webhooks/fire'
 
 export async function POST(request: Request) {
   try {
@@ -90,6 +91,33 @@ export async function POST(request: Request) {
         .eq('id', post_id)
       if (updateError) {
         return NextResponse.json({ error: updateError.message }, { status: 500 })
+      }
+    }
+
+    // Fire webhook for vote
+    const { data: postData } = await supabase
+      .from('posts')
+      .select('id, title, vote_count, board_id')
+      .eq('id', post_id)
+      .single()
+
+    if (postData?.board_id) {
+      const { data: boardData } = await supabase
+        .from('boards')
+        .select('org_id')
+        .eq('id', postData.board_id)
+        .single()
+
+      if (boardData?.org_id) {
+        fireWebhooks({
+          orgId: boardData.org_id,
+          event: 'post.voted',
+          payload: {
+            post_id: post_id,
+            vote_count: postData.vote_count,
+            post_title: postData.title
+          }
+        })
       }
     }
 

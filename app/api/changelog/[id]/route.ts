@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { fireWebhooks } from '@/lib/webhooks/fire'
 
 export async function PATCH(
   request: Request,
@@ -17,6 +18,13 @@ export async function PATCH(
 
     const body = await request.json()
     const { title, content, category, is_published } = body
+
+    // Get old entry to check if publishing status changed
+    const { data: oldEntry } = await supabase
+      .from('changelog_entries')
+      .select('is_published, org_id')
+      .eq('id', id)
+      .single()
 
     // Build update object with only provided fields
     const updates: Record<string, any> = { updated_at: new Date().toISOString() }
@@ -39,6 +47,15 @@ export async function PATCH(
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Fire webhook if changelog was just published (changed from unpublished to published)
+    if (is_published !== undefined && oldEntry && !oldEntry.is_published && is_published && oldEntry.org_id) {
+      fireWebhooks({
+        orgId: oldEntry.org_id,
+        event: 'changelog.published',
+        payload: entry
+      })
     }
 
     return NextResponse.json({ entry })

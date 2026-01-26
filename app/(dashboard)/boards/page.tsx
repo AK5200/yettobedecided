@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import Link from 'next/link'
+import { Settings } from 'lucide-react'
 
 export default async function BoardsPage() {
   const supabase = await createClient()
@@ -40,14 +41,21 @@ export default async function BoardsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {boards.map((board) => (
-            <Link key={board.id} href={`/boards/${board.id}`}>
-              <Card>
+            <Card key={board.id} className="relative">
+              <Link href={`/boards/${board.id}`}>
                 <CardHeader>
                   <CardTitle>{board.name}</CardTitle>
                 </CardHeader>
                 <CardContent>{board.description || 'No description'}</CardContent>
-              </Card>
-            </Link>
+              </Link>
+              <Link 
+                href={`/boards/${board.id}/settings`}
+                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Settings className="h-4 w-4 text-gray-600" />
+              </Link>
+            </Card>
           ))}
         </div>
       )}

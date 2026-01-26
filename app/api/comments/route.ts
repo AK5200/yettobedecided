@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { fireWebhooks } from '@/lib/webhooks/fire'
+import { notifyIntegrations } from '@/lib/integrations/notify'
 
 export async function GET(request: Request) {
   try {
@@ -51,6 +53,43 @@ export async function POST(request: Request) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Fire webhook for new comment
+    const { data: postData } = await supabase
+      .from('posts')
+      .select('title, board_id')
+      .eq('id', post_id)
+      .single()
+
+    if (postData?.board_id) {
+      const { data: boardData } = await supabase
+        .from('boards')
+        .select('org_id')
+        .eq('id', postData.board_id)
+        .single()
+
+      if (boardData?.org_id) {
+        fireWebhooks({
+          orgId: boardData.org_id,
+          event: 'comment.created',
+          payload: {
+            comment: comment,
+            post_id: post_id,
+            post_title: postData.title
+          }
+        })
+        // Notify Slack/Discord on new comment
+        notifyIntegrations({
+          orgId: boardData.org_id,
+          type: 'new_comment',
+          payload: {
+            title: 'New Comment',
+            description: `Comment on: ${postData.title}`,
+            url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`,
+          },
+        })
+      }
     }
 
     return NextResponse.json({ comment }, { status: 201 })

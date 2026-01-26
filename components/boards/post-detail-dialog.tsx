@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { CommentList } from './comment-list'
 import { CommentForm } from './comment-form'
+import { TagSelector } from '@/components/tags/tag-selector'
+import { createClient } from '@/lib/supabase/client'
 import type { Post } from '@/lib/types/database'
 
 interface PostDetailDialogProps {
@@ -28,6 +30,25 @@ export function PostDetailDialog({
   children,
 }: PostDetailDialogProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [orgId, setOrgId] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Fetch org_id from board
+    const fetchOrgId = async () => {
+      const supabase = createClient()
+      const { data: board } = await supabase
+        .from('boards')
+        .select('org_id')
+        .eq('id', post.board_id)
+        .single()
+      
+      if (board?.org_id) {
+        setOrgId(board.org_id)
+      }
+    }
+    
+    fetchOrgId()
+  }, [post.board_id])
 
   const handleCommentAdded = () => {
     setRefreshTrigger((prev) => prev + 1)
@@ -50,6 +71,12 @@ export function PostDetailDialog({
         </p>
         {post.admin_note && (
           <p className="text-sm text-red-600">{post.admin_note}</p>
+        )}
+        {isAdmin && orgId && (
+          <div className="mt-4">
+            <label className="text-sm font-medium">Tags</label>
+            <TagSelector postId={post.id} orgId={orgId} />
+          </div>
         )}
         <Separator className="my-4" />
         <h3 className="font-semibold mb-2">Comments</h3>

@@ -2,16 +2,20 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { BoardDetailTabs } from '@/components/boards/board-detail-tabs'
 import { BoardFilters } from '@/components/boards/board-filters'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { Settings } from 'lucide-react'
 
 export default async function BoardDetailPage({
   params,
   searchParams,
 }: {
-  params: { id: string }
-  searchParams: { search?: string; status?: string; sort?: string }
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ search?: string; status?: string; sort?: string; tag?: string }>
 }) {
-  const { id } = params
+  const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
+  const { id } = resolvedParams
   const supabase = await createClient()
   const {
     data: { user },
@@ -48,9 +52,20 @@ export default async function BoardDetailPage({
     .eq('board_id', id)
     .order('created_at', { ascending: false })
 
-  const search = (searchParams.search || '').toLowerCase()
-  const status = searchParams.status || 'all'
-  const sort = searchParams.sort || 'newest'
+  const search = (resolvedSearchParams.search || '').toLowerCase()
+  const status = resolvedSearchParams.status || 'all'
+  const sort = resolvedSearchParams.sort || 'newest'
+  const tagId = resolvedSearchParams.tag
+
+  // Fetch post tags if tag filter is active
+  let postIdsWithTag: string[] = []
+  if (tagId) {
+    const { data: postTags } = await supabase
+      .from('post_tags')
+      .select('post_id')
+      .eq('tag_id', tagId)
+    postIdsWithTag = postTags?.map(pt => pt.post_id) || []
+  }
 
   const matchesFilters = (post: any) => {
     const matchesSearch =
@@ -58,7 +73,8 @@ export default async function BoardDetailPage({
       post.title?.toLowerCase().includes(search) ||
       post.content?.toLowerCase().includes(search)
     const matchesStatus = status === 'all' || post.status === status
-    return matchesSearch && matchesStatus
+    const matchesTag = !tagId || postIdsWithTag.includes(post.id)
+    return matchesSearch && matchesStatus && matchesTag
   }
 
   const sortPosts = (posts: any[]) => {
@@ -77,17 +93,30 @@ export default async function BoardDetailPage({
 
   return (
     <div className="p-8">
-      <div className="mb-4">
-        <Link href="/boards" className="text-sm text-muted-foreground hover:underline">
-          Back to boards
+      <div className="text-sm text-gray-500 mb-4">
+        <Link href="/boards" className="hover:underline">Boards</Link>
+        <span className="mx-2">/</span>
+        <span>{board.name}</span>
+      </div>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">{board.name}</h1>
+        <Link href={`/boards/${board.id}/settings`}>
+          <Button variant="outline" size="sm">
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Button>
         </Link>
       </div>
-      <h1 className="text-2xl font-bold">{board.name}</h1>
       <p className="text-muted-foreground mt-2">
         {board.description || 'No description'}
       </p>
       <div className="mt-6">
-        <BoardFilters search={searchParams.search || ''} status={status} sort={sort} />
+        <BoardFilters 
+          search={resolvedSearchParams.search || ''} 
+          status={status} 
+          sort={sort}
+          orgId={board.org_id}
+        />
       </div>
       <div className="mt-8">
         <BoardDetailTabs

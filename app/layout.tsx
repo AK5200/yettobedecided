@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Raleway, Libre_Baskerville, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({
-  variable: "--font-inter",
+const raleway = Raleway({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
+  variable: "--font-raleway",
+});
+
+const libreBaskerville = Libre_Baskerville({
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-libre-baskerville",
+});
+
+const nunito = Nunito({
+  weight: ["400", "500", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  variable: "--font-nunito",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${raleway.variable} ${libreBaskerville.variable} ${nunito.variable} antialiased`}>
         {children}
         <Toaster />
       </body>

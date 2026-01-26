@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { fireWebhooks } from '@/lib/webhooks/fire'
+import { notifyIntegrations } from '@/lib/integrations/notify'
 
 export async function GET(request: Request) {
   try {
@@ -65,6 +67,31 @@ export async function POST(request: Request) {
 
     if (postError) {
       return NextResponse.json({ error: postError.message }, { status: 500 })
+    }
+
+    // Fire webhook for new post
+    const { data: boardData } = await supabase
+      .from('boards')
+      .select('org_id')
+      .eq('id', board_id)
+      .single()
+
+    if (boardData?.org_id) {
+      fireWebhooks({
+        orgId: boardData.org_id,
+        event: 'post.created',
+        payload: post
+      })
+      // Notify Slack/Discord
+      notifyIntegrations({
+        orgId: boardData.org_id,
+        type: 'new_feedback',
+        payload: {
+          title: 'New Feedback',
+          description: post.title,
+          url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/boards/${board_id}`,
+        },
+      })
     }
 
     return NextResponse.json({ post }, { status: 201 })

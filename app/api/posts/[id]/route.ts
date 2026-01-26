@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { fireWebhooks } from '@/lib/webhooks/fire'
+import { notifyIntegrations } from '@/lib/integrations/notify'
 
 export async function GET(
   request: Request,
@@ -42,6 +44,13 @@ export async function PATCH(
     const body = await request.json()
     const { status, is_approved, is_pinned } = body
 
+    // Get old post to check for status change
+    const { data: oldPost } = await supabase
+      .from('posts')
+      .select('status, board_id')
+      .eq('id', id)
+      .single()
+
     // Build update object with only provided fields
     const updates: Record<string, any> = { updated_at: new Date().toISOString() }
     if (status !== undefined) updates.status = status
@@ -58,6 +67,37 @@ export async function PATCH(
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Fire webhook if status changed
+    if (status !== undefined && oldPost && status !== oldPost.status) {
+      const { data: boardData } = await supabase
+        .from('boards')
+        .select('org_id')
+        .eq('id', oldPost.board_id)
+        .single()
+
+      if (boardData?.org_id) {
+        fireWebhooks({
+          orgId: boardData.org_id,
+          event: 'post.status_changed',
+          payload: {
+            ...post,
+            old_status: oldPost.status,
+            new_status: status
+          }
+        })
+        // Notify Slack/Discord on status change
+        notifyIntegrations({
+          orgId: boardData.org_id,
+          type: 'status_change',
+          payload: {
+            title: 'Status Changed',
+            description: `${post.title}: ${oldPost.status} → ${status}`,
+            url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/boards/${oldPost.board_id}`,
+          },
+        })
+      }
     }
 
     return NextResponse.json({ post })
