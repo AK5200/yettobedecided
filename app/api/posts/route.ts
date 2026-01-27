@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const boardId = searchParams.get('board_id')
-    const search = searchParams.get('search')
+    const search = searchParams.get('search') || searchParams.get('q')
     const exclude = searchParams.get('exclude')
 
     let query = supabase
