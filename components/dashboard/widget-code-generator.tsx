@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -11,8 +11,30 @@ interface WidgetCodeGeneratorProps {
 
 export function WidgetCodeGenerator({ orgSlug, baseUrl }: WidgetCodeGeneratorProps) {
   const [copied, setCopied] = useState<string | null>(null)
+  const [widgetType, setWidgetType] = useState<string>('floating')
 
-  const scriptCode = `<script src="${baseUrl}/widget.js" data-org="${orgSlug}"></script>`
+  useEffect(() => {
+    // Fetch widget settings to get the widget type
+    fetch('/api/widget-settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.widget_type) {
+          setWidgetType(data.widget_type)
+        }
+      })
+      .catch(() => {
+        // Default to floating if fetch fails
+        setWidgetType('floating')
+      })
+  }, [])
+
+  const getScriptName = () => {
+    if (widgetType === 'popup') return 'changelog-popup.js'
+    if (widgetType === 'announcement') return 'announcement-bar.js'
+    return 'widget.js'
+  }
+
+  const scriptCode = `<script src="${baseUrl}/${getScriptName()}" data-org="${orgSlug}"></script>`
   const iframeCode = `<iframe src="${baseUrl}/embed/widget?org=${orgSlug}" width="420" height="640"></iframe>`
 
   const copyToClipboard = async (value: string, label: string) => {

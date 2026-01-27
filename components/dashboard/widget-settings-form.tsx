@@ -77,17 +77,21 @@ export function WidgetSettingsForm({ orgId, initialSettings, onSave }: WidgetSet
       <div className="space-y-2">
         <Label>Widget Type</Label>
         <RadioGroup value={widgetType} onValueChange={setWidgetType}>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="changelog" id="widget-changelog" />
-            <Label htmlFor="widget-changelog">Changelog Only</Label>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="floating" id="floating" />
+            <Label htmlFor="floating">Floating Button (Feedback + Changelog)</Label>
           </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="feedback" id="widget-feedback" />
-            <Label htmlFor="widget-feedback">Feedback Only</Label>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="popup" id="popup" />
+            <Label htmlFor="popup">Changelog Popup (on user return)</Label>
           </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="all-in-one" id="widget-all" />
-            <Label htmlFor="widget-all">All-in-One</Label>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="dropdown" id="dropdown" />
+            <Label htmlFor="dropdown">Changelog Dropdown (bell icon)</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="announcement" id="announcement" />
+            <Label htmlFor="announcement">Announcement Bar (top of page)</Label>
           </div>
         </RadioGroup>
       </div>

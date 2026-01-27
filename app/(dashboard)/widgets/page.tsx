@@ -5,7 +5,7 @@ import { WidgetCodeGenerator } from '@/components/dashboard/widget-code-generato
 import { WidgetPreviewWrapper } from '@/components/dashboard/widget-preview-wrapper'
 
 const defaultSettings = {
-  widget_type: 'all-in-one',
+  widget_type: 'floating',
   position: 'bottom-right',
   accent_color: '#000000',
   button_text: 'Feedback',
