@@ -1,58 +1,79 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { useState, useEffect } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Bell } from 'lucide-react'
 
 interface ChangelogEntry {
   id: string
   title: string
-  category: string
-  published_at?: string | null
+  description: string
+  published_at: string
+  label?: string
 }
 
 interface ChangelogDropdownProps {
-  entries: ChangelogEntry[]
-  trigger: ReactNode
+  orgSlug: string
   accentColor?: string
-  showBranding?: boolean
 }
 
-export function ChangelogDropdown({
-  entries,
-  trigger,
-  accentColor = '#000000',
-  showBranding = true,
-}: ChangelogDropdownProps) {
+export function ChangelogDropdown({ orgSlug, accentColor = '#000' }: ChangelogDropdownProps) {
+  const [entries, setEntries] = useState<ChangelogEntry[]>([])
+  const [hasNew, setHasNew] = useState(false)
+
+  useEffect(() => {
+    const lastSeen = localStorage.getItem(`feedbackhub-dropdown-${orgSlug}`)
+
+    fetch(`/api/changelog?org=${orgSlug}&limit=5`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.entries) {
+          setEntries(data.entries)
+          if (data.entries.length > 0 && lastSeen !== data.entries[0].id) {
+            setHasNew(true)
+          }
+        }
+      })
+  }, [orgSlug])
+
+  const markSeen = () => {
+    if (entries.length > 0) {
+      localStorage.setItem(`feedbackhub-dropdown-${orgSlug}`, entries[0].id)
+      setHasNew(false)
+    }
+  }
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className="w-80 max-h-96 overflow-y-auto">
-        <div className="font-semibold mb-3">Latest Updates</div>
-        <div className="space-y-3">
-          {entries.map((entry) => (
-            <div key={entry.id} className="border-b pb-3 last:border-b-0">
-              <div className="text-xs text-gray-500 mb-1">
-                {entry.published_at
-                  ? new Date(entry.published_at).toLocaleDateString()
-                  : 'Recently'}
+    <Popover onOpenChange={(open) => open && markSeen()}>
+      <PopoverTrigger asChild>
+        <Button variant='ghost' size='sm' className='relative'>
+          <Bell className='h-5 w-5' />
+          {hasNew && (
+            <span className='absolute -top-1 -right-1 h-3 w-3 rounded-full' style={{ background: accentColor }} />
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className='w-80' align='end'>
+        <div className='font-medium mb-2'>Latest Updates</div>
+        <div className='space-y-3 max-h-60 overflow-y-auto'>
+          {entries.map(entry => (
+            <div key={entry.id} className='border-b pb-2 last:border-0'>
+              <div className='flex items-center gap-2'>
+                {entry.label && (
+                  <span className='text-xs px-2 py-0.5 rounded' style={{ background: accentColor, color: '#fff' }}>
+                    {entry.label}
+                  </span>
+                )}
               </div>
-              <div className="font-medium text-sm">{entry.title}</div>
-              <Badge
-                variant="outline"
-                className="mt-2"
-                style={{ borderColor: accentColor, color: accentColor }}
-              >
-                {entry.category}
-              </Badge>
+              <h4 className='font-medium text-sm mt-1'>{entry.title}</h4>
+              <p className='text-xs text-gray-500 line-clamp-2'>{entry.description}</p>
             </div>
           ))}
         </div>
-        {showBranding && (
-          <div className="pt-3 text-xs text-gray-500 text-center">
-            Powered by FeedbackHub
-          </div>
-        )}
+        <div className='pt-2 text-center'>
+          <span className='text-xs text-gray-400'>Powered by FeedbackHub</span>
+        </div>
       </PopoverContent>
     </Popover>
   )
