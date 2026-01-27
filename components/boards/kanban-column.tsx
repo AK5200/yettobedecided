@@ -41,7 +41,7 @@ export function KanbanColumn({
             <div className="font-medium text-sm">{post.title}</div>
             <div className="flex items-center justify-between text-xs text-gray-600">
               <Badge variant="outline">{post.vote_count ?? 0} votes</Badge>
-              <span>{post.author_name || 'Anonymous'}</span>
+              <span>{post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')}</span>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger className="text-xs underline">

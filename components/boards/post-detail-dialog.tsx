@@ -92,7 +92,7 @@ export function PostDetailDialog({
           <Badge variant="outline">{post.vote_count} votes</Badge>
         </div>
         <p className="text-sm text-gray-600">
-          By {post.author_name || 'Anonymous'}
+          By {post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')}
         </p>
         {post.admin_note && (
           <p className="text-sm text-red-600">{post.admin_note}</p>

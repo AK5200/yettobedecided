@@ -424,7 +424,7 @@ export function PublicFeaturesView({
                                 <p className="text-sm text-muted-foreground line-clamp-2">{post.content}</p>
                               )}
                               <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <span>By {post.author_name || 'Anonymous'}</span>
+                                <span>By {post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')}</span>
                                 {post.status && (
                                   <Badge variant="outline" className="capitalize text-xs">
                                     {post.status.replace('_', ' ')}

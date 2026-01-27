@@ -41,6 +41,9 @@ export interface Post {
   status: 'open' | 'planned' | 'in_progress' | 'shipped' | 'closed'
   author_email: string | null
   author_name: string | null
+  is_guest: boolean
+  guest_name: string | null
+  guest_email: string | null
   linear_issue_id: string | null
   linear_issue_url: string | null
   is_approved: boolean

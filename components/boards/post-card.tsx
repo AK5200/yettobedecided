@@ -67,7 +67,7 @@ export function PostCard({ post, onUpdate, isAdmin, adminEmail }: PostCardProps)
                 </div>
               )}
               <div className="text-xs text-gray-600">
-                By {post.author_name || 'Anonymous'}
+                By {post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')}
               </div>
               {post.admin_note && (
                 <div className="text-sm text-red-600">
