@@ -33,7 +33,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`block rounded-md px-3 py-2 text-sm font-medium ${
+              className={`block rounded-md px-3 py-2 text-sm font-medium cursor-pointer ${
                 isActive ? 'bg-black text-white' : 'hover:bg-gray-100'
               }`}
             >

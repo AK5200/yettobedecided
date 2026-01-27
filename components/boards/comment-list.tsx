@@ -3,14 +3,16 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/badge'
+import { Lock } from 'lucide-react'
 import type { Comment } from '@/lib/types/database'
 
 interface CommentListProps {
   postId: string
+  isAdmin?: boolean
   refreshTrigger?: number
 }
 
-export function CommentList({ postId, refreshTrigger }: CommentListProps) {
+export function CommentList({ postId, isAdmin, refreshTrigger }: CommentListProps) {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -42,18 +44,34 @@ export function CommentList({ postId, refreshTrigger }: CommentListProps) {
 
   return (
     <div className="space-y-3">
-      {comments.map((comment) => (
-        <div key={comment.id} className="border-l-2 border-gray-200 pl-3 py-2">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <span>{comment.author_name || 'Anonymous'}</span>
-            {comment.is_from_admin && <Badge variant="secondary">Admin</Badge>}
+      {comments
+        .filter(c => !c.is_internal || isAdmin)
+        .map((comment) => (
+          <div
+            key={comment.id}
+            className={`p-3 rounded border-l-2 ${comment.is_internal
+                ? 'bg-yellow-50 border-yellow-200 border-l-yellow-600'
+                : 'border-gray-200 bg-gray-50/50'
+              }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <span>{comment.author_name || 'Anonymous'}</span>
+                {comment.is_from_admin && <Badge variant="secondary">Admin</Badge>}
+              </div>
+              {comment.is_internal && (
+                <span className='text-[10px] bg-yellow-200 text-yellow-800 px-1.5 py-0.5 rounded flex items-center gap-1 font-bold tracking-tight uppercase'>
+                  <Lock className='w-3 h-3' />
+                  Internal
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-gray-600 mb-1">{comment.content}</p>
+            <small className="text-[10px] text-gray-500">
+              {new Date(comment.created_at).toLocaleDateString()}
+            </small>
           </div>
-          <p className="text-sm text-gray-600">{comment.content}</p>
-          <small className="text-xs text-gray-500">
-            {new Date(comment.created_at).toLocaleDateString()}
-          </small>
-        </div>
-      ))}
+        ))}
     </div>
   )
 }

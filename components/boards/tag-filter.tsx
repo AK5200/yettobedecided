@@ -24,7 +24,7 @@ export function TagFilter({ orgId }: TagFilterProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [tags, setTags] = useState<Tag[]>([])
-  const currentTag = searchParams.get('tag') || ''
+  const currentTag = searchParams.get('tag') || 'all'
 
   useEffect(() => {
     fetch(`/api/tags?org_id=${orgId}`)
@@ -34,7 +34,7 @@ export function TagFilter({ orgId }: TagFilterProps) {
 
   const handleChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) {
+    if (value && value !== 'all') {
       params.set('tag', value)
     } else {
       params.delete('tag')
@@ -48,7 +48,7 @@ export function TagFilter({ orgId }: TagFilterProps) {
         <SelectValue placeholder="All Tags" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All Tags</SelectItem>
+        <SelectItem value="all">All Tags</SelectItem>
         {tags.map(tag => (
           <SelectItem key={tag.id} value={tag.id}>
             {tag.name}

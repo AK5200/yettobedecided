@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,9 +20,11 @@ interface WidgetSettingsFormProps {
     show_branding: boolean
     theme: string
   }
+  onSave?: () => void
 }
 
-export function WidgetSettingsForm({ orgId, initialSettings }: WidgetSettingsFormProps) {
+export function WidgetSettingsForm({ orgId, initialSettings, onSave }: WidgetSettingsFormProps) {
+  const router = useRouter()
   const [widgetType, setWidgetType] = useState(initialSettings.widget_type)
   const [position, setPosition] = useState(initialSettings.position)
   const [accentColor, setAccentColor] = useState(initialSettings.accent_color)
@@ -32,27 +35,41 @@ export function WidgetSettingsForm({ orgId, initialSettings }: WidgetSettingsFor
 
   const handleSave = async () => {
     setLoading(true)
-    const response = await fetch('/api/widget-settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        org_id: orgId,
-        widget_type: widgetType,
-        position,
-        accent_color: accentColor,
-        button_text: buttonText,
-        show_branding: showBranding,
-        theme,
-      }),
-    })
+    try {
+      const response = await fetch('/api/widget-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          org_id: orgId,
+          widget_type: widgetType,
+          position,
+          accent_color: accentColor,
+          button_text: buttonText,
+          show_branding: showBranding,
+          theme,
+        }),
+      })
 
-    if (response.ok) {
-      toast.success('Widget settings saved.')
-    } else {
-      toast.error('Unable to save widget settings.')
+      if (response.ok) {
+        toast.success('Widget settings saved.')
+        router.refresh()
+        if (onSave) {
+          onSave()
+        }
+      } else {
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json()
+          toast.error(errorData.error || 'Unable to save widget settings.')
+        } else {
+          toast.error('Unable to save widget settings.')
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to save widget settings.')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (

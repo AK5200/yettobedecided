@@ -29,11 +29,10 @@ export default async function PublicOrgPage({
 
   return (
     <div className="min-h-screen p-8">
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <h1 className="text-2xl font-bold">{org.name}</h1>
+      <header className="flex flex-col md:flex-row md:items-center md:justify-center gap-4 mb-8">
         <nav className="flex gap-4 text-sm">
-          <Link href={`/${orgSlug}`} className="font-medium">
-            Feedback
+          <Link href={`/${orgSlug}/features`} className="font-medium">
+            Features
           </Link>
           <Link href={`/${orgSlug}/roadmap`} className="text-muted-foreground">
             Roadmap

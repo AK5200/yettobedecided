@@ -55,16 +55,10 @@ export default async function PublicRoadmapPage({
 
   return (
     <div className="min-h-screen p-8">
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold">{org.name}</h1>
-          {org.description && (
-            <p className="text-sm text-gray-600 mt-2">{org.description}</p>
-          )}
-        </div>
+      <header className="flex flex-col md:flex-row md:items-center md:justify-center gap-4 mb-8">
         <nav className="flex gap-4 text-sm">
-          <Link href={`/${orgSlug}`} className="text-muted-foreground">
-            Feedback
+          <Link href={`/${orgSlug}/features`} className="text-muted-foreground">
+            Features
           </Link>
           <Link href={`/${orgSlug}/roadmap`} className="font-medium">
             Roadmap

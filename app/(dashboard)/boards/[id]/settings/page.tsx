@@ -20,7 +20,7 @@ export default async function BoardSettingsPage({ params }: { params: { id: stri
 
   const { data: board } = await supabase
     .from('boards')
-    .select('id, name, slug, description, is_public')
+    .select('id, name, slug, description, is_public, is_archived')
     .eq('id', params.id)
     .eq('org_id', membership?.org_id)
     .single()
@@ -35,6 +35,7 @@ export default async function BoardSettingsPage({ params }: { params: { id: stri
           slug: board?.slug || '',
           description: board?.description || '',
           isPublic: board?.is_public ?? false,
+          isArchived: board?.is_archived ?? false,
         }}
       />
     </div>

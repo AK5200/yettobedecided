@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
 import { notifyIntegrations } from '@/lib/integrations/notify'
+import { triggerStatusChangeEmail } from '@/lib/email/triggers'
 
 export async function GET(
   request: Request,
@@ -97,6 +98,13 @@ export async function PATCH(
             url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/boards/${oldPost.board_id}`,
           },
         })
+      }
+
+      // Trigger email on status change
+      try {
+        await triggerStatusChangeEmail(id, oldPost.status, status);
+      } catch (e) {
+        console.error('Email trigger failed:', e);
       }
     }
 

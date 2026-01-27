@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { SearchInput } from './search-input'
+import { SearchInput } from '@/components/search/search-input'
 import { StatusFilter } from './status-filter'
 import { SortSelect } from './sort-select'
 import { TagFilter } from './tag-filter'
@@ -30,7 +30,7 @@ export function BoardFilters({ search, status, sort, orgId }: BoardFiltersProps)
 
   return (
     <div className="flex flex-col md:flex-row gap-3">
-      <SearchInput value={search} onSearch={(value) => updateParam('search', value)} />
+      <SearchInput />
       <StatusFilter value={status} onChange={(value) => updateParam('status', value)} />
       <TagFilter orgId={orgId} />
       <SortSelect value={sort} onChange={(value) => updateParam('sort', value)} />

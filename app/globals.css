@@ -152,4 +152,7 @@
   body {
     @apply bg-background text-foreground;
   }
+  a {
+    @apply cursor-pointer;
+  }
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { triggerInvitationEmail } from '@/lib/email/triggers'
 import crypto from 'crypto'
 
 export async function GET(request: Request) {
@@ -36,5 +37,13 @@ export async function POST(request: Request) {
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Trigger email
+  try {
+    await triggerInvitationEmail(email, token, invited_by);
+  } catch (e) {
+    console.error('Failed to send invitation email:', e);
+  }
+
   return NextResponse.json({ invitation: data })
 }

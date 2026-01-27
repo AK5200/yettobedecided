@@ -28,6 +28,7 @@ export interface Board {
   description: string | null
   is_public: boolean
   require_approval: boolean
+  is_archived: boolean
   created_at: string
   updated_at: string
 }
@@ -40,6 +41,8 @@ export interface Post {
   status: 'open' | 'planned' | 'in_progress' | 'shipped' | 'closed'
   author_email: string | null
   author_name: string | null
+  linear_issue_id: string | null
+  linear_issue_url: string | null
   is_approved: boolean
   is_pinned: boolean
   admin_note: string | null
@@ -62,6 +65,7 @@ export interface Comment {
   author_email: string | null
   author_name: string | null
   is_from_admin: boolean
+  is_internal: boolean
   created_at: string
 }
 

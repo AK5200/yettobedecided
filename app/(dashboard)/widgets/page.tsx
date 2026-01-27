@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { WidgetSettingsForm } from '@/components/dashboard/widget-settings-form'
 import { WidgetCodeGenerator } from '@/components/dashboard/widget-code-generator'
+import { WidgetPreviewWrapper } from '@/components/dashboard/widget-preview-wrapper'
 
 const defaultSettings = {
   widget_type: 'all-in-one',
@@ -48,7 +49,7 @@ export default async function WidgetsPage() {
           <CardTitle>Widget Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <WidgetSettingsForm orgId={orgId} initialSettings={settings || defaultSettings} />
+          <WidgetPreviewWrapper orgId={orgId} orgSlug={org?.slug || ''} initialSettings={settings || defaultSettings} />
         </CardContent>
       </Card>
       <Card>
@@ -57,23 +58,6 @@ export default async function WidgetsPage() {
         </CardHeader>
         <CardContent>
           <WidgetCodeGenerator orgSlug={org?.slug || ''} baseUrl={baseUrl} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Preview</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-sm text-gray-600">
-            This is how your widget will appear on your website
-          </p>
-          <div className="border rounded overflow-hidden">
-            <iframe
-              src={`/embed/widget?org=${org?.slug}`}
-              className="w-full h-[500px]"
-              title="Widget preview"
-            />
-          </div>
         </CardContent>
       </Card>
     </div>

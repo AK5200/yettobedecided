@@ -2,21 +2,36 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
 import { notifyIntegrations } from '@/lib/integrations/notify'
+import { triggerNewPostEmail } from '@/lib/email/triggers'
 
 export async function GET(request: Request) {
   try {
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const boardId = searchParams.get('board_id')
+    const search = searchParams.get('search')
+    const exclude = searchParams.get('exclude')
 
-    if (!boardId) {
-      return NextResponse.json({ error: 'board_id is required' }, { status: 400 })
-    }
-
-    const { data: posts, error } = await supabase
+    let query = supabase
       .from('posts')
       .select('*')
-      .eq('board_id', boardId)
+
+    if (boardId) {
+      query = query.eq('board_id', boardId)
+    }
+
+    if (search) {
+      query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`)
+    }
+
+    if (exclude) {
+      query = query.neq('id', exclude)
+    }
+
+    // Exclude merged posts
+    query = query.is('merged_into_id', null)
+
+    const { data: posts, error } = await query
       .order('is_pinned', { ascending: false })
       .order('vote_count', { ascending: false })
       .order('created_at', { ascending: false })
@@ -35,10 +50,22 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { board_id, title, content, author_email, author_name } = body
+    const { board_id, title, content, author_email, author_name, guest_email, guest_name, is_guest } = body
 
     if (!board_id || !title) {
       return NextResponse.json({ error: 'board_id and title are required' }, { status: 400 })
+    }
+
+    // Auth check - bypass for guests
+    if (!is_guest) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    } else {
+      if (!guest_email) {
+        return NextResponse.json({ error: 'Guest email is required' }, { status: 400 })
+      }
     }
 
     // Check if board exists and get require_approval setting
@@ -58,9 +85,13 @@ export async function POST(request: Request) {
         board_id,
         title,
         content: content || null,
-        author_email: author_email || null,
-        author_name: author_name || null,
-        is_approved: !board.require_approval
+        author_email: is_guest ? null : (author_email || null),
+        author_name: is_guest ? null : (author_name || null),
+        guest_email: is_guest ? guest_email : null,
+        guest_name: is_guest ? (guest_name || 'Anonymous') : null,
+        is_guest: is_guest || false,
+        is_approved: !board.require_approval,
+        status: 'open'
       })
       .select()
       .single()
@@ -92,6 +123,13 @@ export async function POST(request: Request) {
           url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/boards/${board_id}`,
         },
       })
+    }
+
+    // Trigger email notification
+    try {
+      await triggerNewPostEmail(post.id);
+    } catch (e) {
+      console.error('Email trigger failed:', e);
     }
 
     return NextResponse.json({ post }, { status: 201 })

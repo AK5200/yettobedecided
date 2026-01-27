@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
 import { notifyIntegrations } from '@/lib/integrations/notify'
+import { triggerNewCommentEmail } from '@/lib/email/triggers'
 
 export async function GET(request: Request) {
   try {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { post_id, content, author_email, author_name, is_from_admin } = body
+    const { post_id, content, author_email, author_name, is_from_admin, is_internal = false } = body
 
     if (!post_id || !content) {
       return NextResponse.json({ error: 'post_id and content are required' }, { status: 400 })
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
         content,
         author_email: author_email || null,
         author_name: author_name || null,
-        is_from_admin: is_from_admin || false
+        is_from_admin: is_from_admin || false,
+        is_internal
       })
       .select()
       .single()
@@ -89,6 +91,15 @@ export async function POST(request: Request) {
             url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`,
           },
         })
+      }
+    }
+
+    // Trigger email notification (only for public comments)
+    if (!body.is_internal) {
+      try {
+        await triggerNewCommentEmail(post_id, content);
+      } catch (e) {
+        console.error('Email trigger failed:', e);
       }
     }
 

@@ -54,6 +54,7 @@ export default function PublicBoardPage({
       .select('*')
       .eq('board_id', boardId)
       .eq('is_approved', true)
+      .neq('status', 'merged')
       .order('vote_count', { ascending: false })
 
     setPosts((data as Post[]) || [])
@@ -98,6 +99,7 @@ export default function PublicBoardPage({
         .eq('org_id', orgData.id)
         .eq('slug', boardSlug)
         .eq('is_public', true)
+        .eq('is_archived', false)
         .single()
 
       setOrg(orgData)

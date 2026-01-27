@@ -24,6 +24,7 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
   const [slug, setSlug] = useState(initialValues.slug)
   const [description, setDescription] = useState(initialValues.description)
   const [website, setWebsite] = useState(initialValues.website)
+  const [logoUrl, setLogoUrl] = useState(initialValues.logoUrl)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -34,7 +35,7 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
     const response = await fetch(`/api/organizations/${orgId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, slug, description, website }),
+      body: JSON.stringify({ name, slug, description, website, logo_url: logoUrl }),
     })
 
     if (!response.ok) {
@@ -70,6 +71,10 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
       <div className="space-y-2">
         <Label htmlFor="website">Website</Label>
         <Input id="website" value={website} onChange={(e) => setWebsite(e.target.value)} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="logoUrl">Logo URL</Label>
+        <Input id="logoUrl" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." />
       </div>
       <Button type="submit" disabled={loading}>
         {loading ? 'Saving...' : 'Save Changes'}
