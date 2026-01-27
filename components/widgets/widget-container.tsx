@@ -61,6 +61,11 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
 
   const accentColor = settings.accent_color
 
+  const handleClose = () => {
+    setIsOpen(false)
+    window.parent.postMessage('feedbackhub:close', '*')
+  }
+
   return (
     <>
       <FloatingButton
@@ -74,14 +79,19 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
         <ChangelogPopup
           entries={changelog}
           isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
+          onClose={handleClose}
           accentColor={accentColor}
           showBranding={settings.show_branding}
         />
       )}
 
       {settings.widget_type === 'feedback' && (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(isOpen) => {
+          setIsOpen(isOpen)
+          if (!isOpen) {
+            window.parent.postMessage('feedbackhub:close', '*')
+          }
+        }}>
           <DialogContent className="max-w-md">
             <FeedbackWidget
               boards={boards}
@@ -94,7 +104,12 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
       )}
 
       {settings.widget_type === 'all-in-one' && (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(isOpen) => {
+          setIsOpen(isOpen)
+          if (!isOpen) {
+            window.parent.postMessage('feedbackhub:close', '*')
+          }
+        }}>
           <DialogContent className="max-w-md">
             <AllInOneWidget
               boards={boards}
