@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ export function PostDetailDialog({
   adminEmail,
   children,
 }: PostDetailDialogProps) {
+  const router = useRouter()
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [orgId, setOrgId] = useState<string | null>(null)
   const [mergeOpen, setMergeOpen] = useState(false)
@@ -68,7 +70,7 @@ export function PostDetailDialog({
       const data = await res.json()
       if (res.ok) {
         toast.success('Synced to Linear!')
-        window.location.reload()
+        router.refresh()
       } else {
         toast.error(data.error || 'Failed to sync')
       }
@@ -143,7 +145,9 @@ export function PostDetailDialog({
             onClose={() => setMergeOpen(false)}
             sourcePost={{ id: post.id, title: post.title, vote_count: post.vote_count || 0 }}
             boardId={post.board_id}
-            onMerged={() => window.location.reload()}
+            onMerged={() => {
+              router.refresh()
+            }}
           />
         )}
         <Separator className="my-4" />
