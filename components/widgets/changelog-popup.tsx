@@ -1,79 +1,82 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 
 interface ChangelogEntry {
   id: string
   title: string
-  content: string
-  category: string
-  published_at?: string | null
+  description: string
+  published_at: string
+  label?: string
 }
 
 interface ChangelogPopupProps {
-  entries: ChangelogEntry[]
-  isOpen: boolean
-  onClose: () => void
+  orgSlug: string
   accentColor?: string
-  showBranding?: boolean
 }
 
-export function ChangelogPopup({
-  entries,
-  isOpen,
-  onClose,
-  accentColor = '#000000',
-  showBranding = true,
-}: ChangelogPopupProps) {
+export function ChangelogPopup({ orgSlug, accentColor = '#000' }: ChangelogPopupProps) {
+  const [open, setOpen] = useState(false)
+  const [entries, setEntries] = useState<ChangelogEntry[]>([])
+
   useEffect(() => {
-    if (!isOpen) {
-      onClose()
+    // Check if user has seen latest changelog
+    const lastSeen = localStorage.getItem(`feedbackhub-changelog-${orgSlug}`)
+
+    fetch(`/api/changelog?org=${orgSlug}&limit=5`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.entries && data.entries.length > 0) {
+          setEntries(data.entries)
+          const latestId = data.entries[0].id
+          if (lastSeen !== latestId) {
+            setOpen(true)
+          }
+        }
+      })
+  }, [orgSlug])
+
+  const handleClose = () => {
+    if (entries.length > 0) {
+      localStorage.setItem(`feedbackhub-changelog-${orgSlug}`, entries[0].id)
     }
-  }, [isOpen, onClose])
+    setOpen(false)
+    window.parent.postMessage('feedbackhub:close', '*')
+  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => (!open ? onClose() : null)}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle>What&apos;s New</DialogTitle>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md p-1 text-gray-600 hover:text-black"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+      <DialogContent className='max-w-lg'>
+        <DialogHeader>
+          <DialogTitle className='flex items-center gap-2'>
+            Welcome back 👋
+          </DialogTitle>
+          <p className='text-sm text-gray-500'>Here is what we added while you were away.</p>
         </DialogHeader>
-        <div className="max-h-96 overflow-y-auto space-y-4">
-          {entries.map((entry) => (
-            <div key={entry.id} className="border-b pb-4 last:border-b-0">
-              <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                <Badge
-                  variant="outline"
-                  style={{ borderColor: accentColor, color: accentColor }}
-                >
-                  {entry.category}
-                </Badge>
-                <span>
-                  {entry.published_at
-                    ? new Date(entry.published_at).toLocaleDateString()
-                    : 'Recently'}
+
+        <div className='space-y-4 max-h-80 overflow-y-auto'>
+          {entries.map(entry => (
+            <div key={entry.id} className='border-b pb-4 last:border-0'>
+              {entry.label && (
+                <span className='text-xs px-2 py-1 rounded' style={{ background: accentColor, color: '#fff' }}>
+                  {entry.label}
                 </span>
-              </div>
-              <div className="font-medium">{entry.title}</div>
-              <p className="text-sm text-gray-600 line-clamp-3">{entry.content}</p>
+              )}
+              <h3 className='font-medium mt-2'>{entry.title}</h3>
+              <p className='text-sm text-gray-600 mt-1'>{entry.description}</p>
             </div>
           ))}
         </div>
-        {showBranding && (
-          <div className="pt-4 text-xs text-gray-500 text-center">
-            Powered by FeedbackHub
-          </div>
-        )}
+
+        <div className='flex justify-between items-center pt-4'>
+          <span className='text-xs text-gray-400'>Powered by FeedbackHub</span>
+          <Button variant='outline' size='sm' onClick={handleClose}>
+            Got it
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )

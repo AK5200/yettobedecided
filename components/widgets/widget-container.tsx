@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ChangelogPopup } from './changelog-popup'
 import { FeedbackWidget } from './feedback-widget'
 import { AllInOneWidget } from './all-in-one-widget'
 import { FloatingButton } from './floating-button'
@@ -74,16 +73,6 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
         accentColor={accentColor}
         onClick={() => setIsOpen(true)}
       />
-
-      {settings.widget_type === 'changelog' && (
-        <ChangelogPopup
-          entries={changelog}
-          isOpen={isOpen}
-          onClose={handleClose}
-          accentColor={accentColor}
-          showBranding={settings.show_branding}
-        />
-      )}
 
       {settings.widget_type === 'feedback' && (
         <Dialog open={isOpen} onOpenChange={(isOpen) => {
