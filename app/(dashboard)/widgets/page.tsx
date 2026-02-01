@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Megaphone, MessageSquare, Map, Settings, Code, ExternalLink, Copy, Check, Database, Sparkles, Layers, Info } from 'lucide-react'
+import { Megaphone, MessageSquare, Map, Settings, Code, ExternalLink, Copy, Check, Database, Sparkles, Layers, Info, Globe, LayoutGrid } from 'lucide-react'
 import { ChangelogPopupPreview } from '@/components/widgets/changelog-popup-preview'
 import { ChangelogDropdownPreview } from '@/components/widgets/changelog-dropdown-preview'
 import { AnnouncementBannerPreview } from '@/components/widgets/announcement-banner-preview'
@@ -91,6 +91,9 @@ export default function WidgetsPage() {
   const [showAllInOneSettings, setShowAllInOneSettings] = useState(false)
   const [showAllInOneCode, setShowAllInOneCode] = useState(false)
   const [allInOneWidgetType, setAllInOneWidgetType] = useState<'popup' | 'popover'>('popup')
+  // Feedback Portal state
+  const [showPortalCode, setShowPortalCode] = useState(false)
+  const [portalCopied, setPortalCopied] = useState(false)
 
   // Settings state
   const [settings, setSettings] = useState<WidgetSettings>(defaultSettings)
@@ -273,6 +276,49 @@ export default function WidgetsPage() {
           </p>
         </div>
       </div>
+
+      {/* Feedback Portal */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-emerald-100 rounded-lg">
+              <Globe className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Feedback Portal</CardTitle>
+              <CardDescription>Your public hub with feedback boards, changelog, and roadmap</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={() => window.open(`/${orgSlug}`, '_blank')} disabled={!orgSlug}>
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Open Portal
+            </Button>
+            <Button variant="outline" onClick={() => window.open(`/${orgSlug}/changelog`, '_blank')} disabled={!orgSlug}>
+              <Megaphone className="h-4 w-4 mr-2" />
+              Changelog
+            </Button>
+            <Button variant="outline" onClick={() => window.open(`/${orgSlug}/roadmap`, '_blank')} disabled={!orgSlug}>
+              <Map className="h-4 w-4 mr-2" />
+              Roadmap
+            </Button>
+            <Button variant="outline" onClick={() => setShowPortalCode(true)}>
+              <Code className="h-4 w-4 mr-2" />
+              Get Link
+            </Button>
+          </div>
+          <div className="mt-4 p-3 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>Portal URL:</strong>{' '}
+              <code className="text-xs bg-background px-2 py-1 rounded">
+                {baseUrl}/{orgSlug}
+              </code>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Changelog Widget */}
       <Card>
@@ -1225,6 +1271,102 @@ export default function WidgetsPage() {
               <p className="text-sm font-medium mb-1">Preview your widget</p>
               <p className="text-xs text-muted-foreground">
                 Use the "Open Popover" or "Open Pop-up" buttons above to see how your widget will look.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Feedback Portal Links Modal */}
+      <Dialog open={showPortalCode} onOpenChange={setShowPortalCode}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Feedback Portal Links</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Share these links with your users to give them access to your feedback portal.
+            </p>
+
+            <div className="space-y-3">
+              {/* Main Portal */}
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Feedback Portal</p>
+                  <p className="text-xs text-muted-foreground">{baseUrl}/{orgSlug}</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${baseUrl}/${orgSlug}`)
+                    setPortalCopied(true)
+                    toast.success('Link copied!')
+                    setTimeout(() => setPortalCopied(false), 2000)
+                  }}
+                >
+                  {portalCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+
+              {/* Changelog */}
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Changelog</p>
+                  <p className="text-xs text-muted-foreground">{baseUrl}/{orgSlug}/changelog</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${baseUrl}/${orgSlug}/changelog`)
+                    toast.success('Link copied!')
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Roadmap */}
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Roadmap</p>
+                  <p className="text-xs text-muted-foreground">{baseUrl}/{orgSlug}/roadmap</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${baseUrl}/${orgSlug}/roadmap`)
+                    toast.success('Link copied!')
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Feature Requests */}
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Feature Requests</p>
+                  <p className="text-xs text-muted-foreground">{baseUrl}/{orgSlug}/features</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${baseUrl}/${orgSlug}/features`)
+                    toast.success('Link copied!')
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+              <p className="text-sm text-blue-800">
+                <strong>Tip:</strong> You can add these links to your website's navigation, footer, or help menu to give users easy access to your feedback portal.
               </p>
             </div>
           </div>
