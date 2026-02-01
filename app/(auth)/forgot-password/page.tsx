@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import type React from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,34 +14,36 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 
-export default function SignupPage() {
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const supabase = createClient()
+  const [success, setSuccess] = useState(false)
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setMessage('')
 
     try {
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        setMessage(data.error || 'Failed to create account')
+        setMessage(data.error || 'Failed to send reset email')
+        setSuccess(false)
       } else {
-        setMessage(data.message || 'Check your email to confirm your account!')
+        setMessage(data.message || 'Password reset email sent! Please check your inbox.')
+        setSuccess(true)
       }
     } catch (error: any) {
-      setMessage(error.message || 'Failed to create account')
+      setMessage(error.message || 'Failed to send reset email')
+      setSuccess(false)
     }
 
     setLoading(false)
@@ -52,11 +53,11 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create your account</CardTitle>
-          <CardDescription>Enter your email and password to get started</CardDescription>
+          <CardTitle>Reset Password</CardTitle>
+          <CardDescription>Enter your email to receive a password reset link</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -68,25 +69,17 @@ export default function SignupPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-            </div>
-            {message && <p className="text-sm">{message}</p>}
+            {message && (
+              <p className={`text-sm ${success ? 'text-green-600' : 'text-red-600'}`}>
+                {message}
+              </p>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? 'Sending...' : 'Send Reset Link'}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm">
-            Already have an account?{' '}
+            Remember your password?{' '}
             <Link href="/login" className="underline">
               Login
             </Link>
