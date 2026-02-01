@@ -24,6 +24,7 @@ export default async function WebhooksSettingsPage() {
     .from('org_members')
     .select('org_id')
     .eq('user_id', user.id)
+    .limit(1)
     .single()
 
   const orgId = membership?.org_id

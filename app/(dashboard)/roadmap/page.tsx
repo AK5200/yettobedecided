@@ -16,6 +16,7 @@ export default async function RoadmapPage() {
     .from('org_members')
     .select('org_id, role')
     .eq('user_id', user.id)
+    .limit(1)
     .single()
 
   if (!membership) {

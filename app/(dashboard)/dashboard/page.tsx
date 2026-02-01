@@ -11,6 +11,7 @@ export default async function DashboardPage() {
     .from('org_members')
     .select('org_id, organizations(name)')
     .eq('user_id', user!.id)
+    .limit(1)
     .single()
 
   const orgId = membership?.org_id

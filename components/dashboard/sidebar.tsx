@@ -64,6 +64,7 @@ export function Sidebar() {
         .from('org_members')
         .select('organizations(id, name, slug)')
         .eq('user_id', user.id)
+        .limit(1)
         .maybeSingle()
 
       if (error) {

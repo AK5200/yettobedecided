@@ -50,6 +50,7 @@ export default function GeneralSettingsPage() {
       .from('org_members')
       .select('organizations(*)')
       .eq('user_id', user.id)
+      .limit(1)
       .single()
 
     if (membership?.organizations) {

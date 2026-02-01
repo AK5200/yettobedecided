@@ -16,6 +16,7 @@ export default async function OrganizationSettingsPage() {
     .from('org_members')
     .select('org_id, organizations(id, name, slug, description, website, logo_url)')
     .eq('user_id', user.id)
+    .limit(1)
     .single()
 
   const org = membership?.organizations as any
