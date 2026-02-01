@@ -125,7 +125,7 @@ export default function PrioritizePage() {
         board_id,
         boards(name, emoji)
       `)
-      .in('board_id', boards.map(b => b.id))
+      .in('board_id', boards.map((b: { id: string }) => b.id))
       .eq('is_approved', true)
       .order('vote_count', { ascending: false })
 
