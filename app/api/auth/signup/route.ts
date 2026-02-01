@@ -39,6 +39,7 @@ export async function POST(request: Request) {
         const { data: linkData } = await adminClient.auth.admin.generateLink({
           type: 'signup',
           email: data.user.email,
+          password: password, // Required for signup type
         })
 
         if (linkData?.properties?.action_link) {
