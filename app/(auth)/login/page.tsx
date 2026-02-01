@@ -36,11 +36,11 @@ export default function LoginPage() {
 
     if (error) {
       setMessage(error.message)
+      setLoading(false)
     } else {
-      router.push('/dashboard')
+      // Use window.location for a full page reload to ensure session is established
+      window.location.href = '/dashboard'
     }
-
-    setLoading(false)
   }
 
   return (
