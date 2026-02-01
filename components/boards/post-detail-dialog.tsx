@@ -19,12 +19,40 @@ import { createClient } from '@/lib/supabase/client'
 import type { Post } from '@/lib/types/database'
 import { MergeModal } from '@/components/posts/merge-modal'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Circle } from 'lucide-react'
 
 interface PostDetailDialogProps {
   post: Post
   isAdmin?: boolean
   adminEmail?: string
   children: React.ReactNode
+}
+
+interface Status {
+  id: string
+  key: string
+  name: string
+  color: string
+  order: number
+  is_system: boolean
+  show_on_roadmap: boolean
+}
+
+function formatDate(dateString?: string | null): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 export function PostDetailDialog({
@@ -38,6 +66,9 @@ export function PostDetailDialog({
   const [orgId, setOrgId] = useState<string | null>(null)
   const [mergeOpen, setMergeOpen] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [currentStatus, setCurrentStatus] = useState<string>(post.status)
+  const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [statuses, setStatuses] = useState<Status[]>([])
 
   useEffect(() => {
     // Fetch org_id from board
@@ -57,8 +88,61 @@ export function PostDetailDialog({
     fetchOrgId()
   }, [post.board_id])
 
+  useEffect(() => {
+    // Fetch dynamic statuses
+    const fetchStatuses = async () => {
+      try {
+        const res = await fetch('/api/statuses')
+        const data = await res.json()
+        if (data.statuses) {
+          setStatuses(data.statuses)
+        }
+      } catch (error) {
+        console.error('Failed to fetch statuses:', error)
+      }
+    }
+
+    fetchStatuses()
+  }, [])
+
   const handleCommentAdded = () => {
     setRefreshTrigger((prev) => prev + 1)
+  }
+
+  const handleStatusChange = async (newStatus: string) => {
+    setUpdatingStatus(true)
+    try {
+      const res = await fetch(`/api/posts/${post.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (res.ok) {
+        setCurrentStatus(newStatus)
+        const statusObj = statuses.find(s => s.key === newStatus)
+        toast.success(`Status updated to ${statusObj?.name || newStatus}`)
+        router.refresh()
+      } else {
+        toast.error('Failed to update status')
+      }
+    } catch (error) {
+      toast.error('Failed to update status')
+    } finally {
+      setUpdatingStatus(false)
+    }
+  }
+
+  const getCurrentStatusDisplay = () => {
+    const status = statuses.find(s => s.key === currentStatus)
+    if (status) {
+      return (
+        <span className="flex items-center gap-2">
+          <Circle className="h-4 w-4" style={{ color: status.color, fill: status.color }} />
+          {status.name}
+        </span>
+      )
+    }
+    return currentStatus
   }
 
   const handleSyncLinear = async () => {
@@ -89,12 +173,34 @@ export function PostDetailDialog({
           <DialogTitle>{post.title}</DialogTitle>
         </DialogHeader>
         {post.content && <div className="text-sm text-gray-600">{post.content}</div>}
-        <div className="flex flex-wrap gap-2 text-sm">
-          <Badge variant="secondary">{post.status}</Badge>
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {isAdmin && statuses.length > 0 ? (
+            <Select value={currentStatus} onValueChange={handleStatusChange} disabled={updatingStatus}>
+              <SelectTrigger className="w-40">
+                <SelectValue>
+                  {getCurrentStatusDisplay()}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {statuses.map((status) => (
+                  <SelectItem key={status.key} value={status.key}>
+                    <span className="flex items-center gap-2">
+                      <Circle className="h-4 w-4" style={{ color: status.color, fill: status.color }} />
+                      {status.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Badge variant="secondary">
+              {statuses.find(s => s.key === post.status)?.name || post.status}
+            </Badge>
+          )}
           <Badge variant="outline">{post.vote_count} votes</Badge>
         </div>
-        <p className="text-sm text-gray-600">
-          By {post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')}
+        <p className="text-sm text-gray-500">
+          By {post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')} • {formatDate(post.created_at)}
         </p>
         {post.admin_note && (
           <p className="text-sm text-red-600">{post.admin_note}</p>
@@ -143,7 +249,7 @@ export function PostDetailDialog({
           <MergeModal
             open={mergeOpen}
             onClose={() => setMergeOpen(false)}
-            sourcePost={{ id: post.id, title: post.title, vote_count: post.vote_count || 0 }}
+            sourcePost={{ id: post.id, title: post.title, content: post.content || '', vote_count: post.vote_count || 0 }}
             boardId={post.board_id}
             onMerged={() => {
               router.refresh()
@@ -152,7 +258,7 @@ export function PostDetailDialog({
         )}
         <Separator className="my-4" />
         <h3 className="font-semibold mb-2">Comments</h3>
-        <CommentList postId={post.id} isAdmin={isAdmin} refreshTrigger={refreshTrigger} />
+        <CommentList postId={post.id} isAdmin={isAdmin} refreshTrigger={refreshTrigger} userEmail={adminEmail} />
         <Separator className="my-4" />
         <CommentForm
           postId={post.id}

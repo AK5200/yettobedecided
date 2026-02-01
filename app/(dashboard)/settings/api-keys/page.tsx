@@ -27,8 +27,11 @@ export default async function ApiKeysSettingsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold">API Keys</h1>
+    <div className="p-8 max-w-4xl">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">API Keys</h1>
+      <p className="text-gray-500 mb-8">
+        Create and manage API keys for programmatic access to your feedback hub.
+      </p>
       <ApiKeysManager orgId={orgId} initialApiKeys={apiKeys || []} />
     </div>
   )

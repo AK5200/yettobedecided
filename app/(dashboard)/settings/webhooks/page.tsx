@@ -35,8 +35,11 @@ export default async function WebhooksSettingsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Webhooks</h1>
+    <div className="p-8 max-w-4xl">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Webhooks</h1>
+      <p className="text-gray-500 mb-8">
+        Send real-time notifications to your server when events happen in your feedback hub.
+      </p>
       <WebhooksManager orgId={orgId} initialWebhooks={webhooks || []} availableEvents={AVAILABLE_EVENTS} />
     </div>
   )

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
 
@@ -6,10 +6,40 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { post_id, voter_email } = body
+    const { post_id, voter_email, voter_name } = body
 
     if (!post_id || !voter_email) {
       return NextResponse.json({ error: 'post_id and voter_email are required' }, { status: 400 })
+    }
+
+    // Check if email is banned
+    const { data: postForBan } = await supabase
+      .from('posts')
+      .select('board_id')
+      .eq('id', post_id)
+      .single()
+
+    if (postForBan?.board_id) {
+      const { data: boardForBan } = await supabase
+        .from('boards')
+        .select('org_id')
+        .eq('id', postForBan.board_id)
+        .single()
+
+      if (boardForBan?.org_id) {
+        // Use admin client to bypass RLS for ban check
+        const adminClient = createAdminClient()
+        const { data: banned } = await adminClient
+          .from('banned_emails')
+          .select('id')
+          .eq('org_id', boardForBan.org_id)
+          .ilike('email', voter_email)
+          .maybeSingle()
+
+        if (banned) {
+          return NextResponse.json({ error: 'This email has been banned from voting' }, { status: 403 })
+        }
+      }
     }
 
     // Check if already voted (count in case of duplicates)
@@ -65,7 +95,7 @@ export async function POST(request: Request) {
     // Add vote
     const { error: voteError } = await supabase
       .from('votes')
-      .insert({ post_id, voter_email })
+      .insert({ post_id, voter_email, voter_name: voter_name || null })
 
     if (voteError) {
       return NextResponse.json({ error: voteError.message }, { status: 500 })

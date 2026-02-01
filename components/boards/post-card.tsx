@@ -1,34 +1,32 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { PostStatusSelect } from './post-status-select'
 import { PostAdminActions } from './post-admin-actions'
 import { PostDetailDialog } from './post-detail-dialog'
+import { TagSelector } from '@/components/tags/tag-selector'
 import type { Post } from '@/lib/types/database'
 
-interface Tag {
-  id: string
-  name: string
-  color: string
+function formatDate(dateString?: string | null): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 interface PostCardProps {
   post: Post
+  orgId: string
   onUpdate: () => void
   isAdmin?: boolean
   adminEmail?: string
 }
 
-export function PostCard({ post, onUpdate, isAdmin, adminEmail }: PostCardProps) {
-  const [tags, setTags] = useState<Tag[]>([])
-
-  useEffect(() => {
-    fetch(`/api/posts/${post.id}/tags`)
-      .then(res => res.json())
-      .then(data => setTags(data.tags || []))
-  }, [post.id])
+export function PostCard({ post, orgId, onUpdate, isAdmin, adminEmail }: PostCardProps) {
   const handleStatusChange = async (newStatus: string) => {
     await fetch(`/api/posts/${post.id}`, {
       method: 'PATCH',
@@ -41,6 +39,10 @@ export function PostCard({ post, onUpdate, isAdmin, adminEmail }: PostCardProps)
   return (
     <Card>
       <CardContent className="p-4">
+        {/* Top row with TagSelector on right */}
+        <div className="flex justify-end mb-2">
+          <TagSelector postId={post.id} orgId={orgId} />
+        </div>
         <div className="flex flex-col gap-4 md:flex-row md:items-start">
           <div className="w-16 h-16 border rounded flex items-center justify-center text-lg font-semibold">
             {post.vote_count}
@@ -49,25 +51,32 @@ export function PostCard({ post, onUpdate, isAdmin, adminEmail }: PostCardProps)
             <div className="flex-1 space-y-2 cursor-pointer">
               <div className="flex flex-wrap gap-2">
                 {!post.is_approved && <Badge variant="outline">Pending</Badge>}
-                {post.is_pinned && <Badge>Pinned</Badge>}
+                {post.is_pinned && <Badge>Featured</Badge>}
               </div>
               <div className="text-lg font-semibold">{post.title}</div>
               {post.content && <div className="text-sm text-gray-600">{post.content}</div>}
-              {tags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {tags.map(tag => (
-                    <Badge
-                      key={tag.id}
-                      style={{ backgroundColor: tag.color, color: '#fff' }}
-                      className="text-xs px-2 py-0.5"
-                    >
-                      {tag.name}
-                    </Badge>
-                  ))}
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2">
+                  {post.identified_user_avatar ? (
+                    <img
+                      src={post.identified_user_avatar}
+                      alt=""
+                      className="w-6 h-6 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                      {(post.is_guest ? (post.guest_name || post.guest_email || 'G') : (post.author_name || 'A'))[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span>
+                    {post.is_guest ? (post.guest_name || post.guest_email || 'Guest') : (post.author_name || 'Anonymous')}
+                  </span>
+                  {post.user_source === 'verified_sso' && (
+                    <span className="text-xs bg-green-100 text-green-700 px-1 rounded">Verified</span>
+                  )}
                 </div>
-              )}
-              <div className="text-xs text-gray-600">
-                By {post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')}
+                <span>•</span>
+                <span>{formatDate(post.created_at)}</span>
               </div>
               {post.admin_note && (
                 <div className="text-sm text-red-600">

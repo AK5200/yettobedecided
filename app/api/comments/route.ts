@@ -1,8 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
 import { notifyIntegrations } from '@/lib/integrations/notify'
 import { triggerNewCommentEmail } from '@/lib/email/triggers'
+import { processIdentifiedUser } from '@/lib/sso'
+import { incrementCounter, upsertWidgetUser } from '@/lib/widget-users'
 
 export async function GET(request: Request) {
   try {
@@ -34,22 +36,104 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { post_id, content, author_email, author_name, is_from_admin, is_internal = false } = body
+    const { post_id, content, author_email, author_name, guest_email, guest_name, identified_user, is_from_admin, is_internal = false } = body
 
     if (!post_id || !content) {
       return NextResponse.json({ error: 'post_id and content are required' }, { status: 400 })
     }
 
+    // Get post and board to find org
+    const { data: postData } = await supabase
+      .from('posts')
+      .select('board_id')
+      .eq('id', post_id)
+      .single()
+
+    if (!postData?.board_id) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    }
+
+    const { data: boardData } = await supabase
+      .from('boards')
+      .select('org_id')
+      .eq('id', postData.board_id)
+      .single()
+
+    if (!boardData?.org_id) {
+      return NextResponse.json({ error: 'Board not found' }, { status: 404 })
+    }
+
+    // Get org settings
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id, guest_posting_enabled, sso_secret_key')
+      .eq('id', boardData.org_id)
+      .single()
+    if (!org?.id) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 })
+    }
+
+    // Process identified user
+    const ssoResult = processIdentifiedUser(identified_user, org?.sso_secret_key || null)
+    if (ssoResult.error) {
+      return NextResponse.json({ error: ssoResult.error }, { status: 401 })
+    }
+    const sourceForRow = ssoResult.source === 'verified_jwt' ? 'verified_sso' : ssoResult.source
+
+    // Use identified email/name if available, otherwise fall back to guest/author fields
+    const emailToUse = ssoResult.user?.email || guest_email || author_email
+    const nameToUse = ssoResult.user?.name || guest_name || author_name
+
+    if (!emailToUse && !is_from_admin && !org?.guest_posting_enabled) {
+      return NextResponse.json({ error: 'Guest posting is disabled' }, { status: 403 })
+    }
+
+    // Require email for non-admin comments
+    if (!is_from_admin && !emailToUse) {
+      return NextResponse.json({ error: 'author_email is required' }, { status: 400 })
+    }
+
+    let widgetUserId: string | null = null
+    if (!is_from_admin && emailToUse) {
+      const { user: widgetUser, error: userError } = await upsertWidgetUser(org.id, {
+        external_id: ssoResult.user?.id,
+        email: emailToUse,
+        name: nameToUse,
+        avatar_url: ssoResult.user?.avatar,
+        user_source: ssoResult.source,
+        company_id: ssoResult.user?.company?.id,
+        company_name: ssoResult.user?.company?.name,
+        company_plan: ssoResult.user?.company?.plan,
+        company_monthly_spend: ssoResult.user?.company?.monthlySpend,
+      })
+
+      if (userError) {
+        return NextResponse.json({ error: userError }, { status: 500 })
+      }
+
+      if (widgetUser?.is_banned) {
+        return NextResponse.json({ error: 'User is banned' }, { status: 403 })
+      }
+
+      widgetUserId = widgetUser?.id || null
+    }
+
+    const commentData = {
+      post_id,
+      content,
+      author_email: emailToUse || null,
+      author_name: nameToUse || null,
+      widget_user_id: widgetUserId,
+      identified_user_id: ssoResult.user?.id || null,
+      identified_user_avatar: ssoResult.user?.avatar || null,
+      user_source: sourceForRow,
+      is_from_admin: is_from_admin || false,
+      is_internal
+    }
+
     const { data: comment, error } = await supabase
       .from('comments')
-      .insert({
-        post_id,
-        content,
-        author_email: author_email || null,
-        author_name: author_name || null,
-        is_from_admin: is_from_admin || false,
-        is_internal
-      })
+      .insert(commentData)
       .select()
       .single()
 
@@ -58,40 +142,44 @@ export async function POST(request: Request) {
     }
 
     // Fire webhook for new comment
-    const { data: postData } = await supabase
+    const { data: postDataForWebhook } = await supabase
       .from('posts')
       .select('title, board_id')
       .eq('id', post_id)
       .single()
 
-    if (postData?.board_id) {
-      const { data: boardData } = await supabase
+    if (postDataForWebhook?.board_id) {
+      const { data: boardDataForWebhook } = await supabase
         .from('boards')
         .select('org_id')
-        .eq('id', postData.board_id)
+        .eq('id', postDataForWebhook.board_id)
         .single()
 
-      if (boardData?.org_id) {
+      if (boardDataForWebhook?.org_id) {
         fireWebhooks({
-          orgId: boardData.org_id,
+          orgId: boardDataForWebhook.org_id,
           event: 'comment.created',
           payload: {
             comment: comment,
             post_id: post_id,
-            post_title: postData.title
+            post_title: postDataForWebhook.title
           }
         })
         // Notify Slack/Discord on new comment
         notifyIntegrations({
-          orgId: boardData.org_id,
+          orgId: boardDataForWebhook.org_id,
           type: 'new_comment',
           payload: {
             title: 'New Comment',
-            description: `Comment on: ${postData.title}`,
+            description: `Comment on: ${postDataForWebhook.title}`,
             url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`,
           },
         })
       }
+    }
+
+    if (widgetUserId) {
+      await incrementCounter(widgetUserId, 'comment_count')
     }
 
     // Trigger email notification (only for public comments)

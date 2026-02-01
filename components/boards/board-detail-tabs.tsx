@@ -8,6 +8,7 @@ import type { Post } from '@/lib/types/database'
 
 interface BoardDetailTabsProps {
   boardId: string
+  orgId: string
   pendingPosts: Post[]
   approvedPosts: Post[]
   allPosts: Post[]
@@ -16,6 +17,7 @@ interface BoardDetailTabsProps {
 
 export function BoardDetailTabs({
   boardId,
+  orgId,
   pendingPosts,
   approvedPosts,
   allPosts,
@@ -45,6 +47,7 @@ export function BoardDetailTabs({
           </h2>
           <BoardPostsList
             boardId={boardId}
+            orgId={orgId}
             initialPosts={pendingPosts}
             isAdmin={true}
             adminEmail={adminEmail}
@@ -56,6 +59,7 @@ export function BoardDetailTabs({
           </h2>
           <BoardPostsList
             boardId={boardId}
+            orgId={orgId}
             initialPosts={approvedPosts}
             isAdmin={true}
             adminEmail={adminEmail}
@@ -63,7 +67,12 @@ export function BoardDetailTabs({
         </div>
       </TabsContent>
       <TabsContent value="kanban" className="mt-6">
-        <KanbanBoard posts={allPosts} onStatusChange={handleStatusChange} />
+        <KanbanBoard
+          posts={allPosts}
+          onStatusChange={handleStatusChange}
+          isAdmin={true}
+          adminEmail={adminEmail}
+        />
       </TabsContent>
     </Tabs>
   )

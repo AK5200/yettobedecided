@@ -30,10 +30,15 @@ export default async function TeamSettingsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Team Settings</h1>
-      <InviteMemberForm orgId={orgId} />
-      <TeamMembersList members={members || []} invitations={invitations || []} orgId={orgId} />
+    <div className="p-8 max-w-3xl">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Team</h1>
+      <p className="text-gray-500 mb-8">
+        Manage your team members and their roles.
+      </p>
+      <div className="space-y-6">
+        <InviteMemberForm orgId={orgId} />
+        <TeamMembersList members={members || []} invitations={invitations || []} orgId={orgId} />
+      </div>
     </div>
   )
 }

@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FeedbackHub Integration Guide & Tester</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #10b981;
+      --success-bg: #d1fae5;
+      --warning: #f59e0b;
+      --warning-bg: #fef3c7;
+      --error: #ef4444;
+      --error-bg: #fee2e2;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+    }
+    
+    /* Header */
+    header {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--gray-900);
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--gray-100);
+    }
+    .connection-status.connected { background: var(--success-bg); color: #065f46; }
+    .connection-status.disconnected { background: var(--error-bg); color: #991b1b; }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray-400);
+    }
+    .connected .status-dot { background: var(--success); }
+    .disconnected .status-dot { background: var(--error); }
+    
+    /* Main Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    
+    /* Section */
+    .section {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--gray-200);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .section-number {
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .section-body {
+      padding: 24px;
+    }
+    
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+    label .required {
+      color: var(--error);
+    }
+    .label-hint {
+      font-weight: 400;
+      color: var(--gray-500);
+      font-size: 13px;
+    }
+    input[type="text"],
+    input[type="url"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 14px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      background: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--gray-400);
+    }
+    .input-with-btn {
+      display: flex;
+      gap: 8px;
+    }
+    .input-with-btn input {
+      flex: 1;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+    .btn-secondary {
+      background: white;
+      color: var(--gray-700);
+      border: 1px solid var(--gray-300);
+    }
+    .btn-secondary:hover {
+      background: var(--gray-50);
+      border-color: var(--gray-400);
+    }
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    .btn-success:hover {
+      background: #059669;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    
+    /* Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    
+    /* Mode Selector */
+    .mode-selector {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .mode-card {
+      flex: 1;
+      min-width: 200px;
+      padding: 16px;
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+    .mode-card:hover {
+      border-color: var(--gray-300);
+    }
+    .mode-card.selected {
+      border-color: var(--primary);
+      background: #f5f3ff;
+    }
+    .mode-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .mode-icon {
+      font-size: 24px;
+    }
+    .mode-name {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    .mode-tier {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+    .mode-card.selected .mode-tier {
+      background: var(--primary);
+      color: white;
+    }
+    .mode-desc {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+    
+    /* Code Block */
+    .code-block {
+      background: var(--gray-800);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: var(--gray-900);
+      border-bottom: 1px solid var(--gray-700);
+    }
+    .code-title {
+      font-size: 13px;
+      color: var(--gray-400);
+      font-weight: 500;
+    }
+    .code-copy {
+      padding: 4px 10px;
+      font-size: 12px;
+      background: var(--gray-700);
+      color: var(--gray-300);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .code-copy:hover {
+      background: var(--gray-600);
+    }
+    .code-content {
+      padding: 16px;
+      overflow-x: auto;
+    }
+    .code-content pre {
+      margin: 0;
+      font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e5e7eb;
+    }
+    .code-content .comment { color: #6b7280; }
+    .code-content .keyword { color: #c084fc; }
+    .code-content .string { color: #86efac; }
+    .code-content .function { color: #93c5fd; }
+    .code-content .property { color: #fcd34d; }
+    
+    /* Test Result */
+    .test-result {
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      display: none;
+    }
+    .test-result.show { display: block; }
+    .test-result.success {
+      background: var(--success-bg);
+      border: 1px solid #a7f3d0;
+    }
+    .test-result.error {
+      background: var(--error-bg);
+      border: 1px solid #fecaca;
+    }
+    .test-result.info {
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+    }
+    .test-result-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .test-result.success .test-result-header { color: #065f46; }
+    .test-result.error .test-result-header { color: #991b1b; }
+    .test-result.info .test-result-header { color: #1e40af; }
+    .test-result-body {
+      font-size: 13px;
+      color: var(--gray-700);
+    }
+    .test-result-body pre {
+      margin-top: 8px;
+      padding: 12px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: 'SF Mono', monospace;
+      font-size: 12px;
+    }
+    
+    /* User Card */
+    .user-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--gray-50);
+      border-radius: 8px;
+      border: 1px solid var(--gray-200);
+    }
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 18px;
+      overflow: hidden;
+    }
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .user-info {
+      flex: 1;
+    }
+    .user-name {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 2px 8px;
+      background: var(--success-bg);
+      color: #065f46;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .user-email {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+    .user-meta {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 4px;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-500);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab:hover {
+      color: var(--gray-700);
+    }
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Alert */
+    .alert {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+    }
+    .alert-warning {
+      background: var(--warning-bg);
+      border: 1px solid #fcd34d;
+    }
+    .alert-icon {
+      font-size: 20px;
+    }
+    .alert-content {
+      flex: 1;
+    }
+    .alert-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 4px;
+    }
+    .alert-text {
+      font-size: 14px;
+      color: #78350f;
+    }
+    
+    /* Spinner */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      color: var(--gray-500);
+      font-size: 14px;
+    }
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">📋</div>
+        <span>FeedbackHub</span>
+        <span style="color: var(--gray-400); font-weight: 400;">Integration Tester</span>
+      </div>
+      <div class="connection-status disconnected" id="connectionStatus">
+        <span class="status-dot"></span>
+        <span id="connectionText">Checking connection...</span>
+      </div>
+    </div>
+  </header>
+  
+  <div class="container">
+    <!-- Step 1: Configuration -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">1</div>
+        <h2>Connect to Your FeedbackHub Instance</h2>
+      </div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>FeedbackHub URL <span class="required">*</span></label>
+            <div class="input-with-btn">
+              <input type="url" id="feedbackhubUrl" value="http://localhost:3000" placeholder="https://feedback.yourapp.com">
+              <button class="btn btn-secondary" onclick="testConnection()">Test</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Workspace Slug <span class="required">*</span></label>
+            <input type="text" id="workspaceSlug" value="" placeholder="your-company">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Board ID <span class="required">*</span></label>
+            <input type="text" id="boardId" value="" placeholder="abc12345-1234-5678-abcd-1234567890ab">
+          </div>
+          <div class="form-group">
+            <label>SSO Secret Key <span class="label-hint">(for JWT mode)</span></label>
+            <input type="password" id="ssoSecret" value="" placeholder="sk_live_xxxx...">
+          </div>
+        </div>
+        
+        <div class="test-result" id="connectionResult"></div>
+      </div>
+    </div>
+    
+    <!-- Step 2: Choose Auth Mode -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">2</div>
+        <h2>Choose Authentication Mode</h2>
+      </div>
+      <div class="section-body">
+        <p style="color: var(--gray-600); margin-bottom: 16px;">
+          How do you want to identify users who submit feedback?
+        </p>
+        
+        <div class="mode-selector">
+          <div class="mode-card" data-mode="guest" onclick="selectMode('guest')">
+            <div class="mode-card-header">
+              <span class="mode-icon">👤</span>
+              <span class="mode-name">Guest Mode</span>
+              <span class="mode-tier">Free</span>
+            </div>
+            <p class="mode-desc">Users post anonymously. No identification required. Simplest setup.</p>
+          </div>
+          
+          <div class="mode-card" data-mode="trust" onclick="selectMode('trust')">
+            <div class="mode-card-header">
+              <span class="mode-icon">🤝</span>
+              <span class="mode-name">Trust Mode</span>
+              <span class="mode-tier">Free</span>
+            </div>
+            <p class="mode-desc">Pass user data from your frontend. Quick setup, not cryptographically verified.</p>
+          </div>
+          
+          <div class="mode-card selected" data-mode="jwt" onclick="selectMode('jwt')">
+            <div class="mode-card-header">
+              <span class="mode-icon">🔐</span>
+              <span class="mode-name">JWT Mode</span>
+              <span class="mode-tier">Starter+</span>
+            </div>
+            <p class="mode-desc">Server-signed tokens. Cryptographically verified. Shows ✓ badge. Most secure.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step 3: Configure User Data -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">3</div>
+        <h2>Configure Test User</h2>
+      </div>
+      <div class="section-body">
+        <p style="color: var(--gray-600); margin-bottom: 16px;">
+          This simulates a logged-in user on your application. In production, you'd get this from your session/database.
+        </p>
+        
+        <div class="grid-2">
+          <div class="form-group">
+            <label>User ID <span class="required">*</span></label>
+            <input type="text" id="userId" value="user_12345" placeholder="Unique ID from your system">
+          </div>
+          <div class="form-group">
+            <label>Email <span class="required">*</span></label>
+            <input type="email" id="userEmail" value="john.smith@example.com" placeholder="user@example.com">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="userName" value="John Smith" placeholder="Display name">
+          </div>
+          <div class="form-group">
+            <label>Avatar URL</label>
+            <input type="url" id="userAvatar" value="https://i.pravatar.cc/150?u=john" placeholder="https://...">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Plan <span class="label-hint">(custom attribute)</span></label>
+            <select id="userPlan">
+              <option value="free">Free</option>
+              <option value="starter">Starter</option>
+              <option value="pro" selected>Pro</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Company Name <span class="label-hint">(optional)</span></label>
+            <input type="text" id="companyName" value="Acme Inc" placeholder="Company name">
+          </div>
+        </div>
+        
+        <h4 style="margin: 24px 0 12px; color: var(--gray-700);">Preview</h4>
+        <div class="user-preview">
+          <div class="user-avatar" id="previewAvatar">JS</div>
+          <div class="user-info">
+            <div class="user-name">
+              <span id="previewName">John Smith</span>
+              <span class="verified-badge" id="previewBadge" style="display: none;">✓ Verified</span>
+            </div>
+            <div class="user-email" id="previewEmail">john.smith@example.com</div>
+            <div class="user-meta" id="previewMeta">Pro plan • Acme Inc</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step 4: Integration Code -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">4</div>
+        <h2>Integration Code</h2>
+      </div>
+      <div class="section-body">
+        <p style="color: var(--gray-600); margin-bottom: 16px;">
+          Add this code to your website. The code updates based on your configuration above.
+        </p>
+        
+        <div class="tabs">
+          <div class="tab active" data-tab="html" onclick="switchTab('html')">HTML Embed</div>
+          <div class="tab" data-tab="react" onclick="switchTab('react')">React</div>
+          <div class="tab" data-tab="server" onclick="switchTab('server')">Server-side JWT</div>
+        </div>
+        
+        <div id="tab-html" class="tab-content active">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-title">Add to your HTML</span>
+              <button class="code-copy" onclick="copyCode('html')">Copy</button>
+            </div>
+            <div class="code-content">
+              <pre id="codeHtml"></pre>
+            </div>
+          </div>
+        </div>
+        
+        <div id="tab-react" class="tab-content">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-title">React Component</span>
+              <button class="code-copy" onclick="copyCode('react')">Copy</button>
+            </div>
+            <div class="code-content">
+              <pre id="codeReact"></pre>
+            </div>
+          </div>
+        </div>
+        
+        <div id="tab-server" class="tab-content">
+          <div class="alert alert-warning" id="serverAlert" style="display: none;">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-content">
+              <div class="alert-title">JWT Mode Required</div>
+              <div class="alert-text">Server-side JWT generation is only needed for JWT mode. Switch to JWT mode to see this code.</div>
+            </div>
+          </div>
+          <div class="code-block" id="serverCodeBlock">
+            <div class="code-header">
+              <span class="code-title">Node.js / Express</span>
+              <button class="code-copy" onclick="copyCode('server')">Copy</button>
+            </div>
+            <div class="code-content">
+              <pre id="codeServer"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step 5: Test Submission -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">5</div>
+        <h2>Test Feedback Submission</h2>
+      </div>
+      <div class="section-body">
+        <p style="color: var(--gray-600); margin-bottom: 16px;">
+          Submit a test feedback post to verify everything is working correctly.
+        </p>
+        
+        <div class="form-group">
+          <label>Feedback Title <span class="required">*</span></label>
+          <input type="text" id="feedbackTitle" value="Test feedback from integration tester" placeholder="Feature request title">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="feedbackContent" rows="4" placeholder="Describe the feature request...">This is a test submission to verify the FeedbackHub integration is working correctly.</textarea>
+        </div>
+        
+        <button class="btn btn-success" id="submitBtn" onclick="submitFeedback()">
+          📤 Submit Test Feedback
+        </button>
+        
+        <div class="test-result" id="submitResult"></div>
+      </div>
+    </div>
+    
+    <!-- Step 6: Verify in Dashboard -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-number">6</div>
+        <h2>Verify in Dashboard</h2>
+      </div>
+      <div class="section-body">
+        <p style="color: var(--gray-600); margin-bottom: 16px;">
+          After submitting, check your FeedbackHub dashboard to verify:
+        </p>
+        
+        <ul style="list-style: none; padding: 0;">
+          <li style="padding: 12px 0; border-bottom: 1px solid var(--gray-200); display: flex; align-items: flex-start; gap: 12px;">
+            <span style="font-size: 18px;">✅</span>
+            <div>
+              <strong>Post appears on board</strong>
+              <p style="font-size: 13px; color: var(--gray-500); margin-top: 2px;">The feedback should show up on your board immediately</p>
+            </div>
+          </li>
+          <li style="padding: 12px 0; border-bottom: 1px solid var(--gray-200); display: flex; align-items: flex-start; gap: 12px;">
+            <span style="font-size: 18px;">👤</span>
+            <div>
+              <strong>User attribution</strong>
+              <p style="font-size: 13px; color: var(--gray-500); margin-top: 2px;">
+                <span id="verifyUserHint">Check that the user name and avatar appear correctly</span>
+              </p>
+            </div>
+          </li>
+          <li style="padding: 12px 0; display: flex; align-items: flex-start; gap: 12px;">
+            <span style="font-size: 18px;">🔍</span>
+            <div>
+              <strong>Database records</strong>
+              <p style="font-size: 13px; color: var(--gray-500); margin-top: 2px;">Check widget_users table for the user record with correct source</p>
+            </div>
+          </li>
+        </ul>
+        
+        <div style="margin-top: 20px;">
+          <button class="btn btn-secondary" onclick="openDashboard()">
+            Open FeedbackHub Dashboard →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <p>FeedbackHub Integration Tester • <a href="SDK-SPEC.md">SDK Documentation</a> • <a href="README.md">Setup Guide</a></p>
+  </footer>
+
+  <!-- Jose library for JWT generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jose/4.15.4/index.umd.min.js"></script>
+  
+  <script>
+    // ===========================================
+    // STATE
+    // ===========================================
+    let currentMode = 'jwt';
+    let isConnected = false;
+    
+    // ===========================================
+    // CONNECTION TEST
+    // ===========================================
+    async function testConnection() {
+      const url = document.getElementById('feedbackhubUrl').value.replace(/\/$/, '');
+      const statusEl = document.getElementById('connectionStatus');
+      const textEl = document.getElementById('connectionText');
+      const resultEl = document.getElementById('connectionResult');
+      
+      statusEl.className = 'connection-status';
+      textEl.textContent = 'Testing...';
+      
+      try {
+        // Try to fetch a known endpoint
+        const response = await fetch(`${url}/api/health`, { method: 'GET' })
+          .catch(() => fetch(url, { method: 'GET' }));
+        
+        // Server is reachable (even 404 means server is up)
+        isConnected = true;
+        statusEl.className = 'connection-status connected';
+        textEl.textContent = 'Connected';
+        
+        resultEl.className = 'test-result success show';
+        resultEl.innerHTML = `
+          <div class="test-result-header">✅ Connection Successful</div>
+          <div class="test-result-body">
+            FeedbackHub is reachable at <strong>${url}</strong>
+          </div>
+        `;
+      } catch (error) {
+        isConnected = false;
+        statusEl.className = 'connection-status disconnected';
+        textEl.textContent = 'Disconnected';
+        
+        resultEl.className = 'test-result error show';
+        resultEl.innerHTML = `
+          <div class="test-result-header">❌ Connection Failed</div>
+          <div class="test-result-body">
+            Could not connect to <strong>${url}</strong>
+            <br><br>
+            Make sure:
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>FeedbackHub server is running</li>
+              <li>The URL is correct</li>
+              <li>CORS is configured to allow this origin</li>
+            </ul>
+            <pre>Error: ${error.message}</pre>
+          </div>
+        `;
+      }
+    }
+    
+    // ===========================================
+    // MODE SELECTION
+    // ===========================================
+    function selectMode(mode) {
+      currentMode = mode;
+      
+      // Update UI
+      document.querySelectorAll('.mode-card').forEach(card => {
+        card.classList.toggle('selected', card.dataset.mode === mode);
+      });
+      
+      // Update verified badge visibility
+      const badge = document.getElementById('previewBadge');
+      badge.style.display = mode === 'jwt' ? 'inline-flex' : 'none';
+      
+      // Update server tab alert
+      const serverAlert = document.getElementById('serverAlert');
+      const serverBlock = document.getElementById('serverCodeBlock');
+      if (mode === 'jwt') {
+        serverAlert.style.display = 'none';
+        serverBlock.style.display = 'block';
+      } else {
+        serverAlert.style.display = 'flex';
+        serverBlock.style.display = 'none';
+      }
+      
+      // Update verify hint
+      const verifyHint = document.getElementById('verifyUserHint');
+      if (mode === 'guest') {
+        verifyHint.textContent = 'Post should show as "Guest" with no user info';
+      } else if (mode === 'trust') {
+        verifyHint.textContent = 'User name and avatar should appear (no verified badge)';
+      } else {
+        verifyHint.textContent = 'User name, avatar, and ✓ Verified badge should appear';
+      }
+      
+      // Update code examples
+      updateCodeExamples();
+    }
+    
+    // ===========================================
+    // CODE GENERATION
+    // ===========================================
+    function updateCodeExamples() {
+      const config = getConfig();
+      
+      // HTML embed code
+      let htmlCode = '';
+      if (currentMode === 'guest') {
+        htmlCode = `<span class="comment">&lt;!-- FeedbackHub Widget - Guest Mode --&gt;</span>
+<span class="keyword">&lt;script&gt;</span>
+  !function(f,e,d,b,a,c,k){if(!f.FeedbackHub){
+    c=e.createElement(d);c.async=1;c.src=b;
+    k=e.getElementsByTagName(d)[0];k.parentNode.insertBefore(c,k);
+    f.FeedbackHub=function(){(f.FeedbackHub.q=f.FeedbackHub.q||[]).push(arguments)};
+  }}(window,document,<span class="string">"script"</span>,<span class="string">"${config.url}/widget.js"</span>);
+
+  <span class="comment">// Initialize the widget</span>
+  <span class="function">FeedbackHub</span>(<span class="string">'init'</span>, {
+    <span class="property">workspace</span>: <span class="string">'${config.workspace}'</span>,
+    <span class="property">boardId</span>: <span class="string">'${config.board}'</span>
+  });
+  
+  <span class="comment">// No identify call needed - users post as guests</span>
+<span class="keyword">&lt;/script&gt;</span>`;
+      } else if (currentMode === 'trust') {
+        htmlCode = `<span class="comment">&lt;!-- FeedbackHub Widget - Trust Mode --&gt;</span>
+<span class="keyword">&lt;script&gt;</span>
+  !function(f,e,d,b,a,c,k){if(!f.FeedbackHub){
+    c=e.createElement(d);c.async=1;c.src=b;
+    k=e.getElementsByTagName(d)[0];k.parentNode.insertBefore(c,k);
+    f.FeedbackHub=function(){(f.FeedbackHub.q=f.FeedbackHub.q||[]).push(arguments)};
+  }}(window,document,<span class="string">"script"</span>,<span class="string">"${config.url}/widget.js"</span>);
+
+  <span class="comment">// Initialize</span>
+  <span class="function">FeedbackHub</span>(<span class="string">'init'</span>, {
+    <span class="property">workspace</span>: <span class="string">'${config.workspace}'</span>,
+    <span class="property">boardId</span>: <span class="string">'${config.board}'</span>
+  });
+
+  <span class="comment">// Identify your logged-in user</span>
+  <span class="function">FeedbackHub</span>(<span class="string">'identify'</span>, {
+    <span class="property">id</span>: <span class="string">'${config.user.id}'</span>,
+    <span class="property">email</span>: <span class="string">'${config.user.email}'</span>,
+    <span class="property">name</span>: <span class="string">'${config.user.name}'</span>,
+    <span class="property">avatar</span>: <span class="string">'${config.user.avatar}'</span>,
+    <span class="property">plan</span>: <span class="string">'${config.user.plan}'</span>,
+    <span class="property">company</span>: {
+      <span class="property">name</span>: <span class="string">'${config.user.company}'</span>
+    }
+  });
+<span class="keyword">&lt;/script&gt;</span>`;
+      } else {
+        htmlCode = `<span class="comment">&lt;!-- FeedbackHub Widget - JWT Mode (Secure) --&gt;</span>
+<span class="keyword">&lt;script&gt;</span>
+  !function(f,e,d,b,a,c,k){if(!f.FeedbackHub){
+    c=e.createElement(d);c.async=1;c.src=b;
+    k=e.getElementsByTagName(d)[0];k.parentNode.insertBefore(c,k);
+    f.FeedbackHub=function(){(f.FeedbackHub.q=f.FeedbackHub.q||[]).push(arguments)};
+  }}(window,document,<span class="string">"script"</span>,<span class="string">"${config.url}/widget.js"</span>);
+
+  <span class="comment">// Initialize</span>
+  <span class="function">FeedbackHub</span>(<span class="string">'init'</span>, {
+    <span class="property">workspace</span>: <span class="string">'${config.workspace}'</span>,
+    <span class="property">boardId</span>: <span class="string">'${config.board}'</span>
+  });
+
+  <span class="comment">// Identify with JWT token from your server</span>
+  <span class="comment">// Replace with actual token from your backend API</span>
+  <span class="keyword">const</span> ssoToken = <span class="string">'{{ SSO_TOKEN_FROM_SERVER }}'</span>;
+  
+  <span class="function">FeedbackHub</span>(<span class="string">'identify'</span>, {
+    <span class="property">ssoToken</span>: ssoToken
+  });
+<span class="keyword">&lt;/script&gt;</span>`;
+      }
+      document.getElementById('codeHtml').innerHTML = htmlCode;
+      
+      // React code
+      let reactCode = `<span class="keyword">import</span> { useEffect } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export function</span> <span class="function">FeedbackHubWidget</span>({ user, ssoToken }) {
+  <span class="function">useEffect</span>(() => {
+    <span class="comment">// Load SDK</span>
+    <span class="keyword">const</span> script = document.<span class="function">createElement</span>(<span class="string">'script'</span>);
+    script.src = <span class="string">'${config.url}/widget.js'</span>;
+    script.async = <span class="keyword">true</span>;
+    script.onload = () => {
+      <span class="comment">// Initialize</span>
+      window.<span class="function">FeedbackHub</span>(<span class="string">'init'</span>, {
+        <span class="property">workspace</span>: <span class="string">'${config.workspace}'</span>,
+        <span class="property">boardId</span>: <span class="string">'${config.board}'</span>
+      });
+      
+      <span class="comment">// Identify user (if logged in)</span>`;
+      
+      if (currentMode === 'jwt') {
+        reactCode += `
+      <span class="keyword">if</span> (ssoToken) {
+        window.<span class="function">FeedbackHub</span>(<span class="string">'identify'</span>, { ssoToken });
+      }`;
+      } else if (currentMode === 'trust') {
+        reactCode += `
+      <span class="keyword">if</span> (user) {
+        window.<span class="function">FeedbackHub</span>(<span class="string">'identify'</span>, {
+          <span class="property">id</span>: user.id,
+          <span class="property">email</span>: user.email,
+          <span class="property">name</span>: user.name,
+          <span class="property">avatar</span>: user.avatar
+        });
+      }`;
+      } else {
+        reactCode += `
+      <span class="comment">// Guest mode - no identification needed</span>`;
+      }
+      
+      reactCode += `
+    };
+    document.head.<span class="function">appendChild</span>(script);
+    
+    <span class="keyword">return</span> () => script.<span class="function">remove</span>();
+  }, [user, ssoToken]);
+  
+  <span class="keyword">return null</span>;
+}`;
+      document.getElementById('codeReact').innerHTML = reactCode;
+      
+      // Server-side JWT code
+      const serverCode = `<span class="keyword">const</span> jwt = <span class="function">require</span>(<span class="string">'jsonwebtoken'</span>);
+
+<span class="comment">// Your SSO secret from FeedbackHub settings</span>
+<span class="keyword">const</span> SSO_SECRET = process.env.<span class="property">FEEDBACKHUB_SSO_SECRET</span>;
+
+<span class="comment">// Generate SSO token for a user</span>
+<span class="keyword">function</span> <span class="function">createFeedbackHubToken</span>(user) {
+  <span class="keyword">return</span> jwt.<span class="function">sign</span>({
+    <span class="property">sub</span>: user.id,           <span class="comment">// Required: unique user ID</span>
+    <span class="property">email</span>: user.email,       <span class="comment">// Required: user email</span>
+    <span class="property">name</span>: user.name,         <span class="comment">// Optional: display name</span>
+    <span class="property">avatar</span>: user.avatarUrl,  <span class="comment">// Optional: avatar URL</span>
+    <span class="property">plan</span>: user.plan,         <span class="comment">// Optional: custom attribute</span>
+    <span class="property">company</span>: {               <span class="comment">// Optional: company data</span>
+      <span class="property">id</span>: user.company?.id,
+      <span class="property">name</span>: user.company?.name
+    }
+  }, SSO_SECRET, {
+    <span class="property">algorithm</span>: <span class="string">'HS256'</span>,
+    <span class="property">expiresIn</span>: <span class="string">'24h'</span>
+  });
+}
+
+<span class="comment">// Express endpoint example</span>
+app.<span class="function">get</span>(<span class="string">'/api/feedbackhub-token'</span>, (req, res) => {
+  <span class="keyword">const</span> user = req.user; <span class="comment">// From your auth middleware</span>
+  <span class="keyword">const</span> token = <span class="function">createFeedbackHubToken</span>(user);
+  res.<span class="function">json</span>({ token });
+});`;
+      document.getElementById('codeServer').innerHTML = serverCode;
+    }
+    
+    function getConfig() {
+      return {
+        url: document.getElementById('feedbackhubUrl').value.replace(/\/$/, ''),
+        workspace: document.getElementById('workspaceSlug').value || 'your-workspace',
+        board: document.getElementById('boardId').value || 'board-id',
+        secret: document.getElementById('ssoSecret').value,
+        user: {
+          id: document.getElementById('userId').value,
+          email: document.getElementById('userEmail').value,
+          name: document.getElementById('userName').value,
+          avatar: document.getElementById('userAvatar').value,
+          plan: document.getElementById('userPlan').value,
+          company: document.getElementById('companyName').value
+        }
+      };
+    }
+    
+    // ===========================================
+    // TAB SWITCHING
+    // ===========================================
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.toggle('active', c.id === `tab-${tab}`);
+      });
+    }
+    
+    // ===========================================
+    // COPY CODE
+    // ===========================================
+    function copyCode(type) {
+      const el = document.getElementById(`code${type.charAt(0).toUpperCase() + type.slice(1)}`);
+      const text = el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = el.closest('.code-block').querySelector('.code-copy');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+    
+    // ===========================================
+    // JWT GENERATION (for testing)
+    // ===========================================
+    async function generateTestJWT() {
+      const config = getConfig();
+      
+      if (!config.secret) {
+        throw new Error('SSO Secret is required for JWT mode');
+      }
+      
+      const payload = {
+        id: config.user.id,
+        email: config.user.email,
+        name: config.user.name,
+        avatar: config.user.avatar,
+        plan: config.user.plan,
+        company: {
+          name: config.user.company
+        }
+      };
+      
+      const secretKey = new TextEncoder().encode(config.secret);
+      
+      const token = await new jose.SignJWT(payload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime('24h')
+        .sign(secretKey);
+      
+      return token;
+    }
+    
+    // ===========================================
+    // SUBMIT FEEDBACK
+    // ===========================================
+    async function submitFeedback() {
+      const config = getConfig();
+      const resultEl = document.getElementById('submitResult');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      // Validate
+      if (!config.workspace || !config.board) {
+        resultEl.className = 'test-result error show';
+        resultEl.innerHTML = `
+          <div class="test-result-header">❌ Missing Configuration</div>
+          <div class="test-result-body">Please fill in Workspace Slug and Board ID</div>
+        `;
+        return;
+      }
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+      
+      try {
+        // Build request payload based on mode
+        const payload = {
+          org_slug: config.workspace,
+          board_id: config.board,
+          title: document.getElementById('feedbackTitle').value,
+          content: document.getElementById('feedbackContent').value,
+          // Always include guest fields as a fallback
+          guest_email: config.user.email,
+          guest_name: config.user.name
+        };
+        
+        if (currentMode === 'trust') {
+          payload.identified_user = {
+            id: config.user.id,
+            email: config.user.email,
+            name: config.user.name,
+            avatar: config.user.avatar,
+            plan: config.user.plan,
+            company: { name: config.user.company }
+          };
+        } else if (currentMode === 'jwt') {
+          const token = await generateTestJWT();
+          payload.identified_user = {
+            token: token
+          };
+        }
+        
+        console.log('📤 Submitting:', payload);
+        
+        const response = await fetch(`${config.url}/api/widget/feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          resultEl.className = 'test-result success show';
+          resultEl.innerHTML = `
+            <div class="test-result-header">✅ Feedback Submitted Successfully!</div>
+            <div class="test-result-body">
+              <strong>Post ID:</strong> ${result.id || result.data?.id || 'N/A'}<br>
+              <strong>User Source:</strong> ${result.user_source || result.data?.user_source || (currentMode === 'guest' ? 'guest' : currentMode)}<br>
+              <br>
+              Check your FeedbackHub dashboard to see the post.
+              <pre>${JSON.stringify(result, null, 2)}</pre>
+            </div>
+          `;
+        } else {
+          throw new Error(result.error || result.message || JSON.stringify(result));
+        }
+      } catch (error) {
+        console.error('Submit failed:', error);
+        resultEl.className = 'test-result error show';
+        resultEl.innerHTML = `
+          <div class="test-result-header">❌ Submission Failed</div>
+          <div class="test-result-body">
+            ${error.message}
+            <br><br>
+            Check the browser console for more details.
+          </div>
+        `;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '📤 Submit Test Feedback';
+      }
+    }
+    
+    // ===========================================
+    // OPEN DASHBOARD
+    // ===========================================
+    function openDashboard() {
+      const url = document.getElementById('feedbackhubUrl').value.replace(/\/$/, '');
+      window.open(url, '_blank');
+    }
+    
+    // ===========================================
+    // USER PREVIEW UPDATE
+    // ===========================================
+    function updateUserPreview() {
+      const name = document.getElementById('userName').value || 'User';
+      const email = document.getElementById('userEmail').value || 'user@example.com';
+      const avatar = document.getElementById('userAvatar').value;
+      const plan = document.getElementById('userPlan').value;
+      const company = document.getElementById('companyName').value;
+      
+      document.getElementById('previewName').textContent = name;
+      document.getElementById('previewEmail').textContent = email;
+      
+      const avatarEl = document.getElementById('previewAvatar');
+      if (avatar) {
+        avatarEl.innerHTML = `<img src="${avatar}" alt="${name}" onerror="this.parentElement.textContent='${name.split(' ').map(n=>n[0]).join('')}'">`;
+      } else {
+        avatarEl.textContent = name.split(' ').map(n => n[0]).join('').substring(0, 2);
+      }
+      
+      let meta = plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan';
+      if (company) meta += ' • ' + company;
+      document.getElementById('previewMeta').textContent = meta;
+    }
+    
+    // ===========================================
+    // INITIALIZE
+    // ===========================================
+    document.querySelectorAll('#userId, #userEmail, #userName, #userAvatar, #userPlan, #companyName').forEach(input => {
+      input.addEventListener('input', () => {
+        updateUserPreview();
+        updateCodeExamples();
+      });
+    });
+    
+    document.querySelectorAll('#feedbackhubUrl, #workspaceSlug, #boardId, #ssoSecret').forEach(input => {
+      input.addEventListener('input', updateCodeExamples);
+    });
+    
+    // Initial setup
+    selectMode('jwt');
+    updateUserPreview();
+    testConnection();
+  </script>
+</body>
+</html>

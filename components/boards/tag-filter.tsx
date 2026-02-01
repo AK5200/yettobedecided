@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import {
   Select,
   SelectContent,
@@ -22,6 +22,7 @@ interface TagFilterProps {
 
 export function TagFilter({ orgId }: TagFilterProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [tags, setTags] = useState<Tag[]>([])
   const currentTag = searchParams.get('tag') || 'all'
@@ -39,7 +40,8 @@ export function TagFilter({ orgId }: TagFilterProps) {
     } else {
       params.delete('tag')
     }
-    router.push(`?${params.toString()}`)
+    const queryString = params.toString()
+    router.push(queryString ? `${pathname}?${queryString}` : pathname)
   }
 
   return (

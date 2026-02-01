@@ -145,6 +145,11 @@ export function PublicFeaturesView({
   }
 
   const sortedPosts = [...posts].sort((a, b) => {
+    // Featured posts always come first
+    if (a.is_pinned && !b.is_pinned) return -1
+    if (!a.is_pinned && b.is_pinned) return 1
+
+    // Then apply the selected sort
     if (sortBy === 'most_votes') {
       return (b.vote_count || 0) - (a.vote_count || 0)
     }
@@ -401,7 +406,7 @@ export function PublicFeaturesView({
                               <div className="flex items-center gap-2 flex-wrap">
                                 {post.is_pinned && (
                                   <Badge variant="secondary" className="text-xs">
-                                    Pinned
+                                    Featured
                                   </Badge>
                                 )}
                                 {board && (

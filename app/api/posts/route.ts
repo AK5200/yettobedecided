@@ -1,8 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
 import { notifyIntegrations } from '@/lib/integrations/notify'
 import { triggerNewPostEmail } from '@/lib/email/triggers'
+import { processIdentifiedUser } from '@/lib/sso'
 
 export async function GET(request: Request) {
   try {
@@ -25,7 +26,11 @@ export async function GET(request: Request) {
     }
 
     if (exclude) {
-      query = query.neq('id', exclude)
+      // Handle multiple exclude IDs separated by comma
+      const excludeIds = exclude.split(',').filter(Boolean)
+      for (const id of excludeIds) {
+        query = query.neq('id', id.trim())
+      }
     }
 
     // Exclude merged posts
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { board_id, title, content, author_email, author_name, guest_email, guest_name, is_guest } = body
+    const { board_id, title, content, author_email, author_name, guest_email, guest_name, identified_user, is_guest } = body
 
     if (!board_id || !title) {
       return NextResponse.json({ error: 'board_id and title are required' }, { status: 400 })
@@ -63,15 +68,15 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
     } else {
-      if (!guest_email) {
-        return NextResponse.json({ error: 'Guest email is required' }, { status: 400 })
+      if (!guest_email && !identified_user) {
+        return NextResponse.json({ error: 'Guest email or identified_user is required' }, { status: 400 })
       }
     }
 
     // Check if board exists and get require_approval setting
     const { data: board } = await supabase
       .from('boards')
-      .select('id, require_approval')
+      .select('id, require_approval, org_id')
       .eq('id', board_id)
       .single()
 
@@ -79,20 +84,71 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Board not found' }, { status: 404 })
     }
 
+    // Process identified user for guest posts
+    type PostSsoResult = {
+      user: any
+      source: 'guest' | 'identified' | 'verified_jwt' | 'verified_sso'
+      error?: string
+    }
+    let ssoResult: PostSsoResult = { user: null, source: 'guest' }
+    if (is_guest && identified_user && board.org_id) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('sso_secret_key')
+        .eq('id', board.org_id)
+        .single()
+
+      ssoResult = processIdentifiedUser(identified_user, org?.sso_secret_key || null) as PostSsoResult
+
+      if (ssoResult.error) {
+        return NextResponse.json({ error: ssoResult.error }, { status: 401 })
+      }
+    }
+
+    // Use identified email/name if available, otherwise fall back to guest/author fields
+    const emailToCheck = is_guest 
+      ? (ssoResult.user?.email || guest_email)
+      : author_email
+    const nameToUse = is_guest
+      ? (ssoResult.user?.name || guest_name)
+      : author_name
+    const sourceForRow = ssoResult.source === 'verified_jwt' ? 'verified_sso' : ssoResult.source
+
+    // Check if email is banned
+    if (emailToCheck && board.org_id) {
+      // Use admin client to bypass RLS for ban check
+      const adminClient = createAdminClient()
+      const { data: banned } = await adminClient
+        .from('banned_emails')
+        .select('id')
+        .eq('org_id', board.org_id)
+        .ilike('email', emailToCheck)
+        .maybeSingle()
+
+      if (banned) {
+        return NextResponse.json({ error: 'This email has been banned from creating posts' }, { status: 403 })
+      }
+    }
+
+    const insertData = {
+      board_id,
+      title,
+      content: content || null,
+      author_email: is_guest ? null : (author_email || null),
+      author_name: is_guest ? null : (author_name || null),
+      guest_email: is_guest ? emailToCheck : null,
+      guest_name: is_guest ? (nameToUse || 'Anonymous') : null,
+      identified_user_id: is_guest ? (ssoResult.user?.id || null) : null,
+      identified_user_avatar: is_guest ? (ssoResult.user?.avatar || null) : null,
+      user_source: is_guest ? sourceForRow : 'guest',
+      is_guest: is_guest || false,
+      is_approved: !board.require_approval,
+      status: 'open'
+    }
+
     const { data: post, error: postError } = await supabase
       .from('posts')
-      .insert({
-        board_id,
-        title,
-        content: content || null,
-        author_email: is_guest ? null : (author_email || null),
-        author_name: is_guest ? null : (author_name || null),
-        guest_email: is_guest ? guest_email : null,
-        guest_name: is_guest ? (guest_name || 'Anonymous') : null,
-        is_guest: is_guest || false,
-        is_approved: !board.require_approval,
-        status: 'open'
-      })
+      .insert(insertData)
       .select()
       .single()
 

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { handleOptions, withCors } from '@/lib/cors'
 
 const defaultSettings = {
   widget_type: 'all-in-one',
@@ -10,23 +11,21 @@ const defaultSettings = {
   theme: 'light',
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+export async function OPTIONS(request: NextRequest) {
+  return handleOptions(request)
 }
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders })
-}
-
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const origin = request.headers.get('origin')
   const supabase = await createClient()
   const { searchParams } = new URL(request.url)
   const orgSlug = searchParams.get('org')
 
   if (!orgSlug) {
-    return NextResponse.json({ error: 'org is required' }, { status: 400, headers: corsHeaders })
+    return withCors(
+      NextResponse.json({ error: 'org is required' }, { status: 400 }),
+      origin
+    )
   }
 
   const { data: org, error: orgError } = await supabase
@@ -36,7 +35,10 @@ export async function GET(request: Request) {
     .single()
 
   if (orgError || !org) {
-    return NextResponse.json({ error: 'Organization not found' }, { status: 404, headers: corsHeaders })
+    return withCors(
+      NextResponse.json({ error: 'Organization not found' }, { status: 404 }),
+      origin
+    )
   }
 
   const { data: settings } = await supabase
@@ -59,13 +61,13 @@ export async function GET(request: Request) {
     .order('published_at', { ascending: false })
     .limit(10)
 
-  return NextResponse.json(
-    {
+  return withCors(
+    NextResponse.json({
       org,
       settings: settings || { ...defaultSettings, org_id: org.id },
       boards: boards || [],
       changelog: changelog || [],
-    },
-    { headers: corsHeaders }
+    }),
+    origin
   )
 }

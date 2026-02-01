@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { PostCard } from './post-card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -8,6 +8,7 @@ import type { Post } from '@/lib/types/database'
 
 interface BoardPostsListProps {
   boardId: string
+  orgId: string
   initialPosts: Post[]
   isAdmin?: boolean
   adminEmail?: string
@@ -15,11 +16,17 @@ interface BoardPostsListProps {
 
 export function BoardPostsList({
   boardId,
+  orgId,
   initialPosts,
   isAdmin,
   adminEmail,
 }: BoardPostsListProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
+
+  // Sync posts with initialPosts when filters change
+  useEffect(() => {
+    setPosts(initialPosts)
+  }, [initialPosts])
 
   const fetchPosts = async () => {
     const supabase = createClient()
@@ -45,6 +52,7 @@ export function BoardPostsList({
         <PostCard
           key={post.id}
           post={post}
+          orgId={orgId}
           onUpdate={fetchPosts}
           isAdmin={isAdmin}
           adminEmail={adminEmail}

@@ -1,14 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 
 export function SearchInput() {
     const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
     const [query, setQuery] = useState(searchParams.get('q') || '');
+
+    // Sync local state with URL when searchParams change externally
+    useEffect(() => {
+        setQuery(searchParams.get('q') || '');
+    }, [searchParams]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -18,11 +24,12 @@ export function SearchInput() {
             } else {
                 params.delete('q');
             }
-            router.push(`?${params.toString()}`);
+            const queryString = params.toString();
+            router.push(queryString ? `${pathname}?${queryString}` : pathname);
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [query, router, searchParams]);
+    }, [query, router, pathname, searchParams]);
 
     return (
         <div className='relative w-full max-w-sm'>

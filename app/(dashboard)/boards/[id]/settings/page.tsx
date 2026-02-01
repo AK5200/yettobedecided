@@ -1,8 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { BoardSettingsForm } from '@/components/settings/board-settings-form'
+import { redirect, notFound } from 'next/navigation'
+import { BoardSettingsPage } from '@/components/settings/board-settings-page'
 
-export default async function BoardSettingsPage({ params }: { params: { id: string } }) {
+export default async function BoardSettingsRoute({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
   const supabase = await createClient()
   const {
     data: { user },
@@ -18,26 +23,38 @@ export default async function BoardSettingsPage({ params }: { params: { id: stri
     .eq('user_id', user.id)
     .single()
 
+  if (!membership) {
+    redirect('/onboarding')
+  }
+
   const { data: board } = await supabase
     .from('boards')
-    .select('id, name, slug, description, is_public, is_archived')
-    .eq('id', params.id)
-    .eq('org_id', membership?.org_id)
+    .select('*')
+    .eq('id', id)
+    .eq('org_id', membership.org_id)
+    .single()
+
+  if (!board) {
+    notFound()
+  }
+
+  // Fetch org settings for moderation defaults
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('*')
+    .eq('id', membership.org_id)
     .single()
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Board Settings</h1>
-      <BoardSettingsForm
-        boardId={board?.id}
-        initialValues={{
-          name: board?.name || '',
-          slug: board?.slug || '',
-          description: board?.description || '',
-          isPublic: board?.is_public ?? false,
-          isArchived: board?.is_archived ?? false,
-        }}
-      />
-    </div>
+    <BoardSettingsPage
+      board={board}
+      orgSettings={{
+        post_moderation: org?.post_moderation ?? false,
+        comment_moderation: org?.comment_moderation ?? false,
+        allow_anonymous_posts: org?.allow_anonymous_posts ?? false,
+        allow_guest_posts: org?.allow_guest_posts ?? false,
+        allow_guest_votes: org?.allow_guest_votes ?? false,
+      }}
+    />
   )
 }

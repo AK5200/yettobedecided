@@ -97,20 +97,34 @@ export default async function BoardDetailPage({
     const matchesSearch =
       !search ||
       post.title?.toLowerCase().includes(search) ||
-      post.content?.toLowerCase().includes(search)
+      post.content?.toLowerCase().includes(search) ||
+      post.author_name?.toLowerCase().includes(search) ||
+      post.guest_name?.toLowerCase().includes(search) ||
+      post.author_email?.toLowerCase().includes(search) ||
+      post.guest_email?.toLowerCase().includes(search)
     const matchesStatus = status === 'all' || post.status === status
     const matchesTag = !tagId || postIdsWithTag.includes(post.id)
     return matchesSearch && matchesStatus && matchesTag
   }
 
   const sortPosts = (posts: any[]) => {
-    if (sort === 'oldest') {
-      return [...posts].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-    }
-    if (sort === 'most_votes') {
-      return [...posts].sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
-    }
-    return [...posts].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    // Always sort featured posts first, then apply the selected sort
+    const sortedPosts = [...posts].sort((a, b) => {
+      // Featured posts always come first
+      if (a.is_pinned && !b.is_pinned) return -1
+      if (!a.is_pinned && b.is_pinned) return 1
+
+      // Then apply the selected sort
+      if (sort === 'oldest') {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      }
+      if (sort === 'most_votes') {
+        return (b.vote_count || 0) - (a.vote_count || 0)
+      }
+      // Default: newest first
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+    return sortedPosts
   }
 
   const filteredPending = sortPosts((pendingPosts || []).filter(matchesFilters))
@@ -155,6 +169,7 @@ export default async function BoardDetailPage({
       <div className="mt-8">
         <BoardDetailTabs
           boardId={id}
+          orgId={board.org_id}
           pendingPosts={filteredPending}
           approvedPosts={filteredApproved}
           allPosts={filteredAll}

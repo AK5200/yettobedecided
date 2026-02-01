@@ -21,8 +21,11 @@ export default async function TagsSettingsPage() {
   const orgId = membership?.org_id
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Tags</h1>
+    <div className="p-8 max-w-3xl">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Tags</h1>
+      <p className="text-gray-500 mb-8">
+        Create and manage tags to categorize your feedback posts.
+      </p>
       <TagManager orgId={orgId} />
     </div>
   )

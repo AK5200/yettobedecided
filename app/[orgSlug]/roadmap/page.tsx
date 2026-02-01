@@ -27,13 +27,40 @@ export default async function PublicRoadmapPage({
     .select('id')
     .eq('org_id', org.id)
     .eq('is_public', true)
+    .eq('is_archived', false)
 
   const boardIds = (publicBoards || []).map((board) => board.id)
+
+  if (boardIds.length === 0) {
+    return (
+      <div className="min-h-screen p-8">
+        <header className="flex flex-col md:flex-row md:items-center md:justify-center gap-4 mb-8">
+          <nav className="flex gap-4 text-sm">
+            <Link href={`/${orgSlug}/features`} className="text-muted-foreground">
+              Features
+            </Link>
+            <Link href={`/${orgSlug}/roadmap`} className="font-medium">
+              Roadmap
+            </Link>
+            <Link href={`/${orgSlug}/changelog`} className="text-muted-foreground">
+              Changelog
+            </Link>
+          </nav>
+        </header>
+        <h2 className="text-xl font-semibold mb-6">Roadmap</h2>
+        <div className="text-center py-12 text-muted-foreground">
+          <p>No public boards available.</p>
+        </div>
+      </div>
+    )
+  }
 
   const { data: posts } = await supabase
     .from('posts')
     .select('*')
     .in('board_id', boardIds)
+    .eq('is_approved', true)
+    .is('merged_into_id', null)
     .in('status', ['open', 'planned', 'in_progress', 'shipped', 'closed'])
 
   const planned = posts?.filter((post) => post.status === 'planned') || []

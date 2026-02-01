@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,28 @@ type Post = {
   content: string
   status: string
   vote_count: number | null
+  created_at: string
+  guest_name: string | null
+  author_name: string | null
+  is_guest: boolean
+  is_pinned: boolean
+  widget_users?: {
+    avatar_url: string | null
+    name: string | null
+    email: string | null
+    user_source: string | null
+    company_name: string | null
+  } | null
+}
+
+function formatDate(dateString?: string | null): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 export default function PublicBoardPage({
@@ -37,24 +60,25 @@ export default function PublicBoardPage({
   const [org, setOrg] = useState<Org | null>(null)
   const [board, setBoard] = useState<Board | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
-  const [voterEmail, setVoterEmail] = useState('')
+  // Shared user identity for all actions
+  const [userEmail, setUserEmail] = useState('')
+  const [userName, setUserName] = useState('')
   const [loading, setLoading] = useState(true)
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
-  const [authorName, setAuthorName] = useState('')
-  const [authorEmail, setAuthorEmail] = useState('')
   const [submitLoading, setSubmitLoading] = useState(false)
   const [commentRefresh, setCommentRefresh] = useState(0)
   const [votingIds, setVotingIds] = useState<string[]>([])
   const [votedPostIds, setVotedPostIds] = useState<string[]>([])
 
   const fetchPosts = async (boardId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('posts')
-      .select('*')
+      .select('*, widget_users(avatar_url, name, email, user_source, company_name)')
       .eq('board_id', boardId)
       .eq('is_approved', true)
       .neq('status', 'merged')
+      .order('is_pinned', { ascending: false })
       .order('vote_count', { ascending: false })
 
     setPosts((data as Post[]) || [])
@@ -116,15 +140,15 @@ export default function PublicBoardPage({
   }, [params])
 
   useEffect(() => {
-    if (!voterEmail) {
+    if (!userEmail) {
       setVotedPostIds([])
       return
     }
-    fetchVoteStatuses(voterEmail, board?.id)
-  }, [voterEmail, board?.id])
+    fetchVoteStatuses(userEmail, board?.id)
+  }, [userEmail, board?.id])
 
   const handleVote = async (postId: string) => {
-    if (!voterEmail) {
+    if (!userEmail) {
       window.alert('Please enter your email before voting.')
       return
     }
@@ -136,7 +160,7 @@ export default function PublicBoardPage({
       const response = await fetch('/api/votes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId, voter_email: voterEmail }),
+        body: JSON.stringify({ post_id: postId, voter_email: userEmail, voter_name: userName || null }),
       })
 
       if (!response.ok) {
@@ -150,7 +174,7 @@ export default function PublicBoardPage({
       if (board?.id) {
         await fetchPosts(board.id)
       }
-      await fetchVoteStatuses(voterEmail, board?.id)
+      await fetchVoteStatuses(userEmail, board?.id)
     } finally {
       setVotingIds((prev) => prev.filter((id) => id !== postId))
     }
@@ -160,6 +184,10 @@ export default function PublicBoardPage({
     e.preventDefault()
     if (!board?.id) return
     if (!newTitle.trim()) return
+    if (!userEmail.trim()) {
+      window.alert('Please enter your email to submit feedback.')
+      return
+    }
     setSubmitLoading(true)
 
     await fetch('/api/posts', {
@@ -169,15 +197,14 @@ export default function PublicBoardPage({
         board_id: board.id,
         title: newTitle,
         content: newContent,
-        author_name: authorName,
-        author_email: authorEmail,
+        guest_name: userName || null,
+        guest_email: userEmail,
+        is_guest: true,
       }),
     })
 
     setNewTitle('')
     setNewContent('')
-    setAuthorName('')
-    setAuthorEmail('')
     await fetchPosts(board.id)
     setSubmitLoading(false)
   }
@@ -193,19 +220,38 @@ export default function PublicBoardPage({
         <h1 className="text-2xl font-bold">{board?.name}</h1>
       </div>
 
-      <div className="border p-4 rounded mb-8 max-w-2xl">
+      {/* User identity section - shared across all actions */}
+      <div className="border p-4 rounded max-w-2xl bg-muted/30">
+        <h3 className="font-semibold mb-3">Your Information</h3>
+        <p className="text-sm text-muted-foreground mb-3">
+          Enter your email to vote, comment, and submit feedback.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="userEmail">Email (Required)</Label>
+            <Input
+              id="userEmail"
+              type="email"
+              placeholder="you@example.com"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="userName">Name (Optional)</Label>
+            <Input
+              id="userName"
+              placeholder="Your name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="border p-4 rounded max-w-2xl">
         <h3 className="font-semibold mb-4">Submit Feedback</h3>
         <form onSubmit={handleSubmitPost} className="space-y-3">
-          <Input
-            placeholder="Your name (optional)"
-            value={authorName}
-            onChange={(e) => setAuthorName(e.target.value)}
-          />
-          <Input
-            placeholder="Your email (optional)"
-            value={authorEmail}
-            onChange={(e) => setAuthorEmail(e.target.value)}
-          />
           <Input
             placeholder="Feedback title"
             value={newTitle}
@@ -217,18 +263,10 @@ export default function PublicBoardPage({
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}
           />
-          <Button type="submit" disabled={submitLoading || !newTitle.trim()}>
+          <Button type="submit" disabled={submitLoading || !newTitle.trim() || !userEmail.trim()}>
             {submitLoading ? 'Submitting...' : 'Submit Feedback'}
           </Button>
         </form>
-      </div>
-
-      <div className="max-w-md">
-        <Input
-          placeholder="Your email"
-          value={voterEmail}
-          onChange={(e) => setVoterEmail(e.target.value)}
-        />
       </div>
 
       <div className="space-y-4">
@@ -247,8 +285,39 @@ export default function PublicBoardPage({
                   {post.vote_count ?? 0}
                 </Button>
                 <div className="flex-1">
+                  {post.is_pinned && (
+                    <Badge className="mb-1">Featured</Badge>
+                  )}
                   <div className="font-medium">{post.title}</div>
                   <p className="text-sm text-muted-foreground mt-1">{post.content}</p>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
+                    {post.widget_users?.avatar_url ? (
+                      <img
+                        src={post.widget_users.avatar_url}
+                        alt={post.widget_users.name || post.widget_users.email || 'User'}
+                        className="w-5 h-5 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[10px]">
+                        {(post.widget_users?.name || post.guest_name || post.author_name || 'G')[0].toUpperCase()}
+                      </div>
+                    )}
+                    <span>
+                      {post.widget_users?.name ||
+                        post.guest_name ||
+                        post.author_name ||
+                        'Anonymous'}
+                    </span>
+                    {post.widget_users?.user_source === 'verified_jwt' && (
+                      <Badge className="bg-green-100 text-green-700 text-[10px]">Verified</Badge>
+                    )}
+                    {post.widget_users?.company_name && (
+                      <Badge variant="secondary" className="text-[10px]">
+                        {post.widget_users.company_name}
+                      </Badge>
+                    )}
+                    <span>• {formatDate(post.created_at)}</span>
+                  </div>
                 </div>
                 <Badge variant="secondary">{post.status}</Badge>
               </Card>
@@ -259,16 +328,19 @@ export default function PublicBoardPage({
               </DialogHeader>
               <p className="text-sm text-gray-600">{post.content}</p>
               <p className="text-sm text-gray-500">
-                By {authorName || 'Anonymous'} • {post.vote_count ?? 0} votes
+                By {post.widget_users?.name ||
+                  post.guest_name ||
+                  post.author_name ||
+                  'Anonymous'} • {formatDate(post.created_at)} • {post.vote_count ?? 0} votes
               </p>
               <Separator className="my-4" />
               <h3 className="font-semibold">Comments</h3>
-              <CommentList postId={post.id} refreshTrigger={commentRefresh} />
+              <CommentList postId={post.id} refreshTrigger={commentRefresh} userEmail={userEmail} />
               <Separator className="my-4" />
               <CommentForm
                 postId={post.id}
-                authorEmail={authorEmail}
-                authorName={authorName}
+                authorEmail={userEmail}
+                authorName={userName}
                 onCommentAdded={() => setCommentRefresh((prev) => prev + 1)}
               />
             </DialogContent>

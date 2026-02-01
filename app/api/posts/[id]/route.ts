@@ -113,3 +113,33 @@ export async function PATCH(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const supabase = await createClient()
+    const { id } = await params
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Delete the post (cascades to votes and comments due to FK constraints)
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, message: 'Post deleted' })
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}

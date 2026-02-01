@@ -14,15 +14,32 @@ export async function GET(request: Request) {
   const supabase = await createClient()
   const { searchParams } = new URL(request.url)
   const orgId = searchParams.get('org_id')
+  const orgSlug = searchParams.get('org')
 
-  if (!orgId) {
-    return NextResponse.json({ error: 'org_id is required' }, { status: 400 })
+  // Support both org_id and org (slug) parameters
+  let resolvedOrgId = orgId
+
+  if (!orgId && orgSlug) {
+    // Look up org_id from slug
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('slug', orgSlug)
+      .single()
+
+    if (org) {
+      resolvedOrgId = org.id
+    }
+  }
+
+  if (!resolvedOrgId) {
+    return NextResponse.json({ error: 'org_id or org (slug) is required' }, { status: 400 })
   }
 
   const { data, error } = await supabase
     .from('widget_settings')
     .select('*')
-    .eq('org_id', orgId)
+    .eq('org_id', resolvedOrgId)
     .single()
 
   if (error && error.code !== 'PGRST116') {
@@ -33,7 +50,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       settings: {
         ...defaultSettings,
-        org_id: orgId,
+        org_id: resolvedOrgId,
       },
     })
   }

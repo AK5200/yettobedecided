@@ -67,7 +67,7 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const { name, slug, description, is_public, is_archived } = body
+    const { name, slug, description, is_public, is_archived, allow_comments, allow_voting, require_approval } = body
 
     // Build update object with only provided fields
     const updates: Record<string, any> = { updated_at: new Date().toISOString() }
@@ -76,6 +76,9 @@ export async function PATCH(
     if (description !== undefined) updates.description = description
     if (is_public !== undefined) updates.is_public = is_public
     if (is_archived !== undefined) updates.is_archived = is_archived
+    if (allow_comments !== undefined) updates.allow_comments = allow_comments
+    if (allow_voting !== undefined) updates.allow_voting = allow_voting
+    if (require_approval !== undefined) updates.require_approval = require_approval
 
     // If slug is being updated, check if it's unique within org
     if (slug !== undefined && slug !== board.slug) {

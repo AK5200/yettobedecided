@@ -44,6 +44,9 @@ export interface Post {
   is_guest: boolean
   guest_name: string | null
   guest_email: string | null
+  identified_user_id: string | null
+  identified_user_avatar: string | null
+  user_source: 'guest' | 'identified' | 'verified_sso'
   linear_issue_id: string | null
   linear_issue_url: string | null
   is_approved: boolean
@@ -67,6 +70,9 @@ export interface Comment {
   content: string
   author_email: string | null
   author_name: string | null
+  identified_user_id: string | null
+  identified_user_avatar: string | null
+  user_source: 'guest' | 'identified' | 'verified_sso'
   is_from_admin: boolean
   is_internal: boolean
   created_at: string

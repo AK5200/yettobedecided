@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acme SaaS - Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f3f4f6;
+      min-height: 100vh;
+    }
+    
+    /* Simulated SaaS App Navigation */
+    .app-nav {
+      background: #1f2937;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .app-logo {
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .app-logo span { color: #60a5fa; }
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+    .nav-links a {
+      color: #9ca3af;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: white; }
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #4f46e5;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .user-name {
+      color: white;
+      font-size: 14px;
+    }
+    
+    /* Main Content */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+    
+    /* Test Control Panel (for demo) */
+    .test-panel {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      color: white;
+    }
+    .test-panel h2 {
+      margin-bottom: 5px;
+      font-size: 18px;
+    }
+    .test-panel p {
+      opacity: 0.8;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .test-modes {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .mode-btn {
+      padding: 12px 24px;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-btn:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.5);
+    }
+    .mode-btn.active {
+      background: white;
+      color: #4f46e5;
+      border-color: white;
+    }
+    .mode-desc {
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+    
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      color: #1f2937;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+    
+    /* Feedback Button */
+    .feedback-trigger {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #4f46e5;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      z-index: 1000;
+    }
+    .feedback-trigger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+    }
+    .feedback-trigger svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    /* Widget Container (for embedded mode) */
+    .widget-container {
+      border: 2px dashed #e5e7eb;
+      border-radius: 12px;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .widget-placeholder {
+      text-align: center;
+      color: #9ca3af;
+    }
+    .widget-placeholder svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 10px;
+      opacity: 0.5;
+    }
+    
+    /* Status Panel */
+    .status-panel {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-label { color: #6b7280; }
+    .status-value { color: #1f2937; font-weight: 500; }
+    .status-value.success { color: #10b981; }
+    .status-value.warning { color: #f59e0b; }
+    .status-value.error { color: #ef4444; }
+    
+    /* Code Display */
+    .code-block {
+      background: #1f2937;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      color: #e5e7eb;
+      font-size: 12px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    .code-block .comment { color: #6b7280; }
+    .code-block .string { color: #a5b4fc; }
+    .code-block .keyword { color: #f472b6; }
+  </style>
+</head>
+<body>
+  <!-- Simulated SaaS App Navigation -->
+  <nav class="app-nav">
+    <div class="app-logo">
+      <span>⚡</span> Acme<span>SaaS</span>
+    </div>
+    <div class="nav-links">
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Projects</a>
+      <a href="#">Analytics</a>
+      <a href="#">Settings</a>
+    </div>
+    <div class="user-menu">
+      <span class="user-name" id="displayUserName">John Smith</span>
+      <div class="user-avatar" id="displayUserAvatar">JS</div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <!-- Test Control Panel -->
+    <div class="test-panel">
+      <h2>🧪 FeedbackHub Integration Test</h2>
+      <p>This simulates your SaaS app. Choose how you want to identify users to FeedbackHub:</p>
+      
+      <div class="test-modes">
+        <button class="mode-btn" data-mode="guest" onclick="setMode('guest')">
+          👤 Guest Mode
+        </button>
+        <button class="mode-btn" data-mode="trust" onclick="setMode('trust')">
+          🤝 Trust Mode
+        </button>
+        <button class="mode-btn active" data-mode="jwt" onclick="setMode('jwt')">
+          🔐 JWT Mode
+        </button>
+      </div>
+      
+      <div class="mode-desc" id="modeDescription">
+        <strong>JWT Mode:</strong> Your server generates a signed token. FeedbackHub verifies it. 
+        User gets a ✓ verified badge. Most secure option.
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Widget Area -->
+      <div class="card">
+        <h3>📋 Feedback Widget</h3>
+        <div class="widget-container" id="feedbackhub-widget">
+          <div class="widget-placeholder">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <p>FeedbackHub widget will load here</p>
+            <p style="font-size: 12px; margin-top: 5px;">Configure your settings below</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuration & Status -->
+      <div>
+        <div class="card">
+          <h3>⚙️ Configuration</h3>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 5px;">FeedbackHub URL</label>
+            <input type="text" id="configUrl" value="http://localhost:3000" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 5px;">Workspace Slug</label>
+            <input type="text" id="configWorkspace" value="test-company" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 5px;">Board ID</label>
+            <input type="text" id="configBoard" value="YOUR_BOARD_ID" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px;">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 5px;">SSO Secret (for JWT mode)</label>
+            <input type="password" id="configSecret" value="your_sso_secret_key_here" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px;">
+          </div>
+          <button onclick="initWidget()" style="width: 100%; padding: 10px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;">
+            🚀 Initialize Widget
+          </button>
+        </div>
+        
+        <div class="card" style="margin-top: 20px;">
+          <h3>📊 Current State</h3>
+          <div class="status-panel">
+            <div class="status-row">
+              <span class="status-label">Mode</span>
+              <span class="status-value" id="statusMode">JWT</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Widget Loaded</span>
+              <span class="status-value" id="statusLoaded">No</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">User Identified</span>
+              <span class="status-value" id="statusIdentified">No</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">User ID</span>
+              <span class="status-value" id="statusUserId">-</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Source</span>
+              <span class="status-value" id="statusSource">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Code Examples -->
+    <div class="card" style="margin-top: 20px;">
+      <h3>💻 Integration Code</h3>
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">
+        This is the code your customers would add to their site:
+      </p>
+      <div class="code-block">
+        <pre id="codeExample"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Button (floating) -->
+  <button class="feedback-trigger" id="feedbackBtn" onclick="openFeedback()">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+    Give Feedback
+  </button>
+
+  <!-- Jose library for JWT generation (demo only - in production, do this server-side!) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jose/4.15.4/index.umd.min.js"></script>
+  
+  <script>
+    // ===========================================
+    // SIMULATED USER DATA (from your auth system)
+    // In a real app, this comes from your session/database
+    // ===========================================
+    const CURRENT_USER = {
+      id: 'user_12345',
+      email: 'john.smith@acmecorp.com',
+      name: 'John Smith',
+      avatar: 'https://i.pravatar.cc/150?u=john.smith',
+      plan: 'pro',
+      company: {
+        id: 'company_789',
+        name: 'Acme Corporation',
+        plan: 'enterprise',
+        mrr: 2500
+      }
+    };
+
+    // Current mode
+    let currentMode = 'jwt';
+    
+    // ===========================================
+    // MODE DESCRIPTIONS
+    // ===========================================
+    const MODE_INFO = {
+      guest: {
+        desc: `<strong>Guest Mode:</strong> Users post anonymously or enter their email manually. 
+               No user data is passed from your app. Simplest setup.`,
+        code: (config) => `<!-- FeedbackHub Widget - Guest Mode -->
+<script>
+  !function(f,e,d,b,a,c,k){if(!f.FeedbackHub){
+    c=e.createElement(d);c.async=1;c.src=b;
+    k=e.getElementsByTagName(d)[0];k.parentNode.insertBefore(c,k);
+    f.FeedbackHub=function(){(f.FeedbackHub.q=f.FeedbackHub.q||[]).push(arguments)};
+  }}(window,document,"script","${config.url}/widget.js");
+
+  FeedbackHub('init', {
+    workspace: '${config.workspace}',
+    boardId: '${config.board}'
+  });
+<\/script>`
+      },
+      trust: {
+        desc: `<strong>Trust Mode:</strong> Pass user data directly from your frontend. 
+               Quick to implement but not verified. User appears with name/avatar but no verified badge.`,
+        code: (config) => `<!-- FeedbackHub Widget - Trust Mode -->
+<script>
+  !function(f,e,d,b,a,c,k){if(!f.FeedbackHub){
+    c=e.createElement(d);c.async=1;c.src=b;
+    k=e.getElementsByTagName(d)[0];k.parentNode.insertBefore(c,k);
+    f.FeedbackHub=function(){(f.FeedbackHub.q=f.FeedbackHub.q||[]).push(arguments)};
+  }}(window,document,"script","${config.url}/widget.js");
+
+  FeedbackHub('init', {
+    workspace: '${config.workspace}',
+    boardId: '${config.board}'
+  });
+
+  // Identify your logged-in user (from your session)
+  FeedbackHub('identify', {
+    id: '${CURRENT_USER.id}',
+    email: '${CURRENT_USER.email}',
+    name: '${CURRENT_USER.name}',
+    avatar: '${CURRENT_USER.avatar}',
+    plan: '${CURRENT_USER.plan}',
+    company: {
+      id: '${CURRENT_USER.company.id}',
+      name: '${CURRENT_USER.company.name}'
+    }
+  });
+<\/script>`
+      },
+      jwt: {
+        desc: `<strong>JWT Mode:</strong> Your server generates a signed token. 
+               FeedbackHub verifies the signature. User gets a ✓ verified badge. Most secure.`,
+        code: (config) => `<!-- FeedbackHub Widget - JWT Mode (Secure) -->
+
+<!-- Step 1: Your backend generates a JWT token -->
+<!-- Server-side (Node.js example):
+const jwt = require('jsonwebtoken');
+const token = jwt.sign({
+  sub: user.id,
+  email: user.email,
+  name: user.name,
+  avatar: user.avatar,
+  company: { id: company.id, name: company.name }
+}, process.env.FEEDBACKHUB_SSO_SECRET, { algorithm: 'HS256' });
+-->
+
+<!-- Step 2: Pass the token to your frontend and init widget -->
+<script>
+  !function(f,e,d,b,a,c,k){if(!f.FeedbackHub){
+    c=e.createElement(d);c.async=1;c.src=b;
+    k=e.getElementsByTagName(d)[0];k.parentNode.insertBefore(c,k);
+    f.FeedbackHub=function(){(f.FeedbackHub.q=f.FeedbackHub.q||[]).push(arguments)};
+  }}(window,document,"script","${config.url}/widget.js");
+
+  FeedbackHub('init', {
+    workspace: '${config.workspace}',
+    boardId: '${config.board}'
+  });
+
+  // Identify user with server-generated JWT
+  FeedbackHub('identify', {
+    ssoToken: '{{ JWT_TOKEN_FROM_SERVER }}'
+  });
+<\/script>`
+      }
+    };
+    
+    // ===========================================
+    // UI FUNCTIONS
+    // ===========================================
+    
+    function setMode(mode) {
+      currentMode = mode;
+      
+      // Update button states
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+      
+      // Update description
+      document.getElementById('modeDescription').innerHTML = MODE_INFO[mode].desc;
+      
+      // Update status
+      document.getElementById('statusMode').textContent = mode.toUpperCase();
+      
+      // Update code example
+      updateCodeExample();
+      
+      // Re-init widget if already loaded
+      if (window.FeedbackHub) {
+        initWidget();
+      }
+    }
+    
+    function updateCodeExample() {
+      const config = {
+        url: document.getElementById('configUrl').value,
+        workspace: document.getElementById('configWorkspace').value,
+        board: document.getElementById('configBoard').value
+      };
+      
+      document.getElementById('codeExample').innerHTML = MODE_INFO[currentMode].code(config)
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/(\/\/.*)/g, '<span class="comment">$1</span>')
+        .replace(/('.*?')/g, '<span class="string">$1</span>');
+    }
+    
+    // ===========================================
+    // WIDGET INITIALIZATION
+    // ===========================================
+    
+    async function initWidget() {
+      const config = {
+        url: document.getElementById('configUrl').value,
+        workspace: document.getElementById('configWorkspace').value,
+        board: document.getElementById('configBoard').value,
+        secret: document.getElementById('configSecret').value
+      };
+      
+      // Update code example
+      updateCodeExample();
+      
+      // Reset status
+      document.getElementById('statusLoaded').textContent = 'Loading...';
+      document.getElementById('statusLoaded').className = 'status-value warning';
+      
+      // For demo: simulate widget SDK behavior
+      // In reality, this would load from your FeedbackHub instance
+      
+      try {
+        // Simulate SDK loading
+        window.FeedbackHub = createMockSDK(config);
+        
+        // Initialize
+        FeedbackHub('init', {
+          workspace: config.workspace,
+          boardId: config.board
+        });
+        
+        // Handle identification based on mode
+        if (currentMode === 'trust') {
+          // Trust mode: pass user data directly
+          FeedbackHub('identify', {
+            id: CURRENT_USER.id,
+            email: CURRENT_USER.email,
+            name: CURRENT_USER.name,
+            avatar: CURRENT_USER.avatar,
+            plan: CURRENT_USER.plan,
+            company: CURRENT_USER.company
+          });
+        } else if (currentMode === 'jwt') {
+          // JWT mode: generate token (normally done server-side!)
+          const token = await generateJWT(CURRENT_USER, config.secret);
+          FeedbackHub('identify', {
+            ssoToken: token
+          });
+        }
+        // Guest mode: no identification
+        
+        document.getElementById('statusLoaded').textContent = 'Yes ✓';
+        document.getElementById('statusLoaded').className = 'status-value success';
+        
+      } catch (error) {
+        console.error('Widget init failed:', error);
+        document.getElementById('statusLoaded').textContent = 'Error';
+        document.getElementById('statusLoaded').className = 'status-value error';
+      }
+    }
+    
+    // ===========================================
+    // MOCK SDK (for demo purposes)
+    // Replace with actual FeedbackHub SDK behavior
+    // ===========================================
+    
+    function createMockSDK(config) {
+      let identifiedUser = null;
+      
+      const sdk = function(action, data) {
+        console.log(`FeedbackHub('${action}',`, data, ')');
+        
+        switch(action) {
+          case 'init':
+            console.log('✅ Widget initialized for workspace:', data.workspace);
+            renderWidgetUI(config, null);
+            break;
+            
+          case 'identify':
+            if (data.ssoToken) {
+              // JWT mode - decode token (in real SDK, this would verify with server)
+              try {
+                const parts = data.ssoToken.split('.');
+                const payload = JSON.parse(atob(parts[1]));
+                identifiedUser = {
+                  id: payload.sub,
+                  email: payload.email,
+                  name: payload.name,
+                  avatar: payload.avatar,
+                  company: payload.company,
+                  source: 'verified_jwt'
+                };
+                console.log('✅ User identified via JWT:', identifiedUser);
+              } catch (e) {
+                console.error('Invalid JWT token');
+              }
+            } else {
+              // Trust mode - use provided data directly
+              identifiedUser = {
+                ...data,
+                source: 'trust'
+              };
+              console.log('✅ User identified via Trust mode:', identifiedUser);
+            }
+            
+            // Update status
+            document.getElementById('statusIdentified').textContent = 'Yes ✓';
+            document.getElementById('statusIdentified').className = 'status-value success';
+            document.getElementById('statusUserId').textContent = identifiedUser.id;
+            document.getElementById('statusSource').textContent = identifiedUser.source;
+            
+            renderWidgetUI(config, identifiedUser);
+            break;
+            
+          case 'clearIdentity':
+            identifiedUser = null;
+            document.getElementById('statusIdentified').textContent = 'No';
+            document.getElementById('statusIdentified').className = 'status-value';
+            document.getElementById('statusUserId').textContent = '-';
+            document.getElementById('statusSource').textContent = '-';
+            renderWidgetUI(config, null);
+            break;
+            
+          case 'open':
+            console.log('Opening feedback modal...');
+            break;
+        }
+      };
+      
+      sdk.getUser = () => identifiedUser;
+      sdk.isIdentified = () => identifiedUser !== null;
+      
+      return sdk;
+    }
+    
+    function renderWidgetUI(config, user) {
+      const container = document.getElementById('feedbackhub-widget');
+      
+      const userHtml = user ? `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px; background: #f0fdf4; border-radius: 8px;">
+          <img src="${user.avatar || 'https://i.pravatar.cc/40'}" style="width: 40px; height: 40px; border-radius: 50%;">
+          <div>
+            <div style="font-weight: 500; color: #1f2937;">
+              ${user.name}
+              ${user.source === 'verified_jwt' ? '<span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 5px;">✓ Verified</span>' : ''}
+            </div>
+            <div style="font-size: 12px; color: #6b7280;">${user.email}</div>
+          </div>
+        </div>
+      ` : `
+        <div style="margin-bottom: 15px; padding: 10px; background: #f3f4f6; border-radius: 8px;">
+          <div style="font-size: 13px; color: #6b7280;">👤 Posting as Guest</div>
+        </div>
+      `;
+      
+      container.innerHTML = `
+        <div style="width: 100%; padding: 20px;">
+          ${userHtml}
+          <div style="margin-bottom: 15px;">
+            <input type="text" placeholder="Feature title..." style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-bottom: 10px;">
+            <textarea placeholder="Describe your idea..." rows="4" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+          </div>
+          <button onclick="submitFeedback()" style="width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+            Submit Feedback
+          </button>
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <div style="font-size: 13px; color: #6b7280; margin-bottom: 10px;">Recent posts</div>
+            <div style="background: #f9fafb; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+              <div style="font-size: 14px; color: #1f2937;">Dark mode support</div>
+              <div style="font-size: 12px; color: #6b7280;">12 votes · 3 comments</div>
+            </div>
+            <div style="background: #f9fafb; padding: 10px; border-radius: 6px;">
+              <div style="font-size: 14px; color: #1f2937;">API rate limit increase</div>
+              <div style="font-size: 12px; color: #6b7280;">8 votes · 1 comment</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // ===========================================
+    // JWT GENERATION (demo only - do server-side!)
+    // ===========================================
+    
+    async function generateJWT(user, secret) {
+      const payload = {
+        sub: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar,
+        plan: user.plan,
+        company: user.company
+      };
+      
+      const secretKey = new TextEncoder().encode(secret);
+      
+      const token = await new jose.SignJWT(payload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime('24h')
+        .sign(secretKey);
+      
+      console.log('Generated JWT:', token);
+      return token;
+    }
+    
+    // ===========================================
+    // FEEDBACK SUBMISSION (demo)
+    // ===========================================
+    
+    async function submitFeedback() {
+      const config = {
+        url: document.getElementById('configUrl').value,
+        workspace: document.getElementById('configWorkspace').value,
+        board: document.getElementById('configBoard').value
+      };
+      
+      const user = window.FeedbackHub?.getUser?.();
+      
+      const payload = {
+        org_slug: config.workspace,
+        board_id: config.board,
+        title: document.querySelector('#feedbackhub-widget input')?.value || 'Test feedback',
+        content: document.querySelector('#feedbackhub-widget textarea')?.value || 'Test description',
+        // This is how user identity is passed to the API
+        identified_user: user ? {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          avatar: user.avatar,
+          source: user.source,
+          token: user.source === 'verified_jwt' ? 'JWT_TOKEN_HERE' : undefined
+        } : null
+      };
+      
+      console.log('📤 Submitting feedback:', payload);
+      
+      try {
+        const response = await fetch(`${config.url}/api/widget/feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        console.log('✅ Feedback submitted:', result);
+        alert('Feedback submitted! Check console for details.');
+      } catch (error) {
+        console.error('❌ Submit failed:', error);
+        alert('Failed to submit. Check console for details.\n\nMake sure FeedbackHub is running at ' + config.url);
+      }
+    }
+    
+    function openFeedback() {
+      if (window.FeedbackHub) {
+        FeedbackHub('open');
+      }
+    }
+    
+    // ===========================================
+    // INITIALIZE
+    // ===========================================
+    
+    // Set initial mode
+    setMode('jwt');
+    updateCodeExample();
+    
+    // Update user display
+    document.getElementById('displayUserName').textContent = CURRENT_USER.name;
+    document.getElementById('displayUserAvatar').textContent = CURRENT_USER.name.split(' ').map(n => n[0]).join('');
+  </script>
+</body>
+</html>

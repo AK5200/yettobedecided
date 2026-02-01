@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Lock, Globe } from 'lucide-react'
 
@@ -24,38 +26,81 @@ export function CommentForm({
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const [isInternal, setIsInternal] = useState(false)
+  // Local email/name state for when not provided via props
+  const [localEmail, setLocalEmail] = useState('')
+  const [localName, setLocalName] = useState('')
+
+  // Use props if provided, otherwise use local state
+  const effectiveEmail = authorEmail || localEmail
+  const effectiveName = authorName || localName
+  const showEmailFields = !isAdmin && !authorEmail
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!content.trim()) return
+    if (!effectiveEmail.trim()) {
+      window.alert('Please enter your email to comment.')
+      return
+    }
     setLoading(true)
-    await fetch('/api/comments', {
+    const response = await fetch('/api/comments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         post_id: postId,
         content,
-        author_email: authorEmail,
-        author_name: authorName,
+        author_email: effectiveEmail,
+        author_name: effectiveName || null,
         is_from_admin: isAdmin || false,
         is_internal: isInternal,
       }),
     })
+
+    if (!response.ok) {
+      const data = await response.json()
+      window.alert(data.error || 'Failed to post comment')
+      setLoading(false)
+      return
+    }
+
     setContent('')
     onCommentAdded()
     setLoading(false)
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-3">
+      {showEmailFields && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label htmlFor={`comment-email-${postId}`}>Email (Required)</Label>
+            <Input
+              id={`comment-email-${postId}`}
+              type="email"
+              placeholder="you@example.com"
+              value={localEmail}
+              onChange={(e) => setLocalEmail(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor={`comment-name-${postId}`}>Name (Optional)</Label>
+            <Input
+              id={`comment-name-${postId}`}
+              placeholder="Your name"
+              value={localName}
+              onChange={(e) => setLocalName(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
       <Textarea
         value={content}
         onChange={(event) => setContent(event.target.value)}
         placeholder="Write a comment..."
-        className={`mb-2 ${isInternal ? 'border-yellow-400 bg-yellow-50' : ''}`}
+        className={isInternal ? 'border-yellow-400 bg-yellow-50' : ''}
       />
       <div className="flex items-center justify-between">
-        <Button type="submit" disabled={loading || !content.trim()}>
+        <Button type="submit" disabled={loading || !content.trim() || !effectiveEmail.trim()}>
           {loading ? 'Posting...' : 'Post Comment'}
         </Button>
         {isAdmin && (

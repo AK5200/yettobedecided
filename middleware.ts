@@ -1,8 +1,33 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { handleOptions, isOriginAllowed, corsHeaders } from '@/lib/cors'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  const origin = request.headers.get('origin')
+  const pathname = request.nextUrl.pathname
+
+  // Handle CORS preflight requests for widget API routes and health check
+  if (request.method === 'OPTIONS' && 
+      (pathname.startsWith('/api/widget') || 
+       pathname.startsWith('/widget') || 
+       pathname === '/api/health')) {
+    return handleOptions(request)
+  }
+
+  // Process Supabase session update
+  const response = await updateSession(request)
+
+  // Add CORS headers for widget API routes and health check
+  if (pathname.startsWith('/api/widget') || 
+      pathname.startsWith('/widget') || 
+      pathname === '/api/health') {
+    const headers = corsHeaders(origin)
+    Object.entries(headers).forEach(([key, value]) => {
+      response.headers.set(key, value)
+    })
+  }
+
+  return response
 }
 
 export const config = {
