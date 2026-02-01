@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/dashboard/sidebar'
 
@@ -16,6 +17,11 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
+  // Get current path to check if we're already on onboarding
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
+  const isOnboarding = pathname.includes('/onboarding')
+
   // Check for organization membership with error handling
   const { data: memberships, error } = await supabase
     .from('org_members')
@@ -24,8 +30,8 @@ export default async function DashboardLayout({
     .limit(1)
 
   // If there's an error (e.g., RLS policy issue) or no memberships, redirect to onboarding
-  // The onboarding layout will handle the case where user already has an org (won't redirect back)
-  if (error || !memberships || memberships.length === 0) {
+  // Skip redirect if already on onboarding to prevent infinite loop
+  if (!isOnboarding && (error || !memberships || memberships.length === 0)) {
     redirect('/onboarding')
   }
 
