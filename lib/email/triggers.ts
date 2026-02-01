@@ -1,9 +1,17 @@
 import { Resend } from 'resend';
 import { createClient } from '@/lib/supabase/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient(): Resend | null {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+        return null;
+    }
+    return new Resend(apiKey);
+}
 
 export async function triggerNewPostEmail(postId: string) {
+    const resend = getResendClient();
+    if (!resend) return;
     const supabase = await createClient();
     const { data: post } = await supabase
         .from('posts')
@@ -35,6 +43,8 @@ export async function triggerNewPostEmail(postId: string) {
 }
 
 export async function triggerStatusChangeEmail(postId: string, oldStatus: string, newStatus: string) {
+    const resend = getResendClient();
+    if (!resend) return;
     const supabase = await createClient();
     const { data: post } = await supabase
         .from('posts')
@@ -62,6 +72,8 @@ export async function triggerStatusChangeEmail(postId: string, oldStatus: string
 }
 
 export async function triggerNewCommentEmail(postId: string, commentContent: string) {
+    const resend = getResendClient();
+    if (!resend) return;
     const supabase = await createClient();
     const { data: post } = await supabase
         .from('posts')
@@ -83,6 +95,8 @@ export async function triggerNewCommentEmail(postId: string, commentContent: str
 }
 
 export async function triggerPostMergedEmail(sourcePostId: string, targetPostId: string) {
+    const resend = getResendClient();
+    if (!resend) return;
     const supabase = await createClient();
     const { data: sourcePost } = await supabase
         .from('posts')
@@ -114,6 +128,8 @@ export async function triggerPostMergedEmail(sourcePostId: string, targetPostId:
 }
 
 export async function triggerInvitationEmail(email: string, token: string, inviterName?: string) {
+    const resend = getResendClient();
+    if (!resend) return;
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/accept-invite?token=${token}`;
 
     await resend.emails.send({
