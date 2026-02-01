@@ -38,7 +38,8 @@ export default function OnboardingPage() {
         return
       }
 
-      router.push('/dashboard')
+      // Use window.location for a full page reload to ensure organization is recognized
+      window.location.href = '/dashboard'
     } catch (err) {
       setError('Something went wrong')
       setLoading(false)
