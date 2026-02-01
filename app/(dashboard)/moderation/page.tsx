@@ -83,7 +83,7 @@ export default function ModerationPage() {
         .order('created_at', { ascending: false })
 
       setPendingPosts(
-        (posts || []).map(p => ({
+        (posts || []).map((p: any) => ({
           ...p,
           board: { name: (p.boards as any)?.name || 'Unknown' }
         }))
@@ -104,7 +104,7 @@ export default function ModerationPage() {
           .order('created_at', { ascending: false })
 
         setPendingComments(
-          (comments || []).map(c => ({
+          (comments || []).map((c: any) => ({
             ...c,
             post: { title: (c.posts as any)?.title || 'Unknown' }
           }))
