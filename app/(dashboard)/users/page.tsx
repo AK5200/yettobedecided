@@ -66,7 +66,7 @@ export default function UsersPage() {
       return
     }
 
-    const orgIds = (memberships || []).map((member) => member.org_id)
+    const orgIds = (memberships || []).map((member: { org_id: string }) => member.org_id)
     if (orgIds.length === 0) {
       setLoading(false)
       return
