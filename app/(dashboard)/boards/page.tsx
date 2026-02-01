@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { BoardsList } from '@/components/boards/boards-list'
 
 export default async function BoardsPage() {
@@ -8,17 +9,17 @@ export default async function BoardsPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return <div>Please log in</div>
+    redirect('/login')
   }
 
   const { data: membership } = await supabase
     .from('org_members')
     .select('org_id')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
-    return <div>No organization found</div>
+    redirect('/onboarding')
   }
 
   const { data: activeBoards } = await supabase

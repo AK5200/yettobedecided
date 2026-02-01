@@ -60,11 +60,16 @@ export function Sidebar() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: membership } = await supabase
+      const { data: membership, error } = await supabase
         .from('org_members')
         .select('organizations(id, name, slug)')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
+
+      if (error) {
+        console.error('Failed to fetch organization:', error)
+        return
+      }
 
       if (membership?.organizations) {
         const orgData = membership.organizations as unknown as Organization

@@ -53,21 +53,32 @@ export default function ChangelogPage() {
   const fetchEntries = async () => {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) {
+      setLoading(false)
+      return
+    }
 
-    const { data: membership } = await supabase
+    const { data: membership, error: membershipError } = await supabase
       .from('org_members')
       .select('org_id')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (!membership) return
+    if (membershipError || !membership) {
+      console.error('Failed to fetch organization membership:', membershipError)
+      setLoading(false)
+      return
+    }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('changelog_entries')
       .select('*')
       .eq('org_id', membership.org_id)
       .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Failed to fetch changelog entries:', error)
+    }
 
     setEntries(data || [])
     setLoading(false)
