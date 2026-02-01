@@ -79,7 +79,7 @@ export default function ModerationPage() {
         .from('posts')
         .select('id, title, content, author_name, author_email, guest_name, guest_email, identified_user_avatar, user_source, created_at, boards!inner(name)')
         .eq('is_approved', false)
-        .in('board_id', boards.map(b => b.id))
+        .in('board_id', boards.map((b: { id: string }) => b.id))
         .order('created_at', { ascending: false })
 
       setPendingPosts(
@@ -93,14 +93,14 @@ export default function ModerationPage() {
       const { data: postIds } = await supabase
         .from('posts')
         .select('id')
-        .in('board_id', boards.map(b => b.id))
+        .in('board_id', boards.map((b: { id: string }) => b.id))
 
       if (postIds && postIds.length > 0) {
         const { data: comments } = await supabase
           .from('comments')
           .select('id, content, author_name, author_email, identified_user_avatar, user_source, created_at, posts!inner(title)')
           .eq('is_approved', false)
-          .in('post_id', postIds.map(p => p.id))
+          .in('post_id', postIds.map((p: { id: string }) => p.id))
           .order('created_at', { ascending: false })
 
         setPendingComments(
