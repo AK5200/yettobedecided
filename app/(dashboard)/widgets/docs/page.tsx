@@ -340,7 +340,7 @@ if (window.FeedbackHub) {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Add the widget to your site</h3>
                 <p className="text-muted-foreground mb-3">
-                  Copy and paste this code snippet before the closing <code className="bg-muted px-1.5 py-0.5 rounded text-sm">&lt;/body&gt;</code> tag. The widget will automatically create a floating button:
+                  Copy and paste the script before the closing <code className="bg-muted px-1.5 py-0.5 rounded text-sm">&lt;/body&gt;</code> tag. Then add a data attribute to any element to trigger the changelog:
                 </p>
                 
                 <Card className="bg-[#1e1e1e] border-gray-800">
@@ -460,14 +460,22 @@ if (window.FeedbackHub) {
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold mb-2">Feedback Widget (Default)</h3>
-                <p className="text-muted-foreground mb-3">A floating button that opens a full-screen feedback interface.</p>
-                <Card className="bg-[#1e1e1e] border-gray-800">
+                <p className="text-muted-foreground mb-3">A floating button that opens a full-screen feedback interface. Or use a custom trigger.</p>
+                <Card className="bg-[#1e1e1e] border-gray-800 mb-4">
                   <div className="p-5 overflow-x-auto">
                     <pre className="text-sm text-gray-300 font-mono">
-                      <code>{`<script 
+                      <code>{`<!-- Default: Floating button (no trigger needed) -->
+<script 
   src="${baseUrl}/widget.js" 
   data-org="${orgSlug}"
-></script>`}</code>
+></script>
+
+<!-- Or use custom trigger (hides floating button) -->
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+></script>
+<button data-feedbackhub-feedback>Give Feedback</button>`}</code>
                     </pre>
                   </div>
                 </Card>
@@ -475,22 +483,28 @@ if (window.FeedbackHub) {
 
               <div>
                 <h3 className="text-xl font-semibold mb-2">Changelog Popup</h3>
-                <p className="text-muted-foreground mb-3">A modal popup showing your product changelog. Can be triggered by a custom button.</p>
-                <Card className="bg-[#1e1e1e] border-gray-800">
+                <p className="text-muted-foreground mb-3">A modal popup showing your product changelog. Can be triggered by a custom button or auto-open on homepage.</p>
+                <Card className="bg-[#1e1e1e] border-gray-800 mb-4">
                   <div className="p-5 overflow-x-auto">
                     <pre className="text-sm text-gray-300 font-mono">
-                      <code>{`<script 
+                      <code>{`<!-- 1. Add the script -->
+<script 
   src="${baseUrl}/widget.js" 
   data-org="${orgSlug}"
-  data-type="changelog-popup"
-  data-trigger="my-custom-button"
 ></script>
 
-<!-- Your custom trigger button -->
-<button id="my-custom-button">What's New</button>`}</code>
+<!-- 2. Add data attribute to any element (Supahub-style) -->
+<button data-feedbackhub-changelog-popup>What's New</button>
+<!-- or -->
+<a href="#" data-feedbackhub-changelog-popup>Changelog</a>
+<!-- or -->
+<div data-feedbackhub-changelog-popup style="cursor: pointer;">📢 Updates</div>`}</code>
                     </pre>
                   </div>
                 </Card>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Note:</strong> The widget automatically detects elements with <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-feedbackhub-changelog-popup</code> and attaches click handlers. No IDs needed!
+                </p>
               </div>
 
               <div>
@@ -499,13 +513,14 @@ if (window.FeedbackHub) {
                 <Card className="bg-[#1e1e1e] border-gray-800">
                   <div className="p-5 overflow-x-auto">
                     <pre className="text-sm text-gray-300 font-mono">
-                      <code>{`<button id="feedbackhub-changelog-trigger">What's New</button>
-
+                      <code>{`<!-- 1. Add the script -->
 <script 
   src="${baseUrl}/widget.js" 
   data-org="${orgSlug}"
-  data-type="changelog-dropdown"
-></script>`}</code>
+></script>
+
+<!-- 2. Add data attribute to any element -->
+<button data-feedbackhub-changelog-dropdown>What's New</button>`}</code>
                     </pre>
                   </div>
                 </Card>

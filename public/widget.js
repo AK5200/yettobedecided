@@ -91,6 +91,18 @@
     return {};
   }
 
+  // Find elements with data attributes for auto-trigger
+  function findDataAttributeTriggers() {
+    const triggers = {
+      changelogPopup: document.querySelectorAll('[data-feedbackhub-changelog-popup]'),
+      changelogDropdown: document.querySelectorAll('[data-feedbackhub-changelog-dropdown]'),
+      feedback: document.querySelectorAll('[data-feedbackhub-feedback]'),
+      allInOnePopup: document.querySelectorAll('[data-feedbackhub-all-in-one-popup]'),
+      allInOnePopover: document.querySelectorAll('[data-feedbackhub-all-in-one-popover]'),
+    };
+    return triggers;
+  }
+
   // Initialize widget based on type
   async function init() {
     const settings = await loadSettings();
@@ -101,7 +113,26 @@
     const position = settings.position || 'bottom-right';
     const showBranding = settings.show_branding !== false;
 
-    if (widgetType === 'changelog-popup') {
+    // Check for data attribute triggers first
+    const dataTriggers = findDataAttributeTriggers();
+    let hasDataTrigger = false;
+
+    if (dataTriggers.changelogPopup.length > 0) {
+      hasDataTrigger = true;
+      initChangelogPopup(settings, null, dataTriggers.changelogPopup);
+    } else if (dataTriggers.changelogDropdown.length > 0) {
+      hasDataTrigger = true;
+      initChangelogDropdown(settings, dataTriggers.changelogDropdown);
+    } else if (dataTriggers.allInOnePopup.length > 0) {
+      hasDataTrigger = true;
+      initAllInOnePopup(settings, dataTriggers.allInOnePopup);
+    } else if (dataTriggers.allInOnePopover.length > 0) {
+      hasDataTrigger = true;
+      initAllInOnePopover(settings, dataTriggers.allInOnePopover);
+    } else if (dataTriggers.feedback.length > 0) {
+      hasDataTrigger = true;
+      initFeedbackWidget(settings, accentColor, buttonText, position, dataTriggers.feedback);
+    } else if (widgetType === 'changelog-popup') {
       initChangelogPopup(settings, customTrigger);
     } else if (widgetType === 'changelog-dropdown') {
       initChangelogDropdown(settings);
@@ -115,22 +146,7 @@
     }
   }
 
-  function initFeedbackWidget(settings, accentColor, buttonText, position) {
-    // Create trigger button
-    const button = document.createElement('button');
-    button.innerHTML = '💬 ' + buttonText;
-
-    const posStyles = {
-      'bottom-right': 'bottom:20px;right:20px;',
-      'bottom-left': 'bottom:20px;left:20px;',
-      'top-right': 'top:20px;right:20px;',
-      'top-left': 'top:20px;left:20px;'
-    };
-
-    button.style.cssText = 'position:fixed;' + (posStyles[position] || posStyles['bottom-right']) + 'z-index:9998;padding:12px 20px;background:' + accentColor + ';color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:sans-serif;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,0.2);';
-    button.id = 'feedbackhub-trigger';
-    document.body.appendChild(button);
-
+  function initFeedbackWidget(settings, accentColor, buttonText, position, dataTriggerElements) {
     // Create iframe (hidden by default)
     const iframe = document.createElement('iframe');
     iframe.src = baseUrl + '/embed/widget?org=' + encodeURIComponent(org);
@@ -140,17 +156,45 @@
 
     function openWidget() {
       iframe.style.display = 'block';
-      button.style.display = 'none';
+      const button = document.getElementById('feedbackhub-trigger');
+      if (button) button.style.display = 'none';
       iframe.contentWindow.postMessage('open', '*');
     }
 
     function closeWidget() {
       iframe.style.display = 'none';
-      button.style.display = 'block';
+      const button = document.getElementById('feedbackhub-trigger');
+      if (button) button.style.display = 'block';
       iframe.contentWindow.postMessage('close', '*');
     }
 
-    button.addEventListener('click', openWidget);
+    // Data attribute trigger support (Supahub-style) - hide default button if custom triggers exist
+    if (dataTriggerElements && dataTriggerElements.length > 0) {
+      dataTriggerElements.forEach(function(el) {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          openWidget();
+        });
+      });
+      // Don't create default button if custom triggers exist
+    } else {
+      // Create default floating trigger button
+      const button = document.createElement('button');
+      button.innerHTML = '💬 ' + buttonText;
+
+      const posStyles = {
+        'bottom-right': 'bottom:20px;right:20px;',
+        'bottom-left': 'bottom:20px;left:20px;',
+        'top-right': 'top:20px;right:20px;',
+        'top-left': 'top:20px;left:20px;'
+      };
+
+      button.style.cssText = 'position:fixed;' + (posStyles[position] || posStyles['bottom-right']) + 'z-index:9998;padding:12px 20px;background:' + accentColor + ';color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:sans-serif;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,0.2);';
+      button.id = 'feedbackhub-trigger';
+      document.body.appendChild(button);
+      button.addEventListener('click', openWidget);
+    }
 
     window.addEventListener('message', function(e) {
       if (e.data === 'feedbackhub:close') {
@@ -164,7 +208,7 @@
     };
   }
 
-  function initChangelogPopup(settings, customTrigger) {
+  function initChangelogPopup(settings, customTrigger, dataTriggerElements) {
     let isOpen = false;
 
     // Create overlay
@@ -199,7 +243,18 @@
 
     overlay.addEventListener('click', closePopup);
 
-    // Custom trigger support
+    // Data attribute trigger support (Supahub-style)
+    if (dataTriggerElements && dataTriggerElements.length > 0) {
+      dataTriggerElements.forEach(function(el) {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          openPopup();
+        });
+      });
+    }
+
+    // Custom trigger support (ID-based, legacy)
     if (customTrigger) {
       const triggerEl = document.getElementById(customTrigger);
       if (triggerEl) {
@@ -256,13 +311,22 @@
     };
   }
 
-  function initChangelogDropdown(settings) {
-    const triggerId = 'feedbackhub-changelog-trigger';
-    const trigger = document.getElementById(triggerId);
-
-    if (!trigger) {
-      console.warn('FeedbackHub: Trigger element #' + triggerId + ' not found');
-      return;
+  function initChangelogDropdown(settings, dataTriggerElements) {
+    let triggers = [];
+    
+    // Data attribute trigger support (Supahub-style)
+    if (dataTriggerElements && dataTriggerElements.length > 0) {
+      triggers = Array.from(dataTriggerElements);
+    } else {
+      // Legacy: ID-based trigger
+      const triggerId = 'feedbackhub-changelog-trigger';
+      const trigger = document.getElementById(triggerId);
+      if (trigger) {
+        triggers = [trigger];
+      } else {
+        console.warn('FeedbackHub: No trigger element found. Add data-feedbackhub-changelog-dropdown to an element or use id="feedbackhub-changelog-trigger"');
+        return;
+      }
     }
 
     // Create dropdown container
@@ -278,15 +342,17 @@
     document.body.appendChild(dropdown);
 
     let isOpen = false;
+    let activeTrigger = null;
 
-    function positionDropdown() {
-      const rect = trigger.getBoundingClientRect();
+    function positionDropdown(triggerEl) {
+      const rect = triggerEl.getBoundingClientRect();
       dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
       dropdown.style.left = Math.max(8, rect.left + window.scrollX - 150) + 'px';
     }
 
-    function openDropdown() {
-      positionDropdown();
+    function openDropdown(triggerEl) {
+      activeTrigger = triggerEl;
+      positionDropdown(triggerEl);
       dropdown.style.display = 'block';
       isOpen = true;
     }
@@ -294,19 +360,24 @@
     function closeDropdown() {
       dropdown.style.display = 'none';
       isOpen = false;
+      activeTrigger = null;
     }
 
-    trigger.addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (isOpen) {
-        closeDropdown();
-      } else {
-        openDropdown();
-      }
+    // Attach click handlers to all triggers
+    triggers.forEach(function(trigger) {
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (isOpen && activeTrigger === trigger) {
+          closeDropdown();
+        } else {
+          openDropdown(trigger);
+        }
+      });
     });
 
     document.addEventListener('click', function(e) {
-      if (isOpen && !dropdown.contains(e.target) && e.target !== trigger) {
+      if (isOpen && !dropdown.contains(e.target) && !triggers.includes(e.target)) {
         closeDropdown();
       }
     });
@@ -317,7 +388,7 @@
     };
   }
 
-  function initAllInOnePopup(settings) {
+  function initAllInOnePopup(settings, dataTriggerElements) {
     let isOpen = false;
 
     // Create overlay
@@ -338,28 +409,42 @@
     iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);';
     container.appendChild(iframe);
 
-    // Create floating trigger button
-    const button = document.createElement('button');
-    button.innerHTML = '💬';
-    button.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9997;width:56px;height:56px;background:' + (settings.accent_color || '#7c3aed') + ';color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;';
-    button.id = 'feedbackhub-allinone-trigger';
-    document.body.appendChild(button);
-
     function openPopup() {
       overlay.style.display = 'block';
       container.style.display = 'block';
-      button.style.display = 'none';
+      const button = document.getElementById('feedbackhub-allinone-trigger');
+      if (button) button.style.display = 'none';
       isOpen = true;
     }
 
     function closePopup() {
       overlay.style.display = 'none';
       container.style.display = 'none';
-      button.style.display = 'flex';
+      const button = document.getElementById('feedbackhub-allinone-trigger');
+      if (button) button.style.display = 'flex';
       isOpen = false;
     }
 
-    button.addEventListener('click', openPopup);
+    // Data attribute trigger support (Supahub-style) - hide default button if custom triggers exist
+    if (dataTriggerElements && dataTriggerElements.length > 0) {
+      dataTriggerElements.forEach(function(el) {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          openPopup();
+        });
+      });
+      // Don't create default button if custom triggers exist
+    } else {
+      // Create floating trigger button
+      const button = document.createElement('button');
+      button.innerHTML = '💬';
+      button.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9997;width:56px;height:56px;background:' + (settings.accent_color || '#7c3aed') + ';color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;';
+      button.id = 'feedbackhub-allinone-trigger';
+      document.body.appendChild(button);
+      button.addEventListener('click', openPopup);
+    }
+
     overlay.addEventListener('click', closePopup);
 
     window.addEventListener('message', function(e) {
@@ -374,7 +459,7 @@
     };
   }
 
-  function initAllInOnePopover(settings) {
+  function initAllInOnePopover(settings, dataTriggerElements) {
     let isOpen = false;
 
     // Create popover container
@@ -389,32 +474,49 @@
     iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
     popover.appendChild(iframe);
 
-    // Create floating trigger button
-    const button = document.createElement('button');
-    button.innerHTML = '💬';
-    button.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9997;width:56px;height:56px;background:' + (settings.accent_color || '#7c3aed') + ';color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;';
-    button.id = 'feedbackhub-allinone-trigger';
-    document.body.appendChild(button);
-
     function openPopover() {
       popover.style.display = 'block';
-      button.innerHTML = '✕';
+      const button = document.getElementById('feedbackhub-allinone-trigger');
+      if (button) button.innerHTML = '✕';
       isOpen = true;
     }
 
     function closePopover() {
       popover.style.display = 'none';
-      button.innerHTML = '💬';
+      const button = document.getElementById('feedbackhub-allinone-trigger');
+      if (button) button.innerHTML = '💬';
       isOpen = false;
     }
 
-    button.addEventListener('click', function() {
-      if (isOpen) {
-        closePopover();
-      } else {
-        openPopover();
-      }
-    });
+    // Data attribute trigger support (Supahub-style) - hide default button if custom triggers exist
+    if (dataTriggerElements && dataTriggerElements.length > 0) {
+      dataTriggerElements.forEach(function(el) {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (isOpen) {
+            closePopover();
+          } else {
+            openPopover();
+          }
+        });
+      });
+      // Don't create default button if custom triggers exist
+    } else {
+      // Create floating trigger button
+      const button = document.createElement('button');
+      button.innerHTML = '💬';
+      button.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9997;width:56px;height:56px;background:' + (settings.accent_color || '#7c3aed') + ';color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;';
+      button.id = 'feedbackhub-allinone-trigger';
+      document.body.appendChild(button);
+      button.addEventListener('click', function() {
+        if (isOpen) {
+          closePopover();
+        } else {
+          openPopover();
+        }
+      });
+    }
 
     window.addEventListener('message', function(e) {
       if (e.data === 'feedbackhub:close') {
