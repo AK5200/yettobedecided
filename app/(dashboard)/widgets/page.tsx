@@ -40,6 +40,8 @@ export type WidgetSettings = {
   shadow: 'none' | 'small' | 'medium' | 'large'
   heading: string
   subheading: string
+  homepageUrl?: string
+  autoTriggerEnabled?: boolean
 }
 
 export type AnnouncementSettings = {
@@ -130,6 +132,8 @@ export default function WidgetsPage() {
         shadow: settings.shadow,
         heading: settings.heading,
         subheading: settings.subheading,
+        homepage_url: settings.homepageUrl || null,
+        auto_trigger_enabled: settings.autoTriggerEnabled || false,
       }
 
       const res = await fetch('/api/widget-settings', {
@@ -186,6 +190,8 @@ export default function WidgetsPage() {
                 shadow: data.settings.shadow || prev.shadow,
                 heading: data.settings.heading || prev.heading,
                 subheading: data.settings.subheading || prev.subheading,
+                homepageUrl: data.settings.homepage_url || prev.homepageUrl,
+                autoTriggerEnabled: data.settings.auto_trigger_enabled ?? prev.autoTriggerEnabled,
               }))
             }
           }

@@ -243,6 +243,12 @@ if (window.FeedbackHub) {
               <a href="#changelog-widget" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
                 Changelog Widget
               </a>
+              <a href="#custom-embeds" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                Custom Embeds
+              </a>
+              <a href="#auto-trigger" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                Auto-trigger
+              </a>
             </div>
             
             <div>
@@ -448,7 +454,7 @@ if (window.FeedbackHub) {
           <section id="widget-types" className="mb-16 scroll-mt-8">
             <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Widget Types</h2>
             <p className="text-muted-foreground mb-6">
-              FeedbackHub supports multiple widget types. Use the <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-type</code> attribute to specify which widget to load.
+              FeedbackHub supports multiple widget types. Use the <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-type</code> attribute to specify which widget to load. You can also embed custom buttons or divs that trigger the widgets.
             </p>
 
             <div className="space-y-6">

@@ -210,6 +210,39 @@
       }
     }
 
+    // Auto-trigger on homepage load
+    if (settings.auto_trigger_enabled && settings.homepage_url) {
+      const currentUrl = window.location.href;
+      const homepageUrl = settings.homepage_url.trim();
+      
+      // Normalize URLs for comparison (remove trailing slashes, protocol, etc.)
+      const normalizeUrl = (url) => {
+        try {
+          const urlObj = new URL(url);
+          return urlObj.origin + urlObj.pathname.replace(/\/$/, '') + urlObj.search;
+        } catch {
+          // If URL parsing fails, just normalize the string
+          return url.replace(/\/$/, '').toLowerCase();
+        }
+      };
+      
+      const currentNormalized = normalizeUrl(currentUrl);
+      const homepageNormalized = normalizeUrl(homepageUrl);
+      
+      // Check if current page matches homepage
+      if (currentNormalized === homepageNormalized || currentUrl === homepageUrl) {
+        // Check if we've already shown it in this session
+        const sessionKey = 'feedbackhub_changelog_shown_' + org;
+        if (!sessionStorage.getItem(sessionKey)) {
+          // Small delay to ensure page is fully loaded
+          setTimeout(() => {
+            openPopup();
+            sessionStorage.setItem(sessionKey, 'true');
+          }, 500);
+        }
+      }
+    }
+
     // Listen for messages from iframe
     window.addEventListener('message', function(e) {
       if (e.data === 'feedbackhub:close-changelog') {
