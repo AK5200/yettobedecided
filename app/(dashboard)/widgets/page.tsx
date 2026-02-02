@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Megaphone, MessageSquare, Map, Settings, Code, ExternalLink, Copy, Check, Database, Sparkles, Layers, Info, Globe, LayoutGrid } from 'lucide-react'
+import Link from 'next/link'
 import { ChangelogPopupPreview } from '@/components/widgets/changelog-popup-preview'
 import { ChangelogDropdownPreview } from '@/components/widgets/changelog-dropdown-preview'
 import { AnnouncementBannerPreview } from '@/components/widgets/announcement-banner-preview'
@@ -258,11 +259,19 @@ export default function WidgetsPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Widgets</h1>
-        <p className="text-muted-foreground mt-1">
-          Embed widgets on your website to engage users
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Widgets</h1>
+          <p className="text-muted-foreground mt-1">
+            Embed widgets on your website to engage users
+          </p>
+        </div>
+        <Link href="/widgets/docs" target="_blank">
+          <Button variant="outline">
+            <Code className="h-4 w-4 mr-2" />
+            View Documentation
+          </Button>
+        </Link>
       </div>
 
       {/* Dynamic Settings Info */}
