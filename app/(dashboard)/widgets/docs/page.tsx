@@ -52,16 +52,18 @@ export default function WidgetDocsPage() {
 
   const initCode = {
     html: `<!-- FeedbackHub Widget -->
-<script>
-  !function(f,e,d,b,a,c,k){if(!f.FeedbackHub){
-    c=e.createElement(d);c.async=1;c.src=b;
-    k=e.getElementsByTagName(d)[0];k.parentNode.insertBefore(c,k);
-    f.FeedbackHub=function(){(f.FeedbackHub.q=f.FeedbackHub.q||[]).push(arguments)};
-  }}(window,document,"script","${baseUrl}/widget.js");
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+></script>
 
-  // Initialize the widget
-  FeedbackHub('init', {
-    workspace: '${orgSlug}',  // That's all!
+<!-- Optional: Identify user (Trust Mode) -->
+<script>
+  FeedbackHub.identify({
+    id: 'user_123',
+    email: 'john@example.com',
+    name: 'John Smith',
+    avatar: 'https://...'
   });
 </script>`,
     react: `import { useEffect } from 'react';
@@ -71,11 +73,17 @@ export function FeedbackHubWidget() {
     // Load SDK
     const script = document.createElement('script');
     script.src = '${baseUrl}/widget.js';
+    script.setAttribute('data-org', '${orgSlug}');
     script.async = true;
     script.onload = () => {
-      window.FeedbackHub('init', {
-        workspace: '${orgSlug}',  // That's all!
-      });
+      // Optional: Identify user after SDK loads
+      if (window.FeedbackHub) {
+        window.FeedbackHub.identify({
+          id: 'user_123',
+          email: 'john@example.com',
+          name: 'John Smith'
+        });
+      }
     };
     document.head.appendChild(script);
     
@@ -90,25 +98,38 @@ import Script from 'next/script';
 
 export function FeedbackHubWidget() {
   return (
-    <Script
-      src="${baseUrl}/widget.js"
-      strategy="afterInteractive"
-      onLoad={() => {
-        window.FeedbackHub('init', {
-          workspace: '${orgSlug}',  // That's all!
-        });
-      }}
-    />
+    <>
+      <Script
+        src="${baseUrl}/widget.js"
+        data-org="${orgSlug}"
+        strategy="afterInteractive"
+        onLoad={() => {
+          // Optional: Identify user after SDK loads
+          if (window.FeedbackHub) {
+            window.FeedbackHub.identify({
+              id: 'user_123',
+              email: 'john@example.com',
+              name: 'John Smith'
+            });
+          }
+        }}
+      />
+    </>
   );
 }`
   }
 
-  const identifyCode = `// Identify the logged-in user
-FeedbackHub('identify', {
+  const identifyCode = `// Identify the logged-in user (Trust Mode)
+FeedbackHub.identify({
   id: 'user_123',          // Required: unique user ID
   email: 'john@example.com', // Required: user email
   name: 'John Smith',        // Optional: display name
   avatar: 'https://...',    // Optional: avatar URL
+  company: {                 // Optional: company data
+    id: 'company_456',
+    name: 'Acme Corp',
+    plan: 'enterprise'
+  }
 });`
 
   const jwtNodeCode = `const jwt = require('jsonwebtoken');
@@ -143,23 +164,31 @@ app.get('/api/feedbackhub-token', (req, res) => {
   res.json({ token });
 });`
 
-  const jwtFrontendCode = `// Initialize widget
-FeedbackHub('init', {
-  workspace: '${orgSlug}',  // That's all!
-});
+  const jwtFrontendCode = `<!-- Load widget SDK -->
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+></script>
 
+<script>
 // Fetch token from your server
 async function initFeedbackHub() {
   const response = await fetch('/api/feedbackhub-token');
   const { token } = await response.json();
   
   // Identify with JWT token
-  FeedbackHub('identify', {
-    ssoToken: token
+  FeedbackHub.identify({
+    token: token
   });
 }
 
-initFeedbackHub();`
+// Wait for SDK to load, then identify
+if (window.FeedbackHub) {
+  initFeedbackHub();
+} else {
+  window.addEventListener('load', initFeedbackHub);
+}
+</script>`
 
   return (
     <div className="min-h-screen bg-background">
@@ -205,6 +234,9 @@ initFeedbackHub();`
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3">
                 Widgets
               </div>
+              <a href="#widget-types" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                Widget Types
+              </a>
               <a href="#feedback-widget" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
                 Feedback Widget
               </a>
@@ -302,7 +334,7 @@ initFeedbackHub();`
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Add the widget to your site</h3>
                 <p className="text-muted-foreground mb-3">
-                  Copy and paste this code snippet before the closing <code className="bg-muted px-1.5 py-0.5 rounded text-sm">&lt;/body&gt;</code> tag:
+                  Copy and paste this code snippet before the closing <code className="bg-muted px-1.5 py-0.5 rounded text-sm">&lt;/body&gt;</code> tag. The widget will automatically create a floating button:
                 </p>
                 
                 <Card className="bg-[#1e1e1e] border-gray-800">
@@ -412,6 +444,103 @@ initFeedbackHub();`
 
           <hr className="my-12" />
 
+          {/* Widget Types */}
+          <section id="widget-types" className="mb-16 scroll-mt-8">
+            <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Widget Types</h2>
+            <p className="text-muted-foreground mb-6">
+              FeedbackHub supports multiple widget types. Use the <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-type</code> attribute to specify which widget to load.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Feedback Widget (Default)</h3>
+                <p className="text-muted-foreground mb-3">A floating button that opens a full-screen feedback interface.</p>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+></script>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Changelog Popup</h3>
+                <p className="text-muted-foreground mb-3">A modal popup showing your product changelog. Can be triggered by a custom button.</p>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+  data-trigger="my-custom-button"
+></script>
+
+<!-- Your custom trigger button -->
+<button id="my-custom-button">What's New</button>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Changelog Dropdown</h3>
+                <p className="text-muted-foreground mb-3">A dropdown panel attached to a button element.</p>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<button id="feedbackhub-changelog-trigger">What's New</button>
+
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-dropdown"
+></script>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold mb-2">All-in-One Popup</h3>
+                <p className="text-muted-foreground mb-3">Combines feedback board and changelog in a centered modal.</p>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="all-in-one-popup"
+></script>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold mb-2">All-in-One Popover</h3>
+                <p className="text-muted-foreground mb-3">Combines feedback board and changelog in a side panel.</p>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="all-in-one-popover"
+></script>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </section>
+
+          <hr className="my-12" />
+
           {/* Guest Mode */}
           <section id="guest-mode" className="mb-16 scroll-mt-8">
             <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Guest Mode</h2>
@@ -431,7 +560,7 @@ initFeedbackHub();`
 
             <h3 className="text-xl font-semibold mt-8 mb-3">Implementation</h3>
             <p className="text-muted-foreground mb-4">
-              Simply initialize the widget without calling <code className="bg-muted px-1.5 py-0.5 rounded text-sm">identify</code>:
+              Simply load the widget without calling <code className="bg-muted px-1.5 py-0.5 rounded text-sm">FeedbackHub.identify()</code>:
             </p>
 
             <Card className="bg-[#1e1e1e] border-gray-800">
@@ -440,7 +569,10 @@ initFeedbackHub();`
                   variant="ghost"
                   size="sm"
                   className="h-7 text-xs text-gray-400 hover:text-white"
-                  onClick={() => copyCode(initCode.html, 'guest')}
+                  onClick={() => copyCode(`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+></script>`, 'guest')}
                 >
                   {copiedCode === 'guest' ? (
                     <>
@@ -457,7 +589,10 @@ initFeedbackHub();`
               </div>
               <div className="p-5 overflow-x-auto">
                 <pre className="text-sm text-gray-300 font-mono">
-                  <code>{initCode.html}</code>
+                  <code>{`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+></script>`}</code>
                 </pre>
               </div>
             </Card>
@@ -634,18 +769,16 @@ initFeedbackHub();`
 
             <div className="space-y-8">
               <div>
-                <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub('init', options)</code>
-                </h3>
+                <h3 className="text-xl font-semibold mb-3">Script Attributes</h3>
                 <p className="text-muted-foreground mb-4">
-                  Initialize the FeedbackHub widget. Must be called before any other methods.
+                  The widget SDK is initialized via a script tag with data attributes. No JavaScript initialization needed!
                 </p>
                 
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left p-3 font-semibold">Parameter</th>
+                        <th className="text-left p-3 font-semibold">Attribute</th>
                         <th className="text-left p-3 font-semibold">Type</th>
                         <th className="text-left p-3 font-semibold">Description</th>
                       </tr>
@@ -653,7 +786,7 @@ initFeedbackHub();`
                     <tbody>
                       <tr className="border-b">
                         <td className="p-3">
-                          <code className="bg-muted px-1.5 py-0.5 rounded">workspace</code>{' '}
+                          <code className="bg-muted px-1.5 py-0.5 rounded">data-org</code>{' '}
                           <Badge variant="destructive" className="ml-2">Required</Badge>
                         </td>
                         <td className="p-3 text-muted-foreground">string</td>
@@ -661,20 +794,21 @@ initFeedbackHub();`
                       </tr>
                       <tr className="border-b">
                         <td className="p-3">
-                          <code className="bg-muted px-1.5 py-0.5 rounded">boardId</code>
+                          <code className="bg-muted px-1.5 py-0.5 rounded">data-type</code>
                           <Badge variant="secondary" className="ml-2">Optional</Badge>
                         </td>
                         <td className="p-3 text-muted-foreground">string</td>
-                        <td className="p-3 text-muted-foreground">Specific board ID (only needed if you want to target a single board)</td>
+                        <td className="p-3 text-muted-foreground">
+                          Widget type: <code className="bg-muted px-1.5 py-0.5 rounded">'feedback'</code> (default) | <code className="bg-muted px-1.5 py-0.5 rounded">'changelog-popup'</code> | <code className="bg-muted px-1.5 py-0.5 rounded">'changelog-dropdown'</code> | <code className="bg-muted px-1.5 py-0.5 rounded">'all-in-one-popup'</code> | <code className="bg-muted px-1.5 py-0.5 rounded">'all-in-one-popover'</code>
+                        </td>
                       </tr>
                       <tr className="border-b">
                         <td className="p-3">
-                          <code className="bg-muted px-1.5 py-0.5 rounded">type</code>
+                          <code className="bg-muted px-1.5 py-0.5 rounded">data-trigger</code>
+                          <Badge variant="secondary" className="ml-2">Optional</Badge>
                         </td>
                         <td className="p-3 text-muted-foreground">string</td>
-                        <td className="p-3 text-muted-foreground">
-                          <code className="bg-muted px-1.5 py-0.5 rounded">'popup'</code> | <code className="bg-muted px-1.5 py-0.5 rounded">'popover'</code> | <code className="bg-muted px-1.5 py-0.5 rounded">'embed'</code> | <code className="bg-muted px-1.5 py-0.5 rounded">'changelog-popup'</code>
-                        </td>
+                        <td className="p-3 text-muted-foreground">ID of a custom button element to trigger the widget (for changelog-popup)</td>
                       </tr>
                     </tbody>
                   </table>
@@ -683,41 +817,52 @@ initFeedbackHub();`
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub('identify', user)</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.identify(data)</code>
                 </h3>
                 <p className="text-muted-foreground mb-4">
                   Identify the current user. Can use direct user data (Trust mode) or a JWT token (SSO mode).
+                </p>
+                <p className="text-muted-foreground text-sm mb-2">
+                  <strong>Trust Mode:</strong> Pass user object with <code className="bg-muted px-1.5 py-0.5 rounded">id</code> and <code className="bg-muted px-1.5 py-0.5 rounded">email</code>
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  <strong>JWT Mode:</strong> Pass object with <code className="bg-muted px-1.5 py-0.5 rounded">token</code> property
                 </p>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub('clearIdentity')</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.clearIdentity()</code>
                 </h3>
                 <p className="text-muted-foreground">Clear the current user identity. Call this when the user logs out.</p>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub('open')</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.open()</code>
                 </h3>
                 <p className="text-muted-foreground">Programmatically open the widget.</p>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub('close')</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.close()</code>
                 </h3>
                 <p className="text-muted-foreground">Programmatically close the widget.</p>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub('on', event, callback)</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.getUser()</code>
                 </h3>
-                <p className="text-muted-foreground">
-                  Listen for widget events. See <a href="#events" className="text-primary underline">Events</a> for available events.
-                </p>
+                <p className="text-muted-foreground">Get the currently identified user object.</p>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold mb-3">
+                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.isIdentified()</code>
+                </h3>
+                <p className="text-muted-foreground">Check if a user is currently identified. Returns <code className="bg-muted px-1.5 py-0.5 rounded">true</code> or <code className="bg-muted px-1.5 py-0.5 rounded">false</code>.</p>
               </div>
             </div>
           </section>
@@ -786,38 +931,36 @@ initFeedbackHub();`
             <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Events</h2>
             <p className="text-muted-foreground mb-6">Subscribe to widget events to integrate with your application.</p>
 
+            <p className="text-muted-foreground mb-4">
+              The widget communicates via <code className="bg-muted px-1.5 py-0.5 rounded text-sm">postMessage</code> API. You can listen for messages from the widget iframe:
+            </p>
+
             <Card className="bg-[#1e1e1e] border-gray-800 mb-6">
               <div className="flex items-center justify-end p-3 border-b border-gray-700">
                 <span className="text-xs text-gray-400">JavaScript</span>
               </div>
               <div className="p-5 overflow-x-auto">
                 <pre className="text-sm text-gray-300 font-mono">
-                  <code>{`// Widget ready
-FeedbackHub('on', 'ready', () => {
-  console.log('Widget loaded and ready');
+                  <code>{`// Listen for widget close events
+window.addEventListener('message', function(e) {
+  if (e.data === 'feedbackhub:close') {
+    console.log('Widget closed');
+    // Your code here
+  }
+  
+  if (e.data === 'feedbackhub:close-changelog') {
+    console.log('Changelog popup closed');
+    // Your code here
+  }
 });
 
-// Widget opened
-FeedbackHub('on', 'open', () => {
-  console.log('Widget opened');
-});
+// Programmatically control the widget
+FeedbackHub.open();  // Open widget
+FeedbackHub.close(); // Close widget
 
-// Widget closed
-FeedbackHub('on', 'close', () => {
-  console.log('Widget closed');
-});
-
-// Feedback submitted
-FeedbackHub('on', 'feedback:submitted', (post) => {
-  console.log('New feedback:', post.title);
-  // Track in your analytics
-  analytics.track('Feedback Submitted', { postId: post.id });
-});
-
-// User identified
-FeedbackHub('on', 'user:identified', (user) => {
-  console.log('User identified:', user.email);
-});`}</code>
+// For changelog widgets
+FeedbackHubChangelog.open();  // Open changelog
+FeedbackHubChangelog.close(); // Close changelog`}</code>
                 </pre>
               </div>
             </Card>
@@ -826,54 +969,188 @@ FeedbackHub('on', 'user:identified', (user) => {
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left p-3 font-semibold">Event</th>
-                    <th className="text-left p-3 font-semibold">Payload</th>
+                    <th className="text-left p-3 font-semibold">Message</th>
+                    <th className="text-left p-3 font-semibold">Source</th>
                     <th className="text-left p-3 font-semibold">Description</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b">
                     <td className="p-3">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">ready</code>
+                      <code className="bg-muted px-1.5 py-0.5 rounded">'feedbackhub:close'</code>
                     </td>
-                    <td className="p-3 text-muted-foreground">—</td>
-                    <td className="p-3 text-muted-foreground">Widget has loaded and is ready</td>
+                    <td className="p-3 text-muted-foreground">Widget iframe</td>
+                    <td className="p-3 text-muted-foreground">Widget requests to close</td>
                   </tr>
                   <tr className="border-b">
                     <td className="p-3">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">open</code>
+                      <code className="bg-muted px-1.5 py-0.5 rounded">'feedbackhub:close-changelog'</code>
                     </td>
-                    <td className="p-3 text-muted-foreground">—</td>
-                    <td className="p-3 text-muted-foreground">Widget was opened</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="p-3">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">close</code>
-                    </td>
-                    <td className="p-3 text-muted-foreground">—</td>
-                    <td className="p-3 text-muted-foreground">Widget was closed</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="p-3">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">feedback:submitted</code>
-                    </td>
-                    <td className="p-3 text-muted-foreground">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">{'{ id, title, ... }'}</code>
-                    </td>
-                    <td className="p-3 text-muted-foreground">User submitted feedback</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="p-3">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">user:identified</code>
-                    </td>
-                    <td className="p-3 text-muted-foreground">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">{'{ id, email, name }'}</code>
-                    </td>
-                    <td className="p-3 text-muted-foreground">User was successfully identified</td>
+                    <td className="p-3 text-muted-foreground">Changelog iframe</td>
+                    <td className="p-3 text-muted-foreground">Changelog popup requests to close</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+          </section>
+
+          <hr className="my-12" />
+
+          {/* Feedback Widget */}
+          <section id="feedback-widget" className="mb-16 scroll-mt-8">
+            <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Feedback Widget</h2>
+            <p className="text-muted-foreground mb-6">
+              The default feedback widget creates a floating button that opens a full-screen feedback interface where users can browse boards, submit feedback, and view existing posts.
+            </p>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Default Behavior</h3>
+            <p className="text-muted-foreground mb-4">
+              When you load the widget without specifying a <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-type</code>, it defaults to the feedback widget:
+            </p>
+
+            <Card className="bg-[#1e1e1e] border-gray-800">
+              <div className="flex items-center justify-end p-3 border-b border-gray-700">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-gray-400 hover:text-white"
+                  onClick={() => copyCode(`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+></script>`, 'feedback-default')}
+                >
+                  {copiedCode === 'feedback-default' ? (
+                    <>
+                      <Check className="h-3 w-3 mr-1" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="p-5 overflow-x-auto">
+                <pre className="text-sm text-gray-300 font-mono">
+                  <code>{`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+></script>`}</code>
+                </pre>
+              </div>
+            </Card>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">What it creates</h3>
+            <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
+              <li>A floating button in the bottom-right corner (customizable position)</li>
+              <li>Full-screen iframe when clicked, showing all your feedback boards</li>
+              <li>Users can browse boards, submit new feedback, and vote on existing posts</li>
+              <li>Settings (colors, position, branding) are loaded from your dashboard</li>
+            </ul>
+          </section>
+
+          <hr className="my-12" />
+
+          {/* Changelog Widget */}
+          <section id="changelog-widget" className="mb-16 scroll-mt-8">
+            <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Changelog Widget</h2>
+            <p className="text-muted-foreground mb-6">
+              Display your product updates and announcements to users via a popup modal or dropdown panel.
+            </p>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Popup Mode</h3>
+            <p className="text-muted-foreground mb-4">
+              Shows a centered modal with your changelog entries. Can be triggered by a custom button:
+            </p>
+
+            <Card className="bg-[#1e1e1e] border-gray-800 mb-6">
+              <div className="flex items-center justify-end p-3 border-b border-gray-700">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-gray-400 hover:text-white"
+                  onClick={() => copyCode(`<button id="my-changelog-btn">What's New</button>
+
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+  data-trigger="my-changelog-btn"
+></script>`, 'changelog-popup')}
+                >
+                  {copiedCode === 'changelog-popup' ? (
+                    <>
+                      <Check className="h-3 w-3 mr-1" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="p-5 overflow-x-auto">
+                <pre className="text-sm text-gray-300 font-mono">
+                  <code>{`<button id="my-changelog-btn">What's New</button>
+
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+  data-trigger="my-changelog-btn"
+></script>`}</code>
+                </pre>
+              </div>
+            </Card>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Dropdown Mode</h3>
+            <p className="text-muted-foreground mb-4">
+              Shows a dropdown panel attached to a button element:
+            </p>
+
+            <Card className="bg-[#1e1e1e] border-gray-800">
+              <div className="flex items-center justify-end p-3 border-b border-gray-700">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-gray-400 hover:text-white"
+                  onClick={() => copyCode(`<button id="feedbackhub-changelog-trigger">What's New</button>
+
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-dropdown"
+></script>`, 'changelog-dropdown')}
+                >
+                  {copiedCode === 'changelog-dropdown' ? (
+                    <>
+                      <Check className="h-3 w-3 mr-1" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="p-5 overflow-x-auto">
+                <pre className="text-sm text-gray-300 font-mono">
+                  <code>{`<button id="feedbackhub-changelog-trigger">What's New</button>
+
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-dropdown"
+></script>`}</code>
+                </pre>
+              </div>
+            </Card>
           </section>
         </main>
       </div>
