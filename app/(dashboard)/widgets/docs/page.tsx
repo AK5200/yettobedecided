@@ -542,7 +542,194 @@ if (window.FeedbackHub) {
                   </div>
                 </Card>
               </div>
+
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Announcement Banner</h3>
+                <p className="text-muted-foreground mb-3">A customizable banner that can link to your changelog or custom URL.</p>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<!-- Announcement Banner (opens changelog popup) -->
+<a href="#" id="feedbackhub-announcement-trigger" class="feedbackhub-announcement">
+  <span>New</span>
+  <span>Check out our latest updates</span>
+</a>
+
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+  data-trigger="feedbackhub-announcement-trigger"
+></script>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+              </div>
             </div>
+          </section>
+
+          <hr className="my-12" />
+
+          {/* Custom Button/Div Embeds */}
+          <section id="custom-embeds" className="mb-16 scroll-mt-8">
+            <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Custom Button & Div Embeds</h2>
+            <p className="text-muted-foreground mb-6">
+              You can use any button or div element on your website to trigger the changelog popup. Just add an ID to your element and reference it in the <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-trigger</code> attribute.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-3">Using a Button</h3>
+                <Card className="bg-[#1e1e1e] border-gray-800 mb-4">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<!-- Your custom button -->
+<button id="my-changelog-btn" class="btn-primary">
+  What's New
+</button>
+
+<!-- Widget script -->
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+  data-trigger="my-changelog-btn"
+></script>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold mb-3">Using a Div</h3>
+                <Card className="bg-[#1e1e1e] border-gray-800 mb-4">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<!-- Your custom div (can be styled however you want) -->
+<div 
+  id="changelog-trigger" 
+  style="cursor: pointer; padding: 12px; background: #7c3aed; color: white; border-radius: 8px;"
+>
+  📢 See What's New
+</div>
+
+<!-- Widget script -->
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+  data-trigger="changelog-trigger"
+></script>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold mb-3">Using a Link</h3>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="p-5 overflow-x-auto">
+                    <pre className="text-sm text-gray-300 font-mono">
+                      <code>{`<!-- Your custom link -->
+<a href="#" id="whats-new-link" class="nav-link">
+  What's New
+</a>
+
+<!-- Widget script -->
+<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+  data-trigger="whats-new-link"
+></script>`}</code>
+                    </pre>
+                  </div>
+                </Card>
+                <p className="text-sm text-muted-foreground mt-2">
+                  <strong>Note:</strong> The widget will automatically prevent the default link behavior when clicked.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <hr className="my-12" />
+
+          {/* Auto-trigger on Page Load */}
+          <section id="auto-trigger" className="mb-16 scroll-mt-8">
+            <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Auto-trigger on Homepage</h2>
+            <p className="text-muted-foreground mb-6">
+              Automatically open the changelog popup when users visit your homepage. Perfect for announcing new features or updates!
+            </p>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex gap-3">
+              <div className="text-blue-600 text-xl">ℹ️</div>
+              <div>
+                <div className="font-semibold text-blue-900 mb-1">How it works</div>
+                <p className="text-sm text-blue-700">
+                  The widget checks if the current page URL matches your configured homepage URL. If it matches, the changelog popup opens automatically. The popup only shows once per browser session to avoid annoying users.
+                </p>
+              </div>
+            </div>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Setup</h3>
+            <p className="text-muted-foreground mb-4">
+              Enable auto-trigger in your dashboard:
+            </p>
+            <ol className="list-decimal list-inside space-y-2 text-muted-foreground ml-4 mb-6">
+              <li>Go to <strong>Widgets</strong> → <strong>Changelog Widget</strong> → <strong>Settings</strong></li>
+              <li>Enable <strong>"Auto-trigger on Homepage"</strong></li>
+              <li>Enter your homepage URL (e.g., <code className="bg-muted px-1.5 py-0.5 rounded text-sm">https://example.com</code> or <code className="bg-muted px-1.5 py-0.5 rounded text-sm">https://example.com/</code>)</li>
+              <li>Save settings</li>
+            </ol>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Implementation</h3>
+            <p className="text-muted-foreground mb-4">
+              Just add the changelog popup widget to your homepage. The auto-trigger is controlled by your dashboard settings:
+            </p>
+
+            <Card className="bg-[#1e1e1e] border-gray-800">
+              <div className="flex items-center justify-end p-3 border-b border-gray-700">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-gray-400 hover:text-white"
+                  onClick={() => copyCode(`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+></script>`, 'auto-trigger')}
+                >
+                  {copiedCode === 'auto-trigger' ? (
+                    <>
+                      <Check className="h-3 w-3 mr-1" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="p-5 overflow-x-auto">
+                <pre className="text-sm text-gray-300 font-mono">
+                  <code>{`<script 
+  src="${baseUrl}/widget.js" 
+  data-org="${orgSlug}"
+  data-type="changelog-popup"
+></script>`}</code>
+                </pre>
+              </div>
+            </Card>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Important Notes</h3>
+            <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
+              <li>The popup only shows <strong>once per browser session</strong> (uses sessionStorage)</li>
+              <li>URL matching is case-insensitive and ignores trailing slashes</li>
+              <li>Works with both <code className="bg-muted px-1.5 py-0.5 rounded text-sm">https://example.com</code> and <code className="bg-muted px-1.5 py-0.5 rounded text-sm">https://example.com/</code></li>
+              <li>Query parameters are ignored when matching URLs</li>
+            </ul>
           </section>
 
           <hr className="my-12" />
