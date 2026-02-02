@@ -61,8 +61,7 @@ export default function WidgetDocsPage() {
 
   // Initialize the widget
   FeedbackHub('init', {
-    workspace: '${orgSlug}',
-    boardId: 'your-board-id',
+    workspace: '${orgSlug}',  // That's all!
   });
 </script>`,
     react: `import { useEffect } from 'react';
@@ -75,8 +74,7 @@ export function FeedbackHubWidget() {
     script.async = true;
     script.onload = () => {
       window.FeedbackHub('init', {
-        workspace: '${orgSlug}',
-        boardId: 'your-board-id',
+        workspace: '${orgSlug}',  // That's all!
       });
     };
     document.head.appendChild(script);
@@ -97,8 +95,7 @@ export function FeedbackHubWidget() {
       strategy="afterInteractive"
       onLoad={() => {
         window.FeedbackHub('init', {
-          workspace: '${orgSlug}',
-          boardId: 'your-board-id',
+          workspace: '${orgSlug}',  // That's all!
         });
       }}
     />
@@ -148,8 +145,7 @@ app.get('/api/feedbackhub-token', (req, res) => {
 
   const jwtFrontendCode = `// Initialize widget
 FeedbackHub('init', {
-  workspace: '${orgSlug}',
-  boardId: 'your-board-id',
+  workspace: '${orgSlug}',  // That's all!
 });
 
 // Fetch token from your server
@@ -292,10 +288,12 @@ initFeedbackHub();`
                   Log in to your FeedbackHub dashboard and navigate to <strong>Settings → Widgets</strong> to find your:
                 </p>
                 <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
-                  <li><strong>Workspace slug</strong> — Your unique workspace identifier</li>
-                  <li><strong>Board ID</strong> — The board where feedback will be collected</li>
-                  <li><strong>SSO Secret</strong> — For secure user identification (optional)</li>
+                  <li><strong>Workspace slug</strong> — Your unique workspace identifier (required)</li>
+                  <li><strong>SSO Secret</strong> — For secure user identification (optional, only for JWT mode)</li>
                 </ul>
+                <p className="text-muted-foreground mt-3 text-sm">
+                  <strong>Note:</strong> You don&apos;t need a board ID. The widget works with all your boards automatically.
+                </p>
               </div>
 
               <div className="relative pl-12 border-l-2">
@@ -664,9 +662,10 @@ initFeedbackHub();`
                       <tr className="border-b">
                         <td className="p-3">
                           <code className="bg-muted px-1.5 py-0.5 rounded">boardId</code>
+                          <Badge variant="secondary" className="ml-2">Optional</Badge>
                         </td>
                         <td className="p-3 text-muted-foreground">string</td>
-                        <td className="p-3 text-muted-foreground">Board ID for feedback widgets</td>
+                        <td className="p-3 text-muted-foreground">Specific board ID (only needed if you want to target a single board)</td>
                       </tr>
                       <tr className="border-b">
                         <td className="p-3">
