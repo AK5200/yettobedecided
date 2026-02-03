@@ -150,7 +150,7 @@
     // Create iframe (hidden by default)
     const iframe = document.createElement('iframe');
     iframe.src = baseUrl + '/embed/widget?org=' + encodeURIComponent(org);
-    iframe.style.cssText = 'position:fixed;bottom:0;right:0;width:100%;height:100%;border:none;z-index:9999;display:none;';
+    iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;display:none;background:white;pointer-events:auto;';
     iframe.id = 'feedbackhub-widget';
     document.body.appendChild(iframe);
 

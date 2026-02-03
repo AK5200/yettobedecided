@@ -4,6 +4,7 @@ import { fireWebhooks } from '@/lib/webhooks/fire'
 import { notifyIntegrations } from '@/lib/integrations/notify'
 import { triggerNewPostEmail } from '@/lib/email/triggers'
 import { processIdentifiedUser } from '@/lib/sso'
+import { upsertWidgetUser, incrementCounter } from '@/lib/widget-users'
 
 export async function GET(request: Request) {
   try {
@@ -62,11 +63,13 @@ export async function POST(request: Request) {
     }
 
     // Auth check - bypass for guests
+    let authenticatedUser: any = null
     if (!is_guest) {
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       if (authError || !user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
+      authenticatedUser = user
     } else {
       if (!guest_email && !identified_user) {
         return NextResponse.json({ error: 'Guest email or identified_user is required' }, { status: 400 })
@@ -106,13 +109,18 @@ export async function POST(request: Request) {
     }
 
     // Use identified email/name if available, otherwise fall back to guest/author fields
+    // For authenticated users, get email from auth user if not provided
     const emailToCheck = is_guest 
       ? (ssoResult.user?.email || guest_email)
-      : author_email
+      : (author_email || authenticatedUser?.email)
     const nameToUse = is_guest
       ? (ssoResult.user?.name || guest_name)
-      : author_name
-    const sourceForRow = ssoResult.source === 'verified_jwt' ? 'verified_sso' : ssoResult.source
+      : (author_name || authenticatedUser?.user_metadata?.name || authenticatedUser?.email?.split('@')[0])
+    // Map source to UserSource type (verified_sso -> verified_jwt)
+    const sourceForRow: 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt' = 
+      ssoResult.source === 'verified_jwt' || ssoResult.source === 'verified_sso' 
+        ? 'verified_jwt' 
+        : (ssoResult.source as 'guest' | 'social_google' | 'social_github' | 'identified')
 
     // Check if email is banned
     if (emailToCheck && board.org_id) {
@@ -130,12 +138,34 @@ export async function POST(request: Request) {
       }
     }
 
-    const insertData = {
+    // Upsert widget_user before creating post (same logic as widget feedback route)
+    let widgetUser: any = null
+    if (emailToCheck && board.org_id) {
+      const { user, error: userError } = await upsertWidgetUser(board.org_id, {
+        external_id: ssoResult.user?.id || null,
+        email: emailToCheck,
+        name: nameToUse || null,
+        avatar_url: ssoResult.user?.avatar || null,
+        user_source: sourceForRow,
+        company_id: ssoResult.user?.company?.id || null,
+        company_name: ssoResult.user?.company?.name || null,
+        company_plan: ssoResult.user?.company?.plan || null,
+        company_monthly_spend: ssoResult.user?.company?.monthlySpend || null,
+      })
+
+      if (userError) {
+        console.error('Failed to upsert widget user:', userError)
+      } else {
+        widgetUser = user
+      }
+    }
+
+    const insertData: any = {
       board_id,
       title,
       content: content || null,
-      author_email: is_guest ? null : (author_email || null),
-      author_name: is_guest ? null : (author_name || null),
+      author_email: is_guest ? null : emailToCheck,
+      author_name: is_guest ? null : nameToUse,
       guest_email: is_guest ? emailToCheck : null,
       guest_name: is_guest ? (nameToUse || 'Anonymous') : null,
       identified_user_id: is_guest ? (ssoResult.user?.id || null) : null,
@@ -143,7 +173,8 @@ export async function POST(request: Request) {
       user_source: is_guest ? sourceForRow : 'guest',
       is_guest: is_guest || false,
       is_approved: !board.require_approval,
-      status: 'open'
+      status: 'open',
+      widget_user_id: widgetUser?.id || null,
     }
 
     const { data: post, error: postError } = await supabase
@@ -154,6 +185,11 @@ export async function POST(request: Request) {
 
     if (postError) {
       return NextResponse.json({ error: postError.message }, { status: 500 })
+    }
+
+    // Increment post_count for widget_user (same as widget feedback route)
+    if (widgetUser?.id) {
+      await incrementCounter(widgetUser.id, 'post_count')
     }
 
     // Fire webhook for new post
