@@ -101,6 +101,7 @@ function AllInOneContent() {
   const showBranding = settings?.show_branding !== false
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'
+  const textStyle = settings?.all_in_one_text_style || 'default'
 
   const handleCreatePost = () => {
     setShowFeedbackForm(true)
@@ -141,18 +142,19 @@ function AllInOneContent() {
       </button>
 
       <div className="flex-1 overflow-y-auto p-6">
-        <AllInOneWidget
-          boards={boards}
-          posts={posts}
-          changelog={changelog}
-          orgSlug={org || ''}
-          accentColor={accentColor}
-          backgroundColor={backgroundColor}
-          showBranding={showBranding}
-          heading={heading}
-          subheading={subheading}
-          onCreatePost={handleCreatePost}
-        />
+          <AllInOneWidget
+            boards={boards}
+            posts={posts}
+            changelog={changelog}
+            orgSlug={org || ''}
+            accentColor={accentColor}
+            backgroundColor={backgroundColor}
+            showBranding={showBranding}
+            heading={heading}
+            subheading={subheading}
+            textStyle={textStyle}
+            onCreatePost={handleCreatePost}
+          />
       </div>
 
       {/* Feedback Form Modal */}

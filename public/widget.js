@@ -391,16 +391,24 @@
   function initAllInOnePopup(settings, dataTriggerElements) {
     let isOpen = false;
 
+    // Get placement and width from settings
+    const popupPlacement = settings.all_in_one_popup_placement || 'right';
+    const popupWidth = settings.all_in_one_popup_width || 420;
+    const isLeft = popupPlacement === 'left';
+
     // Create overlay - subtle background
     const overlay = document.createElement('div');
     overlay.id = 'feedbackhub-allinone-overlay';
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9998;display:none;';
     document.body.appendChild(overlay);
 
-    // Create iframe container - positioned as sidebar on the right
+    // Create iframe container - positioned based on settings
     const container = document.createElement('div');
     container.id = 'feedbackhub-allinone-container';
-    container.style.cssText = 'position:fixed;top:0;right:0;z-index:9999;display:none;width:420px;max-width:90vw;height:100vh;';
+    const positionStyle = isLeft 
+      ? `position:fixed;top:0;left:0;z-index:9999;display:none;width:${popupWidth}px;max-width:90vw;height:100vh;`
+      : `position:fixed;top:0;right:0;z-index:9999;display:none;width:${popupWidth}px;max-width:90vw;height:100vh;`;
+    container.style.cssText = positionStyle;
     document.body.appendChild(container);
 
     // Create iframe
@@ -462,10 +470,22 @@
   function initAllInOnePopover(settings, dataTriggerElements) {
     let isOpen = false;
 
+    // Get placement from settings
+    const popoverPlacement = settings.all_in_one_popover_placement || 'bottom-right';
+    const isBottom = popoverPlacement.includes('bottom');
+    const isLeft = popoverPlacement.includes('left');
+    const isRight = popoverPlacement.includes('right');
+    
+    // Calculate position based on placement
+    const top = isBottom ? 'auto' : '90px';
+    const bottom = isBottom ? '90px' : 'auto';
+    const left = isLeft ? '20px' : 'auto';
+    const right = isRight ? '20px' : 'auto';
+
     // Create popover container
     const popover = document.createElement('div');
     popover.id = 'feedbackhub-allinone-popover';
-    popover.style.cssText = 'position:fixed;bottom:90px;right:20px;z-index:9998;display:none;width:400px;height:600px;max-height:calc(100vh - 120px);';
+    popover.style.cssText = `position:fixed;${top !== 'auto' ? 'top:' + top + ';' : ''}${bottom !== 'auto' ? 'bottom:' + bottom + ';' : ''}${left !== 'auto' ? 'left:' + left + ';' : ''}${right !== 'auto' ? 'right:' + right + ';' : ''}z-index:9998;display:none;width:400px;height:600px;max-height:calc(100vh - 120px);`;
     document.body.appendChild(popover);
 
     // Create iframe
@@ -503,10 +523,15 @@
       });
       // Don't create default button if custom triggers exist
     } else {
-      // Create floating trigger button
+      // Create floating trigger button - position based on popover placement
       const button = document.createElement('button');
       button.innerHTML = '💬';
-      button.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9997;width:56px;height:56px;background:' + (settings.accent_color || '#7c3aed') + ';color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;';
+      const buttonTop = isBottom ? 'auto' : '20px';
+      const buttonBottom = isBottom ? '20px' : 'auto';
+      const buttonLeft = isLeft ? '20px' : 'auto';
+      const buttonRight = isRight ? '20px' : 'auto';
+      const buttonStyle = `position:fixed;${buttonTop !== 'auto' ? 'top:' + buttonTop + ';' : ''}${buttonBottom !== 'auto' ? 'bottom:' + buttonBottom + ';' : ''}${buttonLeft !== 'auto' ? 'left:' + buttonLeft + ';' : ''}${buttonRight !== 'auto' ? 'right:' + buttonRight + ';' : ''}z-index:9997;width:56px;height:56px;background:${settings.accent_color || '#7c3aed'};color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;`;
+      button.style.cssText = buttonStyle;
       button.id = 'feedbackhub-allinone-trigger';
       document.body.appendChild(button);
       button.addEventListener('click', function() {

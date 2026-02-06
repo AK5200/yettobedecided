@@ -192,18 +192,32 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
     )
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+  // Get popup placement and width from settings
+  const popupPlacement = settings.allInOnePopupPlacement || 'right'
+  const popupWidth = settings.allInOnePopupWidth || 420
+  const isLeft = popupPlacement === 'left'
+  
+  // Apply text style
+  const textStyleClass = settings.allInOneTextStyle === 'bold' || settings.allInOneTextStyle === 'bold-italic' 
+    ? 'font-bold' 
+    : ''
+  const textItalicClass = settings.allInOneTextStyle === 'italic' || settings.allInOneTextStyle === 'bold-italic'
+    ? 'italic'
+    : ''
 
-      {/* Modal */}
+  return (
+    <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+
+      {/* Modal - positioned based on settings */}
       <div
-        className="relative w-full mx-4 max-h-[85vh] flex flex-col"
+        className={`relative ${isLeft ? 'left-0' : 'right-0'} top-0 h-full flex flex-col`}
         style={{
-          maxWidth,
-          borderRadius,
-          boxShadow,
+          width: `${popupWidth}px`,
+          maxWidth: '90vw',
+          borderRadius: isLeft ? `${borderRadius} 0 0 0` : `0 ${borderRadius} 0 0`,
+          boxShadow: isLeft ? '4px 0 20px rgba(0,0,0,0.1)' : '-4px 0 20px rgba(0,0,0,0.1)',
           backgroundColor: settings.backgroundColor,
         }}
       >
@@ -223,10 +237,10 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
           >
             <Zap className="h-5 w-5" style={{ color: settings.accentColor }} />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className={`text-xl font-semibold text-gray-900 ${textStyleClass} ${textItalicClass}`}>
             {settings.heading || 'Have something to say?'}
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className={`text-sm text-gray-500 mt-1 ${textStyleClass} ${textItalicClass}`}>
             {settings.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'}
           </p>
         </div>

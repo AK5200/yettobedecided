@@ -38,6 +38,7 @@ interface AllInOneWidgetProps {
   showBranding?: boolean
   heading?: string
   subheading?: string
+  textStyle?: 'default' | 'bold' | 'italic' | 'bold-italic'
   onCreatePost?: () => void
   onVote?: (postId: string) => void
 }
@@ -65,6 +66,7 @@ export function AllInOneWidget({
   showBranding = true,
   heading = 'Have something to say?',
   subheading = 'Suggest a feature, read through our feedback and check out our latest feature releases.',
+  textStyle = 'default',
   onCreatePost,
   onVote,
 }: AllInOneWidgetProps) {
@@ -162,8 +164,24 @@ export function AllInOneWidget({
           <Zap className="h-5 w-5" style={{ color: accentColor }} />
         </div>
         <div>
-          <div className="text-lg font-semibold text-gray-900">{heading}</div>
-          <p className="text-sm text-gray-500">{subheading}</p>
+          <div 
+            className={`text-lg font-semibold text-gray-900 ${
+              textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
+            } ${
+              textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
+            }`}
+          >
+            {heading}
+          </div>
+          <p 
+            className={`text-sm text-gray-500 ${
+              textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
+            } ${
+              textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
+            }`}
+          >
+            {subheading}
+          </p>
         </div>
       </div>
 

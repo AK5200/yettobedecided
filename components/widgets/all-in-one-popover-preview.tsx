@@ -161,19 +161,43 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
     )
   }
 
+  // Get popover placement from settings
+  const popoverPlacement = settings.allInOnePopoverPlacement || 'bottom-right'
+  const isBottom = popoverPlacement.includes('bottom')
+  const isLeft = popoverPlacement.includes('left')
+  const isRight = popoverPlacement.includes('right')
+  
+  // Calculate position
+  const top = isBottom ? 'auto' : '90px'
+  const bottom = isBottom ? '90px' : 'auto'
+  const left = isLeft ? '20px' : 'auto'
+  const right = isRight ? '20px' : 'auto'
+  
+  // Apply text style
+  const textStyleClass = settings.allInOneTextStyle === 'bold' || settings.allInOneTextStyle === 'bold-italic' 
+    ? 'font-bold' 
+    : ''
+  const textItalicClass = settings.allInOneTextStyle === 'italic' || settings.allInOneTextStyle === 'bold-italic'
+    ? 'italic'
+    : ''
+
   return (
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
 
-      {/* Popover Panel - Right side */}
+      {/* Popover Panel - positioned based on settings */}
       <div
-        className="absolute right-4 top-20 border max-h-[calc(100vh-120px)] flex flex-col"
+        className="absolute border max-h-[calc(100vh-120px)] flex flex-col"
         style={{
           width,
           borderRadius,
           boxShadow,
           backgroundColor: settings.backgroundColor,
+          top: top !== 'auto' ? top : undefined,
+          bottom: bottom !== 'auto' ? bottom : undefined,
+          left: left !== 'auto' ? left : undefined,
+          right: right !== 'auto' ? right : undefined,
         }}
       >
         {/* Header */}
@@ -187,10 +211,10 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                 <Zap className="h-4 w-4" style={{ color: settings.accentColor }} />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 text-sm">
+                <h3 className={`font-semibold text-gray-900 text-sm ${textStyleClass} ${textItalicClass}`}>
                   {settings.heading || 'Have something to say?'}
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                <p className={`text-xs text-gray-500 mt-0.5 line-clamp-2 ${textStyleClass} ${textItalicClass}`}>
                   {settings.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'}
                 </p>
               </div>

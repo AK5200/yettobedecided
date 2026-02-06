@@ -42,6 +42,11 @@ export type WidgetSettings = {
   subheading: string
   homepageUrl?: string
   autoTriggerEnabled?: boolean
+  // All-in-One widget specific settings
+  allInOneTextStyle?: 'default' | 'bold' | 'italic' | 'bold-italic'
+  allInOnePopoverPlacement?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
+  allInOnePopupPlacement?: 'left' | 'right'
+  allInOnePopupWidth?: number
 }
 
 export type AnnouncementSettings = {
@@ -63,6 +68,10 @@ const defaultSettings: WidgetSettings = {
   shadow: 'large',
   heading: 'Welcome back 👋',
   subheading: "Here's what we added while you were away.",
+  allInOneTextStyle: 'default',
+  allInOnePopoverPlacement: 'bottom-right',
+  allInOnePopupPlacement: 'right',
+  allInOnePopupWidth: 420,
 }
 
 const defaultAnnouncementSettings: AnnouncementSettings = {
@@ -113,6 +122,23 @@ export default function WidgetsPage() {
         org_id: orgId,
         widget_type: 'announcement',
         ...announcementSettings,
+      } : type === 'all-in-one' ? {
+        org_id: orgId,
+        widget_type: 'all-in-one',
+        accent_color: settings.accentColor,
+        background_color: settings.backgroundColor,
+        show_branding: settings.showBranding,
+        size: settings.size,
+        border_radius: settings.borderRadius,
+        shadow: settings.shadow,
+        heading: settings.heading,
+        subheading: settings.subheading,
+        homepage_url: settings.homepageUrl || null,
+        auto_trigger_enabled: settings.autoTriggerEnabled || false,
+        all_in_one_text_style: settings.allInOneTextStyle || 'default',
+        all_in_one_popover_placement: settings.allInOnePopoverPlacement || 'bottom-right',
+        all_in_one_popup_placement: settings.allInOnePopupPlacement || 'right',
+        all_in_one_popup_width: settings.allInOnePopupWidth || 420,
       } : {
         org_id: orgId,
         widget_type: type,
@@ -183,6 +209,10 @@ export default function WidgetsPage() {
                 subheading: data.settings.subheading || prev.subheading,
                 homepageUrl: data.settings.homepage_url || prev.homepageUrl,
                 autoTriggerEnabled: data.settings.auto_trigger_enabled ?? prev.autoTriggerEnabled,
+                allInOneTextStyle: data.settings.all_in_one_text_style || prev.allInOneTextStyle,
+                allInOnePopoverPlacement: data.settings.all_in_one_popover_placement || prev.allInOnePopoverPlacement,
+                allInOnePopupPlacement: data.settings.all_in_one_popup_placement || prev.allInOnePopupPlacement,
+                allInOnePopupWidth: data.settings.all_in_one_popup_width || prev.allInOnePopupWidth,
               }))
             }
           }
@@ -1096,6 +1126,77 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                 checked={settings.showBranding}
                 onCheckedChange={(v) => updateSetting('showBranding', v)}
               />
+            </div>
+
+            {/* All-in-One Specific Settings */}
+            <div className="border-t pt-4 space-y-4">
+              <h3 className="font-medium text-sm">All-in-One Widget Options</h3>
+              
+              <div className="space-y-2">
+                <Label>Text Style</Label>
+                <Select
+                  value={settings.allInOneTextStyle || 'default'}
+                  onValueChange={(v) => updateSetting('allInOneTextStyle', v as WidgetSettings['allInOneTextStyle'])}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Default</SelectItem>
+                    <SelectItem value="bold">Bold</SelectItem>
+                    <SelectItem value="italic">Italic</SelectItem>
+                    <SelectItem value="bold-italic">Bold & Italic</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Popover Placement</Label>
+                <Select
+                  value={settings.allInOnePopoverPlacement || 'bottom-right'}
+                  onValueChange={(v) => updateSetting('allInOnePopoverPlacement', v as WidgetSettings['allInOnePopoverPlacement'])}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                    <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                    <SelectItem value="top-left">Top Left</SelectItem>
+                    <SelectItem value="top-right">Top Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Popup Placement</Label>
+                <Select
+                  value={settings.allInOnePopupPlacement || 'right'}
+                  onValueChange={(v) => updateSetting('allInOnePopupPlacement', v as WidgetSettings['allInOnePopupPlacement'])}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="left">Left</SelectItem>
+                    <SelectItem value="right">Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="aio-popup-width">Popup Width (px)</Label>
+                <Input
+                  id="aio-popup-width"
+                  type="number"
+                  min="300"
+                  max="800"
+                  value={settings.allInOnePopupWidth || 420}
+                  onChange={(e) => updateSetting('allInOnePopupWidth', parseInt(e.target.value) || 420)}
+                  placeholder="420"
+                />
+                <p className="text-xs text-muted-foreground">Width in pixels (300-800px)</p>
+              </div>
             </div>
 
             <div className="pt-4 flex justify-end gap-3">
