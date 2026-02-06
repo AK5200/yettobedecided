@@ -154,6 +154,10 @@ export function FeedbackWidget({
             placeholder="Describe your feedback..."
             value={content}
             onChange={(event) => setContent(event.target.value)}
+            className="resize-none overflow-y-auto"
+            style={{
+              maxHeight: '200px',
+            }}
           />
           <Button
             type="submit"

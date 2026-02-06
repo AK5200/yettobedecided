@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search, ChevronUp, Zap } from 'lucide-react'
+import { PostDetailView } from './post-detail-view'
 
 interface ChangelogEntry {
   id: string
@@ -24,6 +25,7 @@ interface Post {
   author_email?: string
   tags?: { name: string }[]
   hasVoted?: boolean
+  created_at?: string
 }
 
 interface AllInOneWidgetProps {
@@ -68,6 +70,7 @@ export function AllInOneWidget({
 }: AllInOneWidgetProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [posts, setPosts] = useState(initialPosts)
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
 
   const filteredPosts = posts.filter(
     (post) =>
@@ -87,7 +90,65 @@ export function AllInOneWidget({
           : post
       )
     )
+    // Update selected post if it's the one being voted on
+    if (selectedPost && selectedPost.id === postId) {
+      setSelectedPost({
+        ...selectedPost,
+        votes: selectedPost.hasVoted ? selectedPost.votes - 1 : selectedPost.votes + 1,
+        hasVoted: !selectedPost.hasVoted,
+      })
+    }
     onVote?.(postId)
+  }
+
+  const handlePostClick = async (post: Post) => {
+    // Fetch full post details including created_at
+    try {
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+      const res = await fetch(`${baseUrl}/api/posts/${post.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        const fullPost: Post = {
+          ...post,
+          content: data.post?.content || post.content,
+          created_at: data.post?.created_at,
+          tags: data.post?.tags || post.tags,
+        }
+        setSelectedPost(fullPost)
+      } else {
+        // Fallback to existing post data
+        setSelectedPost(post)
+      }
+    } catch (error) {
+      console.error('Failed to fetch post details:', error)
+      // Fallback to existing post data
+      setSelectedPost(post)
+    }
+  }
+
+  const handleBack = () => {
+    setSelectedPost(null)
+  }
+
+  // Show post detail view if a post is selected
+  if (selectedPost) {
+    return (
+      <div className="rounded-lg p-4 space-y-4" style={{ backgroundColor }}>
+        <PostDetailView
+          post={selectedPost}
+          orgSlug={orgSlug}
+          accentColor={accentColor}
+          onBack={handleBack}
+          onVote={handleVote}
+        />
+        {showBranding && (
+          <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">
+            <Zap className="h-3 w-3" style={{ color: accentColor }} />
+            Powered by FeedbackHub
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -170,6 +231,7 @@ export function AllInOneWidget({
               filteredPosts.map((post) => (
                 <div
                   key={post.id}
+                  onClick={() => handlePostClick(post)}
                   className="p-3 border rounded-lg hover:border-gray-300 transition-colors cursor-pointer"
                 >
                   <div className="flex gap-3">

@@ -130,7 +130,7 @@ function AllInOneContent() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-white relative" style={{ pointerEvents: 'auto' }}>
+    <div className="w-full h-full bg-white relative overflow-y-auto" style={{ pointerEvents: 'auto' }}>
       {/* Close button */}
       <button
         onClick={handleClose}
@@ -140,21 +140,19 @@ function AllInOneContent() {
         <X className="h-5 w-5 text-gray-500" />
       </button>
 
-      <div className="p-6">
-        <div className="max-w-2xl mx-auto">
-          <AllInOneWidget
-            boards={boards}
-            posts={posts}
-            changelog={changelog}
-            orgSlug={org || ''}
-            accentColor={accentColor}
-            backgroundColor={backgroundColor}
-            showBranding={showBranding}
-            heading={heading}
-            subheading={subheading}
-            onCreatePost={handleCreatePost}
-          />
-        </div>
+      <div className="p-6 h-full">
+        <AllInOneWidget
+          boards={boards}
+          posts={posts}
+          changelog={changelog}
+          orgSlug={org || ''}
+          accentColor={accentColor}
+          backgroundColor={backgroundColor}
+          showBranding={showBranding}
+          heading={heading}
+          subheading={subheading}
+          onCreatePost={handleCreatePost}
+        />
       </div>
 
       {/* Feedback Form Modal */}

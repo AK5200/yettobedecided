@@ -391,22 +391,22 @@
   function initAllInOnePopup(settings, dataTriggerElements) {
     let isOpen = false;
 
-    // Create overlay
+    // Create overlay - subtle background
     const overlay = document.createElement('div');
     overlay.id = 'feedbackhub-allinone-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;display:none;';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9998;display:none;';
     document.body.appendChild(overlay);
 
-    // Create iframe container
+    // Create iframe container - positioned as sidebar on the right
     const container = document.createElement('div');
     container.id = 'feedbackhub-allinone-container';
-    container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;display:none;width:90%;max-width:680px;max-height:90vh;';
+    container.style.cssText = 'position:fixed;top:0;right:0;z-index:9999;display:none;width:420px;max-width:90vw;height:100vh;';
     document.body.appendChild(container);
 
     // Create iframe
     const iframe = document.createElement('iframe');
     iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup';
-    iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);';
+    iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);';
     container.appendChild(iframe);
 
     function openPopup() {
