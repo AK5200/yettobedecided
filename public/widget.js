@@ -397,10 +397,10 @@
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9998;display:none;';
     document.body.appendChild(overlay);
 
-    // Create iframe container - full width and height
+    // Create iframe container - positioned as sidebar on the right
     const container = document.createElement('div');
     container.id = 'feedbackhub-allinone-container';
-    container.style.cssText = 'position:fixed;top:0;left:0;z-index:9999;display:none;width:100%;height:100vh;';
+    container.style.cssText = 'position:fixed;top:0;right:0;z-index:9999;display:none;width:420px;max-width:90vw;height:100vh;';
     document.body.appendChild(container);
 
     // Create iframe

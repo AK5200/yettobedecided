@@ -130,17 +130,17 @@ function AllInOneContent() {
   }
 
   return (
-    <div className="w-full h-full bg-white relative overflow-y-auto" style={{ pointerEvents: 'auto', minHeight: '100vh' }}>
+    <div className="w-full h-full bg-white relative flex flex-col" style={{ pointerEvents: 'auto', height: '100vh', overflow: 'hidden' }}>
       {/* Close button */}
       <button
         onClick={handleClose}
-        className="fixed top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-50 bg-white shadow-sm"
+        className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-50 bg-white shadow-sm"
         aria-label="Close"
       >
         <X className="h-5 w-5 text-gray-500" />
       </button>
 
-      <div className="p-6 min-h-full">
+      <div className="flex-1 overflow-y-auto p-6">
         <AllInOneWidget
           boards={boards}
           posts={posts}
