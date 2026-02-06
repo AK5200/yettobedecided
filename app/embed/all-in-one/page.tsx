@@ -31,13 +31,44 @@ function AllInOneContent() {
           setChangelog(data.changelog || [])
           setSettings(data.settings || {})
           
-          // Fetch posts for the first board
+          // Fetch posts from all boards
           if (data.boards && data.boards.length > 0) {
-            const postsRes = await fetch(`${baseUrl}/api/posts?board_id=${data.boards[0].id}&limit=20`)
-            if (postsRes.ok) {
-              const postsData = await postsRes.json()
-              setPosts(postsData.posts || [])
+            const allPosts: any[] = []
+            // Fetch posts from each board
+            for (const board of data.boards) {
+              try {
+                const postsRes = await fetch(`${baseUrl}/api/posts?board_id=${board.id}&limit=20`)
+                if (postsRes.ok) {
+                  const postsData = await postsRes.json()
+                  if (postsData.posts && Array.isArray(postsData.posts)) {
+                    // Format posts to match widget expected format
+                    const formattedPosts = postsData.posts.map((p: any) => ({
+                      id: p.id,
+                      title: p.title,
+                      content: p.content || '',
+                      votes: p.vote_count || 0,
+                      author_name: p.author_name || p.guest_name || 'Anonymous',
+                      author_email: p.author_email || p.guest_email,
+                      tags: p.tags || [],
+                      hasVoted: false,
+                    }))
+                    allPosts.push(...formattedPosts)
+                  }
+                }
+              } catch (error) {
+                console.error(`Failed to fetch posts for board ${board.id}:`, error)
+              }
             }
+            // Sort by vote count and created date, then limit to top 20
+            const sortedPosts = allPosts
+              .sort((a, b) => {
+                // First by vote count
+                if (b.votes !== a.votes) return b.votes - a.votes
+                // Then by created date (if available)
+                return 0
+              })
+              .slice(0, 20)
+            setPosts(sortedPosts)
           }
         }
       } catch (error) {
