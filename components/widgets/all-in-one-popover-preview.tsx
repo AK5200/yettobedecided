@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Search, ChevronUp, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -94,66 +94,48 @@ function getCategoryStyle(category: string): { bg: string; text: string } {
   }
 }
 
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    title: 'Localize changelog email subject and CTA text',
-    content: 'Allow users to customize the language of changelog email subject lines and call-to-action buttons.',
-    votes: 1,
-    author: 'Medevio',
-    category: 'Feature Requests',
-    status: 'under_review',
-  },
-  {
-    id: '2',
-    title: 'Quarters',
-    content: "Ability to customise the Quarter. Some companies don't have their quarter aligned with the year quarters.",
-    votes: 1,
-    author: 'Ricardo',
-    category: 'Feature Requests',
-    status: 'planned',
-  },
-  {
-    id: '3',
-    title: "What's new widget - status badge",
-    content: 'Implement server-side tracking for notification badge "read" status.',
-    votes: 3,
-    author: 'Alex',
-    category: 'Feature Requests',
-    status: 'in_progress',
-  },
-]
-
-const mockChangelog: ChangelogEntry[] = [
-  {
-    id: '1',
-    title: 'User Segmentation',
-    content: 'Enable moderation today in your dashboard settings.',
-    category: 'feature',
-    published_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-  {
-    id: '2',
-    title: 'Dark Mode Support',
-    content: "We've added a beautiful dark mode to reduce eye strain.",
-    category: 'feature',
-    published_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-  {
-    id: '3',
-    title: 'Performance Improvements',
-    content: 'Pages now load 40% faster with improved caching.',
-    category: 'improvement',
-    published_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-]
-
 export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: AllInOnePopoverPreviewProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [posts, setPosts] = useState(mockPosts)
+  const [posts, setPosts] = useState<Post[]>([])
+  const [changelog, setChangelog] = useState<ChangelogEntry[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch posts
+        const postsRes = await fetch(`/api/posts?board_id=&limit=10`)
+        if (postsRes.ok) {
+          const postsData = await postsRes.json()
+          const formattedPosts: Post[] = (postsData.posts || []).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            content: p.content || '',
+            votes: p.vote_count || 0,
+            author: p.author_name || p.guest_name || 'Anonymous',
+            category: 'Feature Requests',
+            status: p.status || 'planned',
+            hasVoted: false,
+          }))
+          setPosts(formattedPosts)
+        }
+
+        // Fetch changelog
+        const changelogRes = await fetch(`/api/changelog?org_id=${orgId}&published_only=true`)
+        if (changelogRes.ok) {
+          const changelogData = await changelogRes.json()
+          setChangelog(changelogData.entries || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (orgId) {
+      fetchData()
+    }
+  }, [orgId])
 
   const width = getWidthStyle(settings.size)
   const borderRadius = getBorderRadiusStyle(settings.borderRadius)
@@ -280,8 +262,19 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
 
             {/* Posts List */}
             <div className="flex-1 overflow-y-auto">
-              <div className="px-3 pb-3 space-y-2">
-                {filteredPosts.map((post) => (
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+              ) : filteredPosts.length === 0 ? (
+                <div className="text-center py-12 px-3">
+                  <p className="text-gray-500 text-sm">
+                    {searchQuery ? 'No posts match your search.' : 'No posts yet.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="px-3 pb-3 space-y-2">
+                  {filteredPosts.map((post) => (
                   <div
                     key={post.id}
                     className="p-3 border rounded-lg hover:border-gray-300 transition-colors cursor-pointer"
@@ -324,34 +317,45 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </TabsContent>
 
           {/* Changelog Tab */}
           <TabsContent value="changelog" className="flex-1 overflow-y-auto mt-0">
-            <div className="p-3 space-y-3">
-              {mockChangelog.map((entry) => {
-                const categoryStyle = getCategoryStyle(entry.category)
-                return (
-                  <div key={entry.id} className="border-b pb-3 last:border-b-0">
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-1.5">
-                      <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-[10px] px-1.5 py-0`}>
-                        {entry.category}
-                      </Badge>
-                      <span className="text-[10px]">
-                        {entry.published_at
-                          ? new Date(entry.published_at).toLocaleDateString()
-                          : 'Recently'}
-                      </span>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            ) : changelog.length === 0 ? (
+              <div className="text-center py-12 px-3">
+                <p className="text-gray-500 text-sm">No changelog entries yet.</p>
+              </div>
+            ) : (
+              <div className="p-3 space-y-3">
+                {changelog.map((entry) => {
+                  const categoryStyle = getCategoryStyle(entry.category)
+                  return (
+                    <div key={entry.id} className="border-b pb-3 last:border-b-0">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-1.5">
+                        <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-[10px] px-1.5 py-0`}>
+                          {entry.category}
+                        </Badge>
+                        <span className="text-[10px]">
+                          {entry.published_at
+                            ? new Date(entry.published_at).toLocaleDateString()
+                            : 'Recently'}
+                        </span>
+                      </div>
+                      <div className="font-medium text-gray-900 text-sm">{entry.title}</div>
+                      <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{entry.content}</p>
                     </div>
-                    <div className="font-medium text-gray-900 text-sm">{entry.title}</div>
-                    <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{entry.content}</p>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 

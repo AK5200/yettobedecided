@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import Link from 'next/link'
 import type { WidgetSettings } from '@/app/(dashboard)/widgets/page'
@@ -91,53 +92,28 @@ function getShadowStyle(shadow: WidgetSettings['shadow']): string {
   }
 }
 
-const mockEntries: ChangelogEntry[] = [
-  {
-    id: '1',
-    title: 'Dark Mode Support',
-    content: `We've added a beautiful dark mode to reduce eye strain during late-night work sessions.`,
-    category: 'feature',
-    published_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-    image_url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=120&fit=crop',
-  },
-  {
-    id: '2',
-    title: 'Performance Improvements',
-    content: `Pages now load 40% faster with improved caching and optimized database queries.`,
-    category: 'improvement',
-    published_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-  {
-    id: '3',
-    title: 'Fixed Export Bug',
-    content: `Resolved an issue where CSV exports would sometimes fail for large datasets.`,
-    category: 'fix',
-    published_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-  {
-    id: '4',
-    title: 'Team Workspaces',
-    content: `Create team workspaces to collaborate with your colleagues seamlessly.`,
-    category: 'feature',
-    published_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-    image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=120&fit=crop',
-  },
-  {
-    id: '5',
-    title: 'New API Endpoints',
-    content: `Added new REST API endpoints for better integration with third-party services.`,
-    category: 'feature',
-    published_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-]
-
 export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: ChangelogDropdownPreviewProps) {
-  const entries = mockEntries
+  const [entries, setEntries] = useState<ChangelogEntry[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchEntries = async () => {
+      try {
+        const res = await fetch(`/api/changelog?org_id=${orgId}&published_only=true`)
+        if (res.ok) {
+          const data = await res.json()
+          setEntries(data.entries || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch changelog entries:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (orgId) {
+      fetchEntries()
+    }
+  }, [orgId])
 
   const width = getWidthStyle(settings.size)
   const borderRadius = getBorderRadiusStyle(settings.borderRadius)
@@ -182,34 +158,45 @@ export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: 
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="divide-y">
-            {entries.map((entry) => {
-              const categoryStyle = getCategoryStyle(entry.category)
-              return (
-                <div key={entry.id} className="p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${categoryStyle.dot}`}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 text-sm">{entry.title}</h4>
-                      <p className="text-xs text-gray-500 mt-1">{entry.content}</p>
-                      {entry.image_url && (
-                        <img
-                          src={entry.image_url}
-                          alt={entry.title}
-                          className="mt-2 w-full h-20 object-cover rounded"
-                        />
-                      )}
-                      <span className="text-xs text-gray-400 mt-2 block">
-                        {formatDate(entry.published_at)}
-                      </span>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          ) : entries.length === 0 ? (
+            <div className="text-center py-12 px-4">
+              <p className="text-gray-500 text-sm">No changelog entries yet.</p>
+              <p className="text-xs text-gray-400 mt-2">Create your first changelog entry to see it here.</p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {entries.map((entry) => {
+                const categoryStyle = getCategoryStyle(entry.category)
+                return (
+                  <div key={entry.id} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${categoryStyle.dot}`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-900 text-sm">{entry.title}</h4>
+                        <p className="text-xs text-gray-500 mt-1">{entry.content}</p>
+                        {entry.image_url && (
+                          <img
+                            src={entry.image_url}
+                            alt={entry.title}
+                            className="mt-2 w-full h-20 object-cover rounded"
+                          />
+                        )}
+                        <span className="text-xs text-gray-400 mt-2 block">
+                          {formatDate(entry.published_at)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Footer */}

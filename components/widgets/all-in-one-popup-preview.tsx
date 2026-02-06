@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Search, ChevronUp, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -124,75 +124,49 @@ function getCategoryStyle(category: string): { bg: string; text: string } {
   }
 }
 
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    title: 'Localize changelog email subject and CTA text',
-    content: 'Allow users to customize the language of changelog email subject lines and call-to-action buttons to match their preferred language.',
-    votes: 1,
-    author: 'Medevio',
-    category: 'Feature Requests',
-    status: 'under_review',
-  },
-  {
-    id: '2',
-    title: 'Quarters',
-    content: "Ability to customise the Quarter. Some companies don't have their quarter aligned with the year quarters.",
-    votes: 1,
-    author: 'Ricardo',
-    category: 'Feature Requests',
-    status: 'planned',
-  },
-  {
-    id: '3',
-    title: "What's new widget - status badge",
-    content: 'Implement server-side tracking for notification badge "read" status instead of relying on browser cache, ensuring consistent badge...',
-    votes: 3,
-    author: 'Alex',
-    category: 'Feature Requests',
-    status: 'in_progress',
-  },
-  {
-    id: '4',
-    title: 'Dark mode for public pages',
-    content: 'Add dark mode support for all public-facing pages including changelog, roadmap, and feedback boards.',
-    votes: 5,
-    author: 'Sarah',
-    category: 'Feature Requests',
-    status: 'completed',
-  },
-]
-
-const mockChangelog: ChangelogEntry[] = [
-  {
-    id: '1',
-    title: 'User Segmentation',
-    content: 'Enable moderation today in your dashboard settings to build a better community experience.',
-    category: 'feature',
-    published_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-  {
-    id: '2',
-    title: 'Dark Mode Support',
-    content: "We've added a beautiful dark mode to reduce eye strain during late-night work sessions.",
-    category: 'feature',
-    published_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-  {
-    id: '3',
-    title: 'Performance Improvements',
-    content: 'Pages now load 40% faster with improved caching and optimized database queries.',
-    category: 'improvement',
-    published_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-]
 
 export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllInOnePopupPreviewProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [posts, setPosts] = useState(mockPosts)
+  const [posts, setPosts] = useState<Post[]>([])
+  const [changelog, setChangelog] = useState<ChangelogEntry[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch posts
+        const postsRes = await fetch(`/api/posts?board_id=&limit=10`)
+        if (postsRes.ok) {
+          const postsData = await postsRes.json()
+          const formattedPosts: Post[] = (postsData.posts || []).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            content: p.content || '',
+            votes: p.vote_count || 0,
+            author: p.author_name || p.guest_name || 'Anonymous',
+            category: 'Feature Requests',
+            status: p.status || 'planned',
+            hasVoted: false,
+          }))
+          setPosts(formattedPosts)
+        }
+
+        // Fetch changelog
+        const changelogRes = await fetch(`/api/changelog?org_id=${orgId}&published_only=true`)
+        if (changelogRes.ok) {
+          const changelogData = await changelogRes.json()
+          setChangelog(changelogData.entries || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (orgId) {
+      fetchData()
+    }
+  }, [orgId])
 
   const maxWidth = getSizeStyle(settings.size)
   const borderRadius = getBorderRadiusStyle(settings.borderRadius)
@@ -312,8 +286,19 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
 
             {/* Posts List */}
             <div className="flex-1 overflow-y-auto px-6">
-              <div className="space-y-3 pb-4">
-                {filteredPosts.map((post) => {
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+              ) : filteredPosts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-sm">
+                    {searchQuery ? 'No posts match your search.' : 'No posts yet.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3 pb-4">
+                  {filteredPosts.map((post) => {
                   const statusStyle = getStatusStyle(post.status)
                   return (
                     <div
@@ -361,34 +346,45 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
                       </div>
                     </div>
                   )
-                })}
-              </div>
+                  })}
+                </div>
+              )}
             </div>
           </TabsContent>
 
           {/* Changelog Tab */}
           <TabsContent value="changelog" className="flex-1 overflow-y-auto mt-0 pt-4 px-6">
-            <div className="space-y-4 pb-4">
-              {mockChangelog.map((entry) => {
-                const categoryStyle = getCategoryStyle(entry.category)
-                return (
-                  <div key={entry.id} className="border-b pb-4 last:border-b-0">
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                      <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0`}>
-                        {entry.category}
-                      </Badge>
-                      <span>
-                        {entry.published_at
-                          ? new Date(entry.published_at).toLocaleDateString()
-                          : 'Recently'}
-                      </span>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            ) : changelog.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-sm">No changelog entries yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4 pb-4">
+                {changelog.map((entry) => {
+                  const categoryStyle = getCategoryStyle(entry.category)
+                  return (
+                    <div key={entry.id} className="border-b pb-4 last:border-b-0">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                        <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0`}>
+                          {entry.category}
+                        </Badge>
+                        <span>
+                          {entry.published_at
+                            ? new Date(entry.published_at).toLocaleDateString()
+                            : 'Recently'}
+                        </span>
+                      </div>
+                      <div className="font-medium text-gray-900">{entry.title}</div>
+                      <p className="text-sm text-gray-600 line-clamp-2 mt-1">{entry.content}</p>
                     </div>
-                    <div className="font-medium text-gray-900">{entry.title}</div>
-                    <p className="text-sm text-gray-600 line-clamp-2 mt-1">{entry.content}</p>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 

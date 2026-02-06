@@ -22,14 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Megaphone, MessageSquare, Map, Settings, Code, ExternalLink, Copy, Check, Database, Sparkles, Layers, Info, Globe, LayoutGrid } from 'lucide-react'
+import { Megaphone, MessageSquare, Sparkles, Layers, Settings, Code, ExternalLink, Copy, Check, Eye, Play } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { ChangelogPopupPreview } from '@/components/widgets/changelog-popup-preview'
 import { ChangelogDropdownPreview } from '@/components/widgets/changelog-dropdown-preview'
 import { AnnouncementBannerPreview } from '@/components/widgets/announcement-banner-preview'
 import { AllInOnePopupPreview } from '@/components/widgets/all-in-one-popup-preview'
 import { AllInOnePopoverPreview } from '@/components/widgets/all-in-one-popover-preview'
-import { toast } from 'sonner'
 
 export type WidgetSettings = {
   accentColor: string
@@ -55,7 +55,7 @@ export type AnnouncementSettings = {
 }
 
 const defaultSettings: WidgetSettings = {
-  accentColor: '#7c3aed',
+  accentColor: '#F59E0B', // Amber-500
   backgroundColor: '#ffffff',
   showBranding: true,
   size: 'large',
@@ -68,41 +68,33 @@ const defaultSettings: WidgetSettings = {
 const defaultAnnouncementSettings: AnnouncementSettings = {
   tag: 'New',
   text: 'Capture feedback automatically with AI',
-  accentColor: '#7c3aed',
+  accentColor: '#F59E0B', // Amber-500
   backgroundColor: '#ffffff',
   borderRadius: 'large',
   linkType: 'changelog',
   customUrl: '',
 }
 
+type WidgetType = 'changelog-popup' | 'changelog-dropdown' | 'announcement' | 'all-in-one'
+
 export default function WidgetsPage() {
   const [orgId, setOrgId] = useState<string | null>(null)
   const [orgSlug, setOrgSlug] = useState<string>('')
-  const [showPopup, setShowPopup] = useState(false)
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [showAnnouncement, setShowAnnouncement] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
-  const [showAnnouncementSettings, setShowAnnouncementSettings] = useState(false)
-  const [showCode, setShowCode] = useState(false)
-  const [showAnnouncementCode, setShowAnnouncementCode] = useState(false)
+  const [loading, setLoading] = useState(true)
+  
+  // Widget preview states
+  const [previewWidget, setPreviewWidget] = useState<WidgetType | null>(null)
+  const [previewVariant, setPreviewVariant] = useState<'popup' | 'dropdown' | 'popover'>('popup')
+  
+  // Settings states
+  const [showSettings, setShowSettings] = useState<WidgetType | null>(null)
+  const [showCode, setShowCode] = useState<WidgetType | null>(null)
   const [copied, setCopied] = useState(false)
-  const [widgetType, setWidgetType] = useState<'popup' | 'dropdown'>('popup')
-  const [seeding, setSeeding] = useState(false)
-  // All-in-One Widget state
-  const [showAllInOnePopup, setShowAllInOnePopup] = useState(false)
-  const [showAllInOnePopover, setShowAllInOnePopover] = useState(false)
-  const [showAllInOneSettings, setShowAllInOneSettings] = useState(false)
-  const [showAllInOneCode, setShowAllInOneCode] = useState(false)
-  const [allInOneWidgetType, setAllInOneWidgetType] = useState<'popup' | 'popover'>('popup')
-  // Feedback Portal state
-  const [showPortalCode, setShowPortalCode] = useState(false)
-  const [portalCopied, setPortalCopied] = useState(false)
-
+  
   // Settings state
   const [settings, setSettings] = useState<WidgetSettings>(defaultSettings)
   const [announcementSettings, setAnnouncementSettings] = useState<AnnouncementSettings>(defaultAnnouncementSettings)
   const [saving, setSaving] = useState(false)
-  const [loading, setLoading] = useState(true)
 
   const updateSetting = <K extends keyof WidgetSettings>(key: K, value: WidgetSettings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -179,7 +171,6 @@ export default function WidgetsPage() {
           if (res.ok) {
             const data = await res.json()
             if (data.settings) {
-              // Map database fields to component state
               setSettings(prev => ({
                 ...prev,
                 accentColor: data.settings.accent_color || prev.accentColor,
@@ -204,29 +195,46 @@ export default function WidgetsPage() {
     fetchOrg()
   }, [])
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+  // Use deployed URL for widget code generation
+  // This ensures clients get the correct production URL in their embed code
+  const baseUrl = 'https://yettobedecided-goyz.vercel.app'
 
-  // Simple embed codes - settings are fetched from API dynamically
-  const popupCode = `<!-- FeedbackHub Changelog Popup Widget -->
-<!-- Settings are managed in your dashboard and load automatically -->
+  // Generate embed codes with comments for customization
+  const generateChangelogPopupCode = () => {
+    return `<!-- FeedbackHub Changelog Popup Widget -->
+<!-- Add this script tag before closing </body> tag -->
 <script>
   (function() {
     var script = document.createElement('script');
+    // Change this URL to your FeedbackHub instance URL
     script.src = '${baseUrl}/widget.js';
     script.async = true;
+    // Replace 'your-workspace' with your actual workspace slug
     script.dataset.org = '${orgSlug}';
     script.dataset.type = 'changelog-popup';
     document.head.appendChild(script);
   })();
-</script>`
+</script>
 
-  const dropdownCode = `<!-- FeedbackHub Changelog Dropdown Widget -->
-<!-- Settings are managed in your dashboard and load automatically -->
+<!-- Optional: Custom trigger button -->
+<!-- Uncomment and customize the button below to trigger the popup manually -->
+<!--
+<button id="feedbackhub-changelog-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+  What's New
+</button>
+-->`
+  }
+
+  const generateChangelogDropdownCode = () => {
+    return `<!-- FeedbackHub Changelog Dropdown Widget -->
+<!-- Add this script tag before closing </body> tag -->
 <script>
   (function() {
     var script = document.createElement('script');
+    // Change this URL to your FeedbackHub instance URL
     script.src = '${baseUrl}/widget.js';
     script.async = true;
+    // Replace 'your-workspace' with your actual workspace slug
     script.dataset.org = '${orgSlug}';
     script.dataset.type = 'changelog-dropdown';
     document.head.appendChild(script);
@@ -234,42 +242,119 @@ export default function WidgetsPage() {
 </script>
 
 <!-- Add this button where you want the dropdown trigger -->
-<button id="feedbackhub-changelog-trigger">
+<!-- Customize the button style below -->
+<button id="feedbackhub-changelog-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
   What's New
 </button>`
+  }
 
-  const handleCopy = () => {
-    const code = widgetType === 'popup' ? popupCode : dropdownCode
+  const generateAnnouncementCode = () => {
+    const borderRadius = announcementSettings.borderRadius === 'large' ? '9999px' 
+      : announcementSettings.borderRadius === 'medium' ? '12px' 
+      : announcementSettings.borderRadius === 'small' ? '8px' 
+      : '0px'
+    
+    return `<!-- FeedbackHub Announcement Banner -->
+<!-- Customize colors, size, and text below -->
+<div class="feedbackhub-announcement" style="
+  display: inline-flex; 
+  align-items: center; 
+  gap: 8px; 
+  padding: 8px 16px; 
+  border-radius: ${borderRadius}; 
+  background-color: ${announcementSettings.backgroundColor}; 
+  border: 1px solid ${announcementSettings.accentColor}30; 
+  text-decoration: none; 
+  transition: box-shadow 0.2s;
+">
+  <!-- Tag badge - customize color: ${announcementSettings.accentColor} -->
+  <!-- Size options: Change font-size to 10px (small), 12px (medium/default), or 14px (large) -->
+  <span style="
+    font-size: 12px; 
+    /* Change to: font-size: 10px; for small, or font-size: 14px; for large */
+    font-weight: 600; 
+    padding: 2px 10px; 
+    border-radius: ${borderRadius}; 
+    background-color: ${announcementSettings.accentColor}; 
+    color: white;
+  ">${announcementSettings.tag}</span>
+  
+  <!-- Main text - customize: ${announcementSettings.text} -->
+  <!-- Size options: Change font-size to 12px (small), 14px (medium/default), or 16px (large) -->
+  <span style="font-size: 14px; color: #374151;">
+    ${announcementSettings.text}
+  </span>
+  
+  <!-- Optional arrow icon (uncomment if using link) -->
+  <!-- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> -->
+</div>
+
+<!-- If using popup trigger, add this script -->
+${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enable popup functionality -->
+<script>
+  (function() {
+    var script = document.createElement('script');
+    script.src = '${baseUrl}/widget.js';
+    script.async = true;
+    script.dataset.org = '${orgSlug}';
+    script.dataset.type = 'changelog-popup';
+    script.dataset.trigger = 'feedbackhub-announcement-trigger';
+    document.head.appendChild(script);
+  })();
+</script>` : ''}`
+  }
+
+  const generateAllInOneCode = (variant: 'popup' | 'popover') => {
+    return `<!-- FeedbackHub All-in-One Widget (${variant === 'popup' ? 'Pop-up' : 'Popover'}) -->
+<!-- This widget combines feedback board and changelog in one -->
+<script>
+  (function() {
+    var script = document.createElement('script');
+    // Change this URL to your FeedbackHub instance URL
+    script.src = '${baseUrl}/widget.js';
+    script.async = true;
+    // Replace 'your-workspace' with your actual workspace slug
+    script.dataset.org = '${orgSlug}';
+    script.dataset.type = 'all-in-one-${variant}';
+    document.head.appendChild(script);
+  })();
+</script>
+
+<!-- Optional: Custom trigger button -->
+<!-- Uncomment and customize the button below -->
+<!--
+<button id="feedbackhub-all-in-one-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+  Feedback & Updates
+</button>
+-->`
+  }
+
+  const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code)
     setCopied(true)
     toast.success('Code copied to clipboard!')
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const seedSampleData = async () => {
-    setSeeding(true)
-    try {
-      const res = await fetch('/api/changelog/seed', { method: 'POST' })
-      if (res.ok) {
-        toast.success('Sample changelog entries created!')
-      } else {
-        const data = await res.json()
-        toast.error(data.error || 'Failed to seed data')
-      }
-    } catch {
-      toast.error('Failed to seed data')
-    } finally {
-      setSeeding(false)
-    }
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+          <p className="text-sm text-muted-foreground">Loading widgets...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Widgets</h1>
-          <p className="text-muted-foreground mt-1">
-            Embed widgets on your website to engage users
+          <h1 className="text-3xl font-bold">Widgets</h1>
+          <p className="text-muted-foreground mt-2">
+            Embed widgets on your website to engage users and collect feedback
           </p>
         </div>
         <Link href="/widgets/docs" target="_blank">
@@ -280,263 +365,309 @@ export default function WidgetsPage() {
         </Link>
       </div>
 
-      {/* Dynamic Settings Info */}
-      <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
-        <div className="text-sm">
-          <p className="font-medium text-blue-900">Dynamic Settings</p>
-          <p className="text-blue-700 mt-1">
-            Settings you configure here are automatically applied to all widgets using your embed code.
-            No need to update your embed code when you change settings - changes reflect immediately on your site.
-          </p>
-        </div>
-      </div>
-
-      {/* Feedback Portal */}
-      <Card>
+      {/* Navbar Link Section */}
+      <Card className="border">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-100 rounded-lg">
-              <Globe className="h-5 w-5 text-emerald-600" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Feedback Portal</CardTitle>
-              <CardDescription>Your public hub with feedback boards, changelog, and roadmap</CardDescription>
-            </div>
-          </div>
+          <CardTitle className="text-lg">Add to Your Navbar</CardTitle>
+          <CardDescription>Add a link to your navigation bar that opens your feedback page</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => window.open(`/${orgSlug}`, '_blank')} disabled={!orgSlug}>
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open Portal
-            </Button>
-            <Button variant="outline" onClick={() => window.open(`/${orgSlug}/changelog`, '_blank')} disabled={!orgSlug}>
-              <Megaphone className="h-4 w-4 mr-2" />
-              Changelog
-            </Button>
-            <Button variant="outline" onClick={() => window.open(`/${orgSlug}/roadmap`, '_blank')} disabled={!orgSlug}>
-              <Map className="h-4 w-4 mr-2" />
-              Roadmap
-            </Button>
-            <Button variant="outline" onClick={() => setShowPortalCode(true)}>
-              <Code className="h-4 w-4 mr-2" />
-              Get Link
-            </Button>
-          </div>
-          <div className="mt-4 p-3 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              <strong>Portal URL:</strong>{' '}
-              <code className="text-xs bg-background px-2 py-1 rounded">
-                {baseUrl}/{orgSlug}
-              </code>
+          <div className="space-y-2">
+            <Label>Navbar Link Code</Label>
+            <div className="relative">
+              <Textarea
+                value={`<a href="https://yettobedecided-goyz.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
+  Feedback
+</a>`}
+                readOnly
+                className="font-mono text-sm h-20 resize-none"
+              />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="absolute top-2 right-2"
+                onClick={() => {
+                  const code = `<a href="https://yettobedecided-goyz.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
+  Feedback
+</a>`
+                  navigator.clipboard.writeText(code)
+                  toast.success('Code copied to clipboard!')
+                }}
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 mr-1" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-1" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Customize the link text and styling to match your navbar design.
             </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Changelog Widget */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Megaphone className="h-5 w-5 text-purple-600" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Changelog Widget</CardTitle>
-              <CardDescription>Show product updates to your users</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => setShowPopup(true)}>
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open Popup
-            </Button>
-            <Button variant="outline" onClick={() => setShowDropdown(true)}>
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open Dropdown
-            </Button>
-            <Button variant="outline" onClick={() => setShowSettings(true)}>
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-            <Button variant="outline" onClick={() => setShowCode(true)}>
-              <Code className="h-4 w-4 mr-2" />
-              Get Code
-            </Button>
-            <Button variant="ghost" onClick={seedSampleData} disabled={seeding}>
-              <Database className="h-4 w-4 mr-2" />
-              {seeding ? 'Seeding...' : 'Seed Sample Data'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Announcement Banner Widget */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 rounded-lg">
-              <Sparkles className="h-5 w-5 text-amber-600" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Announcement Banner</CardTitle>
-              <CardDescription>Hero section banner to highlight new features</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => setShowAnnouncement(true)}>
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Preview
-            </Button>
-            <Button variant="outline" onClick={() => setShowAnnouncementSettings(true)}>
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-            <Button variant="outline" onClick={() => setShowAnnouncementCode(true)}>
-              <Code className="h-4 w-4 mr-2" />
-              Get Code
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* All-in-One Widget */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <Layers className="h-5 w-5 text-indigo-600" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">All-in-One Widget</CardTitle>
-              <CardDescription>Combine feedback board and changelog in one widget</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => setShowAllInOnePopover(true)}>
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open Popover
-            </Button>
-            <Button variant="outline" onClick={() => setShowAllInOnePopup(true)}>
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open Pop-up
-            </Button>
-            <Button variant="outline" onClick={() => setShowAllInOneSettings(true)}>
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-            <Button variant="outline" onClick={() => setShowAllInOneCode(true)}>
-              <Code className="h-4 w-4 mr-2" />
-              Get Code
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Feedback Widget - Coming Soon */}
-      <Card className="opacity-60">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <MessageSquare className="h-5 w-5 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-lg">Feedback Widget</CardTitle>
-                <Badge variant="secondary">Coming Soon</Badge>
+      {/* Widget Cards */}
+      <div className="grid gap-6">
+        {/* 1. Changelog Popup Widget */}
+        <Card className="border">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Megaphone className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Changelog Popup</CardTitle>
+                  <CardDescription>Show product updates in a centered modal</CardDescription>
+                </div>
               </div>
-              <CardDescription>Collect feedback from your users</CardDescription>
+              <Badge variant="secondary">Widget 1</Badge>
             </div>
-          </div>
-        </CardHeader>
-      </Card>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="flex flex-wrap gap-3">
+              <Button 
+                onClick={() => {
+                  setPreviewWidget('changelog-popup')
+                  setPreviewVariant('popup')
+                }}
+                className="bg-amber-500 hover:bg-amber-600 text-white"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Live Preview
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowSettings('changelog-popup')}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCode('changelog-popup')}
+              >
+                <Code className="h-4 w-4 mr-2" />
+                Get Code
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Roadmap Widget - Coming Soon */}
-      <Card className="opacity-60">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Map className="h-5 w-5 text-green-600" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-lg">Roadmap Widget</CardTitle>
-                <Badge variant="secondary">Coming Soon</Badge>
+        {/* 2. Changelog Dropdown Widget */}
+        <Card className="border">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Megaphone className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Changelog Dropdown</CardTitle>
+                  <CardDescription>Show updates in a dropdown panel anchored to a button</CardDescription>
+                </div>
               </div>
-              <CardDescription>Share your product roadmap</CardDescription>
+              <Badge variant="secondary">Widget 2</Badge>
             </div>
-          </div>
-        </CardHeader>
-      </Card>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="flex flex-wrap gap-3">
+              <Button 
+                onClick={() => {
+                  setPreviewWidget('changelog-dropdown')
+                  setPreviewVariant('dropdown')
+                }}
+                className="bg-amber-500 hover:bg-amber-600 text-white"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Live Preview
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowSettings('changelog-dropdown')}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCode('changelog-dropdown')}
+              >
+                <Code className="h-4 w-4 mr-2" />
+                Get Code
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Changelog Popup Preview */}
-      {showPopup && orgId && (
+        {/* 3. Announcement Banner Widget */}
+        <Card className="border">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Announcement Banner</CardTitle>
+                  <CardDescription>Hero section banner to highlight new features</CardDescription>
+                </div>
+              </div>
+              <Badge variant="secondary">Widget 3</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="flex flex-wrap gap-3">
+              <Button 
+                onClick={() => {
+                  setPreviewWidget('announcement')
+                  setPreviewVariant('popup')
+                }}
+                className="bg-amber-500 hover:bg-amber-600 text-white"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Live Preview
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowSettings('announcement')}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCode('announcement')}
+              >
+                <Code className="h-4 w-4 mr-2" />
+                Get Code
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 4. All-in-One Widget */}
+        <Card className="border">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Layers className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">All-in-One Widget</CardTitle>
+                  <CardDescription>Combine feedback board and changelog in one widget</CardDescription>
+                </div>
+              </div>
+              <Badge variant="secondary">Widget 4</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="flex flex-wrap gap-3">
+              <Button 
+                onClick={() => {
+                  setPreviewWidget('all-in-one')
+                  setPreviewVariant('popup')
+                }}
+                className="bg-amber-500 hover:bg-amber-600 text-white"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Preview Popup
+              </Button>
+              <Button 
+                onClick={() => {
+                  setPreviewWidget('all-in-one')
+                  setPreviewVariant('popover')
+                }}
+                variant="outline"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Preview Popover
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowSettings('all-in-one')}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCode('all-in-one')}
+              >
+                <Code className="h-4 w-4 mr-2" />
+                Get Code
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Preview Modals */}
+      {previewWidget === 'changelog-popup' && orgId && (
         <ChangelogPopupPreview
           orgId={orgId}
           orgSlug={orgSlug}
-          onClose={() => setShowPopup(false)}
+          onClose={() => setPreviewWidget(null)}
           settings={settings}
         />
       )}
 
-      {/* Changelog Dropdown Preview */}
-      {showDropdown && orgId && (
+      {previewWidget === 'changelog-dropdown' && orgId && (
         <ChangelogDropdownPreview
           orgId={orgId}
           orgSlug={orgSlug}
-          onClose={() => setShowDropdown(false)}
+          onClose={() => setPreviewWidget(null)}
           settings={settings}
         />
       )}
 
-      {/* Announcement Banner Preview */}
-      {showAnnouncement && (
+      {previewWidget === 'announcement' && (
         <AnnouncementBannerPreview
-          onClose={() => setShowAnnouncement(false)}
+          onClose={() => setPreviewWidget(null)}
           settings={announcementSettings}
           orgSlug={orgSlug}
           onOpenPopup={() => {
-            setShowAnnouncement(false)
-            setShowPopup(true)
+            setPreviewWidget(null)
+            setPreviewWidget('changelog-popup')
+            setPreviewVariant('popup')
           }}
         />
       )}
 
-      {/* All-in-One Popup Preview */}
-      {showAllInOnePopup && orgId && (
+      {previewWidget === 'all-in-one' && orgId && previewVariant === 'popup' && (
         <AllInOnePopupPreview
           orgId={orgId}
           orgSlug={orgSlug}
-          onClose={() => setShowAllInOnePopup(false)}
+          onClose={() => setPreviewWidget(null)}
           settings={settings}
         />
       )}
 
-      {/* All-in-One Popover Preview */}
-      {showAllInOnePopover && orgId && (
+      {previewWidget === 'all-in-one' && orgId && previewVariant === 'popover' && (
         <AllInOnePopoverPreview
           orgId={orgId}
           orgSlug={orgSlug}
-          onClose={() => setShowAllInOnePopover(false)}
+          onClose={() => setPreviewWidget(null)}
           settings={settings}
         />
       )}
 
-      {/* Settings Modal */}
-      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+      {/* Settings Modals - Changelog */}
+      <Dialog open={showSettings === 'changelog-popup' || showSettings === 'changelog-dropdown'} onOpenChange={(open) => !open && setShowSettings(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Changelog Widget Settings</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            {/* Heading */}
             <div className="space-y-2">
               <Label htmlFor="heading">Heading</Label>
               <Input
@@ -544,10 +675,10 @@ export default function WidgetsPage() {
                 value={settings.heading}
                 onChange={(e) => updateSetting('heading', e.target.value)}
                 placeholder="Welcome back 👋"
+                className=""
               />
             </div>
 
-            {/* Subheading */}
             <div className="space-y-2">
               <Label htmlFor="subheading">Subheading</Label>
               <Input
@@ -555,10 +686,10 @@ export default function WidgetsPage() {
                 value={settings.subheading}
                 onChange={(e) => updateSetting('subheading', e.target.value)}
                 placeholder="Here's what we added while you were away."
+                className=""
               />
             </div>
 
-            {/* Accent Color */}
             <div className="space-y-2">
               <Label htmlFor="accentColor">Accent Color</Label>
               <div className="flex gap-3">
@@ -572,13 +703,13 @@ export default function WidgetsPage() {
                 <Input
                   value={settings.accentColor}
                   onChange={(e) => updateSetting('accentColor', e.target.value)}
-                  placeholder="#7c3aed"
-                  className="flex-1"
+                  placeholder="#F59E0B"
+                  className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">Change this color to match your brand</p>
             </div>
 
-            {/* Background Color */}
             <div className="space-y-2">
               <Label htmlFor="backgroundColor">Background Color</Label>
               <div className="flex gap-3">
@@ -593,12 +724,11 @@ export default function WidgetsPage() {
                   value={settings.backgroundColor}
                   onChange={(e) => updateSetting('backgroundColor', e.target.value)}
                   placeholder="#ffffff"
-                  className="flex-1"
+                  className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
             </div>
 
-            {/* Size */}
             <div className="space-y-2">
               <Label>Dialog Size</Label>
               <Select
@@ -615,11 +745,11 @@ export default function WidgetsPage() {
                   <SelectItem value="xlarge">X-Large (780px)</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">Choose size: small, medium, large, or xlarge</p>
             </div>
 
-            {/* Border Radius */}
             <div className="space-y-2">
-              <Label>Border Radius (Edge Curve)</Label>
+              <Label>Border Radius</Label>
               <Select
                 value={settings.borderRadius}
                 onValueChange={(v) => updateSetting('borderRadius', v as WidgetSettings['borderRadius'])}
@@ -636,7 +766,6 @@ export default function WidgetsPage() {
               </Select>
             </div>
 
-            {/* Shadow */}
             <div className="space-y-2">
               <Label>Shadow</Label>
               <Select
@@ -655,7 +784,6 @@ export default function WidgetsPage() {
               </Select>
             </div>
 
-            {/* Show Branding */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label>Show Branding</Label>
@@ -669,13 +797,21 @@ export default function WidgetsPage() {
               />
             </div>
 
-            <div className="pt-4 flex justify-end">
+            <div className="pt-4 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowSettings(null)}
+                className=""
+              >
+                Cancel
+              </Button>
               <Button
                 onClick={async () => {
                   await saveSettings('changelog')
-                  setShowSettings(false)
+                  setShowSettings(null)
                 }}
                 disabled={saving}
+                className=""
               >
                 {saving ? 'Saving...' : 'Save Settings'}
               </Button>
@@ -684,88 +820,13 @@ export default function WidgetsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Get Code Modal */}
-      <Dialog open={showCode} onOpenChange={setShowCode}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Embed Changelog Widget</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Widget Type</Label>
-              <div className="flex gap-2">
-                <Button
-                  variant={widgetType === 'popup' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setWidgetType('popup')}
-                >
-                  Popup
-                </Button>
-                <Button
-                  variant={widgetType === 'dropdown' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setWidgetType('dropdown')}
-                >
-                  Dropdown
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {widgetType === 'popup'
-                  ? 'Shows a centered modal when triggered'
-                  : 'Shows a dropdown panel anchored to a button'}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Embed Code</Label>
-              <div className="relative">
-                <Textarea
-                  value={widgetType === 'popup' ? popupCode : dropdownCode}
-                  readOnly
-                  className="font-mono text-sm h-64 resize-none"
-                />
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="absolute top-2 right-2"
-                  onClick={handleCopy}
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4 mr-1" />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4 mr-1" />
-                      Copy
-                    </>
-                  )}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Add this code to your website's HTML, preferably before the closing &lt;/body&gt; tag.
-              </p>
-            </div>
-
-            <div className="bg-muted p-3 rounded-md">
-              <p className="text-sm font-medium mb-1">Preview your widget</p>
-              <p className="text-xs text-muted-foreground">
-                Use the "Open Popup" or "Open Dropdown" buttons above to see how your widget will look.
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Announcement Settings Modal */}
-      <Dialog open={showAnnouncementSettings} onOpenChange={setShowAnnouncementSettings}>
+      {/* Settings Modal - Announcement */}
+      <Dialog open={showSettings === 'announcement'} onOpenChange={(open) => !open && setShowSettings(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Announcement Banner Settings</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            {/* Tag */}
             <div className="space-y-2">
               <Label htmlFor="tag">Tag</Label>
               <Input
@@ -773,13 +834,11 @@ export default function WidgetsPage() {
                 value={announcementSettings.tag}
                 onChange={(e) => updateAnnouncementSetting('tag', e.target.value)}
                 placeholder="New"
+                className=""
               />
-              <p className="text-xs text-muted-foreground">
-                The badge text (e.g., "New", "Update", "Beta")
-              </p>
+              <p className="text-xs text-muted-foreground">The badge text (e.g., "New", "Update", "Beta")</p>
             </div>
 
-            {/* Text */}
             <div className="space-y-2">
               <Label htmlFor="announcement-text">Text</Label>
               <Input
@@ -787,13 +846,10 @@ export default function WidgetsPage() {
                 value={announcementSettings.text}
                 onChange={(e) => updateAnnouncementSetting('text', e.target.value)}
                 placeholder="Capture feedback automatically with AI"
+                className=""
               />
-              <p className="text-xs text-muted-foreground">
-                The main announcement text
-              </p>
             </div>
 
-            {/* Accent Color */}
             <div className="space-y-2">
               <Label htmlFor="announcement-accentColor">Accent Color</Label>
               <div className="flex gap-3">
@@ -807,16 +863,13 @@ export default function WidgetsPage() {
                 <Input
                   value={announcementSettings.accentColor}
                   onChange={(e) => updateAnnouncementSetting('accentColor', e.target.value)}
-                  placeholder="#7c3aed"
-                  className="flex-1"
+                  placeholder="#F59E0B"
+                  className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Color for the tag badge
-              </p>
+              <p className="text-xs text-muted-foreground">Change this color: #F59E0B (amber) or use your brand color</p>
             </div>
 
-            {/* Background Color */}
             <div className="space-y-2">
               <Label htmlFor="announcement-backgroundColor">Background Color</Label>
               <div className="flex gap-3">
@@ -831,15 +884,11 @@ export default function WidgetsPage() {
                   value={announcementSettings.backgroundColor}
                   onChange={(e) => updateAnnouncementSetting('backgroundColor', e.target.value)}
                   placeholder="#ffffff"
-                  className="flex-1"
+                  className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Background color for the banner pill
-              </p>
             </div>
 
-            {/* Border Radius */}
             <div className="space-y-2">
               <Label>Border Radius</Label>
               <Select
@@ -856,9 +905,9 @@ export default function WidgetsPage() {
                   <SelectItem value="large">Large (Full pill)</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">Choose: none, small, medium, or large</p>
             </div>
 
-            {/* Link Type */}
             <div className="space-y-2">
               <Label>Click Action</Label>
               <Select
@@ -875,15 +924,8 @@ export default function WidgetsPage() {
                   <SelectItem value="custom">Custom URL</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                {announcementSettings.linkType === 'none' && 'Banner will not be clickable'}
-                {announcementSettings.linkType === 'popup' && 'Opens the changelog popup widget'}
-                {announcementSettings.linkType === 'changelog' && `Goes to /${orgSlug}/changelog`}
-                {announcementSettings.linkType === 'custom' && 'Opens your custom URL'}
-              </p>
             </div>
 
-            {/* Custom URL - only show when linkType is custom */}
             {announcementSettings.linkType === 'custom' && (
               <div className="space-y-2">
                 <Label htmlFor="customUrl">Custom URL</Label>
@@ -892,17 +934,26 @@ export default function WidgetsPage() {
                   value={announcementSettings.customUrl}
                   onChange={(e) => updateAnnouncementSetting('customUrl', e.target.value)}
                   placeholder="https://example.com/feature"
+                  className=""
                 />
               </div>
             )}
 
-            <div className="pt-4 flex justify-end">
+            <div className="pt-4 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowSettings(null)}
+                className=""
+              >
+                Cancel
+              </Button>
               <Button
                 onClick={async () => {
                   await saveSettings('announcement')
-                  setShowAnnouncementSettings(false)
+                  setShowSettings(null)
                 }}
                 disabled={saving}
+                className=""
               >
                 {saving ? 'Saving...' : 'Save Settings'}
               </Button>
@@ -911,134 +962,13 @@ export default function WidgetsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Announcement Code Modal */}
-      <Dialog open={showAnnouncementCode} onOpenChange={setShowAnnouncementCode}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Embed Announcement Banner</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Embed Code</Label>
-              <div className="relative">
-                <Textarea
-                  value={(() => {
-                    const borderRadius = announcementSettings.borderRadius === 'large' ? '9999px' : announcementSettings.borderRadius === 'medium' ? '12px' : announcementSettings.borderRadius === 'small' ? '8px' : '0px'
-                    const baseStyles = `display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: ${borderRadius}; background-color: ${announcementSettings.backgroundColor}; border: 1px solid ${announcementSettings.accentColor}30; text-decoration: none; transition: box-shadow 0.2s;`
-                    const tagStyles = `font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: ${borderRadius}; background-color: ${announcementSettings.accentColor}; color: white;`
-                    const arrowSvg = announcementSettings.linkType !== 'none'
-                      ? `\n  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`
-                      : ''
-
-                    if (announcementSettings.linkType === 'none') {
-                      return `<!-- FeedbackHub Announcement Banner -->
-<span class="feedbackhub-announcement" style="${baseStyles}">
-  <span style="${tagStyles}">${announcementSettings.tag}</span>
-  <span style="font-size: 14px; color: #374151;">${announcementSettings.text}</span>
-</span>`
-                    } else if (announcementSettings.linkType === 'popup') {
-                      return `<!-- FeedbackHub Announcement Banner (opens changelog popup) -->
-<a
-  href="#"
-  id="feedbackhub-announcement-trigger"
-  class="feedbackhub-announcement"
-  style="${baseStyles}"
->
-  <span style="${tagStyles}">${announcementSettings.tag}</span>
-  <span style="font-size: 14px; color: #374151;">${announcementSettings.text}</span>${arrowSvg}
-</a>
-
-<!-- Include this script to enable popup functionality -->
-<script>
-  (function() {
-    var script = document.createElement('script');
-    script.src = '${baseUrl}/widget.js';
-    script.async = true;
-    script.dataset.org = '${orgSlug}';
-    script.dataset.type = 'changelog-popup';
-    script.dataset.trigger = 'feedbackhub-announcement-trigger';
-    document.head.appendChild(script);
-  })();
-</script>`
-                    } else {
-                      const href = announcementSettings.linkType === 'changelog'
-                        ? `${baseUrl}/${orgSlug}/changelog`
-                        : announcementSettings.customUrl || '#'
-                      return `<!-- FeedbackHub Announcement Banner -->
-<a
-  href="${href}"
-  class="feedbackhub-announcement"
-  style="${baseStyles}"
->
-  <span style="${tagStyles}">${announcementSettings.tag}</span>
-  <span style="font-size: 14px; color: #374151;">${announcementSettings.text}</span>${arrowSvg}
-</a>`
-                    }
-                  })()}
-                  readOnly
-                  className="font-mono text-sm h-80 resize-none"
-                />
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="absolute top-2 right-2"
-                  onClick={() => {
-                    const borderRadius = announcementSettings.borderRadius === 'large' ? '9999px' : announcementSettings.borderRadius === 'medium' ? '12px' : announcementSettings.borderRadius === 'small' ? '8px' : '0px'
-                    const baseStyles = `display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: ${borderRadius}; background-color: ${announcementSettings.backgroundColor}; border: 1px solid ${announcementSettings.accentColor}30; text-decoration: none; transition: box-shadow 0.2s;`
-                    const tagStyles = `font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: ${borderRadius}; background-color: ${announcementSettings.accentColor}; color: white;`
-                    const arrowSvg = announcementSettings.linkType !== 'none'
-                      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`
-                      : ''
-
-                    let code = ''
-                    if (announcementSettings.linkType === 'none') {
-                      code = `<span class="feedbackhub-announcement" style="${baseStyles}"><span style="${tagStyles}">${announcementSettings.tag}</span><span style="font-size: 14px; color: #374151;">${announcementSettings.text}</span></span>`
-                    } else if (announcementSettings.linkType === 'popup') {
-                      code = `<a href="#" id="feedbackhub-announcement-trigger" class="feedbackhub-announcement" style="${baseStyles}"><span style="${tagStyles}">${announcementSettings.tag}</span><span style="font-size: 14px; color: #374151;">${announcementSettings.text}</span>${arrowSvg}</a>
-<script>(function(){var s=document.createElement('script');s.src='${baseUrl}/widget.js';s.async=true;s.dataset.org='${orgSlug}';s.dataset.type='changelog-popup';s.dataset.trigger='feedbackhub-announcement-trigger';document.head.appendChild(s);})();</script>`
-                    } else {
-                      const href = announcementSettings.linkType === 'changelog'
-                        ? `${baseUrl}/${orgSlug}/changelog`
-                        : announcementSettings.customUrl || '#'
-                      code = `<a href="${href}" class="feedbackhub-announcement" style="${baseStyles}"><span style="${tagStyles}">${announcementSettings.tag}</span><span style="font-size: 14px; color: #374151;">${announcementSettings.text}</span>${arrowSvg}</a>`
-                    }
-
-                    navigator.clipboard.writeText(code)
-                    setCopied(true)
-                    toast.success('Code copied to clipboard!')
-                    setTimeout(() => setCopied(false), 2000)
-                  }}
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4 mr-1" />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4 mr-1" />
-                      Copy
-                    </>
-                  )}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Add this HTML to your hero section, typically above your main heading.
-                {announcementSettings.linkType === 'popup' && ' The script will enable the changelog popup on click.'}
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* All-in-One Settings Modal */}
-      <Dialog open={showAllInOneSettings} onOpenChange={setShowAllInOneSettings}>
+      {/* Settings Modal - All-in-One */}
+      <Dialog open={showSettings === 'all-in-one'} onOpenChange={(open) => !open && setShowSettings(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>All-in-One Widget Settings</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            {/* Heading */}
             <div className="space-y-2">
               <Label htmlFor="aio-heading">Heading</Label>
               <Input
@@ -1046,10 +976,10 @@ export default function WidgetsPage() {
                 value={settings.heading}
                 onChange={(e) => updateSetting('heading', e.target.value)}
                 placeholder="Have something to say?"
+                className=""
               />
             </div>
 
-            {/* Subheading */}
             <div className="space-y-2">
               <Label htmlFor="aio-subheading">Subheading</Label>
               <Input
@@ -1057,10 +987,10 @@ export default function WidgetsPage() {
                 value={settings.subheading}
                 onChange={(e) => updateSetting('subheading', e.target.value)}
                 placeholder="Suggest a feature, read through our feedback..."
+                className=""
               />
             </div>
 
-            {/* Accent Color */}
             <div className="space-y-2">
               <Label htmlFor="aio-accentColor">Accent Color</Label>
               <div className="flex gap-3">
@@ -1074,13 +1004,13 @@ export default function WidgetsPage() {
                 <Input
                   value={settings.accentColor}
                   onChange={(e) => updateSetting('accentColor', e.target.value)}
-                  placeholder="#7c3aed"
-                  className="flex-1"
+                  placeholder="#F59E0B"
+                  className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">Customize accent color: #F59E0B (default amber)</p>
             </div>
 
-            {/* Background Color */}
             <div className="space-y-2">
               <Label htmlFor="aio-backgroundColor">Background Color</Label>
               <div className="flex gap-3">
@@ -1095,12 +1025,11 @@ export default function WidgetsPage() {
                   value={settings.backgroundColor}
                   onChange={(e) => updateSetting('backgroundColor', e.target.value)}
                   placeholder="#ffffff"
-                  className="flex-1"
+                  className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
             </div>
 
-            {/* Size */}
             <div className="space-y-2">
               <Label>Widget Size</Label>
               <Select
@@ -1117,9 +1046,9 @@ export default function WidgetsPage() {
                   <SelectItem value="xlarge">X-Large</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">Options: small, medium, large, xlarge</p>
             </div>
 
-            {/* Border Radius */}
             <div className="space-y-2">
               <Label>Border Radius</Label>
               <Select
@@ -1138,7 +1067,6 @@ export default function WidgetsPage() {
               </Select>
             </div>
 
-            {/* Shadow */}
             <div className="space-y-2">
               <Label>Shadow</Label>
               <Select
@@ -1157,7 +1085,6 @@ export default function WidgetsPage() {
               </Select>
             </div>
 
-            {/* Show Branding */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label>Show Branding</Label>
@@ -1171,13 +1098,21 @@ export default function WidgetsPage() {
               />
             </div>
 
-            <div className="pt-4 flex justify-end">
+            <div className="pt-4 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowSettings(null)}
+                className=""
+              >
+                Cancel
+              </Button>
               <Button
                 onClick={async () => {
                   await saveSettings('all-in-one')
-                  setShowAllInOneSettings(false)
+                  setShowSettings(null)
                 }}
                 disabled={saving}
+                className=""
               >
                 {saving ? 'Saving...' : 'Save Settings'}
               </Button>
@@ -1186,83 +1121,26 @@ export default function WidgetsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* All-in-One Get Code Modal */}
-      <Dialog open={showAllInOneCode} onOpenChange={setShowAllInOneCode}>
-        <DialogContent className="max-w-2xl">
+      {/* Code Modals */}
+      <Dialog open={showCode === 'changelog-popup'} onOpenChange={(open) => !open && setShowCode(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Embed All-in-One Widget</DialogTitle>
+            <DialogTitle>Embed Changelog Popup Widget</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Widget Type</Label>
-              <div className="flex gap-2">
-                <Button
-                  variant={allInOneWidgetType === 'popover' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setAllInOneWidgetType('popover')}
-                >
-                  Popover
-                </Button>
-                <Button
-                  variant={allInOneWidgetType === 'popup' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setAllInOneWidgetType('popup')}
-                >
-                  Pop-up
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {allInOneWidgetType === 'popover'
-                  ? 'Shows a side-positioned panel with feedback board and changelog'
-                  : 'Shows a centered modal with feedback board and changelog'}
-              </p>
-            </div>
-
             <div className="space-y-2">
               <Label>Embed Code</Label>
               <div className="relative">
                 <Textarea
-                  value={allInOneWidgetType === 'popover'
-                    ? `<!-- FeedbackHub All-in-One Widget (Popover) -->
-<!-- Settings are managed in your dashboard and load automatically -->
-<script>
-  (function() {
-    var script = document.createElement('script');
-    script.src = '${baseUrl}/widget.js';
-    script.async = true;
-    script.dataset.org = '${orgSlug}';
-    script.dataset.type = 'all-in-one-popover';
-    document.head.appendChild(script);
-  })();
-</script>`
-                    : `<!-- FeedbackHub All-in-One Widget (Pop-up) -->
-<!-- Settings are managed in your dashboard and load automatically -->
-<script>
-  (function() {
-    var script = document.createElement('script');
-    script.src = '${baseUrl}/widget.js';
-    script.async = true;
-    script.dataset.org = '${orgSlug}';
-    script.dataset.type = 'all-in-one-popup';
-    document.head.appendChild(script);
-  })();
-</script>`}
+                  value={generateChangelogPopupCode()}
                   readOnly
-                  className="font-mono text-sm h-56 resize-none"
+                  className="font-mono text-sm h-80 resize-none"
                 />
                 <Button
                   size="sm"
                   variant="secondary"
                   className="absolute top-2 right-2"
-                  onClick={() => {
-                    const code = allInOneWidgetType === 'popover'
-                      ? `<script>(function(){var s=document.createElement('script');s.src='${baseUrl}/widget.js';s.async=true;s.dataset.org='${orgSlug}';s.dataset.type='all-in-one-popover';document.head.appendChild(s);})();</script>`
-                      : `<script>(function(){var s=document.createElement('script');s.src='${baseUrl}/widget.js';s.async=true;s.dataset.org='${orgSlug}';s.dataset.type='all-in-one-popup';document.head.appendChild(s);})();</script>`
-                    navigator.clipboard.writeText(code)
-                    setCopied(true)
-                    toast.success('Code copied to clipboard!')
-                    setTimeout(() => setCopied(false), 2000)
-                  }}
+                  onClick={() => handleCopy(generateChangelogPopupCode())}
                 >
                   {copied ? (
                     <>
@@ -1279,109 +1157,157 @@ export default function WidgetsPage() {
               </div>
               <p className="text-xs text-muted-foreground">
                 Add this code to your website's HTML, preferably before the closing &lt;/body&gt; tag.
-              </p>
-            </div>
-
-            <div className="bg-muted p-3 rounded-md">
-              <p className="text-sm font-medium mb-1">Preview your widget</p>
-              <p className="text-xs text-muted-foreground">
-                Use the "Open Popover" or "Open Pop-up" buttons above to see how your widget will look.
+                Customize colors and sizes in the Settings above.
               </p>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Feedback Portal Links Modal */}
-      <Dialog open={showPortalCode} onOpenChange={setShowPortalCode}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={showCode === 'changelog-dropdown'} onOpenChange={(open) => !open && setShowCode(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Feedback Portal Links</DialogTitle>
+            <DialogTitle>Embed Changelog Dropdown Widget</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-sm text-muted-foreground">
-              Share these links with your users to give them access to your feedback portal.
-            </p>
-
-            <div className="space-y-3">
-              {/* Main Portal */}
-              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">Feedback Portal</p>
-                  <p className="text-xs text-muted-foreground">{baseUrl}/{orgSlug}</p>
-                </div>
+            <div className="space-y-2">
+              <Label>Embed Code</Label>
+              <div className="relative">
+                <Textarea
+                  value={generateChangelogDropdownCode()}
+                  readOnly
+                  className="font-mono text-sm h-80 resize-none"
+                />
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${baseUrl}/${orgSlug}`)
-                    setPortalCopied(true)
-                    toast.success('Link copied!')
-                    setTimeout(() => setPortalCopied(false), 2000)
-                  }}
+                  className="absolute top-2 right-2"
+                  onClick={() => handleCopy(generateChangelogDropdownCode())}
                 >
-                  {portalCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 mr-1" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-1" />
+                      Copy
+                    </>
+                  )}
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Add this code to your website's HTML. Customize the button style in the code.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-              {/* Changelog */}
-              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">Changelog</p>
-                  <p className="text-xs text-muted-foreground">{baseUrl}/{orgSlug}/changelog</p>
-                </div>
+      <Dialog open={showCode === 'announcement'} onOpenChange={(open) => !open && setShowCode(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Embed Announcement Banner</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Embed Code</Label>
+              <div className="relative">
+                <Textarea
+                  value={generateAnnouncementCode()}
+                  readOnly
+                  className="font-mono text-sm h-96 resize-none"
+                />
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${baseUrl}/${orgSlug}/changelog`)
-                    toast.success('Link copied!')
-                  }}
+                  className="absolute top-2 right-2"
+                  onClick={() => handleCopy(generateAnnouncementCode())}
                 >
-                  <Copy className="h-4 w-4" />
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 mr-1" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-1" />
+                      Copy
+                    </>
+                  )}
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Add this HTML to your hero section. All customization options are commented in the code.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-              {/* Roadmap */}
-              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">Roadmap</p>
-                  <p className="text-xs text-muted-foreground">{baseUrl}/{orgSlug}/roadmap</p>
-                </div>
+      <Dialog open={showCode === 'all-in-one'} onOpenChange={(open) => !open && setShowCode(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Embed All-in-One Widget</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Widget Type</Label>
+              <div className="flex gap-2">
                 <Button
+                  variant={previewVariant === 'popover' ? 'default' : 'outline'}
                   size="sm"
-                  variant="secondary"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${baseUrl}/${orgSlug}/roadmap`)
-                    toast.success('Link copied!')
-                  }}
+                  onClick={() => setPreviewVariant('popover')}
+                  className={previewVariant === 'popover' ? '' : ''}
                 >
-                  <Copy className="h-4 w-4" />
+                  Popover
+                </Button>
+                <Button
+                  variant={previewVariant === 'popup' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPreviewVariant('popup')}
+                  className={previewVariant === 'popup' ? '' : ''}
+                >
+                  Pop-up
                 </Button>
               </div>
-
-              {/* Feature Requests */}
-              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">Feature Requests</p>
-                  <p className="text-xs text-muted-foreground">{baseUrl}/{orgSlug}/features</p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${baseUrl}/${orgSlug}/features`)
-                    toast.success('Link copied!')
-                  }}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                {previewVariant === 'popover'
+                  ? 'Shows a side-positioned panel with feedback board and changelog'
+                  : 'Shows a centered modal with feedback board and changelog'}
+              </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-              <p className="text-sm text-blue-800">
-                <strong>Tip:</strong> You can add these links to your website's navigation, footer, or help menu to give users easy access to your feedback portal.
+            <div className="space-y-2">
+              <Label>Embed Code</Label>
+              <div className="relative">
+                <Textarea
+                  value={generateAllInOneCode(previewVariant === 'popup' ? 'popup' : 'popover')}
+                  readOnly
+                  className="font-mono text-sm h-80 resize-none"
+                />
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="absolute top-2 right-2"
+                  onClick={() => handleCopy(generateAllInOneCode(previewVariant === 'popup' ? 'popup' : 'popover'))}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 mr-1" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-1" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Add this code to your website's HTML. Customize settings in the Settings modal above.
               </p>
             </div>
           </div>

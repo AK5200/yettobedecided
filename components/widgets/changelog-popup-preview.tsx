@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import Link from 'next/link'
 import type { WidgetSettings } from '@/app/(dashboard)/widgets/page'
@@ -106,45 +107,28 @@ function getShadowStyle(shadow: WidgetSettings['shadow']): string {
   }
 }
 
-const mockEntries: ChangelogEntry[] = [
-  {
-    id: '1',
-    title: 'User Segmentation',
-    content: `Enable moderation today in your dashboard settings to build a better community experience. With our new user segmentation feature, you can now target specific user groups with personalized messages, track engagement metrics, and create custom workflows based on user behavior patterns. This powerful tool helps you understand your audience better and deliver more relevant content to each segment.`,
-    category: 'feature',
-    published_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-    image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop',
-  },
-  {
-    id: '2',
-    title: 'Dark Mode Support',
-    content: `We've added a beautiful dark mode to reduce eye strain during late-night work sessions. Toggle between light and dark themes in your settings, or let it follow your system preference automatically. The dark theme has been carefully designed to maintain readability while reducing blue light exposure. All charts, graphs, and UI elements have been optimized for the dark color scheme.`,
-    category: 'feature',
-    published_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-    image_url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop',
-  },
-  {
-    id: '3',
-    title: 'Performance Improvements',
-    content: `We've optimized our backend infrastructure for faster load times. Pages now load 40% faster with improved caching and optimized database queries. Our engineering team has worked tirelessly to identify and eliminate bottlenecks across the entire application stack, resulting in a significantly smoother user experience.`,
-    category: 'improvement',
-    published_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-  {
-    id: '4',
-    title: 'Fixed Export Bug',
-    content: `Resolved an issue where CSV exports would sometimes fail for large datasets. The export feature now handles datasets of any size reliably. We've also added progress indicators for large exports so you can track the status in real-time.`,
-    category: 'fix',
-    published_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    is_published: true,
-  },
-]
-
 export function ChangelogPopupPreview({ orgId, orgSlug, onClose, settings }: ChangelogPopupPreviewProps) {
-  const entries = mockEntries
+  const [entries, setEntries] = useState<ChangelogEntry[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchEntries = async () => {
+      try {
+        const res = await fetch(`/api/changelog?org_id=${orgId}&published_only=true`)
+        if (res.ok) {
+          const data = await res.json()
+          setEntries(data.entries || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch changelog entries:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (orgId) {
+      fetchEntries()
+    }
+  }, [orgId])
 
   const maxWidth = getSizeStyle(settings.size)
   const borderRadius = getBorderRadiusStyle(settings.borderRadius)
@@ -186,21 +170,32 @@ export function ChangelogPopupPreview({ orgId, orgSlug, onClose, settings }: Cha
 
           {/* Entries */}
           <div className="space-y-6 pb-4">
-            {entries.map((entry) => {
-              return (
-                <div key={entry.id} className="pb-6 last:pb-0">
-                  {entry.image_url && (
-                    <img
-                      src={entry.image_url}
-                      alt={entry.title}
-                      className="w-full h-72 object-cover rounded-2xl mb-4"
-                    />
-                  )}
-                  <h3 className="font-semibold text-gray-900 text-xl mb-2">{entry.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{entry.content}</p>
-                </div>
-              )
-            })}
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            ) : entries.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No changelog entries yet.</p>
+                <p className="text-sm text-gray-400 mt-2">Create your first changelog entry to see it here.</p>
+              </div>
+            ) : (
+              entries.map((entry) => {
+                return (
+                  <div key={entry.id} className="pb-6 last:pb-0">
+                    {entry.image_url && (
+                      <img
+                        src={entry.image_url}
+                        alt={entry.title}
+                        className="w-full h-72 object-cover rounded-2xl mb-4"
+                      />
+                    )}
+                    <h3 className="font-semibold text-gray-900 text-xl mb-2">{entry.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{entry.content}</p>
+                  </div>
+                )
+              })
+            )}
           </div>
         </div>
 
