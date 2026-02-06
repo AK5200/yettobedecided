@@ -66,11 +66,27 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
 
     fetchComments()
 
-    // Check for identified user
+    // Check for identified user - safely handle cross-origin
     const checkIdentifiedUser = () => {
-      const parentHub = (window.parent as any)?.FeedbackHub
-      if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
-        setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
+      try {
+        // Check if we can access parent window (not cross-origin)
+        if (window.parent && window.parent !== window) {
+          try {
+            const parentHub = (window.parent as any)?.FeedbackHub
+            if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
+              setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
+              return
+            }
+          } catch (e) {
+            // Cross-origin error - parent is from different origin
+            // This is expected when embedded, so we'll just continue without parent access
+          }
+        }
+        // If we can't access parent or no FeedbackHub, check localStorage or other methods
+        setIdentifiedUser(null)
+      } catch (error) {
+        // Silently handle any errors
+        setIdentifiedUser(null)
       }
     }
     checkIdentifiedUser()
@@ -85,8 +101,17 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     setSubmitting(true)
     try {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-      const parentHub = (window.parent as any)?.FeedbackHub
-      const identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
+      let identifiedPayload = null
+      
+      // Safely try to get identified payload from parent
+      try {
+        if (window.parent && window.parent !== window) {
+          const parentHub = (window.parent as any)?.FeedbackHub
+          identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
+        }
+      } catch (e) {
+        // Cross-origin error - ignore and continue without parent payload
+      }
 
       const res = await fetch(`${baseUrl}/api/comments`, {
         method: 'POST',

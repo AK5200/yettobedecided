@@ -50,11 +50,26 @@ export function FeedbackWidget({
 
   useEffect(() => {
     const checkIdentifiedUser = () => {
-      const parentHub = (window.parent as any)?.FeedbackHub
-      if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
-        setIsIdentified(true)
-        setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
-      } else {
+      try {
+        // Check if we can access parent window (not cross-origin)
+        if (window.parent && window.parent !== window) {
+          try {
+            const parentHub = (window.parent as any)?.FeedbackHub
+            if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
+              setIsIdentified(true)
+              setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
+              return
+            }
+          } catch (e) {
+            // Cross-origin error - parent is from different origin
+            // This is expected when embedded, so we'll just continue without parent access
+          }
+        }
+        // If we can't access parent or no FeedbackHub
+        setIsIdentified(false)
+        setIdentifiedUser(null)
+      } catch (error) {
+        // Silently handle any errors
         setIsIdentified(false)
         setIdentifiedUser(null)
       }
@@ -67,11 +82,21 @@ export function FeedbackWidget({
 
   const handleGuestSubmit = (email: string, name: string) => {
     if (!email) return
-    const parentHub = (window.parent as any)?.FeedbackHub
-    if (parentHub?.identify) {
-      parentHub.identify({ id: email, email, name })
-      setIsIdentified(true)
-      setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
+    try {
+      if (window.parent && window.parent !== window) {
+        try {
+          const parentHub = (window.parent as any)?.FeedbackHub
+          if (parentHub?.identify) {
+            parentHub.identify({ id: email, email, name })
+            setIsIdentified(true)
+            setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
+          }
+        } catch (e) {
+          // Cross-origin error - ignore
+        }
+      }
+    } catch (error) {
+      // Silently handle any errors
     }
   }
 
@@ -86,8 +111,19 @@ export function FeedbackWidget({
     setLoading(true)
     setSuccess(false)
 
-    const parentHub = (window.parent as any)?.FeedbackHub
-    const identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
+    let identifiedPayload = null
+    try {
+      if (window.parent && window.parent !== window) {
+        try {
+          const parentHub = (window.parent as any)?.FeedbackHub
+          identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
+        } catch (e) {
+          // Cross-origin error - ignore and continue without parent payload
+        }
+      }
+    } catch (error) {
+      // Silently handle any errors
+    }
 
     const response = await fetch('/api/widget/feedback', {
       method: 'POST',

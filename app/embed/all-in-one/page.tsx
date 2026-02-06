@@ -130,7 +130,7 @@ function AllInOneContent() {
   }
 
   return (
-    <div className="w-full h-full bg-white relative overflow-y-auto" style={{ pointerEvents: 'auto' }}>
+    <div className="w-full h-full bg-white relative overflow-y-auto" style={{ pointerEvents: 'auto', minHeight: '100vh' }}>
       {/* Close button */}
       <button
         onClick={handleClose}
@@ -140,7 +140,7 @@ function AllInOneContent() {
         <X className="h-5 w-5 text-gray-500" />
       </button>
 
-      <div className="p-6 h-full">
+      <div className="p-6 min-h-full">
         <AllInOneWidget
           boards={boards}
           posts={posts}
