@@ -36,18 +36,23 @@ interface AllInOnePopoverPreviewProps {
   settings: WidgetSettings
 }
 
-function getWidthStyle(size: WidgetSettings['size']): string {
+// Responsive size function - returns viewport width percentage
+function getResponsiveSize(size: WidgetSettings['size']): string {
   switch (size) {
+    case 'xsmall':
+      return '25vw'
     case 'small':
-      return '360px'
+      return '35vw'
     case 'medium':
-      return '420px'
+      return '45vw'
     case 'large':
-      return '480px'
+      return '55vw'
     case 'xlarge':
-      return '540px'
+      return '70vw'
+    case 'xxlarge':
+      return '85vw'
     default:
-      return '420px'
+      return '55vw'
   }
 }
 
@@ -137,7 +142,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
     }
   }, [orgId])
 
-  const width = getWidthStyle(settings.size)
+  const responsiveWidth = getResponsiveSize(settings.size)
   const borderRadius = getBorderRadiusStyle(settings.borderRadius)
   const boxShadow = getShadowStyle(settings.shadow)
 
@@ -190,7 +195,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
       <div
         className="absolute border max-h-[calc(100vh-120px)] flex flex-col"
         style={{
-          width,
+          width: responsiveWidth,
           borderRadius,
           boxShadow,
           backgroundColor: settings.backgroundColor,

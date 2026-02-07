@@ -388,12 +388,26 @@
     };
   }
 
+  // Responsive size function - converts size to viewport width
+  function getResponsiveSize(size) {
+    const sizeMap = {
+      'xsmall': '25vw',
+      'small': '35vw',
+      'medium': '45vw',
+      'large': '55vw',
+      'xlarge': '70vw',
+      'xxlarge': '85vw'
+    };
+    return sizeMap[size] || '55vw';
+  }
+
   function initAllInOnePopup(settings, dataTriggerElements) {
     let isOpen = false;
 
-    // Get placement and width from settings
+    // Get placement and responsive size from settings
     const popupPlacement = settings.all_in_one_popup_placement || 'right';
-    const popupWidth = settings.all_in_one_popup_width || 420;
+    const widgetSize = settings.size || 'large';
+    const responsiveWidth = getResponsiveSize(widgetSize);
     const isLeft = popupPlacement === 'left';
 
     // Create overlay - subtle background
@@ -402,12 +416,12 @@
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9998;display:none;';
     document.body.appendChild(overlay);
 
-    // Create iframe container - positioned based on settings
+    // Create iframe container - positioned based on settings with responsive width
     const container = document.createElement('div');
     container.id = 'feedbackhub-allinone-container';
     const positionStyle = isLeft 
-      ? `position:fixed;top:0;left:0;z-index:9999;display:none;width:${popupWidth}px;max-width:90vw;height:100vh;`
-      : `position:fixed;top:0;right:0;z-index:9999;display:none;width:${popupWidth}px;max-width:90vw;height:100vh;`;
+      ? `position:fixed;top:0;left:0;z-index:9999;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;height:100vh;`
+      : `position:fixed;top:0;right:0;z-index:9999;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;height:100vh;`;
     container.style.cssText = positionStyle;
     document.body.appendChild(container);
 
@@ -470,8 +484,10 @@
   function initAllInOnePopover(settings, dataTriggerElements) {
     let isOpen = false;
 
-    // Get placement from settings
+    // Get placement and responsive size from settings
     const popoverPlacement = settings.all_in_one_popover_placement || 'bottom-right';
+    const widgetSize = settings.size || 'large';
+    const responsiveWidth = getResponsiveSize(widgetSize);
     const isBottom = popoverPlacement.includes('bottom');
     const isLeft = popoverPlacement.includes('left');
     const isRight = popoverPlacement.includes('right');
@@ -482,10 +498,10 @@
     const left = isLeft ? '20px' : 'auto';
     const right = isRight ? '20px' : 'auto';
 
-    // Create popover container
+    // Create popover container with responsive width
     const popover = document.createElement('div');
     popover.id = 'feedbackhub-allinone-popover';
-    popover.style.cssText = `position:fixed;${top !== 'auto' ? 'top:' + top + ';' : ''}${bottom !== 'auto' ? 'bottom:' + bottom + ';' : ''}${left !== 'auto' ? 'left:' + left + ';' : ''}${right !== 'auto' ? 'right:' + right + ';' : ''}z-index:9998;display:none;width:400px;height:600px;max-height:calc(100vh - 120px);`;
+    popover.style.cssText = `position:fixed;${top !== 'auto' ? 'top:' + top + ';' : ''}${bottom !== 'auto' ? 'bottom:' + bottom + ';' : ''}${left !== 'auto' ? 'left:' + left + ';' : ''}${right !== 'auto' ? 'right:' + right + ';' : ''}z-index:9998;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;height:600px;max-height:calc(100vh - 120px);`;
     document.body.appendChild(popover);
 
     // Create iframe

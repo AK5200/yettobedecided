@@ -35,7 +35,7 @@ export type WidgetSettings = {
   accentColor: string
   backgroundColor: string
   showBranding: boolean
-  size: 'small' | 'medium' | 'large' | 'xlarge'
+  size: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge'
   borderRadius: 'none' | 'small' | 'medium' | 'large'
   shadow: 'none' | 'small' | 'medium' | 'large'
   heading: string
@@ -46,7 +46,6 @@ export type WidgetSettings = {
   allInOneTextStyle?: 'default' | 'bold' | 'italic' | 'bold-italic'
   allInOnePopoverPlacement?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
   allInOnePopupPlacement?: 'left' | 'right'
-  allInOnePopupWidth?: number
 }
 
 export type AnnouncementSettings = {
@@ -71,7 +70,6 @@ const defaultSettings: WidgetSettings = {
   allInOneTextStyle: 'default',
   allInOnePopoverPlacement: 'bottom-right',
   allInOnePopupPlacement: 'right',
-  allInOnePopupWidth: 420,
 }
 
 const defaultAnnouncementSettings: AnnouncementSettings = {
@@ -138,7 +136,6 @@ export default function WidgetsPage() {
         all_in_one_text_style: settings.allInOneTextStyle || 'default',
         all_in_one_popover_placement: settings.allInOnePopoverPlacement || 'bottom-right',
         all_in_one_popup_placement: settings.allInOnePopupPlacement || 'right',
-        all_in_one_popup_width: settings.allInOnePopupWidth || 420,
       } : {
         org_id: orgId,
         widget_type: type,
@@ -212,7 +209,6 @@ export default function WidgetsPage() {
                 allInOneTextStyle: data.settings.all_in_one_text_style || prev.allInOneTextStyle,
                 allInOnePopoverPlacement: data.settings.all_in_one_popover_placement || prev.allInOnePopoverPlacement,
                 allInOnePopupPlacement: data.settings.all_in_one_popup_placement || prev.allInOnePopupPlacement,
-                allInOnePopupWidth: data.settings.all_in_one_popup_width || prev.allInOnePopupWidth,
               }))
             }
           }
@@ -1061,7 +1057,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
             </div>
 
             <div className="space-y-2">
-              <Label>Widget Size</Label>
+              <Label>Widget Size (Responsive)</Label>
               <Select
                 value={settings.size}
                 onValueChange={(v) => updateSetting('size', v as WidgetSettings['size'])}
@@ -1070,13 +1066,15 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="small">Small</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="large">Large</SelectItem>
-                  <SelectItem value="xlarge">X-Large</SelectItem>
+                  <SelectItem value="xsmall">X-Small (25vw)</SelectItem>
+                  <SelectItem value="small">Small (35vw)</SelectItem>
+                  <SelectItem value="medium">Medium (45vw)</SelectItem>
+                  <SelectItem value="large">Large (55vw)</SelectItem>
+                  <SelectItem value="xlarge">X-Large (70vw)</SelectItem>
+                  <SelectItem value="xxlarge">XX-Large (85vw)</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Options: small, medium, large, xlarge</p>
+              <p className="text-xs text-muted-foreground">Responsive size based on viewport width (vw). Applies to both popup and popover.</p>
             </div>
 
             <div className="space-y-2">
@@ -1182,20 +1180,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                     <SelectItem value="right">Right</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="aio-popup-width">Popup Width (px)</Label>
-                <Input
-                  id="aio-popup-width"
-                  type="number"
-                  min="300"
-                  max="800"
-                  value={settings.allInOnePopupWidth || 420}
-                  onChange={(e) => updateSetting('allInOnePopupWidth', parseInt(e.target.value) || 420)}
-                  placeholder="420"
-                />
-                <p className="text-xs text-muted-foreground">Width in pixels (300-800px)</p>
+                <p className="text-xs text-muted-foreground">Side of screen for popup widget</p>
               </div>
             </div>
 

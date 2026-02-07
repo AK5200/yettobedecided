@@ -36,18 +36,23 @@ interface AllInOnePopupPreviewProps {
   settings: WidgetSettings
 }
 
-function getSizeStyle(size: WidgetSettings['size']): string {
+// Responsive size function - returns viewport width percentage
+function getResponsiveSize(size: WidgetSettings['size']): string {
   switch (size) {
+    case 'xsmall':
+      return '25vw'
     case 'small':
-      return '480px'
+      return '35vw'
     case 'medium':
-      return '560px'
+      return '45vw'
     case 'large':
-      return '680px'
+      return '55vw'
     case 'xlarge':
-      return '780px'
+      return '70vw'
+    case 'xxlarge':
+      return '85vw'
     default:
-      return '680px'
+      return '55vw'
   }
 }
 
@@ -168,7 +173,7 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
     }
   }, [orgId])
 
-  const maxWidth = getSizeStyle(settings.size)
+  const responsiveWidth = getResponsiveSize(settings.size)
   const borderRadius = getBorderRadiusStyle(settings.borderRadius)
   const boxShadow = getShadowStyle(settings.shadow)
 
@@ -191,10 +196,9 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
       )
     )
   }
-
-  // Get popup placement and width from settings
+  
+  // Get popup placement from settings
   const popupPlacement = settings.allInOnePopupPlacement || 'right'
-  const popupWidth = settings.allInOnePopupWidth || 420
   const isLeft = popupPlacement === 'left'
   
   // Apply text style
@@ -214,7 +218,8 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
       <div
         className={`relative ${isLeft ? 'left-0' : 'right-0'} top-0 h-full flex flex-col`}
         style={{
-          width: `${popupWidth}px`,
+          width: responsiveWidth,
+          minWidth: '300px',
           maxWidth: '90vw',
           borderRadius: isLeft ? `${borderRadius} 0 0 0` : `0 ${borderRadius} 0 0`,
           boxShadow: isLeft ? '4px 0 20px rgba(0,0,0,0.1)' : '-4px 0 20px rgba(0,0,0,0.1)',
