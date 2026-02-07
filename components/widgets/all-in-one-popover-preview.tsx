@@ -178,6 +178,32 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
     ? 'italic'
     : ''
 
+  // Style variant configurations
+  const styleVariant = settings.allInOneStyleVariant || '1'
+  const getVariantStyles = () => {
+    switch (styleVariant) {
+      case '2':
+        return {
+          headerBg: 'bg-gray-50',
+          cardBorder: 'border-2',
+          buttonStyle: 'outline',
+        }
+      case '3':
+        return {
+          headerBg: `${settings.accentColor}10`,
+          cardBorder: 'border',
+          buttonStyle: 'solid',
+        }
+      default: // variant 1
+        return {
+          headerBg: 'transparent',
+          cardBorder: 'border',
+          buttonStyle: 'solid',
+        }
+    }
+  }
+  const variantStyles = getVariantStyles()
+
   // Build position styles - only set one of top/bottom and one of left/right
   const positionStyles: React.CSSProperties = {
     width: responsiveWidth,
@@ -213,7 +239,9 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
         style={positionStyles}
       >
         {/* Header */}
-        <div className="p-4 border-b">
+        <div className={`p-4 border-b ${variantStyles.headerBg}`} style={{ 
+          backgroundColor: variantStyles.headerBg === 'transparent' ? 'transparent' : undefined
+        }}>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
               <div
@@ -289,8 +317,8 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
               </div>
               <Button
                 size="sm"
-                style={{ backgroundColor: settings.accentColor }}
-                className="text-white shrink-0 h-9"
+                style={variantStyles.buttonStyle === 'solid' ? { backgroundColor: settings.accentColor } : {}}
+                className={`shrink-0 h-9 ${variantStyles.buttonStyle === 'outline' ? 'border-2' : 'text-white'}`}
               >
                 Create New Post
               </Button>
@@ -313,7 +341,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                   {filteredPosts.map((post) => (
                   <div
                     key={post.id}
-                    className="p-3 border rounded-lg hover:border-gray-300 transition-colors cursor-pointer"
+                    className={`p-3 ${variantStyles.cardBorder} border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer`}
                   >
                     <div className="flex gap-3">
                       {/* Vote button */}
