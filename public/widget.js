@@ -395,8 +395,7 @@
       'small': '35vw',
       'medium': '45vw',
       'large': '55vw',
-      'xlarge': '70vw',
-      'xxlarge': '85vw'
+      'xlarge': '70vw'
     };
     return sizeMap[size] || '55vw';
   }

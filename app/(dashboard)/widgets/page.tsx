@@ -35,7 +35,7 @@ export type WidgetSettings = {
   accentColor: string
   backgroundColor: string
   showBranding: boolean
-  size: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge'
+  size: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
   borderRadius: 'none' | 'small' | 'medium' | 'large'
   shadow: 'none' | 'small' | 'medium' | 'large'
   heading: string
@@ -1071,7 +1071,6 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   <SelectItem value="medium">Medium (45vw)</SelectItem>
                   <SelectItem value="large">Large (55vw)</SelectItem>
                   <SelectItem value="xlarge">X-Large (70vw)</SelectItem>
-                  <SelectItem value="xxlarge">XX-Large (85vw)</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">Responsive size based on viewport width (vw). Applies to both popup and popover.</p>

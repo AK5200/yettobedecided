@@ -49,8 +49,6 @@ function getResponsiveSize(size: WidgetSettings['size']): string {
       return '55vw'
     case 'xlarge':
       return '70vw'
-    case 'xxlarge':
-      return '85vw'
     default:
       return '55vw'
   }
