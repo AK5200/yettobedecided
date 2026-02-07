@@ -36,6 +36,7 @@ interface AllInOneWidgetProps {
   orgSlug: string
   accentColor?: string
   backgroundColor?: string
+  headerBackgroundColor?: string
   showBranding?: boolean
   heading?: string
   subheading?: string
@@ -93,7 +94,7 @@ function getStatusLabel(status: string): string {
   }
 }
 
-function getBorderRadiusClass(borderRadius: 'none' | 'small' | 'medium' | 'large'): string {
+function getBorderRadiusClass(borderRadius: string): string {
   switch (borderRadius) {
     case 'none':
       return 'rounded-none'
@@ -103,8 +104,27 @@ function getBorderRadiusClass(borderRadius: 'none' | 'small' | 'medium' | 'large
       return 'rounded-md'
     case 'large':
       return 'rounded-lg'
+    case 'xlarge':
+      return 'rounded-xl'
     default:
       return 'rounded-md'
+  }
+}
+
+function getBorderRadiusStyle(radius: string): string {
+  switch (radius) {
+    case 'none':
+      return '0px'
+    case 'small':
+      return '8px'
+    case 'medium':
+      return '12px'
+    case 'large':
+      return '16px'
+    case 'xlarge':
+      return '24px'
+    default:
+      return '12px'
   }
 }
 
@@ -115,6 +135,7 @@ export function AllInOneWidget({
   orgSlug,
   accentColor = '#7c3aed',
   backgroundColor = '#ffffff',
+  headerBackgroundColor,
   showBranding = true,
   heading = 'Have something to say?',
   subheading = 'Suggest a feature, read through our feedback and check out our latest feature releases.',
@@ -188,26 +209,70 @@ export function AllInOneWidget({
 
   const borderRadiusClass = getBorderRadiusClass(borderRadius)
   
+  // Helper function to convert hex to rgba
+  const hexToRgba = (hex: string, alpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16)
+    const g = parseInt(hex.slice(3, 5), 16)
+    const b = parseInt(hex.slice(5, 7), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+  
   // Style variant configurations
   const getVariantStyles = () => {
     switch (styleVariant) {
       case '2':
+        // Top Nav style (white background)
         return {
-          headerBg: 'bg-gray-50',
-          cardBorder: 'border-2',
-          buttonStyle: 'outline',
+          containerClass: '',
+          containerStyle: { 
+            background: '#ffffff',
+            border: 'none',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          },
+          headerBg: 'transparent',
+          cardClass: '',
+          cardStyle: {
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+          },
+          cardBorder: 'border',
+          buttonStyle: 'solid',
+          borderRadius: '40px',
+          voteButtonClass: 'bg-white border border-gray-200',
         }
       case '3':
+        // Clean Supahub-style (horizontal tabs, vote on right, divider lines)
         return {
-          headerBg: `${accentColor}10`,
-          cardBorder: 'border',
-          buttonStyle: 'solid',
-        }
-      default: // variant 1
-        return {
+          containerClass: '',
+          containerStyle: {
+            background: '#ffffff',
+            border: 'none',
+            boxShadow: '0 32px 64px -16px rgba(0, 0, 0, 0.1)'
+          },
           headerBg: 'transparent',
+          cardClass: '',
+          cardStyle: {
+            background: 'transparent',
+            border: 'none',
+          },
+          cardBorder: 'border-b',
+          buttonStyle: 'solid',
+          borderRadius: borderRadiusClass,
+          voteButtonClass: 'bg-white border border-gray-200',
+          hasSidebar: false,
+        }
+      default: // variant 1 - Standard
+        return {
+          containerClass: '',
+          containerStyle: {},
+          headerBg: 'transparent',
+          cardClass: '',
+          cardStyle: {},
           cardBorder: 'border',
           buttonStyle: 'solid',
+          borderRadius: borderRadiusClass,
+          voteButtonClass: '',
+          hasSidebar: false,
         }
     }
   }
@@ -236,68 +301,90 @@ export function AllInOneWidget({
   }
 
   return (
-    <div className={`${borderRadiusClass} p-4 space-y-4`} style={{ backgroundColor }}>
+    <div 
+      className={`${variantStyles.borderRadius || borderRadiusClass} p-4 space-y-4 ${variantStyles.containerClass}`} 
+      style={{ 
+        backgroundColor: variantStyles.containerStyle?.background || backgroundColor,
+        border: variantStyles.containerStyle?.border,
+        boxShadow: variantStyles.containerStyle?.boxShadow,
+        ...variantStyles.containerStyle
+      }}
+    >
       {/* Header */}
-      <div className={`flex items-start gap-3 p-3 ${variantStyles.headerBg} ${borderRadiusClass}`}>
+      <div className={`px-6 pt-6 pb-4`} style={{
+        backgroundColor: headerBackgroundColor || variantStyles.headerBg || 'transparent',
+        borderRadius: borderRadiusClass
+      }}>
         <div
-          className={`w-10 h-10 ${borderRadiusClass} flex items-center justify-center shrink-0`}
-          style={{ backgroundColor: `${accentColor}15` }}
+          className={`w-10 h-10 ${styleVariant === '2' ? 'rounded-2xl shadow-lg' : borderRadiusClass} flex items-center justify-center mb-4`}
+          style={{
+            backgroundColor: styleVariant === '2'
+              ? accentColor
+              : hexToRgba(accentColor, 0.15),
+            boxShadow: styleVariant === '2' ? `0 0 20px ${hexToRgba(accentColor, 0.2)}` : undefined
+          }}
         >
-          <Zap className="h-5 w-5" style={{ color: accentColor }} />
+          <Zap className="h-5 w-5" style={{ color: styleVariant === '2' ? 'white' : accentColor }} />
         </div>
-        <div>
-          <div 
-            className={`text-lg font-semibold text-gray-900 ${
-              textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
-            } ${
-              textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
-            }`}
-          >
-            {heading}
-          </div>
-          <p 
-            className={`text-sm text-gray-500 ${
-              textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
-            } ${
-              textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
-            }`}
-          >
-            {subheading}
-          </p>
-        </div>
+        <h2 className={`${styleVariant === '2' ? 'text-3xl font-extrabold' : 'text-lg font-semibold'} text-gray-900 ${
+          textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
+        } ${
+          textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
+        }`}>
+          {heading}
+        </h2>
+        <p className={`text-sm ${styleVariant === '2' ? 'font-medium' : ''} text-gray-500 mt-1 ${
+          textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
+        } ${
+          textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
+        }`}>
+          {subheading}
+        </p>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="board">
-        <TabsList className="w-auto gap-4 bg-transparent p-0 h-auto border-b pb-0 rounded-none">
-          <TabsTrigger
-            value="board"
-            className="px-0 pb-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-current"
-          >
-            <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-              </svg>
-              Board
-            </span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="changelog"
-            className="px-0 pb-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-current"
-          >
-            <span className="flex items-center gap-1.5">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 4h16v16H4z" />
-                <path d="M4 9h16" />
-                <path d="M9 4v16" />
-              </svg>
-              Changelog
-            </span>
-          </TabsTrigger>
-        </TabsList>
+          <TabsList className="w-auto gap-4 bg-transparent p-0 h-auto border-b pb-0 rounded-none">
+            <TabsTrigger
+              value="board"
+              className="px-0 pb-2 text-sm font-medium text-slate-500 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
+              style={{ 
+                '--tw-border-opacity': 1,
+                ...(styleVariant === '2' && {
+                  color: accentColor
+                })
+              } as any}
+            >
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+                Board
+              </span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="changelog"
+              className="px-0 pb-2 text-sm font-medium text-slate-500 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
+              style={{ 
+                '--tw-border-opacity': 1,
+                ...(styleVariant === '2' && {
+                  color: accentColor
+                })
+              } as any}
+            >
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 4h16v16H4z" />
+                  <path d="M4 9h16" />
+                  <path d="M9 4v16" />
+                </svg>
+                Changelog
+              </span>
+            </TabsTrigger>
+          </TabsList>
 
         {/* Board Tab */}
         <TabsContent value="board" className="pt-4 transition-all space-y-3">
@@ -326,7 +413,7 @@ export function AllInOneWidget({
           </div>
 
           {/* Posts List */}
-          <div className="max-h-80 overflow-y-auto space-y-2">
+          <div className={`max-h-80 overflow-y-auto ${styleVariant === '3' ? 'divide-y divide-gray-200' : 'space-y-2'}`}>
             {filteredPosts.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
                 {searchQuery ? 'No posts found matching your search.' : 'No posts yet. Be the first to create one!'}
@@ -334,6 +421,68 @@ export function AllInOneWidget({
             ) : (
               filteredPosts.map((post) => {
                 const statusStyle = post.status ? getStatusStyle(post.status) : null
+
+                if (styleVariant === '3') {
+                  // Supahub-style: content left, vote right, divider lines
+                  return (
+                    <div
+                      key={post.id}
+                      onClick={() => handlePostClick(post)}
+                      className="py-4 first:pt-2 last:pb-2 hover:bg-gray-50 transition-colors cursor-pointer px-1"
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 text-sm">{post.title}</h4>
+                          {post.content && (
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{post.content}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2.5">
+                            {post.author_name && (
+                              <div className="flex items-center gap-1.5">
+                                <div
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium text-white"
+                                  style={{ backgroundColor: accentColor }}
+                                >
+                                  {post.author_name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-xs text-gray-500">{post.author_name}</span>
+                              </div>
+                            )}
+                            {post.tags?.map((tag) => (
+                              <Badge key={tag.name} className="bg-red-50 text-red-600 border-0 text-[10px] font-medium px-2 py-0.5 rounded">
+                                {tag.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Vote button - right side */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleVote(post.id)
+                          }}
+                          className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg border transition-colors shrink-0 ${
+                            post.hasVoted
+                              ? 'border-transparent text-white'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-500'
+                          }`}
+                          style={
+                            post.hasVoted
+                              ? { backgroundColor: accentColor }
+                              : {}
+                          }
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                          <span className="text-sm font-semibold">{post.votes}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )
+                }
+
+                // Default style 1 & 2: vote left, card borders
                 return (
                   <div
                     key={post.id}

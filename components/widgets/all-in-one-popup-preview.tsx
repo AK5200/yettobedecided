@@ -64,8 +64,21 @@ function getBorderRadiusStyle(radius: WidgetSettings['borderRadius']): string {
       return '12px'
     case 'large':
       return '16px'
+    case 'xlarge':
+      return '24px'
     default:
       return '12px'
+  }
+}
+
+function getBorderRadiusClass(radius: WidgetSettings['borderRadius']): string {
+  switch (radius) {
+    case 'none': return 'rounded-none'
+    case 'small': return 'rounded-sm'
+    case 'medium': return 'rounded-md'
+    case 'large': return 'rounded-lg'
+    case 'xlarge': return 'rounded-xl'
+    default: return 'rounded-md'
   }
 }
 
@@ -174,6 +187,20 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
   const responsiveWidth = getResponsiveSize(settings.size)
   const borderRadius = getBorderRadiusStyle(settings.borderRadius)
   const boxShadow = getShadowStyle(settings.shadow)
+  
+  // Get border radius class for buttons and cards
+  const getBorderRadiusClass = (radius: WidgetSettings['borderRadius']): string => {
+    switch (radius) {
+      case 'none': return 'rounded-none'
+      case 'small': return 'rounded-sm'
+      case 'medium': return 'rounded-md'
+      case 'large': return 'rounded-lg'
+      case 'xlarge': return 'rounded-xl'
+      case 'full': return 'rounded-full'
+      default: return 'rounded-md'
+    }
+  }
+  const borderRadiusClass = getBorderRadiusClass(settings.borderRadius)
 
   const filteredPosts = posts.filter(
     (post) =>
@@ -207,37 +234,74 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
     ? 'italic'
     : ''
 
+  // Helper function to convert hex to rgba
+  const hexToRgba = (hex: string, alpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16)
+    const g = parseInt(hex.slice(3, 5), 16)
+    const b = parseInt(hex.slice(5, 7), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+
   // Style variant configurations
   const styleVariant = settings.allInOneStyleVariant || '1'
   const getVariantStyles = () => {
     switch (styleVariant) {
       case '2':
+        // Glass morphism - Top Nav style (white background)
         return {
-          headerBgClass: 'bg-gray-50',
-          headerBgStyle: undefined,
-          cardBorder: 'border-2',
-          buttonStyle: 'outline',
-        }
-      case '3':
-        // Convert hex color to rgba with 10% opacity
-        const hexToRgba = (hex: string, alpha: number) => {
-          const r = parseInt(hex.slice(1, 3), 16)
-          const g = parseInt(hex.slice(3, 5), 16)
-          const b = parseInt(hex.slice(5, 7), 16)
-          return `rgba(${r}, ${g}, ${b}, ${alpha})`
-        }
-        return {
-          headerBgClass: '',
-          headerBgStyle: hexToRgba(settings.accentColor, 0.1),
-          cardBorder: 'border',
-          buttonStyle: 'solid',
-        }
-      default: // variant 1
-        return {
+          containerClass: '',
+          containerStyle: { 
+            background: '#ffffff',
+            border: 'none',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          },
           headerBgClass: '',
           headerBgStyle: 'transparent',
+          cardClass: '',
+          cardStyle: {
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+          },
           cardBorder: 'border',
           buttonStyle: 'solid',
+          borderRadius: '40px',
+          voteButtonClass: 'bg-white border border-gray-200',
+        }
+      case '3':
+        // Clean Supahub-style (horizontal tabs, vote on right, divider lines)
+        return {
+          containerClass: '',
+          containerStyle: {
+            background: '#ffffff',
+            border: 'none',
+            boxShadow: '0 32px 64px -16px rgba(0, 0, 0, 0.1)'
+          },
+          headerBgClass: '',
+          headerBgStyle: 'transparent',
+          cardClass: '',
+          cardStyle: {
+            background: 'transparent',
+            border: 'none',
+          },
+          cardBorder: 'border-b',
+          buttonStyle: 'solid',
+          borderRadius: borderRadius,
+          voteButtonClass: 'bg-white border border-gray-200',
+          hasSidebar: false,
+        }
+      default: // variant 1 - Standard
+        return {
+          containerClass: '',
+          containerStyle: {},
+          headerBgClass: '',
+          headerBgStyle: 'transparent',
+          cardClass: '',
+          cardStyle: {},
+          cardBorder: 'border',
+          buttonStyle: 'solid',
+          borderRadius: borderRadius,
+          voteButtonClass: '',
+          hasSidebar: false,
         }
     }
   }
@@ -250,15 +314,20 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
 
       {/* Modal - positioned based on settings */}
       <div
-        className="fixed top-0 h-full flex flex-col z-50"
+        className={`fixed top-0 h-full flex flex-col z-50 ${variantStyles.containerClass}`}
         style={{
           width: responsiveWidth,
           minWidth: '300px',
           maxWidth: '90vw',
           ...(isLeft ? { left: '0' } : { right: '0' }),
-          borderRadius: isLeft ? `${borderRadius} 0 0 0` : `0 ${borderRadius} 0 0`,
-          boxShadow: isLeft ? '4px 0 20px rgba(0,0,0,0.1)' : '-4px 0 20px rgba(0,0,0,0.1)',
-          backgroundColor: settings.backgroundColor,
+          // Border radius only on the non-edge side (right if left-aligned, left if right-aligned)
+          borderRadius: isLeft 
+            ? `0 ${borderRadius} ${borderRadius} 0` 
+            : `${borderRadius} 0 0 ${borderRadius}`,
+          boxShadow: boxShadow || (isLeft ? '4px 0 20px rgba(0,0,0,0.1)' : '-4px 0 20px rgba(0,0,0,0.1)'),
+          backgroundColor: variantStyles.containerStyle?.background || '#ffffff',
+          border: variantStyles.containerStyle?.border,
+          ...variantStyles.containerStyle,
         }}
       >
         {/* Close button */}
@@ -269,83 +338,129 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
           <X className="h-5 w-5 text-gray-500" />
         </button>
 
-        {/* Header */}
-        <div className={`px-6 pt-6 pb-4 ${variantStyles.headerBgClass}`} style={{ 
-          backgroundColor: variantStyles.headerBgStyle,
-          borderRadius: borderRadius
-        }}>
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-            style={{ backgroundColor: `${settings.accentColor}15` }}
-          >
-            <Zap className="h-5 w-5" style={{ color: settings.accentColor }} />
-          </div>
-          <h2 className={`text-xl font-semibold text-gray-900 ${textStyleClass} ${textItalicClass}`}>
-            {settings.heading || 'Have something to say?'}
-          </h2>
-          <p className={`text-sm text-gray-500 mt-1 ${textStyleClass} ${textItalicClass}`}>
-            {settings.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'}
-          </p>
-        </div>
+        {/* Content Layout */}
+        <div className="flex-1 min-h-0 flex flex-col">
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Header */}
+              <div className={`px-6 pt-6 pb-4 ${variantStyles.headerBgClass}`} style={{
+                backgroundColor: settings.headerBackgroundColor || variantStyles.headerBgStyle || 'transparent',
+                borderRadius: borderRadius
+              }}>
+                <div
+                  className={`w-10 h-10 ${styleVariant === '2' ? 'rounded-2xl shadow-lg' : 'rounded-xl'} flex items-center justify-center mb-4`}
+                  style={{
+                    backgroundColor: styleVariant === '2'
+                      ? settings.accentColor
+                      : hexToRgba(settings.accentColor, 0.15),
+                    boxShadow: styleVariant === '2' ? `0 0 20px ${hexToRgba(settings.accentColor, 0.2)}` : undefined
+                  }}
+                >
+                  <Zap className="h-5 w-5" style={{ color: styleVariant === '2' ? 'white' : settings.accentColor }} />
+                </div>
+                <h2 className={`${styleVariant === '2' ? 'text-3xl font-extrabold' : 'text-xl font-semibold'} text-gray-900 ${textStyleClass} ${textItalicClass}`}>
+                  {settings.heading || 'Have something to say?'}
+                </h2>
+                <p className={`text-sm ${styleVariant === '2' ? 'font-medium' : ''} text-gray-500 mt-1 ${textStyleClass} ${textItalicClass}`}>
+                  {settings.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'}
+                </p>
+              </div>
 
-        {/* Tabs */}
+            {/* Tabs */}
         <Tabs defaultValue="board" className="flex-1 flex flex-col min-h-0">
-          <div className="px-6">
-            <TabsList className="w-auto gap-4 bg-transparent p-0 h-auto">
-              <TabsTrigger
-                value="board"
-                className="px-0 pb-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-current"
-                style={{ '--tw-border-opacity': 1 } as any}
-              >
-                <span className="flex items-center gap-2">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="7" height="7" rx="1" />
-                    <rect x="14" y="3" width="7" height="7" rx="1" />
-                    <rect x="3" y="14" width="7" height="7" rx="1" />
-                    <rect x="14" y="14" width="7" height="7" rx="1" />
-                  </svg>
-                  Board
-                </span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="changelog"
-                className="px-0 pb-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-current"
-              >
-                <span className="flex items-center gap-2">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 4h16v16H4z" />
-                    <path d="M4 9h16" />
-                    <path d="M9 4v16" />
-                  </svg>
-                  Changelog
-                </span>
-              </TabsTrigger>
+            <div className={`px-6 ${styleVariant === '2' ? 'border-b border-white/10' : ''}`}>
+              <TabsList className={`w-auto gap-4 ${styleVariant === '2' ? 'gap-8' : 'gap-4'} bg-transparent p-0 h-auto`}>
+                <TabsTrigger
+                  value="board"
+                  className="px-2 py-4 text-sm font-medium text-slate-500 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
+                  style={{
+                    '--tw-border-opacity': 1,
+                    ...(styleVariant === '2' && {
+                      color: settings.accentColor
+                    })
+                  } as any}
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="7" height="7" rx="1" />
+                      <rect x="14" y="3" width="7" height="7" rx="1" />
+                      <rect x="3" y="14" width="7" height="7" rx="1" />
+                      <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    Board
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="changelog"
+                  className="px-2 py-4 text-sm font-medium text-slate-500 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
+                  style={{
+                    '--tw-border-opacity': 1,
+                    ...(styleVariant === '2' && {
+                      color: settings.accentColor
+                    })
+                  } as any}
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M4 4h16v16H4z" />
+                      <path d="M4 9h16" />
+                      <path d="M9 4v16" />
+                    </svg>
+                    Changelog
+                  </span>
+                </TabsTrigger>
             </TabsList>
-          </div>
+            </div>
 
           {/* Board Tab */}
           <TabsContent value="board" className="flex-1 flex flex-col min-h-0 mt-0 pt-4">
             {/* Search and Create */}
-            <div className="px-6 pb-4 flex gap-3">
+            <div className={`px-6 ${styleVariant === '2' ? 'py-6' : 'pb-4'} flex gap-3 items-center`}>
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className={`absolute ${styleVariant === '2' ? 'left-4' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400`} />
                 <Input
-                  placeholder="Search posts..."
+                  placeholder={styleVariant === '2' ? "Explore ideas..." : "Search posts..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className={`${styleVariant === '2' ? 'pl-12 pr-4 py-4 bg-white/30 border border-white/20 rounded-2xl focus:ring-2 focus:ring-primary/40' : 'pl-9'}`}
+                  style={styleVariant === '2' ? {
+                    focusRingColor: hexToRgba(settings.accentColor, 0.4)
+                  } : {}}
                 />
               </div>
+              {styleVariant === '2' && (
+                <button className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-600 hover:bg-gray-100 transition-colors">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 6h18M7 12h10M5 18h14" />
+                  </svg>
+                </button>
+              )}
               <Button 
-                style={variantStyles.buttonStyle === 'solid' ? { backgroundColor: settings.accentColor } : {}}
-                className={`shrink-0 ${variantStyles.buttonStyle === 'outline' ? 'border-2' : 'text-white'}`}
+                style={variantStyles.buttonStyle === 'solid' 
+                  ? { 
+                      backgroundColor: settings.accentColor, 
+                      color: 'white',
+                      boxShadow: styleVariant === '2' ? `0 0 20px ${hexToRgba(settings.accentColor, 0.2)}` : undefined
+                    }
+                  : { borderColor: settings.accentColor, color: settings.accentColor, backgroundColor: 'transparent' }
+                }
+                variant={variantStyles.buttonStyle === 'outline' ? 'outline' : 'default'}
+                className={`shrink-0 ${styleVariant === '2' ? 'px-8 py-4 font-bold shadow-xl' : variantStyles.buttonStyle === 'outline' ? 'border-2' : ''} ${borderRadiusClass}`}
               >
-                Create New Post
+                {styleVariant === '2' ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 4v16m8-8H4" />
+                    </svg>
+                    New Post
+                  </span>
+                ) : (
+                  'Create New Post'
+                )}
               </Button>
             </div>
 
             {/* Posts List */}
-            <div className="flex-1 overflow-y-auto px-6">
+            <div className={`flex-1 overflow-y-auto px-6`}>
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -357,50 +472,144 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3 pb-4">
+                <div className={`${styleVariant === '3' ? 'divide-y divide-gray-200' : styleVariant === '2' ? 'space-y-4' : 'space-y-3'} pb-4`}>
                   {filteredPosts.map((post) => {
                   const statusStyle = getStatusStyle(post.status)
+
+                  if (styleVariant === '3') {
+                    // Supahub-style: content left, vote right, divider lines
+                    return (
+                      <div
+                        key={post.id}
+                        className="py-4 first:pt-2 last:pb-2 hover:bg-gray-50 transition-colors cursor-pointer px-1 group"
+                      >
+                        <div className="flex items-start gap-4">
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 text-sm">{post.title}</h3>
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{post.content}</p>
+                            <div className="flex items-center gap-2 mt-2.5">
+                              <div className="flex items-center gap-1.5">
+                                <div
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium text-white"
+                                  style={{ backgroundColor: settings.accentColor }}
+                                >
+                                  {post.author.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-xs text-gray-500">{post.author}</span>
+                              </div>
+                              <Badge className="bg-red-50 text-red-600 border-0 text-[10px] font-medium px-2 py-0.5 rounded">
+                                {post.category}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Vote button - right side */}
+                          <button
+                            onClick={() => handleVote(post.id)}
+                            className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg border transition-colors shrink-0 ${
+                              post.hasVoted
+                                ? 'border-transparent text-white'
+                                : 'border-gray-200 hover:border-gray-300 text-gray-500'
+                            }`}
+                            style={
+                              post.hasVoted
+                                ? { backgroundColor: settings.accentColor }
+                                : {}
+                            }
+                          >
+                            <ChevronUp className="h-4 w-4" />
+                            <span className="text-sm font-semibold">{post.votes}</span>
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  // Default style 1 & 2
                   return (
                     <div
                       key={post.id}
-                      className={`p-4 ${variantStyles.cardBorder} border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer`}
+                      className={`${styleVariant === '2' ? 'p-6' : 'p-4'} ${variantStyles.cardClass} ${variantStyles.cardBorder} ${borderRadiusClass} hover:border-gray-300 transition-all cursor-pointer group ${
+                        styleVariant === '2'
+                          ? 'hover:translate-y-[-2px] hover:shadow-md'
+                          : ''
+                      }`}
+                      style={{
+                        ...variantStyles.cardStyle,
+                        ...(styleVariant === '2' && post.hasVoted && {
+                          borderColor: hexToRgba(settings.accentColor, 0.3),
+                          boxShadow: `0 0 20px ${hexToRgba(settings.accentColor, 0.1)}`
+                        })
+                      }}
                     >
-                      <div className="flex gap-4">
+                      <div className={`flex ${styleVariant === '2' ? 'gap-6' : 'gap-4'}`}>
                         {/* Vote button */}
                         <button
                           onClick={() => handleVote(post.id)}
-                          className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg border transition-colors shrink-0 ${
-                            post.hasVoted
-                              ? 'border-transparent text-white'
-                              : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                          }`}
-                          style={
-                            post.hasVoted
-                              ? { backgroundColor: settings.accentColor }
+                        className={`flex flex-col items-center justify-center ${styleVariant === '2' ? 'px-3 py-3 min-w-[64px]' : 'px-3 py-2'} ${borderRadiusClass} border transition-colors shrink-0 ${
+                          post.hasVoted
+                            ? 'border-transparent text-white'
+                            : variantStyles.voteButtonClass || 'border-gray-200 hover:border-gray-300 text-gray-600'
+                        }`}
+                        style={
+                          post.hasVoted
+                            ? { backgroundColor: settings.accentColor }
+                            : styleVariant === '2'
+                              ? {
+                                  backgroundColor: '#ffffff',
+                                  border: '1px solid rgba(0, 0, 0, 0.1)'
+                                }
                               : {}
-                          }
+                        }
                         >
-                          <ChevronUp className="h-4 w-4" />
-                          <span className="text-sm font-medium">{post.votes}</span>
+                          <ChevronUp className={`h-4 w-4 ${styleVariant === '2' ? 'group-hover:text-primary' : ''}`} style={post.hasVoted ? {} : (styleVariant === '2' ? { color: '#6b7280' } : {})} />
+                          <span className={`${styleVariant === '2' ? 'text-lg font-extrabold' : 'text-sm font-medium'} ${post.hasVoted ? 'text-white' : styleVariant === '2' ? 'text-gray-900' : 'text-gray-600'}`}>
+                            {post.votes}
+                          </span>
                         </button>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 text-sm">{post.title}</h4>
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{post.content}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <div className="flex items-center gap-1.5">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className={`${styleVariant === '2' ? 'text-xl font-bold' : 'font-medium text-sm'} text-gray-900 group-hover:text-primary transition-colors line-clamp-1`} style={styleVariant === '2' ? { color: post.hasVoted ? settings.accentColor : undefined } : {}}>
+                              {post.title}
+                            </h3>
+                            {post.status && statusStyle && (
+                              <Badge
+                                className={`${statusStyle.bg} ${statusStyle.text} border-0 ${styleVariant === '2' ? 'text-[10px] font-bold uppercase tracking-widest rounded-full border' : 'text-xs'}`}
+                                style={styleVariant === '2' ? {
+                                  borderColor: statusStyle.bg.includes('blue') ? 'rgba(59, 130, 246, 0.2)' : statusStyle.bg.includes('green') ? hexToRgba(settings.accentColor, 0.2) : 'rgba(107, 114, 128, 0.2)'
+                                } : {}}
+                              >
+                                {getStatusLabel(post.status)}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className={`${styleVariant === '2' ? 'text-sm mb-4 leading-relaxed font-medium line-clamp-3' : 'text-xs mt-1 line-clamp-2'} text-gray-500`}>
+                            {post.content}
+                          </p>
+                          <div className={`flex items-center ${styleVariant === '2' ? 'gap-4' : 'gap-2'} ${styleVariant === '2' ? 'mt-0' : 'mt-2'}`}>
+                            <div className="flex items-center gap-2">
                               <div
-                                className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                                className={`${styleVariant === '2' ? 'w-6 h-6 rounded-full bg-gradient-to-tr border border-white/20' : 'w-5 h-5 rounded-full'} flex items-center justify-center text-xs font-medium text-white`}
                                 style={{ backgroundColor: settings.accentColor }}
                               >
-                                {post.author.charAt(0)}
+                                {post.author.charAt(0).toUpperCase()}
                               </div>
-                              <span className="text-xs text-gray-500">{post.author}</span>
+                              <span className={`text-xs ${styleVariant === '2' ? 'font-bold text-gray-700' : 'text-gray-500'}`}>
+                                {post.author}
+                              </span>
                             </div>
-                            <Badge variant="outline" className="text-xs">
-                              {post.category}
-                            </Badge>
+                            <span className="text-xs text-gray-400">• {styleVariant === '2' ? '2 hours ago' : post.category}</span>
+                            {styleVariant === '2' && (
+                              <div className="flex items-center gap-1 text-gray-400 ml-auto">
+                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                </svg>
+                                <span className="text-xs font-bold">12</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -472,6 +681,8 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
           >
             View all posts
           </Link>
+        </div>
+          </div>
         </div>
       </div>
     </div>

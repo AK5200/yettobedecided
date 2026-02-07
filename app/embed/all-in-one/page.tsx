@@ -99,6 +99,7 @@ function AllInOneContent() {
 
   const accentColor = settings?.accent_color || '#F59E0B'
   const backgroundColor = settings?.background_color || '#ffffff'
+  const headerBackgroundColor = settings?.header_background_color || settings?.background_color || '#ffffff'
   const showBranding = settings?.show_branding !== false
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'
@@ -152,6 +153,7 @@ function AllInOneContent() {
             orgSlug={org || ''}
             accentColor={accentColor}
             backgroundColor={backgroundColor}
+            headerBackgroundColor={headerBackgroundColor}
             showBranding={showBranding}
             heading={heading}
             subheading={subheading}

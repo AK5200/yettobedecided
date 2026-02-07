@@ -34,9 +34,10 @@ import { AllInOnePopoverPreview } from '@/components/widgets/all-in-one-popover-
 export type WidgetSettings = {
   accentColor: string
   backgroundColor: string
+  headerBackgroundColor?: string
   showBranding: boolean
   size: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
-  borderRadius: 'none' | 'small' | 'medium' | 'large'
+  borderRadius: 'none' | 'small' | 'medium' | 'large' | 'xlarge'
   shadow: 'none' | 'small' | 'medium' | 'large'
   heading: string
   subheading: string
@@ -54,7 +55,7 @@ export type AnnouncementSettings = {
   text: string
   accentColor: string
   backgroundColor: string
-  borderRadius: 'none' | 'small' | 'medium' | 'large'
+  borderRadius: 'none' | 'small' | 'medium' | 'large' | 'xlarge'
   linkType: 'none' | 'popup' | 'changelog' | 'custom'
   customUrl: string
 }
@@ -62,6 +63,7 @@ export type AnnouncementSettings = {
 const defaultSettings: WidgetSettings = {
   accentColor: '#F59E0B', // Amber-500
   backgroundColor: '#ffffff',
+  headerBackgroundColor: '#ffffff',
   showBranding: true,
   size: 'large',
   borderRadius: 'medium',
@@ -127,6 +129,7 @@ export default function WidgetsPage() {
         widget_type: 'all-in-one',
         accent_color: settings.accentColor,
         background_color: settings.backgroundColor,
+        header_background_color: settings.headerBackgroundColor || settings.backgroundColor,
         show_branding: settings.showBranding,
         size: settings.size,
         border_radius: settings.borderRadius,
@@ -144,6 +147,7 @@ export default function WidgetsPage() {
         widget_type: type,
         accent_color: settings.accentColor,
         background_color: settings.backgroundColor,
+        header_background_color: settings.headerBackgroundColor || settings.backgroundColor,
         show_branding: settings.showBranding,
         size: settings.size,
         border_radius: settings.borderRadius,
@@ -201,6 +205,7 @@ export default function WidgetsPage() {
                 ...prev,
                 accentColor: data.settings.accent_color || prev.accentColor,
                 backgroundColor: data.settings.background_color || prev.backgroundColor,
+                headerBackgroundColor: data.settings.header_background_color || data.settings.background_color || prev.headerBackgroundColor || prev.backgroundColor,
                 showBranding: data.settings.show_branding ?? prev.showBranding,
                 size: data.settings.size || prev.size,
                 borderRadius: data.settings.border_radius || prev.borderRadius,
@@ -741,7 +746,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="backgroundColor">Background Color</Label>
+              <Label htmlFor="backgroundColor">Body Background Color</Label>
               <div className="flex gap-3">
                 <Input
                   id="backgroundColor"
@@ -757,6 +762,27 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">Background color for the posts area</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="headerBackgroundColor">Header Background Color</Label>
+              <div className="flex gap-3">
+                <Input
+                  id="headerBackgroundColor"
+                  type="color"
+                  value={settings.headerBackgroundColor || settings.backgroundColor}
+                  onChange={(e) => updateSetting('headerBackgroundColor', e.target.value)}
+                  className="w-16 h-10 p-1 cursor-pointer"
+                />
+                <Input
+                  value={settings.headerBackgroundColor || settings.backgroundColor}
+                  onChange={(e) => updateSetting('headerBackgroundColor', e.target.value)}
+                  placeholder="#ffffff"
+                  className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">Background color for the header area (title and description)</p>
             </div>
 
             <div className="space-y-2">
@@ -792,6 +818,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   <SelectItem value="small">Small (8px)</SelectItem>
                   <SelectItem value="medium">Medium (12px)</SelectItem>
                   <SelectItem value="large">Large (16px)</SelectItem>
+                  <SelectItem value="xlarge">X-Large (24px)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1042,7 +1069,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="aio-backgroundColor">Background Color</Label>
+              <Label htmlFor="aio-backgroundColor">Body Background Color</Label>
               <div className="flex gap-3">
                 <Input
                   id="aio-backgroundColor"
@@ -1058,6 +1085,27 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">Background color for the posts area</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="aio-headerBackgroundColor">Header Background Color</Label>
+              <div className="flex gap-3">
+                <Input
+                  id="aio-headerBackgroundColor"
+                  type="color"
+                  value={settings.headerBackgroundColor || settings.backgroundColor}
+                  onChange={(e) => updateSetting('headerBackgroundColor', e.target.value)}
+                  className="w-16 h-10 p-1 cursor-pointer"
+                />
+                <Input
+                  value={settings.headerBackgroundColor || settings.backgroundColor}
+                  onChange={(e) => updateSetting('headerBackgroundColor', e.target.value)}
+                  placeholder="#ffffff"
+                  className="flex-1 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">Background color for the header area (title and description)</p>
             </div>
 
             <div className="space-y-2">
@@ -1094,6 +1142,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   <SelectItem value="small">Small (8px)</SelectItem>
                   <SelectItem value="medium">Medium (12px)</SelectItem>
                   <SelectItem value="large">Large (16px)</SelectItem>
+                  <SelectItem value="xlarge">X-Large (24px)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -494,18 +494,26 @@
     // Build position styles - only set one of top/bottom and one of left/right
     let positionStyle = 'position:fixed;z-index:9998;display:none;';
     
-    // Set vertical position (only one of top or bottom)
+    // Set vertical position (only one of top or bottom) with responsive spacing
     if (isBottom) {
-      positionStyle += 'bottom:90px;';
+      // Responsive spacing from bottom: min 20px, preferred 5vh, max 80px
+      const bottomSpacing = Math.max(20, Math.min(80, window.innerHeight * 0.05));
+      positionStyle += 'bottom:' + bottomSpacing + 'px;';
     } else {
-      positionStyle += 'top:90px;';
+      // Responsive spacing from top: min 20px, preferred 5vh, max 80px
+      const topSpacing = Math.max(20, Math.min(80, window.innerHeight * 0.05));
+      positionStyle += 'top:' + topSpacing + 'px;';
     }
     
-    // Set horizontal position (only one of left or right)
+    // Set horizontal position (only one of left or right) with responsive spacing
     if (isLeft) {
-      positionStyle += 'left:20px;';
+      // Responsive spacing from left: min 16px, preferred 2vw, max 24px
+      const leftSpacing = Math.max(16, Math.min(24, window.innerWidth * 0.02));
+      positionStyle += 'left:' + leftSpacing + 'px;';
     } else {
-      positionStyle += 'right:20px;';
+      // Responsive spacing from right: min 16px, preferred 2vw, max 24px
+      const rightSpacing = Math.max(16, Math.min(24, window.innerWidth * 0.02));
+      positionStyle += 'right:' + rightSpacing + 'px;';
     }
     
     // Add size and other styles

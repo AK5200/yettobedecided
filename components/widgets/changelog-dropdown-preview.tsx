@@ -72,6 +72,8 @@ function getBorderRadiusStyle(radius: WidgetSettings['borderRadius']): string {
       return '12px'
     case 'large':
       return '16px'
+    case 'xlarge':
+      return '24px'
     default:
       return '12px'
   }
