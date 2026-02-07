@@ -196,7 +196,6 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
       case 'medium': return 'rounded-md'
       case 'large': return 'rounded-lg'
       case 'xlarge': return 'rounded-xl'
-      case 'full': return 'rounded-full'
       default: return 'rounded-md'
     }
   }
