@@ -232,7 +232,7 @@ export default function WidgetsPage() {
 
   // Use deployed URL for widget code generation
   // This ensures clients get the correct production URL in their embed code
-  const baseUrl = 'https://yettobedecided-goyz.vercel.app'
+  const baseUrl = 'https://yettobedecided-8lws.vercel.app'
 
   // Generate embed codes with comments for customization
   const generateChangelogPopupCode = () => {
@@ -411,7 +411,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
             <Label>Navbar Link Code</Label>
             <div className="relative">
               <Textarea
-                value={`<a href="https://yettobedecided-goyz.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
+                value={`<a href="https://yettobedecided-8lws.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
   Feedback
 </a>`}
                 readOnly
@@ -422,7 +422,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                 variant="secondary"
                 className="absolute top-2 right-2"
                 onClick={() => {
-                  const code = `<a href="https://yettobedecided-goyz.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
+                  const code = `<a href="https://yettobedecided-8lws.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
   Feedback
 </a>`
                   navigator.clipboard.writeText(code)
