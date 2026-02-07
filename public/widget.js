@@ -491,16 +491,30 @@
     const isLeft = popoverPlacement.includes('left');
     const isRight = popoverPlacement.includes('right');
     
-    // Calculate position based on placement
-    const top = isBottom ? 'auto' : '90px';
-    const bottom = isBottom ? '90px' : 'auto';
-    const left = isLeft ? '20px' : 'auto';
-    const right = isRight ? '20px' : 'auto';
+    // Build position styles - only set one of top/bottom and one of left/right
+    let positionStyle = 'position:fixed;z-index:9998;display:none;';
+    
+    // Set vertical position (only one of top or bottom)
+    if (isBottom) {
+      positionStyle += 'bottom:90px;';
+    } else {
+      positionStyle += 'top:90px;';
+    }
+    
+    // Set horizontal position (only one of left or right)
+    if (isLeft) {
+      positionStyle += 'left:20px;';
+    } else {
+      positionStyle += 'right:20px;';
+    }
+    
+    // Add size and other styles
+    positionStyle += `width:${responsiveWidth};min-width:300px;max-width:90vw;height:600px;max-height:calc(100vh - 120px);`;
 
     // Create popover container with responsive width
     const popover = document.createElement('div');
     popover.id = 'feedbackhub-allinone-popover';
-    popover.style.cssText = `position:fixed;${top !== 'auto' ? 'top:' + top + ';' : ''}${bottom !== 'auto' ? 'bottom:' + bottom + ';' : ''}${left !== 'auto' ? 'left:' + left + ';' : ''}${right !== 'auto' ? 'right:' + right + ';' : ''}z-index:9998;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;height:600px;max-height:calc(100vh - 120px);`;
+    popover.style.cssText = positionStyle;
     document.body.appendChild(popover);
 
     // Create iframe

@@ -170,12 +170,6 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
   const isLeft = popoverPlacement.includes('left')
   const isRight = popoverPlacement.includes('right')
   
-  // Calculate position
-  const top = isBottom ? 'auto' : '90px'
-  const bottom = isBottom ? '90px' : 'auto'
-  const left = isLeft ? '20px' : 'auto'
-  const right = isRight ? '20px' : 'auto'
-  
   // Apply text style
   const textStyleClass = settings.allInOneTextStyle === 'bold' || settings.allInOneTextStyle === 'bold-italic' 
     ? 'font-bold' 
@@ -184,6 +178,30 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
     ? 'italic'
     : ''
 
+  // Build position styles - only set one of top/bottom and one of left/right
+  const positionStyles: React.CSSProperties = {
+    width: responsiveWidth,
+    minWidth: '300px',
+    maxWidth: '90vw',
+    borderRadius,
+    boxShadow,
+    backgroundColor: settings.backgroundColor,
+  }
+
+  // Set vertical position (only one of top or bottom)
+  if (isBottom) {
+    positionStyles.bottom = '90px'
+  } else {
+    positionStyles.top = '90px'
+  }
+
+  // Set horizontal position (only one of left or right)
+  if (isLeft) {
+    positionStyles.left = '20px'
+  } else {
+    positionStyles.right = '20px'
+  }
+
   return (
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
@@ -191,17 +209,8 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
 
       {/* Popover Panel - positioned based on settings */}
       <div
-        className="absolute border max-h-[calc(100vh-120px)] flex flex-col"
-        style={{
-          width: responsiveWidth,
-          borderRadius,
-          boxShadow,
-          backgroundColor: settings.backgroundColor,
-          top: top !== 'auto' ? top : undefined,
-          bottom: bottom !== 'auto' ? bottom : undefined,
-          left: left !== 'auto' ? left : undefined,
-          right: right !== 'auto' ? right : undefined,
-        }}
+        className="fixed border max-h-[calc(100vh-120px)] flex flex-col"
+        style={positionStyles}
       >
         {/* Header */}
         <div className="p-4 border-b">
