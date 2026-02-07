@@ -216,11 +216,12 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
 
       {/* Modal - positioned based on settings */}
       <div
-        className={`relative ${isLeft ? 'left-0' : 'right-0'} top-0 h-full flex flex-col`}
+        className="fixed top-0 h-full flex flex-col z-50"
         style={{
           width: responsiveWidth,
           minWidth: '300px',
           maxWidth: '90vw',
+          ...(isLeft ? { left: '0' } : { right: '0' }),
           borderRadius: isLeft ? `${borderRadius} 0 0 0` : `0 ${borderRadius} 0 0`,
           boxShadow: isLeft ? '4px 0 20px rgba(0,0,0,0.1)' : '-4px 0 20px rgba(0,0,0,0.1)',
           backgroundColor: settings.backgroundColor,
