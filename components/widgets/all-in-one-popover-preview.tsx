@@ -425,9 +425,6 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`${styleVariant === '2' ? 'pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/40' : 'pl-8 h-9 text-sm'}`}
-                  style={styleVariant === '2' ? {
-                    focusRingColor: hexToRgba(settings.accentColor, 0.4)
-                  } : {}}
                 />
               </div>
               {styleVariant === '2' && (
