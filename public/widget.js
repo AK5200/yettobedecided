@@ -424,9 +424,10 @@
     container.style.cssText = positionStyle;
     document.body.appendChild(container);
 
-    // Create iframe
+    // Create iframe - pass style variant via URL for immediate rendering
     const iframe = document.createElement('iframe');
-    iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup';
+    const styleVariant = settings.all_in_one_style_variant || '1';
+    iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
     iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);';
     container.appendChild(iframe);
 
@@ -525,9 +526,10 @@
     popover.style.cssText = positionStyle;
     document.body.appendChild(popover);
 
-    // Create iframe
+    // Create iframe - pass style variant via URL for immediate rendering
     const iframe = document.createElement('iframe');
-    iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popover';
+    const styleVariant = settings.all_in_one_style_variant || '1';
+    iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popover&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
     iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
     popover.appendChild(iframe);
 

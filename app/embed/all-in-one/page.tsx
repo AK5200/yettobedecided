@@ -84,7 +84,7 @@ function AllInOneContent() {
 
   if (loading) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-white" style={{ pointerEvents: 'auto' }}>
+      <div className="w-full min-h-screen flex items-center justify-center" style={{ pointerEvents: 'auto' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
           <p className="text-sm text-gray-500">Loading...</p>
@@ -104,7 +104,8 @@ function AllInOneContent() {
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'
   const textStyle = settings?.all_in_one_text_style || 'default'
-  const styleVariant = settings?.all_in_one_style_variant || '1'
+  // Read style variant from API settings, fall back to URL param, then default to '1'
+  const styleVariant = settings?.all_in_one_style_variant || searchParams.get('style') || '1'
   const borderRadius = settings?.border_radius || 'medium'
 
   const handleCreatePost = () => {
@@ -135,7 +136,7 @@ function AllInOneContent() {
   }
 
   return (
-    <div className="w-full h-full bg-white relative flex flex-col" style={{ pointerEvents: 'auto', height: '100vh', overflow: 'hidden' }}>
+    <div className="w-full h-full relative flex flex-col" style={{ pointerEvents: 'auto', height: '100vh', overflow: 'hidden', backgroundColor }}>
       {/* Close button */}
       <button
         onClick={handleClose}
@@ -145,7 +146,7 @@ function AllInOneContent() {
         <X className="h-5 w-5 text-gray-500" />
       </button>
 
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto">
           <AllInOneWidget
             boards={boards}
             posts={posts}
@@ -158,8 +159,9 @@ function AllInOneContent() {
             heading={heading}
             subheading={subheading}
             textStyle={textStyle}
-            styleVariant={styleVariant}
+            styleVariant={styleVariant as '1' | '2' | '3'}
             borderRadius={borderRadius}
+            isEmbedded={true}
             onCreatePost={handleCreatePost}
           />
       </div>

@@ -43,6 +43,7 @@ interface AllInOneWidgetProps {
   textStyle?: 'default' | 'bold' | 'italic' | 'bold-italic'
   styleVariant?: '1' | '2' | '3'
   borderRadius?: 'none' | 'small' | 'medium' | 'large'
+  isEmbedded?: boolean
   onCreatePost?: () => void
   onVote?: (postId: string) => void
 }
@@ -142,6 +143,7 @@ export function AllInOneWidget({
   textStyle = 'default',
   styleVariant = '1',
   borderRadius = 'medium',
+  isEmbedded = false,
   onCreatePost,
   onVote,
 }: AllInOneWidgetProps) {
@@ -282,7 +284,7 @@ export function AllInOneWidget({
   // Show post detail view if a post is selected
   if (selectedPost) {
     return (
-      <div className={`${borderRadiusClass} p-4 space-y-4`} style={{ backgroundColor }}>
+      <div className={`${isEmbedded ? '' : borderRadiusClass} ${isEmbedded ? 'px-4 py-2' : 'p-4'} space-y-4`} style={isEmbedded ? {} : { backgroundColor }}>
         <PostDetailView
           post={selectedPost}
           orgSlug={orgSlug}
@@ -301,9 +303,9 @@ export function AllInOneWidget({
   }
 
   return (
-    <div 
-      className={`${variantStyles.borderRadius || borderRadiusClass} p-4 space-y-4 ${variantStyles.containerClass}`} 
-      style={{ 
+    <div
+      className={`${isEmbedded ? '' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? 'px-4 py-2' : 'p-4'} space-y-4 ${variantStyles.containerClass}`}
+      style={isEmbedded ? {} : {
         backgroundColor: variantStyles.containerStyle?.background || backgroundColor,
         border: variantStyles.containerStyle?.border,
         boxShadow: variantStyles.containerStyle?.boxShadow,

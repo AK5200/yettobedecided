@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { handleOptions, withCors } from '@/lib/cors'
 
+export const dynamic = 'force-dynamic'
+
 const defaultSettings = {
   widget_type: 'all-in-one',
   position: 'bottom-right',
@@ -61,13 +63,12 @@ export async function GET(request: NextRequest) {
     .order('published_at', { ascending: false })
     .limit(10)
 
-  return withCors(
-    NextResponse.json({
-      org,
-      settings: settings || { ...defaultSettings, org_id: org.id },
-      boards: boards || [],
-      changelog: changelog || [],
-    }),
-    origin
-  )
+  const response = NextResponse.json({
+    org,
+    settings: settings || { ...defaultSettings, org_id: org.id },
+    boards: boards || [],
+    changelog: changelog || [],
+  })
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+  return withCors(response, origin)
 }
