@@ -46,6 +46,7 @@ export type WidgetSettings = {
   allInOneTextStyle?: 'default' | 'bold' | 'italic' | 'bold-italic'
   allInOnePopoverPlacement?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
   allInOnePopupPlacement?: 'left' | 'right'
+  allInOneStyleVariant?: '1' | '2' | '3'
 }
 
 export type AnnouncementSettings = {
@@ -70,6 +71,7 @@ const defaultSettings: WidgetSettings = {
   allInOneTextStyle: 'default',
   allInOnePopoverPlacement: 'bottom-right',
   allInOnePopupPlacement: 'right',
+  allInOneStyleVariant: '1',
 }
 
 const defaultAnnouncementSettings: AnnouncementSettings = {
@@ -136,6 +138,7 @@ export default function WidgetsPage() {
         all_in_one_text_style: settings.allInOneTextStyle || 'default',
         all_in_one_popover_placement: settings.allInOnePopoverPlacement || 'bottom-right',
         all_in_one_popup_placement: settings.allInOnePopupPlacement || 'right',
+        all_in_one_style_variant: settings.allInOneStyleVariant || '1',
       } : {
         org_id: orgId,
         widget_type: type,
@@ -209,6 +212,7 @@ export default function WidgetsPage() {
                 allInOneTextStyle: data.settings.all_in_one_text_style || prev.allInOneTextStyle,
                 allInOnePopoverPlacement: data.settings.all_in_one_popover_placement || prev.allInOnePopoverPlacement,
                 allInOnePopupPlacement: data.settings.all_in_one_popup_placement || prev.allInOnePopupPlacement,
+                allInOneStyleVariant: data.settings.all_in_one_style_variant || prev.allInOneStyleVariant,
               }))
             }
           }
@@ -1180,6 +1184,24 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">Side of screen for popup widget</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Style Variant</Label>
+                <Select
+                  value={settings.allInOneStyleVariant || '1'}
+                  onValueChange={(v) => updateSetting('allInOneStyleVariant', v as WidgetSettings['allInOneStyleVariant'])}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Style 1</SelectItem>
+                    <SelectItem value="2">Style 2</SelectItem>
+                    <SelectItem value="3">Style 3</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Your site, your choice</p>
               </div>
             </div>
 

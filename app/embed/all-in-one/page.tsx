@@ -50,6 +50,7 @@ function AllInOneContent() {
                       author_name: p.author_name || p.guest_name || 'Anonymous',
                       author_email: p.author_email || p.guest_email,
                       tags: p.tags || [],
+                      status: p.status || 'open',
                       hasVoted: false,
                     }))
                     allPosts.push(...formattedPosts)
@@ -102,6 +103,8 @@ function AllInOneContent() {
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'
   const textStyle = settings?.all_in_one_text_style || 'default'
+  const styleVariant = settings?.all_in_one_style_variant || '1'
+  const borderRadius = settings?.border_radius || 'medium'
 
   const handleCreatePost = () => {
     setShowFeedbackForm(true)
@@ -153,6 +156,8 @@ function AllInOneContent() {
             heading={heading}
             subheading={subheading}
             textStyle={textStyle}
+            styleVariant={styleVariant}
+            borderRadius={borderRadius}
             onCreatePost={handleCreatePost}
           />
       </div>

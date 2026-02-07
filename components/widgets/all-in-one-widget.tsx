@@ -24,6 +24,7 @@ interface Post {
   author_name?: string
   author_email?: string
   tags?: { name: string }[]
+  status?: string
   hasVoted?: boolean
   created_at?: string
 }
@@ -39,6 +40,8 @@ interface AllInOneWidgetProps {
   heading?: string
   subheading?: string
   textStyle?: 'default' | 'bold' | 'italic' | 'bold-italic'
+  styleVariant?: '1' | '2' | '3'
+  borderRadius?: 'none' | 'small' | 'medium' | 'large'
   onCreatePost?: () => void
   onVote?: (postId: string) => void
 }
@@ -56,6 +59,55 @@ function getCategoryStyle(category: string): { bg: string; text: string } {
   }
 }
 
+function getStatusStyle(status: string): { bg: string; text: string } {
+  switch (status?.toLowerCase()) {
+    case 'open':
+      return { bg: 'bg-gray-100', text: 'text-gray-700' }
+    case 'planned':
+      return { bg: 'bg-blue-100', text: 'text-blue-700' }
+    case 'in_progress':
+      return { bg: 'bg-yellow-100', text: 'text-yellow-700' }
+    case 'shipped':
+      return { bg: 'bg-green-100', text: 'text-green-700' }
+    case 'closed':
+      return { bg: 'bg-gray-200', text: 'text-gray-600' }
+    default:
+      return { bg: 'bg-gray-100', text: 'text-gray-700' }
+  }
+}
+
+function getStatusLabel(status: string): string {
+  switch (status?.toLowerCase()) {
+    case 'open':
+      return 'Open'
+    case 'planned':
+      return 'Planned'
+    case 'in_progress':
+      return 'In Progress'
+    case 'shipped':
+      return 'Shipped'
+    case 'closed':
+      return 'Closed'
+    default:
+      return status || 'Open'
+  }
+}
+
+function getBorderRadiusClass(borderRadius: 'none' | 'small' | 'medium' | 'large'): string {
+  switch (borderRadius) {
+    case 'none':
+      return 'rounded-none'
+    case 'small':
+      return 'rounded-sm'
+    case 'medium':
+      return 'rounded-md'
+    case 'large':
+      return 'rounded-lg'
+    default:
+      return 'rounded-md'
+  }
+}
+
 export function AllInOneWidget({
   boards,
   posts: initialPosts = [],
@@ -67,6 +119,8 @@ export function AllInOneWidget({
   heading = 'Have something to say?',
   subheading = 'Suggest a feature, read through our feedback and check out our latest feature releases.',
   textStyle = 'default',
+  styleVariant = '1',
+  borderRadius = 'medium',
   onCreatePost,
   onVote,
 }: AllInOneWidgetProps) {
@@ -132,10 +186,38 @@ export function AllInOneWidget({
     setSelectedPost(null)
   }
 
+  const borderRadiusClass = getBorderRadiusClass(borderRadius)
+  
+  // Style variant configurations
+  const getVariantStyles = () => {
+    switch (styleVariant) {
+      case '2':
+        return {
+          headerBg: 'bg-gray-50',
+          cardBorder: 'border-2',
+          buttonStyle: 'outline',
+        }
+      case '3':
+        return {
+          headerBg: `${accentColor}10`,
+          cardBorder: 'border',
+          buttonStyle: 'solid',
+        }
+      default: // variant 1
+        return {
+          headerBg: 'transparent',
+          cardBorder: 'border',
+          buttonStyle: 'solid',
+        }
+    }
+  }
+  
+  const variantStyles = getVariantStyles()
+
   // Show post detail view if a post is selected
   if (selectedPost) {
     return (
-      <div className="rounded-lg p-4 space-y-4" style={{ backgroundColor }}>
+      <div className={`${borderRadiusClass} p-4 space-y-4`} style={{ backgroundColor }}>
         <PostDetailView
           post={selectedPost}
           orgSlug={orgSlug}
@@ -154,11 +236,11 @@ export function AllInOneWidget({
   }
 
   return (
-    <div className="rounded-lg p-4 space-y-4" style={{ backgroundColor }}>
+    <div className={`${borderRadiusClass} p-4 space-y-4`} style={{ backgroundColor }}>
       {/* Header */}
-      <div className="flex items-start gap-3">
+      <div className={`flex items-start gap-3 p-3 ${variantStyles.headerBg} ${borderRadiusClass}`}>
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          className={`w-10 h-10 ${borderRadiusClass} flex items-center justify-center shrink-0`}
           style={{ backgroundColor: `${accentColor}15` }}
         >
           <Zap className="h-5 w-5" style={{ color: accentColor }} />
@@ -232,8 +314,12 @@ export function AllInOneWidget({
             </div>
             <Button
               onClick={onCreatePost}
-              style={{ backgroundColor: accentColor }}
-              className="text-white shrink-0"
+              style={variantStyles.buttonStyle === 'solid' ? { backgroundColor: accentColor } : {}}
+              className={`shrink-0 ${borderRadiusClass} ${
+                variantStyles.buttonStyle === 'outline' 
+                  ? 'border-2' 
+                  : 'text-white'
+              }`}
             >
               Create New Post
             </Button>
@@ -246,59 +332,72 @@ export function AllInOneWidget({
                 {searchQuery ? 'No posts found matching your search.' : 'No posts yet. Be the first to create one!'}
               </div>
             ) : (
-              filteredPosts.map((post) => (
-                <div
-                  key={post.id}
-                  onClick={() => handlePostClick(post)}
-                  className="p-3 border rounded-lg hover:border-gray-300 transition-colors cursor-pointer"
-                >
-                  <div className="flex gap-3">
-                    {/* Vote button */}
-                    <button
-                      onClick={() => handleVote(post.id)}
-                      className={`flex flex-col items-center justify-center px-2.5 py-2 rounded-lg border transition-colors shrink-0 ${
-                        post.hasVoted
-                          ? 'border-transparent text-white'
-                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                      }`}
-                      style={
-                        post.hasVoted
-                          ? { backgroundColor: accentColor }
-                          : {}
-                      }
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                      <span className="text-sm font-medium">{post.votes}</span>
-                    </button>
+              filteredPosts.map((post) => {
+                const statusStyle = post.status ? getStatusStyle(post.status) : null
+                return (
+                  <div
+                    key={post.id}
+                    onClick={() => handlePostClick(post)}
+                    className={`p-3 ${variantStyles.cardBorder} border-gray-200 ${borderRadiusClass} hover:border-gray-300 transition-colors cursor-pointer`}
+                  >
+                    <div className="flex gap-3">
+                      {/* Vote button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleVote(post.id)
+                        }}
+                        className={`flex flex-col items-center justify-center px-2.5 py-2 ${borderRadiusClass} border transition-colors shrink-0 ${
+                          post.hasVoted
+                            ? 'border-transparent text-white'
+                            : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                        }`}
+                        style={
+                          post.hasVoted
+                            ? { backgroundColor: accentColor }
+                            : {}
+                        }
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                        <span className="text-sm font-medium">{post.votes}</span>
+                      </button>
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 text-sm">{post.title}</h4>
-                      {post.content && (
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{post.content}</p>
-                      )}
-                      <div className="flex items-center gap-2 mt-2">
-                        {post.author_name && (
-                          <div className="flex items-center gap-1.5">
-                            <div
-                              className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium text-white"
-                              style={{ backgroundColor: accentColor }}
-                            >
-                              {post.author_name.charAt(0).toUpperCase()}
-                            </div>
-                            <span className="text-xs text-gray-500">{post.author_name}</span>
-                          </div>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-medium text-gray-900 text-sm flex-1">{post.title}</h4>
+                          {post.status && statusStyle && (
+                            <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 ${borderRadiusClass} text-xs`}>
+                              {getStatusLabel(post.status)}
+                            </Badge>
+                          )}
+                        </div>
+                        {post.content && (
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{post.content}</p>
                         )}
-                        {post.tags?.map((tag) => (
-                          <Badge key={tag.name} variant="outline" className="text-xs">
-                            {tag.name}
-                          </Badge>
-                        ))}
+                        <div className="flex items-center gap-2 mt-2">
+                          {post.author_name && (
+                            <div className="flex items-center gap-1.5">
+                              <div
+                                className={`w-5 h-5 ${borderRadiusClass === 'rounded-none' ? 'rounded-full' : borderRadiusClass} flex items-center justify-center text-xs font-medium text-white`}
+                                style={{ backgroundColor: accentColor }}
+                              >
+                                {post.author_name.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="text-xs text-gray-500">{post.author_name}</span>
+                            </div>
+                          )}
+                          {post.tags?.map((tag) => (
+                            <Badge key={tag.name} variant="outline" className={`text-xs ${borderRadiusClass}`}>
+                              {tag.name}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </TabsContent>
