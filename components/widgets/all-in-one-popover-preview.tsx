@@ -184,19 +184,29 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
     switch (styleVariant) {
       case '2':
         return {
-          headerBg: 'bg-gray-50',
+          headerBgClass: 'bg-gray-50',
+          headerBgStyle: undefined,
           cardBorder: 'border-2',
           buttonStyle: 'outline',
         }
       case '3':
+        // Convert hex color to rgba with 10% opacity
+        const hexToRgba = (hex: string, alpha: number) => {
+          const r = parseInt(hex.slice(1, 3), 16)
+          const g = parseInt(hex.slice(3, 5), 16)
+          const b = parseInt(hex.slice(5, 7), 16)
+          return `rgba(${r}, ${g}, ${b}, ${alpha})`
+        }
         return {
-          headerBg: `${settings.accentColor}10`,
+          headerBgClass: '',
+          headerBgStyle: hexToRgba(settings.accentColor, 0.1),
           cardBorder: 'border',
           buttonStyle: 'solid',
         }
       default: // variant 1
         return {
-          headerBg: 'transparent',
+          headerBgClass: '',
+          headerBgStyle: 'transparent',
           cardBorder: 'border',
           buttonStyle: 'solid',
         }
@@ -239,8 +249,8 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
         style={positionStyles}
       >
         {/* Header */}
-        <div className={`p-4 border-b ${variantStyles.headerBg}`} style={{ 
-          backgroundColor: variantStyles.headerBg === 'transparent' ? 'transparent' : undefined
+        <div className={`p-4 border-b ${variantStyles.headerBgClass}`} style={{ 
+          backgroundColor: variantStyles.headerBgStyle
         }}>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
