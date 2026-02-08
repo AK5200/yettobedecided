@@ -94,6 +94,21 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     return () => clearInterval(interval)
   }, [post.id])
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return ''
+    try {
+      const date = new Date(dateString)
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        timeZone: 'UTC',
+      }).format(date)
+    } catch {
+      return ''
+    }
+  }
+
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newComment.trim() || submitting) return
@@ -198,7 +213,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
                 </div>
               )}
               {post.created_at && (
-                <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                <span>{formatDate(post.created_at)}</span>
               )}
               {post.tags?.map((tag) => (
                 <span key={tag.name} className="px-2 py-1 bg-gray-100 rounded text-gray-600">
@@ -240,7 +255,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
                       {comment.author_name || comment.guest_name || 'Anonymous'}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {new Date(comment.created_at).toLocaleDateString()}
+                      {formatDate(comment.created_at)}
                     </span>
                   </div>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.content}</p>

@@ -95,6 +95,21 @@ function getStatusLabel(status: string): string {
   }
 }
 
+function formatDate(dateString?: string | null): string {
+  if (!dateString) return ''
+  try {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      timeZone: 'UTC',
+    }).format(date)
+  } catch {
+    return ''
+  }
+}
+
 function getBorderRadiusClass(borderRadius: string): string {
   switch (borderRadius) {
     case 'none':
@@ -571,7 +586,7 @@ export function AllInOneWidget({
                       </Badge>
                       <span>
                         {entry.published_at
-                          ? new Date(entry.published_at).toLocaleDateString()
+                          ? formatDate(entry.published_at)
                           : 'Recently'}
                       </span>
                     </div>
