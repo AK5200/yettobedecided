@@ -335,6 +335,21 @@ export function AllInOneWidget({
         ...variantStyles.containerStyle
       }}
     >
+      {/* DEBUG: Visible style variant indicator - REMOVE after debugging */}
+      {isEmbedded && (
+        <div style={{
+          background: styleVariant === '3' ? '#22c55e' : styleVariant === '2' ? '#3b82f6' : '#ef4444',
+          color: 'white',
+          padding: '4px 12px',
+          fontSize: '11px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          fontFamily: 'monospace',
+        }}>
+          STYLE: {styleVariant} | ORDER FIX DEPLOYED | v{Date.now().toString(36).slice(-4)}
+        </div>
+      )}
+
       {/* Header */}
       <div className={`px-6 pt-6 pb-4`} style={{
         backgroundColor: headerBackgroundColor || variantStyles.headerBg || 'transparent',
@@ -450,11 +465,18 @@ export function AllInOneWidget({
                 const statusStyle = post.status ? getStatusStyle(post.status) : null
                 const isStyle3 = styleVariant === '3'
 
+                // DEBUG: Log per-card style info
+                if (typeof window !== 'undefined' && post === filteredPosts[0]) {
+                  console.log('FeedbackHub CARD DEBUG:', { isStyle3, styleVariant, voteOrder: isStyle3 ? 1 : -1, cardBorder: isStyle3 ? 'borderBottom' : 'border' })
+                }
+
                 return (
                   <div
                     key={post.id}
                     onClick={() => handlePostClick(post)}
                     className="transition-colors cursor-pointer"
+                    data-is-style3={String(isStyle3)}
+                    data-vote-order={isStyle3 ? 'right' : 'left'}
                     style={isStyle3 ? {
                       padding: '16px 4px',
                       borderBottom: '1px solid #e5e7eb',
