@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Filter } from 'lucide-react'
 
 interface BoardFilterProps {
   orgId: string
@@ -53,24 +54,27 @@ export function BoardFilter({ orgId }: BoardFilterProps) {
 
   if (loading) {
     return (
-      <select className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white">
+      <select className="px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white shadow-sm">
         <option>Loading...</option>
       </select>
     )
   }
 
   return (
-    <select
-      value={currentBoardId}
-      onChange={handleChange}
-      className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-    >
-      <option value="">All Boards</option>
-      {boards.map((board) => (
-        <option key={board.id} value={board.id}>
-          {board.name}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+      <select
+        value={currentBoardId}
+        onChange={handleChange}
+        className="pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent shadow-sm appearance-none cursor-pointer"
+      >
+        <option value="">All Boards</option>
+        {boards.map((board) => (
+          <option key={board.id} value={board.id}>
+            {board.name}
+          </option>
+        ))}
+      </select>
+    </div>
   )
 }

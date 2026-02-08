@@ -15,6 +15,7 @@ import { NeedsAttention } from '@/components/analytics/needs-attention'
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { BarChart3 } from 'lucide-react'
 
 export default function AnalyticsPage() {
   const searchParams = useSearchParams()
@@ -49,12 +50,20 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="flex-1 bg-white">
-      <div className="p-6 max-w-7xl mx-auto">
+    <div className="flex-1 bg-gradient-to-br from-gray-50 to-white min-h-screen">
+      <div className="p-8 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-          <div className="flex items-center gap-3">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-amber-100 rounded-xl">
+              <BarChart3 className="h-6 w-6 text-amber-600" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+              <p className="text-sm text-gray-500 mt-1">Insights into your feedback and engagement</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 mt-6">
             <DateRangePicker defaultDays={days} />
             <BoardFilter orgId={orgId} />
           </div>
@@ -65,12 +74,12 @@ export default function AnalyticsPage() {
           <NeedsAttention orgId={orgId} />
 
           {/* Metric Cards */}
-          <section className="mb-6">
+          <section className="mb-8">
             <MetricCards orgId={orgId} days={days} boardId={boardId} />
           </section>
 
           {/* Charts Row */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-2">
               <ActivityChart orgId={orgId} days={days} boardId={boardId} />
             </div>
@@ -80,7 +89,7 @@ export default function AnalyticsPage() {
           </section>
 
           {/* Prioritization Matrix */}
-          <section className="mb-6">
+          <section className="mb-8">
             <PriorityMatrix orgId={orgId} boardId={boardId} />
           </section>
 

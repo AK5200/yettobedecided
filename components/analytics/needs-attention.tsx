@@ -34,24 +34,26 @@ export function NeedsAttention({ orgId }: NeedsAttentionProps) {
   }
 
   return (
-    <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-600" />
+    <div className="mb-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-5 flex items-center justify-between shadow-md">
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-amber-100 rounded-xl">
+          <AlertTriangle className="h-6 w-6 text-amber-600" />
+        </div>
         <div>
-          <p className="text-sm font-medium text-amber-900">
+          <p className="text-sm font-bold text-amber-900 mb-1">
             {data.stale} {data.stale === 1 ? 'post' : 'posts'} need attention
           </p>
-          <p className="text-xs text-amber-700">
+          <p className="text-xs text-amber-800">
             Some posts haven't been updated in over 30 days
           </p>
         </div>
       </div>
       <button
         onClick={() => setDismissed(true)}
-        className="p-1 hover:bg-amber-100 rounded-md transition-colors"
+        className="p-2 hover:bg-amber-100 rounded-lg transition-colors"
         aria-label="Dismiss"
       >
-        <X className="h-4 w-4 text-amber-600" />
+        <X className="h-5 w-5 text-amber-600" />
       </button>
     </div>
   )

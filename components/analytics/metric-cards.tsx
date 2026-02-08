@@ -42,7 +42,7 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-xl" />
+          <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-2xl" />
         ))}
       </div>
     )
@@ -59,39 +59,54 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
       current: data.period?.posts || 0,
       previous: data.period?.posts_prev || 0,
       icon: FileText,
-      color: 'text-indigo-600',
+      gradient: 'from-indigo-500 to-indigo-600',
+      bgGradient: 'from-indigo-50 to-indigo-100',
+      iconBg: 'bg-indigo-100',
+      iconColor: 'text-indigo-600',
     },
     {
       label: 'Votes',
       value: data.totals?.votes || 0,
-      current: data.period?.posts || 0, // Approximation
+      current: data.period?.posts || 0,
       previous: data.period?.posts_prev || 0,
       icon: ThumbsUp,
-      color: 'text-violet-600',
+      gradient: 'from-violet-500 to-violet-600',
+      bgGradient: 'from-violet-50 to-violet-100',
+      iconBg: 'bg-violet-100',
+      iconColor: 'text-violet-600',
     },
     {
       label: 'Comments',
       value: data.totals?.comments || 0,
-      current: data.period?.posts || 0, // Approximation
+      current: data.period?.posts || 0,
       previous: data.period?.posts_prev || 0,
       icon: MessageSquare,
-      color: 'text-gray-600',
+      gradient: 'from-emerald-500 to-emerald-600',
+      bgGradient: 'from-emerald-50 to-emerald-100',
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
     },
     {
       label: 'Users',
       value: data.totals?.users || 0,
-      current: data.period?.posts || 0, // Approximation
+      current: data.period?.posts || 0,
       previous: data.period?.posts_prev || 0,
       icon: Users,
-      color: 'text-blue-600',
+      gradient: 'from-blue-500 to-blue-600',
+      bgGradient: 'from-blue-50 to-blue-100',
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
     },
     {
       label: 'Completed',
       value: data.by_status?.completed || 0,
-      current: data.period?.posts || 0, // Approximation
+      current: data.period?.posts || 0,
       previous: data.period?.posts_prev || 0,
       icon: CheckCircle2,
-      color: 'text-green-600',
+      gradient: 'from-green-500 to-green-600',
+      bgGradient: 'from-green-50 to-green-100',
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-600',
     },
   ]
 
@@ -102,13 +117,19 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
         return (
           <div
             key={metric.label}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
+            className={`bg-gradient-to-br ${metric.bgGradient} rounded-2xl shadow-lg border border-gray-200 p-5 hover:shadow-xl transition-all duration-200 group`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <Icon className={`h-5 w-5 ${metric.color}`} />
+            <div className="flex items-start justify-between mb-4">
+              <div className={`p-2.5 ${metric.iconBg} rounded-xl group-hover:scale-110 transition-transform`}>
+                <Icon className={`h-5 w-5 ${metric.iconColor}`} />
+              </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{metric.value}</div>
-            <div className="text-xs font-medium text-gray-500 mb-1">{metric.label}</div>
+            <div className="mb-2">
+              <div className={`text-3xl font-bold bg-gradient-to-r ${metric.gradient} bg-clip-text text-transparent`}>
+                {metric.value.toLocaleString()}
+              </div>
+              <div className="text-sm font-semibold text-gray-700 mt-1">{metric.label}</div>
+            </div>
             <ComparisonBadge current={metric.current} previous={metric.previous} />
           </div>
         )

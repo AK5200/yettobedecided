@@ -20,20 +20,20 @@ export function ComparisonBadge({
 
   return (
     <div
-      className={`flex items-center gap-1 text-xs font-medium ${
+      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-semibold ${
         isPositive
-          ? 'text-green-600'
+          ? 'bg-emerald-50 text-emerald-700'
           : isNeutral
-            ? 'text-gray-500'
-            : 'text-red-600'
+            ? 'bg-gray-50 text-gray-600'
+            : 'bg-red-50 text-red-700'
       }`}
     >
       {isPositive ? (
-        <ArrowUp className="h-3 w-3" />
+        <ArrowUp className="h-3.5 w-3.5" />
       ) : isNeutral ? (
-        <Minus className="h-3 w-3" />
+        <Minus className="h-3.5 w-3.5" />
       ) : (
-        <ArrowDown className="h-3 w-3" />
+        <ArrowDown className="h-3.5 w-3.5" />
       )}
       <span>
         {formatted}% {label}
