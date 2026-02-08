@@ -234,12 +234,9 @@ export function Sidebar() {
               <Users className="h-4 w-4" />
               Users
             </Link>
-            <Link href="/prioritize" className={navItemClass('/prioritize')}>
+            <Link href="/analytics" className={navItemClass('/analytics')}>
               <BarChart3 className="h-4 w-4" />
-              Prioritize
-              <Badge className="ml-auto bg-emerald-100 text-emerald-700 hover:bg-emerald-100 text-[10px] px-1.5 py-0">
-                NEW
-              </Badge>
+              Analytics
             </Link>
           </nav>
         </div>

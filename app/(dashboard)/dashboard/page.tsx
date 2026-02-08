@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MiniMetricCards } from '@/components/analytics/mini-metric-cards'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -31,6 +32,10 @@ export default async function DashboardPage() {
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
       <p className="text-gray-600 mb-8">{orgName}</p>
+      
+      {/* Mini Analytics Widget */}
+      {orgId && <MiniMetricCards orgId={orgId} />}
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
