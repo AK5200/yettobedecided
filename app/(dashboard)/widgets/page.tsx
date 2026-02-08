@@ -346,7 +346,8 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
   (function() {
     var script = document.createElement('script');
     // Change this URL to your FeedbackHub instance URL
-    script.src = '${baseUrl}/widget.js';
+    // Adding version parameter to prevent caching issues
+    script.src = '${baseUrl}/widget.js?v=' + new Date().getTime();
     script.async = true;
     // Replace 'your-workspace' with your actual workspace slug
     script.dataset.org = '${orgSlug}';
