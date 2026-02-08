@@ -17,6 +17,12 @@ function AllInOneContent() {
   const [settings, setSettings] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!org) return
@@ -82,7 +88,8 @@ function AllInOneContent() {
     fetchData()
   }, [org])
 
-  if (loading) {
+  // Prevent hydration mismatch - don't render until mounted
+  if (!mounted || loading) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center" style={{ pointerEvents: 'auto' }}>
         <div className="text-center">
@@ -147,7 +154,23 @@ function AllInOneContent() {
   }
 
   return (
-    <div className="w-full h-full relative flex flex-col" style={{ pointerEvents: 'auto', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+    <div 
+      className="w-full h-full relative flex flex-col" 
+      style={{ 
+        pointerEvents: 'auto', 
+        height: '100vh', 
+        width: '100vw', 
+        overflow: 'hidden', 
+        backgroundColor, 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0,
+        margin: 0,
+        padding: 0
+      }}
+    >
       {/* Close button */}
       <button
         onClick={handleClose}
@@ -157,7 +180,7 @@ function AllInOneContent() {
         <X className="h-5 w-5 text-gray-500" />
       </button>
 
-      <div className="flex-1 overflow-y-auto w-full">
+      <div className="flex-1 overflow-y-auto w-full h-full">
           <AllInOneWidget
             boards={boards}
             posts={posts}

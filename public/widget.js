@@ -430,7 +430,9 @@
     const styleVariant = settings.all_in_one_style_variant || '1';
     // Add cache busting and ensure settings are fresh
     iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
-    iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);';
+    iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);display:block;margin:0;padding:0;';
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowtransparency', 'true');
     container.appendChild(iframe);
     
     // Debug log
