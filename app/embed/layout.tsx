@@ -4,10 +4,9 @@ export default function EmbedLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning style={{ height: '100%', width: '100%' }}>
-      <body className="antialiased" style={{ margin: 0, padding: 0, overflow: 'hidden', height: '100%', width: '100%' }}>
-        {children}
-      </body>
-    </html>
+    <>
+      <style>{`html, body { height: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }`}</style>
+      {children}
+    </>
   )
 }
