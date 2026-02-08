@@ -425,11 +425,16 @@
     document.body.appendChild(container);
 
     // Create iframe - pass style variant via URL for immediate rendering
+    // Note: The embed page will fetch settings from API, but we pass it via URL as a fallback
     const iframe = document.createElement('iframe');
     const styleVariant = settings.all_in_one_style_variant || '1';
+    // Add cache busting and ensure settings are fresh
     iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
     iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);';
     container.appendChild(iframe);
+    
+    // Debug log
+    console.log('FeedbackHub: Initializing All-in-One Popup with style variant:', styleVariant, 'from settings:', settings);
 
     function openPopup() {
       overlay.style.display = 'block';
@@ -527,11 +532,16 @@
     document.body.appendChild(popover);
 
     // Create iframe - pass style variant via URL for immediate rendering
+    // Note: The embed page will fetch settings from API, but we pass it via URL as a fallback
     const iframe = document.createElement('iframe');
     const styleVariant = settings.all_in_one_style_variant || '1';
+    // Add cache busting and ensure settings are fresh
     iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popover&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
     iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
     popover.appendChild(iframe);
+    
+    // Debug log
+    console.log('FeedbackHub: Initializing All-in-One Popover with style variant:', styleVariant, 'from settings:', settings);
 
     function openPopover() {
       popover.style.display = 'block';

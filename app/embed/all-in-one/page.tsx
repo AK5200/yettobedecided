@@ -104,9 +104,20 @@ function AllInOneContent() {
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'
   const textStyle = settings?.all_in_one_text_style || 'default'
-  // Read style variant from API settings, fall back to URL param, then default to '1'
-  const styleVariant = settings?.all_in_one_style_variant || searchParams.get('style') || '1'
+  // Read style variant from API settings first (most reliable), fall back to URL param, then default to '1'
+  // The API settings should always be the source of truth
+  const styleVariant = (settings?.all_in_one_style_variant || searchParams.get('style') || '1') as '1' | '2' | '3'
   const borderRadius = settings?.border_radius || 'medium'
+  
+  // Debug log to help troubleshoot
+  if (typeof window !== 'undefined') {
+    console.log('FeedbackHub Widget Settings:', {
+      all_in_one_style_variant: settings?.all_in_one_style_variant,
+      urlStyleParam: searchParams.get('style'),
+      finalStyleVariant: styleVariant,
+      settings: settings
+    })
+  }
 
   const handleCreatePost = () => {
     setShowFeedbackForm(true)
@@ -136,7 +147,7 @@ function AllInOneContent() {
   }
 
   return (
-    <div className="w-full h-full relative flex flex-col" style={{ pointerEvents: 'auto', height: '100vh', overflow: 'hidden', backgroundColor }}>
+    <div className="w-full h-full relative flex flex-col" style={{ pointerEvents: 'auto', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
       {/* Close button */}
       <button
         onClick={handleClose}
@@ -146,7 +157,7 @@ function AllInOneContent() {
         <X className="h-5 w-5 text-gray-500" />
       </button>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto w-full">
           <AllInOneWidget
             boards={boards}
             posts={posts}
