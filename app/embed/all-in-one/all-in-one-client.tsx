@@ -48,40 +48,25 @@ export default function AllInOneEmbedClient() {
           setChangelog(data.changelog || [])
           setSettings(data.settings || {})
 
-          // Fetch posts from all boards
-          if (data.boards && data.boards.length > 0) {
-            const allPosts: any[] = []
-            for (const board of data.boards) {
-              try {
-                const postsRes = await fetch(`${baseUrl}/api/posts?board_id=${board.id}&limit=20`)
-                if (postsRes.ok) {
-                  const postsData = await postsRes.json()
-                  if (postsData.posts && Array.isArray(postsData.posts)) {
-                    const formattedPosts = postsData.posts.map((p: any) => ({
-                      id: p.id,
-                      title: p.title,
-                      content: p.content || '',
-                      votes: p.vote_count || 0,
-                      author_name: p.author_name || p.guest_name || 'Anonymous',
-                      author_email: p.author_email || p.guest_email,
-                      tags: p.tags || [],
-                      status: p.status || 'open',
-                      hasVoted: false,
-                    }))
-                    allPosts.push(...formattedPosts)
-                  }
-                }
-              } catch (error) {
-                console.error(`Failed to fetch posts for board ${board.id}:`, error)
-              }
-            }
-            const sortedPosts = allPosts
-              .sort((a, b) => {
-                if (b.votes !== a.votes) return b.votes - a.votes
-                return 0
-              })
-              .slice(0, 20)
-            setPosts(sortedPosts)
+          // Use posts from widget response (fetched server-side with admin privileges)
+          console.log('FeedbackHub: Boards loaded:', data.boards?.length)
+          console.log('FeedbackHub: Posts from widget API:', data.posts?.length)
+          if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+            const formattedPosts = data.posts.map((p: any) => ({
+              id: p.id,
+              title: p.title,
+              content: p.content || '',
+              votes: p.vote_count || 0,
+              author_name: p.author_name || p.guest_name || 'Anonymous',
+              author_email: p.author_email || p.guest_email,
+              tags: p.tags || [],
+              status: p.status || 'open',
+              hasVoted: false,
+            }))
+            console.log('FeedbackHub: Total posts loaded:', formattedPosts.length)
+            setPosts(formattedPosts)
+          } else {
+            console.log('FeedbackHub: No posts returned from widget API')
           }
         }
       } catch (error) {
@@ -124,13 +109,29 @@ export default function AllInOneEmbedClient() {
   }
 
   const handleFeedbackSubmit = async () => {
-    if (boards.length > 0) {
+    // Re-fetch posts from widget API (uses admin client to bypass RLS)
+    try {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-      const postsRes = await fetch(`${baseUrl}/api/posts?board_id=${boards[0].id}&limit=20`)
-      if (postsRes.ok) {
-        const postsData = await postsRes.json()
-        setPosts(postsData.posts || [])
+      const res = await fetch(`${baseUrl}/api/widget?org=${encodeURIComponent(org || '')}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.posts && Array.isArray(data.posts)) {
+          const formattedPosts = data.posts.map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            content: p.content || '',
+            votes: p.vote_count || 0,
+            author_name: p.author_name || p.guest_name || 'Anonymous',
+            author_email: p.author_email || p.guest_email,
+            tags: p.tags || [],
+            status: p.status || 'open',
+            hasVoted: false,
+          }))
+          setPosts(formattedPosts)
+        }
       }
+    } catch (error) {
+      console.error('Failed to refresh posts:', error)
     }
     setShowFeedbackForm(false)
   }

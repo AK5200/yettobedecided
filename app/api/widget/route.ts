@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { handleOptions, withCors } from '@/lib/cors'
 
@@ -63,11 +63,29 @@ export async function GET(request: NextRequest) {
     .order('published_at', { ascending: false })
     .limit(10)
 
+  // Fetch posts for all public boards using admin client to bypass RLS
+  let allPosts: any[] = []
+  if (boards && boards.length > 0) {
+    const adminClient = createAdminClient()
+    const boardIds = boards.map((b: any) => b.id)
+    const { data: posts } = await adminClient
+      .from('posts')
+      .select('*')
+      .in('board_id', boardIds)
+      .is('merged_into_id', null)
+      .order('is_pinned', { ascending: false })
+      .order('vote_count', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(50)
+    allPosts = posts || []
+  }
+
   const response = NextResponse.json({
     org,
     settings: settings || { ...defaultSettings, org_id: org.id },
     boards: boards || [],
     changelog: changelog || [],
+    posts: allPosts,
   })
   response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
   return withCors(response, origin)

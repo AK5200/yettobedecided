@@ -319,7 +319,7 @@ export function AllInOneWidget({
 
   return (
     <div
-      className={`${isEmbedded ? '' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? 'px-4 py-2' : 'p-4'} space-y-4 ${variantStyles.containerClass}`}
+      className={`${isEmbedded ? 'h-full flex flex-col' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? 'px-4 py-2' : 'p-4'} space-y-4 ${variantStyles.containerClass}`}
       style={isEmbedded ? {} : {
         backgroundColor: variantStyles.containerStyle?.background || backgroundColor,
         border: variantStyles.containerStyle?.border,
@@ -360,7 +360,7 @@ export function AllInOneWidget({
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="board">
+      <Tabs defaultValue="board" className={isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}>
           <TabsList className="w-auto gap-4 bg-transparent p-0 h-auto border-b pb-0 rounded-none">
             <TabsTrigger
               value="board"
@@ -404,7 +404,7 @@ export function AllInOneWidget({
           </TabsList>
 
         {/* Board Tab */}
-        <TabsContent value="board" className="pt-4 transition-all space-y-3">
+        <TabsContent value="board" className={`pt-4 transition-all space-y-3 ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
           {/* Search and Create */}
           <div className="flex gap-2">
             <div className="relative flex-1">
@@ -430,7 +430,7 @@ export function AllInOneWidget({
           </div>
 
           {/* Posts List */}
-          <div className={`max-h-80 overflow-y-auto ${styleVariant === '3' ? 'divide-y divide-gray-200' : 'space-y-2'}`}>
+          <div className={`${isEmbedded ? 'flex-1' : 'max-h-80'} overflow-y-auto ${styleVariant === '3' ? 'divide-y divide-gray-200' : 'space-y-2'}`}>
             {filteredPosts.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
                 {searchQuery ? 'No posts found matching your search.' : 'No posts yet. Be the first to create one!'}
@@ -570,7 +570,7 @@ export function AllInOneWidget({
 
         {/* Changelog Tab */}
         <TabsContent value="changelog" className="pt-4 transition-all">
-          <div className="max-h-80 overflow-y-auto space-y-4">
+          <div className={`${isEmbedded ? '' : 'max-h-80'} overflow-y-auto space-y-4`}>
             {changelog.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
                 No changelog entries yet.
