@@ -24,6 +24,19 @@ function AllInOneContent() {
     setMounted(true)
   }, [])
 
+  // Debug log to help troubleshoot
+  useEffect(() => {
+    if (mounted && settings && typeof window !== 'undefined') {
+      const styleVariant = (settings?.all_in_one_style_variant || searchParams.get('style') || '1') as '1' | '2' | '3'
+      console.log('FeedbackHub Widget Settings:', {
+        all_in_one_style_variant: settings?.all_in_one_style_variant,
+        urlStyleParam: searchParams.get('style'),
+        finalStyleVariant: styleVariant,
+        settings: settings
+      })
+    }
+  }, [mounted, settings, searchParams])
+
   useEffect(() => {
     if (!org) return
 
