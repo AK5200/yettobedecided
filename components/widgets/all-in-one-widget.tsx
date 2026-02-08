@@ -165,10 +165,6 @@ export function AllInOneWidget({
   // Defensive: ensure styleVariant is always a string for reliable comparison
   const styleVariant = String(rawStyleVariant) as '1' | '2' | '3'
 
-  // Debug: log actual style variant at render time
-  if (typeof window !== 'undefined') {
-    console.log('FeedbackHub AllInOneWidget RENDER:', { rawStyleVariant, styleVariant, isEmbedded, postsCount: initialPosts.length })
-  }
   const [searchQuery, setSearchQuery] = useState('')
   const [posts, setPosts] = useState(initialPosts)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
@@ -335,21 +331,6 @@ export function AllInOneWidget({
         ...variantStyles.containerStyle
       }}
     >
-      {/* DEBUG: Visible style variant indicator - REMOVE after debugging */}
-      {isEmbedded && (
-        <div style={{
-          background: styleVariant === '3' ? '#22c55e' : styleVariant === '2' ? '#3b82f6' : '#ef4444',
-          color: 'white',
-          padding: '4px 12px',
-          fontSize: '11px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          fontFamily: 'monospace',
-        }}>
-          STYLE: {styleVariant} | ORDER FIX DEPLOYED | v{Date.now().toString(36).slice(-4)}
-        </div>
-      )}
-
       {/* Header */}
       <div className={`px-6 pt-6 pb-4`} style={{
         backgroundColor: headerBackgroundColor || variantStyles.headerBg || 'transparent',
@@ -431,137 +412,262 @@ export function AllInOneWidget({
         {/* Board Tab */}
         <TabsContent value="board" className={`pt-4 transition-all space-y-3 ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
           {/* Search and Create */}
-          <div className={`flex gap-2 ${isEmbedded ? 'px-6' : ''}`}>
+          <div className={`flex ${styleVariant === '2' ? 'gap-3' : 'gap-2'} items-center ${isEmbedded ? 'px-6' : ''} ${styleVariant === '2' ? 'py-2' : ''}`}>
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className={`absolute ${styleVariant === '2' ? 'left-4' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400`} />
               <Input
-                placeholder="Search posts..."
+                placeholder={styleVariant === '2' ? "Explore ideas..." : "Search posts..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className={styleVariant === '2' ? 'pl-12 pr-4 py-4 bg-white/30 border border-white/20 rounded-2xl' : 'pl-9'}
               />
             </div>
+            {styleVariant === '2' && (
+              <button className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-600 hover:bg-gray-100 transition-colors">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18M7 12h10M5 18h14" />
+                </svg>
+              </button>
+            )}
             <Button
               onClick={onCreatePost}
-              style={variantStyles.buttonStyle === 'solid' ? { backgroundColor: accentColor } : {}}
-              className={`shrink-0 ${borderRadiusClass} ${
-                variantStyles.buttonStyle === 'outline' 
-                  ? 'border-2' 
+              style={variantStyles.buttonStyle === 'solid' ? {
+                backgroundColor: accentColor,
+                color: 'white',
+                boxShadow: styleVariant === '2' ? `0 0 20px ${hexToRgba(accentColor, 0.2)}` : undefined
+              } : {}}
+              className={`shrink-0 ${styleVariant === '2' ? 'px-8 py-4 font-bold shadow-xl' : borderRadiusClass} ${
+                variantStyles.buttonStyle === 'outline'
+                  ? 'border-2'
                   : 'text-white'
               }`}
             >
-              Create New Post
+              {styleVariant === '2' ? (
+                <span className="flex items-center gap-2">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 4v16m8-8H4" />
+                  </svg>
+                  New Post
+                </span>
+              ) : 'Create New Post'}
             </Button>
           </div>
 
-          {/* Posts List - Single JSX path with inline styles for all variants */}
+          {/* Posts List - 3 distinct branches matching preview exactly */}
           <div className={`${isEmbedded ? 'flex-1 px-6' : 'max-h-80'} overflow-y-auto`}>
             {filteredPosts.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
                 {searchQuery ? 'No posts found matching your search.' : 'No posts yet. Be the first to create one!'}
               </div>
             ) : (
-              filteredPosts.map((post) => {
-                const statusStyle = post.status ? getStatusStyle(post.status) : null
-                const isStyle3 = styleVariant === '3'
+              <div className={`${styleVariant === '3' ? 'divide-y divide-gray-200' : styleVariant === '2' ? 'space-y-4' : 'space-y-3'} pb-4`}>
+                {filteredPosts.map((post) => {
+                  const statusStyle = post.status ? getStatusStyle(post.status) : null
 
-                // DEBUG: Log per-card style info
-                if (typeof window !== 'undefined' && post === filteredPosts[0]) {
-                  console.log('FeedbackHub CARD DEBUG:', { isStyle3, styleVariant, voteOrder: isStyle3 ? 1 : -1, cardBorder: isStyle3 ? 'borderBottom' : 'border' })
-                }
-
-                return (
-                  <div
-                    key={post.id}
-                    onClick={() => handlePostClick(post)}
-                    className="transition-colors cursor-pointer"
-                    data-is-style3={String(isStyle3)}
-                    data-vote-order={isStyle3 ? 'right' : 'left'}
-                    style={isStyle3 ? {
-                      padding: '16px 4px',
-                      borderBottom: '1px solid #e5e7eb',
-                    } : {
-                      padding: '12px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: getBorderRadiusStyle(borderRadius),
-                      marginBottom: '8px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: isStyle3 ? '16px' : '12px' }}>
-                      {/* Content - CSS order controls position */}
-                      <div style={{ order: isStyle3 ? 0 : 1, flex: '1 1 0%', minWidth: 0 }}>
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 style={{ fontWeight: isStyle3 ? 600 : 500 }} className="text-gray-900 text-sm flex-1">
-                            {post.title}
-                          </h4>
-                          {!isStyle3 && post.status && statusStyle && (
-                            <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 ${borderRadiusClass} text-xs`}>
-                              {getStatusLabel(post.status)}
-                            </Badge>
-                          )}
-                        </div>
-                        {post.content && (
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2" style={isStyle3 ? { lineHeight: '1.625' } : {}}>
-                            {post.content}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2" style={{ marginTop: isStyle3 ? '10px' : '8px' }}>
-                          {post.author_name && (
-                            <div className="flex items-center gap-1.5">
-                              <div
-                                className="w-5 h-5 rounded-full flex items-center justify-center font-medium text-white"
-                                style={{ backgroundColor: accentColor, fontSize: isStyle3 ? '10px' : '12px' }}
-                              >
-                                {post.author_name.charAt(0).toUpperCase()}
-                              </div>
-                              <span className="text-xs text-gray-500">{post.author_name}</span>
+                  if (styleVariant === '3') {
+                    // Style 3 - Supahub: content left, vote RIGHT, divider lines
+                    return (
+                      <div
+                        key={post.id}
+                        onClick={() => handlePostClick(post)}
+                        className="py-4 first:pt-2 last:pb-2 hover:bg-gray-50 transition-colors cursor-pointer px-1"
+                      >
+                        <div className="flex items-start gap-4">
+                          {/* Content first = appears LEFT */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 text-sm">{post.title}</h4>
+                            {post.content && (
+                              <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{post.content}</p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2.5">
+                              {post.author_name && (
+                                <div className="flex items-center gap-1.5">
+                                  <div
+                                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium text-white"
+                                    style={{ backgroundColor: accentColor }}
+                                  >
+                                    {post.author_name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span className="text-xs text-gray-500">{post.author_name}</span>
+                                </div>
+                              )}
+                              {post.tags?.map((tag) => (
+                                <Badge key={tag.name} className="bg-red-50 text-red-600 border-0 text-[10px] font-medium px-2 py-0.5 rounded">
+                                  {tag.name}
+                                </Badge>
+                              ))}
                             </div>
-                          )}
-                          {post.tags?.map((tag) => (
-                            isStyle3 ? (
-                              <Badge key={tag.name} className="bg-red-50 text-red-600 border-0 text-[10px] font-medium px-2 py-0.5 rounded">
-                                {tag.name}
+                          </div>
+
+                          {/* Vote button second = appears RIGHT */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleVote(post.id)
+                            }}
+                            className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg border transition-colors shrink-0 ${
+                              post.hasVoted
+                                ? 'border-transparent text-white'
+                                : 'border-gray-200 hover:border-gray-300 text-gray-500'
+                            }`}
+                            style={
+                              post.hasVoted
+                                ? { backgroundColor: accentColor }
+                                : {}
+                            }
+                          >
+                            <ChevronUp className="h-4 w-4" />
+                            <span className="text-sm font-semibold">{post.votes}</span>
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  if (styleVariant === '2') {
+                    // Style 2 - Modern/Glass: larger elements, glow effects, hover animations
+                    return (
+                      <div
+                        key={post.id}
+                        onClick={() => handlePostClick(post)}
+                        className={`p-6 ${variantStyles.cardBorder} ${borderRadiusClass} hover:border-gray-300 transition-all cursor-pointer hover:translate-y-[-2px] hover:shadow-md`}
+                        style={{
+                          ...variantStyles.cardStyle,
+                          ...(post.hasVoted && {
+                            borderColor: hexToRgba(accentColor, 0.3),
+                            boxShadow: `0 0 20px ${hexToRgba(accentColor, 0.1)}`
+                          })
+                        }}
+                      >
+                        <div className="flex gap-6">
+                          {/* Vote button LEFT - larger for style 2 */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleVote(post.id)
+                            }}
+                            className={`flex flex-col items-center justify-center px-3 py-3 min-w-[64px] ${borderRadiusClass} border transition-colors shrink-0 ${
+                              post.hasVoted
+                                ? 'border-transparent text-white'
+                                : 'bg-white hover:border-gray-300'
+                            }`}
+                            style={
+                              post.hasVoted
+                                ? { backgroundColor: accentColor }
+                                : { backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.1)' }
+                            }
+                          >
+                            <ChevronUp className="h-4 w-4" style={post.hasVoted ? {} : { color: '#6b7280' }} />
+                            <span className={`text-lg font-extrabold ${post.hasVoted ? 'text-white' : 'text-gray-900'}`}>
+                              {post.votes}
+                            </span>
+                          </button>
+
+                          {/* Content RIGHT - larger text for style 2 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="text-xl font-bold text-gray-900 line-clamp-1" style={post.hasVoted ? { color: accentColor } : {}}>
+                                {post.title}
+                              </h4>
+                              {post.status && statusStyle && (
+                                <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 text-[10px] font-bold uppercase tracking-widest rounded-full`}>
+                                  {getStatusLabel(post.status)}
+                                </Badge>
+                              )}
+                            </div>
+                            {post.content && (
+                              <p className="text-sm text-gray-500 mb-4 leading-relaxed font-medium line-clamp-3">{post.content}</p>
+                            )}
+                            <div className="flex items-center gap-4">
+                              {post.author_name && (
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                                    style={{ backgroundColor: accentColor }}
+                                  >
+                                    {post.author_name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span className="text-xs font-bold text-gray-700">{post.author_name}</span>
+                                </div>
+                              )}
+                              {post.tags?.map((tag) => (
+                                <Badge key={tag.name} variant="outline" className={`text-xs ${borderRadiusClass}`}>
+                                  {tag.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  // Style 1 - Standard: bordered cards, vote left
+                  return (
+                    <div
+                      key={post.id}
+                      onClick={() => handlePostClick(post)}
+                      className={`p-3 ${variantStyles.cardBorder} border-gray-200 ${borderRadiusClass} hover:border-gray-300 transition-colors cursor-pointer`}
+                    >
+                      <div className="flex gap-3">
+                        {/* Vote button LEFT */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleVote(post.id)
+                          }}
+                          className={`flex flex-col items-center justify-center px-2.5 py-2 ${borderRadiusClass} border transition-colors shrink-0 ${
+                            post.hasVoted
+                              ? 'border-transparent text-white'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                          }`}
+                          style={
+                            post.hasVoted
+                              ? { backgroundColor: accentColor }
+                              : {}
+                          }
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                          <span className="text-sm font-medium">{post.votes}</span>
+                        </button>
+
+                        {/* Content RIGHT */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-medium text-gray-900 text-sm flex-1">{post.title}</h4>
+                            {post.status && statusStyle && (
+                              <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 ${borderRadiusClass} text-xs`}>
+                                {getStatusLabel(post.status)}
                               </Badge>
-                            ) : (
+                            )}
+                          </div>
+                          {post.content && (
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{post.content}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            {post.author_name && (
+                              <div className="flex items-center gap-1.5">
+                                <div
+                                  className={`w-5 h-5 ${borderRadiusClass === 'rounded-none' ? 'rounded-full' : borderRadiusClass} flex items-center justify-center text-xs font-medium text-white`}
+                                  style={{ backgroundColor: accentColor }}
+                                >
+                                  {post.author_name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-xs text-gray-500">{post.author_name}</span>
+                              </div>
+                            )}
+                            {post.tags?.map((tag) => (
                               <Badge key={tag.name} variant="outline" className={`text-xs ${borderRadiusClass}`}>
                                 {tag.name}
                               </Badge>
-                            )
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       </div>
-
-                      {/* Vote button - CSS order: -1 = left (style 1/2), 1 = right (style 3) */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleVote(post.id)
-                        }}
-                        style={{
-                          order: isStyle3 ? 1 : -1,
-                          flexShrink: 0,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: isStyle3 ? '8px 12px' : '8px 10px',
-                          borderRadius: isStyle3 ? '8px' : getBorderRadiusStyle(borderRadius),
-                          border: post.hasVoted ? 'none' : '1px solid #e5e7eb',
-                          backgroundColor: post.hasVoted ? accentColor : 'transparent',
-                          color: post.hasVoted ? 'white' : isStyle3 ? '#6b7280' : '#4b5563',
-                          transition: 'all 150ms',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <ChevronUp style={{ height: '16px', width: '16px' }} />
-                        <span style={{ fontSize: '14px', fontWeight: isStyle3 ? 600 : 500 }}>
-                          {post.votes}
-                        </span>
-                      </button>
                     </div>
-                  </div>
-                )
-              })
+                  )
+                })}
+              </div>
             )}
           </div>
         </TabsContent>
