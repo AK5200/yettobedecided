@@ -156,12 +156,19 @@ export function AllInOneWidget({
   heading = 'Have something to say?',
   subheading = 'Suggest a feature, read through our feedback and check out our latest feature releases.',
   textStyle = 'default',
-  styleVariant = '1',
+  styleVariant: rawStyleVariant = '1',
   borderRadius = 'medium',
   isEmbedded = false,
   onCreatePost,
   onVote,
 }: AllInOneWidgetProps) {
+  // Defensive: ensure styleVariant is always a string for reliable comparison
+  const styleVariant = String(rawStyleVariant) as '1' | '2' | '3'
+
+  // Debug: log actual style variant at render time
+  if (typeof window !== 'undefined') {
+    console.log('FeedbackHub AllInOneWidget RENDER:', { rawStyleVariant, styleVariant, isEmbedded, postsCount: initialPosts.length })
+  }
   const [searchQuery, setSearchQuery] = useState('')
   const [posts, setPosts] = useState(initialPosts)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
@@ -299,7 +306,7 @@ export function AllInOneWidget({
   // Show post detail view if a post is selected
   if (selectedPost) {
     return (
-      <div className={`${isEmbedded ? '' : borderRadiusClass} ${isEmbedded ? 'px-4 py-2' : 'p-4'} space-y-4`} style={isEmbedded ? {} : { backgroundColor }}>
+      <div className={`${isEmbedded ? 'h-full flex flex-col' : borderRadiusClass} ${isEmbedded ? '' : 'p-4'} space-y-4`} style={isEmbedded ? {} : { backgroundColor }}>
         <PostDetailView
           post={selectedPost}
           orgSlug={orgSlug}
@@ -319,7 +326,8 @@ export function AllInOneWidget({
 
   return (
     <div
-      className={`${isEmbedded ? 'h-full flex flex-col' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? 'px-4 py-2' : 'p-4'} space-y-4 ${variantStyles.containerClass}`}
+      className={`${isEmbedded ? 'h-full flex flex-col' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? '' : 'p-4'} space-y-4 ${variantStyles.containerClass}`}
+      data-style-variant={styleVariant}
       style={isEmbedded ? {} : {
         backgroundColor: variantStyles.containerStyle?.background || backgroundColor,
         border: variantStyles.containerStyle?.border,
@@ -361,6 +369,7 @@ export function AllInOneWidget({
 
       {/* Tabs */}
       <Tabs defaultValue="board" className={isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}>
+        <div className={isEmbedded ? 'px-6' : ''}>
           <TabsList className="w-auto gap-4 bg-transparent p-0 h-auto border-b pb-0 rounded-none">
             <TabsTrigger
               value="board"
@@ -402,11 +411,12 @@ export function AllInOneWidget({
               </span>
             </TabsTrigger>
           </TabsList>
+        </div>
 
         {/* Board Tab */}
         <TabsContent value="board" className={`pt-4 transition-all space-y-3 ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
           {/* Search and Create */}
-          <div className="flex gap-2">
+          <div className={`flex gap-2 ${isEmbedded ? 'px-6' : ''}`}>
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -430,7 +440,7 @@ export function AllInOneWidget({
           </div>
 
           {/* Posts List */}
-          <div className={`${isEmbedded ? 'flex-1' : 'max-h-80'} overflow-y-auto ${styleVariant === '3' ? 'divide-y divide-gray-200' : 'space-y-2'}`}>
+          <div className={`${isEmbedded ? 'flex-1 px-6' : 'max-h-80'} overflow-y-auto ${styleVariant === '3' ? 'divide-y divide-gray-200' : 'space-y-2'}`}>
             {filteredPosts.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
                 {searchQuery ? 'No posts found matching your search.' : 'No posts yet. Be the first to create one!'}
@@ -570,7 +580,7 @@ export function AllInOneWidget({
 
         {/* Changelog Tab */}
         <TabsContent value="changelog" className="pt-4 transition-all">
-          <div className={`${isEmbedded ? '' : 'max-h-80'} overflow-y-auto space-y-4`}>
+          <div className={`${isEmbedded ? 'px-6' : 'max-h-80'} overflow-y-auto space-y-4`}>
             {changelog.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
                 No changelog entries yet.
@@ -601,12 +611,32 @@ export function AllInOneWidget({
       </Tabs>
 
       {/* Footer */}
-      {showBranding && (
+      {isEmbedded ? (
+        <div className="px-6 py-3 border-t flex items-center justify-between">
+          {showBranding ? (
+            <span className="text-xs text-gray-400 flex items-center gap-1">
+              <Zap className="h-3 w-3" style={{ color: accentColor }} />
+              Powered by FeedbackHub
+            </span>
+          ) : (
+            <span />
+          )}
+          <a
+            href={`${typeof window !== 'undefined' ? window.location.origin : ''}/${orgSlug}/features`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium hover:underline"
+            style={{ color: accentColor }}
+          >
+            View all posts
+          </a>
+        </div>
+      ) : showBranding ? (
         <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">
           <Zap className="h-3 w-3" style={{ color: accentColor }} />
           Powered by FeedbackHub
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
