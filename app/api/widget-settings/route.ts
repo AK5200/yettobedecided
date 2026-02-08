@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const defaultSettings = {
   widget_type: 'all-in-one',
   position: 'bottom-right',
@@ -47,15 +49,19 @@ export async function GET(request: Request) {
   }
 
   if (!data) {
-    return NextResponse.json({
+    const response = NextResponse.json({
       settings: {
         ...defaultSettings,
         org_id: resolvedOrgId,
       },
     })
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+    return response
   }
 
-  return NextResponse.json({ settings: data })
+  const response = NextResponse.json({ settings: data })
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+  return response
 }
 
 export async function POST(request: Request) {

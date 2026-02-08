@@ -20,9 +20,11 @@ export default function AllInOneEmbedClient() {
   // Debug log to help troubleshoot
   useEffect(() => {
     if (settings && typeof window !== 'undefined') {
-      const styleVariant = (settings?.all_in_one_style_variant || searchParams.get('style') || '1') as '1' | '2' | '3'
+      const rawValue = settings?.all_in_one_style_variant
+      const styleVariant = String(rawValue || searchParams.get('style') || '1') as '1' | '2' | '3'
       console.log('FeedbackHub Widget Settings:', {
-        all_in_one_style_variant: settings?.all_in_one_style_variant,
+        all_in_one_style_variant: rawValue,
+        rawValueType: typeof rawValue,
         urlStyleParam: searchParams.get('style'),
         finalStyleVariant: styleVariant,
         settings: settings,
@@ -114,7 +116,7 @@ export default function AllInOneEmbedClient() {
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'
   const textStyle = settings?.all_in_one_text_style || 'default'
-  const styleVariant = (settings?.all_in_one_style_variant || searchParams.get('style') || '1') as '1' | '2' | '3'
+  const styleVariant = String(settings?.all_in_one_style_variant || searchParams.get('style') || '1') as '1' | '2' | '3'
   const borderRadius = settings?.border_radius || 'medium'
 
   const handleCreatePost = () => {
@@ -144,11 +146,11 @@ export default function AllInOneEmbedClient() {
       className="w-full h-full relative flex flex-col"
       style={{
         pointerEvents: 'auto',
-        height: '100vh',
-        width: '100vw',
+        height: '100%',
+        width: '100%',
         overflow: 'hidden',
         backgroundColor,
-        position: 'fixed',
+        position: 'absolute',
         top: 0,
         left: 0,
         right: 0,

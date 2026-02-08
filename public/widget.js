@@ -147,10 +147,10 @@
   }
 
   function initFeedbackWidget(settings, accentColor, buttonText, position, dataTriggerElements) {
-    // Create iframe (hidden by default)
+    // Create iframe (hidden by default) - use inset positioning for robustness
     const iframe = document.createElement('iframe');
     iframe.src = baseUrl + '/embed/widget?org=' + encodeURIComponent(org);
-    iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;display:none;background:white;pointer-events:auto;';
+    iframe.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;border:none;z-index:2147483647;display:none;background:white;pointer-events:auto;';
     iframe.id = 'feedbackhub-widget';
     document.body.appendChild(iframe);
 
@@ -211,16 +211,16 @@
   function initChangelogPopup(settings, customTrigger, dataTriggerElements) {
     let isOpen = false;
 
-    // Create overlay
+    // Create overlay - use inset positioning for robustness
     const overlay = document.createElement('div');
     overlay.id = 'feedbackhub-changelog-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;display:none;';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2147483646;display:none;';
     document.body.appendChild(overlay);
 
     // Create iframe container
     const container = document.createElement('div');
     container.id = 'feedbackhub-changelog-container';
-    container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;display:none;width:90%;max-width:680px;max-height:90vh;';
+    container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;display:none;width:90%;max-width:680px;max-height:90vh;';
     document.body.appendChild(container);
 
     // Create iframe
@@ -409,25 +409,31 @@
     const responsiveWidth = getResponsiveSize(widgetSize);
     const isLeft = popupPlacement === 'left';
 
-    // Create overlay - subtle background
+    // Inject CSS reset to isolate widget from parent page styles
+    // This prevents parent transforms/filters from breaking position:fixed
+    var styleTag = document.createElement('style');
+    styleTag.textContent = '#feedbackhub-allinone-overlay, #feedbackhub-allinone-container { position: fixed !important; transform: none !important; will-change: auto !important; contain: none !important; filter: none !important; }';
+    document.head.appendChild(styleTag);
+
+    // Create overlay - use top/left/right/bottom instead of width/height for reliability
     const overlay = document.createElement('div');
     overlay.id = 'feedbackhub-allinone-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9998;display:none;';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:2147483646;display:none;';
     document.body.appendChild(overlay);
 
-    // Create iframe container - positioned based on settings with responsive width
+    // Create iframe container - use top:0;bottom:0 instead of height:100vh for robustness
     const container = document.createElement('div');
     container.id = 'feedbackhub-allinone-container';
-    const positionStyle = isLeft 
-      ? `position:fixed;top:0;left:0;z-index:9999;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;height:100vh;`
-      : `position:fixed;top:0;right:0;z-index:9999;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;height:100vh;`;
+    const positionStyle = isLeft
+      ? `position:fixed;top:0;left:0;bottom:0;z-index:2147483647;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;`
+      : `position:fixed;top:0;right:0;bottom:0;z-index:2147483647;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;`;
     container.style.cssText = positionStyle;
     document.body.appendChild(container);
 
     // Create iframe - pass style variant via URL for immediate rendering
     // Note: The embed page will fetch settings from API, but we pass it via URL as a fallback
     const iframe = document.createElement('iframe');
-    const styleVariant = settings.all_in_one_style_variant || '1';
+    const styleVariant = String(settings.all_in_one_style_variant || '1');
     // Add cache busting and ensure settings are fresh
     iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
     iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);display:block;margin:0;padding:0;';
@@ -498,10 +504,18 @@
     const isBottom = popoverPlacement.includes('bottom');
     const isLeft = popoverPlacement.includes('left');
     const isRight = popoverPlacement.includes('right');
-    
+
+    // Inject CSS reset to isolate widget from parent page styles
+    if (!document.getElementById('feedbackhub-widget-styles')) {
+      var styleTag = document.createElement('style');
+      styleTag.id = 'feedbackhub-widget-styles';
+      styleTag.textContent = '#feedbackhub-allinone-overlay, #feedbackhub-allinone-container, #feedbackhub-allinone-popover { position: fixed !important; transform: none !important; will-change: auto !important; contain: none !important; filter: none !important; }';
+      document.head.appendChild(styleTag);
+    }
+
     // Build position styles - only set one of top/bottom and one of left/right
-    let positionStyle = 'position:fixed;z-index:9998;display:none;';
-    
+    let positionStyle = 'position:fixed;z-index:2147483647;display:none;';
+
     // Set vertical position (only one of top or bottom) with responsive spacing
     if (isBottom) {
       // Responsive spacing from bottom: min 20px, preferred 5vh, max 80px
@@ -512,7 +526,7 @@
       const topSpacing = Math.max(20, Math.min(80, window.innerHeight * 0.05));
       positionStyle += 'top:' + topSpacing + 'px;';
     }
-    
+
     // Set horizontal position (only one of left or right) with responsive spacing
     if (isLeft) {
       // Responsive spacing from left: min 16px, preferred 2vw, max 24px
@@ -523,7 +537,7 @@
       const rightSpacing = Math.max(16, Math.min(24, window.innerWidth * 0.02));
       positionStyle += 'right:' + rightSpacing + 'px;';
     }
-    
+
     // Add size and other styles
     positionStyle += `width:${responsiveWidth};min-width:300px;max-width:90vw;height:600px;max-height:calc(100vh - 120px);`;
 
@@ -536,7 +550,7 @@
     // Create iframe - pass style variant via URL for immediate rendering
     // Note: The embed page will fetch settings from API, but we pass it via URL as a fallback
     const iframe = document.createElement('iframe');
-    const styleVariant = settings.all_in_one_style_variant || '1';
+    const styleVariant = String(settings.all_in_one_style_variant || '1');
     // Add cache busting and ensure settings are fresh
     iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popover&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
     iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
