@@ -167,7 +167,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
       {/* Back button */}
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors hover:bg-gray-50 px-3 py-2 rounded-lg -ml-3 cursor-pointer"
+        className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-all hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent px-4 py-2.5 rounded-xl -ml-4 cursor-pointer shadow-sm hover:shadow-md"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to board
@@ -199,9 +199,9 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
 
           {/* Post details */}
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">{post.title}</h2>
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">{post.title}</h2>
             {post.content && (
-              <div className="text-sm text-gray-700 whitespace-pre-wrap mb-4 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-100">{post.content}</div>
+              <div className="text-base text-gray-700 whitespace-pre-wrap mb-5 leading-relaxed bg-gradient-to-br from-gray-50 to-white p-5 rounded-xl border-2 border-gray-200 shadow-sm">{post.content}</div>
             )}
             <div className="flex items-center gap-3 text-xs text-gray-500">
               {post.author_name && (
@@ -245,19 +245,19 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
             <div className="text-center py-8 text-gray-500 text-sm">No comments yet.</div>
           ) : (
             comments.map((comment) => (
-              <div key={comment.id} className="flex gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <div key={comment.id} className="flex gap-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all border border-gray-100 hover:border-gray-200 hover:shadow-sm">
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0 shadow-sm"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 shadow-md"
                   style={{ backgroundColor: accentColor }}
                 >
                   {(comment.author_name || comment.guest_name || 'A').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-sm font-semibold text-gray-900">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-sm font-bold text-gray-900">
                       {comment.author_name || comment.guest_name || 'Anonymous'}
                     </span>
-                    <span className="text-xs text-gray-500 font-medium">
+                    <span className="text-xs text-gray-500 font-semibold">
                       {formatDate(comment.created_at)}
                     </span>
                   </div>

@@ -19,22 +19,22 @@
    }
  
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <Button
         variant="outline"
-        className="w-full justify-start gap-3 border-gray-200 hover:border-gray-300 hover:bg-gray-50 font-medium shadow-sm hover:shadow-md transition-all cursor-pointer"
+        className="w-full justify-start gap-3 border-2 border-gray-300 hover:border-gray-400 hover:bg-gradient-to-r hover:from-gray-50 hover:to-white font-bold text-base py-6 shadow-md hover:shadow-lg transition-all cursor-pointer"
         onClick={() => handleRedirect('google')}
       >
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-700 shadow-sm">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white border-2 border-gray-300 text-sm font-extrabold text-gray-800 shadow-sm">
           G
         </span>
         Continue with Google
       </Button>
       <Button
-        className="w-full justify-start gap-3 bg-gray-900 text-white hover:bg-gray-800 font-medium shadow-md hover:shadow-lg transition-all cursor-pointer"
+        className="w-full justify-start gap-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white hover:from-gray-800 hover:to-gray-700 font-bold text-base py-6 shadow-lg hover:shadow-xl transition-all cursor-pointer"
         onClick={() => handleRedirect('github')}
       >
-        <Github className="h-4 w-4" />
+        <Github className="h-5 w-5" />
         Continue with GitHub
       </Button>
     </div>

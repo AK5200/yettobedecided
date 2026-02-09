@@ -176,22 +176,22 @@ export function FeedbackWidget({
             </Select>
           )}
           {identifiedUser && (
-            <div className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
-              Posting as <span className="font-semibold">{identifiedUser.name || identifiedUser.email}</span>
+            <div className="text-sm text-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 rounded-xl border-2 border-gray-200 shadow-sm">
+              Posting as <span className="font-bold">{identifiedUser.name || identifiedUser.email}</span>
             </div>
           )}
           <Input
             placeholder="Feedback title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+            className="border-2 border-gray-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200 h-12 text-base font-medium shadow-sm"
             required
           />
           <Textarea
             placeholder="Describe your feedback..."
             value={content}
             onChange={(event) => setContent(event.target.value)}
-            className="resize-none overflow-y-auto border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+            className="resize-none overflow-y-auto border-2 border-gray-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200 shadow-sm"
             style={{
               maxHeight: '200px',
             }}
@@ -201,9 +201,9 @@ export function FeedbackWidget({
             disabled={loading || !title.trim()}
             style={{ 
               backgroundColor: accentColor,
-              boxShadow: `0 4px 12px -2px ${accentColor}40`
+              boxShadow: `0 6px 20px -4px ${accentColor}60`
             }}
-            className="text-white font-semibold hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-white font-bold text-base py-6 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Submitting...' : 'Submit Feedback'}
           </Button>
