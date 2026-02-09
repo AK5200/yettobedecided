@@ -5,8 +5,8 @@ DO $$
 DECLARE
   org_record RECORD;
   widget_user_record RECORD;
-  vote_count INT;
-  comment_count INT;
+  computed_vote_count INT;
+  computed_comment_count INT;
 BEGIN
   -- Loop through each organization
   FOR org_record IN SELECT id FROM organizations LOOP
@@ -15,7 +15,7 @@ BEGIN
       SELECT id, email FROM widget_users WHERE org_id = org_record.id
     LOOP
       -- Count votes for this user
-      SELECT COUNT(*) INTO vote_count
+      SELECT COUNT(*) INTO computed_vote_count
       FROM votes v
       JOIN posts p ON v.post_id = p.id
       JOIN boards b ON p.board_id = b.id
@@ -23,7 +23,7 @@ BEGIN
         AND LOWER(v.voter_email) = LOWER(widget_user_record.email);
       
       -- Count comments for this user
-      SELECT COUNT(*) INTO comment_count
+      SELECT COUNT(*) INTO computed_comment_count
       FROM comments c
       JOIN posts p ON c.post_id = p.id
       JOIN boards b ON p.board_id = b.id
@@ -33,8 +33,8 @@ BEGIN
       -- Update widget_user counts
       UPDATE widget_users
       SET 
-        vote_count = vote_count,
-        comment_count = comment_count
+        vote_count = computed_vote_count,
+        comment_count = computed_comment_count
       WHERE id = widget_user_record.id;
     END LOOP;
   END LOOP;
