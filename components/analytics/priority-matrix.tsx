@@ -106,7 +106,7 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
           <div>
             <h3 className="text-xl font-bold text-gray-900">Prioritization Matrix</h3>
             <p className="text-sm text-gray-500">
-              Categorize posts by value (votes) and effort. Click effort buttons to update.
+              Categorize posts by value (votes), effort, and time. Set both effort and time to categorize.
             </p>
           </div>
         </div>
@@ -153,13 +153,14 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
                     <div className="font-semibold text-gray-900 text-sm truncate mb-2">
                       {post.title}
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-2">
                       <div className="text-xs text-gray-500">
                         {post.vote_count || 0} votes
                       </div>
                       <EffortSelector
                         postId={post.id}
                         currentEffort={post.effort}
+                        currentTime={post.time}
                         onUpdate={() => fetchData()}
                       />
                     </div>
@@ -187,7 +188,7 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
             <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-semibold">
               {data.unscored.length}
             </span>
-            Unscored Posts - Set effort level to categorize
+            Unscored Posts - Set effort and time to categorize
           </h4>
           <div className="space-y-3">
             {data.unscored.map((post: any) => (
@@ -197,15 +198,16 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
               >
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-gray-900 truncate mb-1">{post.title}</div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
                     <span>{post.vote_count || 0} votes</span>
                   </div>
+                  <EffortSelector
+                    postId={post.id}
+                    currentEffort={post.effort}
+                    currentTime={post.time}
+                    onUpdate={() => fetchData()}
+                  />
                 </div>
-                <EffortSelector
-                  postId={post.id}
-                  currentEffort={post.effort}
-                  onUpdate={() => fetchData()}
-                />
               </div>
             ))}
           </div>

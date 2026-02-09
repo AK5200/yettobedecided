@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('posts')
-    .select('id, title, vote_count, effort, status, created_at')
+    .select('id, title, vote_count, effort, time, status, created_at')
     .in('board_id', boardIds)
     .eq('is_approved', true)
     .not('status', 'in', '("completed","closed")')
@@ -71,17 +71,38 @@ export async function GET(request: Request) {
   posts.forEach((post) => {
     const isHighValue = (post.vote_count || 0) >= median
     const effort = post.effort
+    const time = post.time
 
-    if (!effort) {
+    // Unscored if missing either effort or time
+    if (!effort || !time) {
       result.unscored.push(post)
-    } else if (isHighValue && effort === 'low') {
+      return
+    }
+
+    // Determine if high effort/time (medium or high effort, or mid/high time)
+    const isHighEffort = effort === 'medium' || effort === 'high'
+    const isHighTime = time === 'mid' || time === 'high'
+    const isHighEffortOrTime = isHighEffort || isHighTime
+
+    // Quick Wins: High value, Low effort, Low time
+    if (isHighValue && effort === 'low' && time === 'easy') {
       result.quick_wins.push(post)
-    } else if (isHighValue && (effort === 'medium' || effort === 'high')) {
+    }
+    // Big Bets: High value, High effort OR High time
+    else if (isHighValue && isHighEffortOrTime) {
       result.big_bets.push(post)
-    } else if (!isHighValue && effort === 'low') {
+    }
+    // Fill-ins: Low value, Low effort, Low time
+    else if (!isHighValue && effort === 'low' && time === 'easy') {
       result.fill_ins.push(post)
-    } else {
+    }
+    // Time Sinks: Low value, High effort OR High time
+    else if (!isHighValue && isHighEffortOrTime) {
       result.time_sinks.push(post)
+    }
+    // Default to unscored if doesn't fit any category
+    else {
+      result.unscored.push(post)
     }
   })
 
@@ -98,15 +119,38 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   const body = await request.json()
-  const { post_id, effort } = body
+  const { post_id, effort, time } = body
 
-  if (!post_id || !['low', 'medium', 'high', null].includes(effort)) {
-    return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+  if (!post_id) {
+    return NextResponse.json({ error: 'post_id required' }, { status: 400 })
+  }
+
+  // Validate effort if provided
+  if (effort !== undefined && !['low', 'medium', 'high', null].includes(effort)) {
+    return NextResponse.json({ error: 'Invalid effort value' }, { status: 400 })
+  }
+
+  // Validate time if provided
+  if (time !== undefined && !['easy', 'mid', 'high', null].includes(time)) {
+    return NextResponse.json({ error: 'Invalid time value' }, { status: 400 })
   }
 
   const supabase = await createClient()
 
-  const { error } = await supabase.from('posts').update({ effort }).eq('id', post_id)
+  // Build update object
+  const updateData: any = {}
+  if (effort !== undefined) {
+    updateData.effort = effort
+  }
+  if (time !== undefined) {
+    updateData.time = time
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ error: 'effort or time required' }, { status: 400 })
+  }
+
+  const { error } = await supabase.from('posts').update(updateData).eq('id', post_id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
