@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const orgId = searchParams.get('org_id')
-  const metric = searchParams.get('metric') || 'posts' // posts, votes, comments
+  const metric = searchParams.get('metric') || 'posts'
   const days = parseInt(searchParams.get('days') || '30')
   const boardId = searchParams.get('board_id')
 
@@ -15,30 +15,42 @@ export async function GET(request: Request) {
   const supabase = await createClient()
   const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
+  // Get board IDs for this org
+  let boardQuery = supabase.from('boards').select('id').eq('org_id', orgId)
+  if (boardId) {
+    boardQuery = boardQuery.eq('id', boardId)
+  }
+  const { data: boards } = await boardQuery
+  const boardIds = boards?.map((b) => b.id) || []
+
+  if (boardIds.length === 0) {
+    return NextResponse.json({ series: [] })
+  }
+
   // Get posts grouped by date
-  let postsQuery = supabase
+  const { data: posts } = await supabase
     .from('posts')
     .select('created_at, vote_count')
-    .eq('org_id', orgId)
+    .in('board_id', boardIds)
     .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: true })
 
-  if (boardId) {
-    postsQuery = postsQuery.eq('board_id', boardId)
+  // Get comments - get post IDs first, then query comments
+  const { data: allPosts } = await supabase.from('posts').select('id').in('board_id', boardIds)
+  const postIds = allPosts?.map((p) => p.id) || []
+  
+  let comments: any[] = []
+  if (postIds.length > 0) {
+    const { data: commentsData } = await supabase
+      .from('comments')
+      .select('created_at')
+      .in('post_id', postIds)
+      .gte('created_at', startDate.toISOString())
+    comments = commentsData || []
   }
 
-  const { data: posts } = await postsQuery
-
-  // Get comments
-  const { data: comments } = await supabase
-    .from('comments')
-    .select('created_at')
-    .eq('org_id', orgId)
-    .gte('created_at', startDate.toISOString())
-
   // Group by date
-  const byDate: Record<string, { date: string; posts: number; votes: number; comments: number }> =
-    {}
+  const byDate: Record<string, { date: string; posts: number; votes: number; comments: number }> = {}
 
   // Initialize all dates
   for (let i = 0; i < days; i++) {

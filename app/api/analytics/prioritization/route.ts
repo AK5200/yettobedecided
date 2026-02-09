@@ -12,16 +12,30 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
+  // Get board IDs for this org
+  let boardQuery = supabase.from('boards').select('id').eq('org_id', orgId)
+  if (boardId) {
+    boardQuery = boardQuery.eq('id', boardId)
+  }
+  const { data: boards } = await boardQuery
+  const boardIds = boards?.map((b) => b.id) || []
+
+  if (boardIds.length === 0) {
+    return NextResponse.json({
+      quick_wins: [],
+      big_bets: [],
+      fill_ins: [],
+      time_sinks: [],
+      unscored: [],
+    })
+  }
+
   let query = supabase
     .from('posts')
     .select('id, title, vote_count, effort, status, created_at')
-    .eq('org_id', orgId)
+    .in('board_id', boardIds)
     .eq('is_approved', true)
     .not('status', 'in', '("completed","closed")')
-
-  if (boardId) {
-    query = query.eq('board_id', boardId)
-  }
 
   const { data: posts } = await query
 
@@ -47,11 +61,11 @@ export async function GET(request: Request) {
     time_sinks: any[]
     unscored: any[]
   } = {
-    quick_wins: [], // high value, low effort
-    big_bets: [], // high value, high effort
-    fill_ins: [], // low value, low effort
-    time_sinks: [], // low value, high effort
-    unscored: [], // no effort set
+    quick_wins: [],
+    big_bets: [],
+    fill_ins: [],
+    time_sinks: [],
+    unscored: [],
   }
 
   posts.forEach((post) => {
@@ -73,9 +87,7 @@ export async function GET(request: Request) {
 
   // Sort each by vote count
   Object.keys(result).forEach((key) => {
-    result[key as keyof typeof result].sort(
-      (a, b) => (b.vote_count || 0) - (a.vote_count || 0)
-    )
+    result[key as keyof typeof result].sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0))
   })
 
   return NextResponse.json({

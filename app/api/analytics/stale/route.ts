@@ -12,11 +12,18 @@ export async function GET(request: Request) {
   const supabase = await createClient()
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
+  // Get board IDs for this org
+  const { data: boards } = await supabase.from('boards').select('id').eq('org_id', orgId)
+  const boardIds = boards?.map((b) => b.id) || []
+
+  if (boardIds.length === 0) {
+    return NextResponse.json({ posts: [] })
+  }
+
   const { data: posts } = await supabase
     .from('posts')
     .select('id, title, vote_count, status, created_at, updated_at')
-    .eq('org_id', orgId)
-    .eq('is_approved', true)
+    .in('board_id', boardIds)
     .not('status', 'in', '("completed","closed")')
     .lt('updated_at', thirtyDaysAgo)
     .lt('created_at', thirtyDaysAgo)

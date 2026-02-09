@@ -128,6 +128,23 @@ export async function POST(request: NextRequest) {
 
     await supabase.rpc('decrement_vote_count', { post_id_input: post_id })
 
+    // Decrement widget_user vote_count
+    if (widgetUser?.id) {
+      const { data: user } = await supabase
+        .from('widget_users')
+        .select('vote_count')
+        .eq('id', widgetUser.id)
+        .single()
+      
+      if (user) {
+        const currentCount = user.vote_count || 0
+        await supabase
+          .from('widget_users')
+          .update({ vote_count: Math.max(0, currentCount - 1) })
+          .eq('id', widgetUser.id)
+      }
+    }
+
     return withCors(
       NextResponse.json({ voted: false }),
       origin
