@@ -50,7 +50,7 @@ export function NeedsAttention({ orgId }: NeedsAttentionProps) {
       </div>
       <button
         onClick={() => setDismissed(true)}
-        className="p-2 hover:bg-amber-100 rounded-lg transition-colors"
+        className="p-2 hover:bg-amber-100 rounded-lg transition-colors cursor-pointer"
         aria-label="Dismiss"
       >
         <X className="h-5 w-5 text-amber-600" />

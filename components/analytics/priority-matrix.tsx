@@ -105,7 +105,9 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Prioritization Matrix</h3>
-            <p className="text-sm text-gray-500">Categorize posts by value and effort</p>
+            <p className="text-sm text-gray-500">
+              Categorize posts by value (votes) and effort. Click effort buttons to update.
+            </p>
           </div>
         </div>
         {data.unscored && data.unscored.length > 0 && (
@@ -148,19 +150,29 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
                     key={post.id}
                     className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className="font-semibold text-gray-900 text-sm truncate mb-1">
+                    <div className="font-semibold text-gray-900 text-sm truncate mb-2">
                       {post.title}
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="text-xs text-gray-500">
                         {post.vote_count || 0} votes
                       </div>
+                      <EffortSelector
+                        postId={post.id}
+                        currentEffort={post.effort}
+                        onUpdate={() => fetchData()}
+                      />
                     </div>
                   </div>
                 ))}
                 {posts.length === 0 && (
                   <div className="text-center py-4 text-sm text-gray-500">
                     No posts in this category
+                  </div>
+                )}
+                {posts.length > 3 && (
+                  <div className="text-center py-2 text-xs text-gray-500">
+                    +{posts.length - 3} more posts
                   </div>
                 )}
               </div>
@@ -181,7 +193,7 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
             {data.unscored.map((post: any) => (
               <div
                 key={post.id}
-                className="flex items-center justify-between bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                className="flex items-center justify-between bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-default"
               >
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-gray-900 truncate mb-1">{post.title}</div>

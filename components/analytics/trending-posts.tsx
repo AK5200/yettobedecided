@@ -73,7 +73,7 @@ export function TrendingPosts({ orgId, boardId }: TrendingPostsProps) {
           <button
             key={tab.value}
             onClick={() => setPeriod(tab.value)}
-            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
+            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all cursor-pointer ${
               period === tab.value
                 ? 'bg-white text-orange-600 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -96,7 +96,7 @@ export function TrendingPosts({ orgId, boardId }: TrendingPostsProps) {
           {posts.map((post, index) => (
             <div
               key={post.id}
-              className="flex items-start gap-4 p-4 rounded-xl bg-white border border-gray-200 hover:shadow-md transition-all group"
+              className="flex items-start gap-4 p-4 rounded-xl bg-white border border-gray-200 hover:shadow-md transition-all group cursor-default"
             >
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-sm font-bold shadow-md">
                 #{index + 1}

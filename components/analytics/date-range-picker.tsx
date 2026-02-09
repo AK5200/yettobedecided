@@ -36,7 +36,7 @@ export function DateRangePicker({ defaultDays = 30 }: DateRangePickerProps) {
         <button
           key={option.value}
           onClick={() => handleChange(option.value)}
-          className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+          className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
             days === option.value
               ? 'bg-amber-100 text-amber-900 shadow-sm'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'

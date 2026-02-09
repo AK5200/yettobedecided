@@ -54,7 +54,7 @@ export function BoardFilter({ orgId }: BoardFilterProps) {
 
   if (loading) {
     return (
-      <select className="px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white shadow-sm">
+      <select className="px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white shadow-sm cursor-wait">
         <option>Loading...</option>
       </select>
     )

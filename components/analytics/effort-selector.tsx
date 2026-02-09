@@ -9,9 +9,9 @@ interface EffortSelectorProps {
 }
 
 const EFFORT_CONFIG = {
-  low: { label: 'Low', color: 'bg-green-100 text-green-700 border-green-200' },
-  medium: { label: 'Med', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-  high: { label: 'High', color: 'bg-red-100 text-red-700 border-red-200' },
+  low: { label: 'Low', color: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' },
+  medium: { label: 'Med', color: 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200' },
+  high: { label: 'High', color: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200' },
 }
 
 export function EffortSelector({ postId, currentEffort, onUpdate }: EffortSelectorProps) {
@@ -50,7 +50,7 @@ export function EffortSelector({ postId, currentEffort, onUpdate }: EffortSelect
             key={level}
             onClick={() => handleClick(level)}
             disabled={loading}
-            className={`px-2 py-1 text-xs font-medium rounded border transition-colors ${
+            className={`px-2 py-1 text-xs font-medium rounded border transition-colors cursor-pointer ${
               isSelected
                 ? config.color
                 : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
