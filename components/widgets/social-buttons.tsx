@@ -18,25 +18,25 @@
      window.location.href = `/api/auth/widget/${provider}?org_slug=${encodeURIComponent(orgSlug)}&return_url=${encodeURIComponent(returnUrl)}`
    }
  
-   return (
-     <div className="space-y-2">
-       <Button
-         variant="outline"
-         className="w-full justify-start gap-2"
-         onClick={() => handleRedirect('google')}
-       >
-         <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-white border text-xs font-semibold text-gray-700">
-           G
-         </span>
-         Continue with Google
-       </Button>
-       <Button
-         className="w-full justify-start gap-2 bg-gray-900 text-white hover:bg-gray-800"
-         onClick={() => handleRedirect('github')}
-       >
-         <Github className="h-4 w-4" />
-         Continue with GitHub
-       </Button>
-     </div>
-   )
+  return (
+    <div className="space-y-3">
+      <Button
+        variant="outline"
+        className="w-full justify-start gap-3 border-gray-200 hover:border-gray-300 hover:bg-gray-50 font-medium shadow-sm hover:shadow-md transition-all cursor-pointer"
+        onClick={() => handleRedirect('google')}
+      >
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-700 shadow-sm">
+          G
+        </span>
+        Continue with Google
+      </Button>
+      <Button
+        className="w-full justify-start gap-3 bg-gray-900 text-white hover:bg-gray-800 font-medium shadow-md hover:shadow-lg transition-all cursor-pointer"
+        onClick={() => handleRedirect('github')}
+      >
+        <Github className="h-4 w-4" />
+        Continue with GitHub
+      </Button>
+    </div>
+  )
  }

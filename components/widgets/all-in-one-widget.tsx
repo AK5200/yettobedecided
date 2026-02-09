@@ -607,7 +607,7 @@ export function AllInOneWidget({
                     <div
                       key={post.id}
                       onClick={() => handlePostClick(post)}
-                      className={`p-3 ${variantStyles.cardBorder} border-gray-200 ${borderRadiusClass} hover:border-gray-300 transition-colors cursor-pointer`}
+                      className={`p-4 ${variantStyles.cardBorder} border-gray-200 ${borderRadiusClass} hover:border-gray-300 hover:shadow-md transition-all cursor-pointer bg-white hover:bg-gradient-to-br hover:from-white hover:to-gray-50`}
                     >
                       <div className="flex gap-3">
                         {/* Vote button LEFT */}
@@ -616,14 +616,17 @@ export function AllInOneWidget({
                             e.stopPropagation()
                             handleVote(post.id)
                           }}
-                          className={`flex flex-col items-center justify-center px-2.5 py-2 ${borderRadiusClass} border transition-colors shrink-0 ${
+                          className={`flex flex-col items-center justify-center px-3 py-2.5 ${borderRadiusClass} border transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 ${
                             post.hasVoted
-                              ? 'border-transparent text-white'
-                              : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                              ? 'border-transparent text-white shadow-md'
+                              : 'border-gray-200 hover:border-gray-300 hover:shadow-sm text-gray-600 bg-gray-50 hover:bg-white'
                           }`}
                           style={
                             post.hasVoted
-                              ? { backgroundColor: accentColor }
+                              ? { 
+                                  backgroundColor: accentColor,
+                                  boxShadow: `0 4px 12px -2px ${accentColor}40`
+                                }
                               : {}
                           }
                         >
@@ -634,7 +637,7 @@ export function AllInOneWidget({
                         {/* Content RIGHT */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-medium text-gray-900 text-sm flex-1">{post.title}</h4>
+                            <h4 className="font-semibold text-gray-900 text-sm flex-1 hover:text-gray-700 transition-colors">{post.title}</h4>
                             {post.status && statusStyle && (
                               <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 ${borderRadiusClass} text-xs`}>
                                 {getStatusLabel(post.status)}
@@ -683,19 +686,19 @@ export function AllInOneWidget({
               changelog.map((entry) => {
                 const categoryStyle = getCategoryStyle(entry.category)
                 return (
-                  <div key={entry.id} className="border-b pb-4 last:border-b-0">
+                  <div key={entry.id} className="border-b border-gray-100 pb-5 last:border-b-0 hover:bg-gray-50/50 -mx-2 px-2 py-2 rounded-lg transition-colors">
                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                      <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0`}>
+                      <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 shadow-sm`}>
                         {entry.category}
                       </Badge>
-                      <span>
+                      <span className="font-medium">
                         {entry.published_at
                           ? formatDate(entry.published_at)
                           : 'Recently'}
                       </span>
                     </div>
-                    <div className="font-medium text-gray-900">{entry.title}</div>
-                    <p className="text-sm text-gray-600 line-clamp-3 mt-1">{entry.content}</p>
+                    <div className="font-semibold text-gray-900 mb-1">{entry.title}</div>
+                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">{entry.content}</p>
                   </div>
                 )
               })

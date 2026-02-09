@@ -26,11 +26,14 @@ export function FloatingButton({
     <button
       type="button"
       onClick={onClick}
-      className={`fixed z-50 ${positionClasses[position]} flex items-center gap-2 rounded-full px-4 py-2 text-white shadow-lg transition-transform hover:scale-105`}
-      style={{ backgroundColor: accentColor }}
+      className={`fixed z-50 ${positionClasses[position]} flex items-center gap-2 rounded-full px-5 py-3 text-white shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer`}
+      style={{ 
+        backgroundColor: accentColor,
+        boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 0 20px -5px ${accentColor}40`
+      }}
     >
       <MessageSquare className="h-4 w-4" />
-      <span className="text-sm font-medium">{text}</span>
+      <span className="text-sm font-semibold">{text}</span>
     </button>
   )
 }

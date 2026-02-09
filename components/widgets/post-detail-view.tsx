@@ -167,7 +167,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
       {/* Back button */}
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors hover:bg-gray-50 px-3 py-2 rounded-lg -ml-3 cursor-pointer"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to board
@@ -179,14 +179,17 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
           {/* Vote button */}
           <button
             onClick={handleVote}
-            className={`flex flex-col items-center justify-center px-4 py-3 rounded-lg border transition-colors shrink-0 ${
+            className={`flex flex-col items-center justify-center px-5 py-4 rounded-lg border transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 ${
               post.hasVoted
-                ? 'border-transparent text-white'
-                : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                ? 'border-transparent text-white shadow-md'
+                : 'border-gray-200 hover:border-gray-300 hover:shadow-sm text-gray-600 bg-gray-50 hover:bg-white'
             }`}
             style={
               post.hasVoted
-                ? { backgroundColor: accentColor }
+                ? { 
+                    backgroundColor: accentColor,
+                    boxShadow: `0 4px 12px -2px ${accentColor}40`
+                  }
                 : {}
             }
           >
@@ -196,9 +199,9 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
 
           {/* Post details */}
           <div className="flex-1">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">{post.title}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">{post.title}</h2>
             {post.content && (
-              <div className="text-sm text-gray-700 whitespace-pre-wrap mb-4">{post.content}</div>
+              <div className="text-sm text-gray-700 whitespace-pre-wrap mb-4 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-100">{post.content}</div>
             )}
             <div className="flex items-center gap-3 text-xs text-gray-500">
               {post.author_name && (
@@ -242,23 +245,23 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
             <div className="text-center py-8 text-gray-500 text-sm">No comments yet.</div>
           ) : (
             comments.map((comment) => (
-              <div key={comment.id} className="flex gap-3">
+              <div key={comment.id} className="flex gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white shrink-0"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0 shadow-sm"
                   style={{ backgroundColor: accentColor }}
                 >
                   {(comment.author_name || comment.guest_name || 'A').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium text-gray-900">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-sm font-semibold text-gray-900">
                       {comment.author_name || comment.guest_name || 'Anonymous'}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 font-medium">
                       {formatDate(comment.created_at)}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
                 </div>
               </div>
             ))
@@ -281,8 +284,11 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
             <Button
               type="submit"
               disabled={!newComment.trim() || submitting}
-              style={{ backgroundColor: accentColor }}
-              className="text-white"
+              style={{ 
+                backgroundColor: accentColor,
+                boxShadow: `0 4px 12px -2px ${accentColor}40`
+              }}
+              className="text-white font-semibold hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               size="sm"
             >
               <Send className="h-4 w-4 mr-2" />

@@ -150,7 +150,7 @@ export function FeedbackWidget({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {!isIdentified && (
         <AuthPrompt
           orgSlug={orgSlug}
@@ -160,7 +160,7 @@ export function FeedbackWidget({
       )}
 
       {isIdentified && (
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {boards.length > 1 && (
             <Select value={selectedBoard} onValueChange={setSelectedBoard}>
               <SelectTrigger>
@@ -176,21 +176,22 @@ export function FeedbackWidget({
             </Select>
           )}
           {identifiedUser && (
-            <div className="text-sm text-gray-600">
-              Posting as {identifiedUser.name || identifiedUser.email}
+            <div className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+              Posting as <span className="font-semibold">{identifiedUser.name || identifiedUser.email}</span>
             </div>
           )}
           <Input
             placeholder="Feedback title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
+            className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
             required
           />
           <Textarea
             placeholder="Describe your feedback..."
             value={content}
             onChange={(event) => setContent(event.target.value)}
-            className="resize-none overflow-y-auto"
+            className="resize-none overflow-y-auto border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
             style={{
               maxHeight: '200px',
             }}
@@ -198,13 +199,16 @@ export function FeedbackWidget({
           <Button
             type="submit"
             disabled={loading || !title.trim()}
-            style={{ backgroundColor: accentColor }}
-            className="text-white"
+            style={{ 
+              backgroundColor: accentColor,
+              boxShadow: `0 4px 12px -2px ${accentColor}40`
+            }}
+            className="text-white font-semibold hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Submitting...' : 'Submit Feedback'}
           </Button>
           {success && (
-            <p className="text-sm text-gray-600 flex items-center gap-2">
+            <p className="text-sm text-green-600 flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
               <Check className="h-4 w-4" />
               Thanks for the feedback!
             </p>
