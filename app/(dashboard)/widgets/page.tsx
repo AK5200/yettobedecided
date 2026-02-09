@@ -386,15 +386,17 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
   return (
     <div className="p-8 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Widgets</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent">
+            Widgets
+          </h1>
+          <p className="text-gray-600 mt-2 text-lg">
             Embed widgets on your website to engage users and collect feedback
           </p>
         </div>
         <Link href="/widgets/docs" target="_blank">
-          <Button variant="outline">
+          <Button variant="outline" className="border-2 border-amber-200 hover:border-amber-400 hover:bg-amber-50 font-semibold shadow-sm hover:shadow-md transition-all">
             <Code className="h-4 w-4 mr-2" />
             View Documentation
           </Button>
@@ -402,49 +404,53 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
       </div>
 
       {/* Navbar Link Section */}
-      <Card className="border">
+      <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50/50 to-white shadow-lg">
         <CardHeader>
-          <CardTitle className="text-lg">Add to Your Navbar</CardTitle>
-          <CardDescription>Add a link to your navigation bar that opens your feedback page</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl shadow-md">
+              <ExternalLink className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-bold">Add to Your Navbar</CardTitle>
+              <CardDescription className="text-base mt-1">Add a link to your navigation bar that redirects users to your feedback page</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <Label>Navbar Link Code</Label>
-            <div className="relative">
-              <Textarea
-                value={`<a href="https://yettobedecided-8lws.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
-  Feedback
-</a>`}
-                readOnly
-                className="font-mono text-sm h-20 resize-none"
-              />
+          <div className="space-y-4">
+            <div className="bg-white/80 backdrop-blur-sm border-2 border-amber-100 rounded-xl p-6 shadow-sm">
+              <p className="text-sm font-medium text-gray-700 mb-4">
+                Use this code snippet to add a "Feedback" link to your website's navigation bar:
+              </p>
               <Button
-                size="sm"
-                variant="secondary"
-                className="absolute top-2 right-2"
+                size="lg"
                 onClick={() => {
                   const code = `<a href="https://yettobedecided-8lws.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
   Feedback
 </a>`
                   navigator.clipboard.writeText(code)
-                  toast.success('Code copied to clipboard!')
+                  toast.success('Navbar link code copied to clipboard!')
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
                 }}
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold shadow-lg hover:shadow-xl transition-all"
               >
                 {copied ? (
                   <>
-                    <Check className="h-4 w-4 mr-1" />
-                    Copied
+                    <Check className="h-5 w-5 mr-2" />
+                    Code Copied!
                   </>
                 ) : (
                   <>
-                    <Copy className="h-4 w-4 mr-1" />
-                    Copy
+                    <Copy className="h-5 w-5 mr-2" />
+                    Copy Navbar Link Code
                   </>
                 )}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Customize the link text and styling to match your navbar design.
+            <p className="text-sm text-gray-600 flex items-center gap-2">
+              <span className="font-semibold">💡 Tip:</span>
+              Customize the link text ("Feedback") and styling to match your navbar design after copying.
             </p>
           </div>
         </CardContent>
@@ -453,19 +459,19 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
       {/* Widget Cards */}
       <div className="grid gap-6">
         {/* 1. Changelog Popup Widget */}
-        <Card className="border">
+        <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50/30 to-white shadow-md hover:shadow-lg transition-all">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Megaphone className="h-5 w-5" />
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                  <Megaphone className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Changelog Popup</CardTitle>
+                  <CardTitle className="text-lg font-bold">Changelog Popup</CardTitle>
                   <CardDescription>Show product updates in a centered modal</CardDescription>
                 </div>
               </div>
-              <Badge variant="secondary">Widget 1</Badge>
+              <Badge className="bg-blue-100 text-blue-700 border-blue-300 font-semibold">Widget 1</Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
@@ -475,7 +481,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   setPreviewWidget('changelog-popup')
                   setPreviewVariant('popup')
                 }}
-                className="bg-amber-500 hover:bg-amber-600 text-white"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Live Preview
@@ -483,6 +489,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <Button 
                 variant="outline" 
                 onClick={() => setShowSettings('changelog-popup')}
+                className="border-2 hover:bg-blue-50 hover:border-blue-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -490,6 +497,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <Button 
                 variant="outline" 
                 onClick={() => setShowCode('changelog-popup')}
+                className="border-2 hover:bg-blue-50 hover:border-blue-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Code className="h-4 w-4 mr-2" />
                 Get Code
@@ -499,19 +507,19 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
         </Card>
 
         {/* 2. Changelog Dropdown Widget */}
-        <Card className="border">
+        <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50/30 to-white shadow-md hover:shadow-lg transition-all">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Megaphone className="h-5 w-5" />
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                  <Megaphone className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Changelog Dropdown</CardTitle>
+                  <CardTitle className="text-lg font-bold">Changelog Dropdown</CardTitle>
                   <CardDescription>Show updates in a dropdown panel anchored to a button</CardDescription>
                 </div>
               </div>
-              <Badge variant="secondary">Widget 2</Badge>
+              <Badge className="bg-purple-100 text-purple-700 border-purple-300 font-semibold">Widget 2</Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
@@ -521,7 +529,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   setPreviewWidget('changelog-dropdown')
                   setPreviewVariant('dropdown')
                 }}
-                className="bg-amber-500 hover:bg-amber-600 text-white"
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Live Preview
@@ -529,6 +537,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <Button 
                 variant="outline" 
                 onClick={() => setShowSettings('changelog-dropdown')}
+                className="border-2 hover:bg-purple-50 hover:border-purple-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -536,6 +545,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <Button 
                 variant="outline" 
                 onClick={() => setShowCode('changelog-dropdown')}
+                className="border-2 hover:bg-purple-50 hover:border-purple-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Code className="h-4 w-4 mr-2" />
                 Get Code
@@ -545,19 +555,19 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
         </Card>
 
         {/* 3. Announcement Banner Widget */}
-        <Card className="border">
+        <Card className="border-2 border-pink-200 bg-gradient-to-br from-pink-50/30 to-white shadow-md hover:shadow-lg transition-all">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Sparkles className="h-5 w-5" />
+                <div className="p-3 bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 rounded-xl shadow-lg">
+                  <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Announcement Banner</CardTitle>
+                  <CardTitle className="text-lg font-bold">Announcement Banner</CardTitle>
                   <CardDescription>Hero section banner to highlight new features</CardDescription>
                 </div>
               </div>
-              <Badge variant="secondary">Widget 3</Badge>
+              <Badge className="bg-pink-100 text-pink-700 border-pink-300 font-semibold">Widget 3</Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
@@ -567,7 +577,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   setPreviewWidget('announcement')
                   setPreviewVariant('popup')
                 }}
-                className="bg-amber-500 hover:bg-amber-600 text-white"
+                className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Live Preview
@@ -575,6 +585,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <Button 
                 variant="outline" 
                 onClick={() => setShowSettings('announcement')}
+                className="border-2 hover:bg-pink-50 hover:border-pink-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -582,6 +593,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <Button 
                 variant="outline" 
                 onClick={() => setShowCode('announcement')}
+                className="border-2 hover:bg-pink-50 hover:border-pink-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Code className="h-4 w-4 mr-2" />
                 Get Code
@@ -591,19 +603,19 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
         </Card>
 
         {/* 4. All-in-One Widget */}
-        <Card className="border">
+        <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/30 to-white shadow-md hover:shadow-lg transition-all">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Layers className="h-5 w-5" />
+                <div className="p-3 bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 rounded-xl shadow-lg">
+                  <Layers className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">All-in-One Widget</CardTitle>
+                  <CardTitle className="text-lg font-bold">All-in-One Widget</CardTitle>
                   <CardDescription>Combine feedback board and changelog in one widget</CardDescription>
                 </div>
               </div>
-              <Badge variant="secondary">Widget 4</Badge>
+              <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 font-semibold">Widget 4</Badge>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
@@ -613,7 +625,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   setPreviewWidget('all-in-one')
                   setPreviewVariant('popup')
                 }}
-                className="bg-amber-500 hover:bg-amber-600 text-white"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Preview Popup
@@ -624,6 +636,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   setPreviewVariant('popover')
                 }}
                 variant="outline"
+                className="border-2 hover:bg-emerald-50 hover:border-emerald-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Preview Popover
@@ -631,6 +644,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <Button 
                 variant="outline" 
                 onClick={() => setShowSettings('all-in-one')}
+                className="border-2 hover:bg-emerald-50 hover:border-emerald-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -638,6 +652,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <Button 
                 variant="outline" 
                 onClick={() => setShowCode('all-in-one')}
+                className="border-2 hover:bg-emerald-50 hover:border-emerald-300 font-medium shadow-sm hover:shadow-md transition-all"
               >
                 <Code className="h-4 w-4 mr-2" />
                 Get Code
