@@ -151,6 +151,31 @@
       // Default feedback widget
       initFeedbackWidget(settings, accentColor, buttonText, position);
     }
+
+    // Auto-open widget if URL has feedbackhub=open parameter
+    function checkAutoOpen() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('feedbackhub') === 'open') {
+          // Small delay to ensure widget is ready and identify() may have been called
+          setTimeout(function() {
+            if (window.FeedbackHub && window.FeedbackHub.open) {
+              window.FeedbackHub.open();
+            }
+            // Clean up URL (remove feedbackhub param)
+            urlParams.delete('feedbackhub');
+            const newUrl = window.location.pathname + 
+              (urlParams.toString() ? '?' + urlParams.toString() : '') + 
+              window.location.hash;
+            window.history.replaceState({}, '', newUrl);
+          }, 800);
+        }
+      } catch (e) {
+        console.warn('FeedbackHub: Auto-open check failed', e);
+      }
+    }
+
+    checkAutoOpen();
   }
 
   function initFeedbackWidget(settings, accentColor, buttonText, position, dataTriggerElements) {
