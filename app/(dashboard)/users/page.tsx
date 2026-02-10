@@ -15,7 +15,7 @@ import {
 import { Users as UsersIcon } from 'lucide-react'
 import { UserDetailDrawer } from '@/components/dashboard/user-detail-drawer'
 
-type UserSource = 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt'
+type UserSource = 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt' | 'magic_link'
 
 interface WidgetUser {
   id: string
@@ -108,6 +108,8 @@ export default function UsersPage() {
         return <Badge className="bg-amber-100 text-amber-700">Identified</Badge>
       case 'verified_jwt':
         return <Badge className="bg-green-100 text-green-700">Verified</Badge>
+      case 'magic_link':
+        return <Badge className="bg-purple-100 text-purple-700">Email</Badge>
       default:
         return <Badge variant="secondary">Guest</Badge>
     }
@@ -141,6 +143,7 @@ export default function UsersPage() {
             <SelectItem value="verified_jwt">Verified JWT</SelectItem>
             <SelectItem value="social_google">Google</SelectItem>
             <SelectItem value="social_github">GitHub</SelectItem>
+            <SelectItem value="magic_link">Email (Magic Link)</SelectItem>
           </SelectContent>
         </Select>
 

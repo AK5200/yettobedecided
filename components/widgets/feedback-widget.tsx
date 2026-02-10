@@ -47,6 +47,12 @@ export function FeedbackWidget({
   const [configLoading, setConfigLoading] = useState(true)
   const [guestEmail, setGuestEmail] = useState('')
   const [guestName, setGuestName] = useState('')
+  const [magicLinkStep, setMagicLinkStep] = useState<'email' | 'code' | null>(null)
+  const [magicLinkEmail, setMagicLinkEmail] = useState('')
+  const [verificationToken, setVerificationToken] = useState('')
+  const [otpCode, setOtpCode] = useState('')
+  const [otpError, setOtpError] = useState('')
+  const [otpLoading, setOtpLoading] = useState(false)
 
   useEffect(() => {
     if (!selectedBoard && boards.length > 0) {
@@ -179,6 +185,81 @@ export function FeedbackWidget({
     }
   }
 
+  const handleMagicLinkSend = async () => {
+    if (!magicLinkEmail) return
+    setOtpLoading(true)
+    setOtpError('')
+
+    try {
+      const res = await fetch('/api/auth/widget/magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: magicLinkEmail, org_slug: orgSlug }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setOtpError(data.error || 'Failed to send code')
+        return
+      }
+
+      setVerificationToken(data.verificationToken)
+      setMagicLinkStep('code')
+    } catch {
+      setOtpError('Network error. Please try again.')
+    } finally {
+      setOtpLoading(false)
+    }
+  }
+
+  const handleMagicLinkVerify = async () => {
+    if (!otpCode || otpCode.length !== 6) return
+    setOtpLoading(true)
+    setOtpError('')
+
+    try {
+      const res = await fetch('/api/auth/widget/magic-link/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: verificationToken, code: otpCode }),
+      })
+      const data = await res.json()
+
+      if (data.exhausted) {
+        setOtpError('Too many attempts. Please request a new code.')
+        setMagicLinkStep('email')
+        setOtpCode('')
+        return
+      }
+
+      if (!res.ok) {
+        if (data.verificationToken) {
+          setVerificationToken(data.verificationToken)
+        }
+        setOtpError(data.attemptsRemaining != null
+          ? `Invalid code. ${data.attemptsRemaining} attempt${data.attemptsRemaining === 1 ? '' : 's'} remaining.`
+          : (data.error || 'Invalid code'))
+        setOtpCode('')
+        return
+      }
+
+      const user = data.user
+      setIdentifiedUser(user)
+      setIsIdentified(true)
+      setMagicLinkStep(null)
+
+      try {
+        sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
+      } catch {
+        // Ignore storage errors
+      }
+    } catch {
+      setOtpError('Network error. Please try again.')
+    } finally {
+      setOtpLoading(false)
+    }
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!selectedBoard || !title.trim()) return
@@ -273,6 +354,65 @@ export function FeedbackWidget({
               {loginHandler === 'feedbackhub' && (
                 <>
                   <div className="text-xs text-gray-500 text-center font-medium relative">
+                    <span className="bg-white px-2 relative z-10">or verify your email</span>
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                  </div>
+                  {magicLinkStep === 'code' ? (
+                    <div className="space-y-3">
+                      <p className="text-xs text-gray-500 text-center">
+                        Enter the 6-digit code sent to <strong>{magicLinkEmail}</strong>
+                      </p>
+                      <Input
+                        placeholder="000000"
+                        value={otpCode}
+                        onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                        className="text-center text-2xl tracking-widest font-mono border-gray-200"
+                        maxLength={6}
+                        autoFocus
+                      />
+                      {otpError && (
+                        <p className="text-xs text-red-500 text-center">{otpError}</p>
+                      )}
+                      <Button
+                        className="w-full font-semibold cursor-pointer"
+                        onClick={handleMagicLinkVerify}
+                        disabled={otpCode.length !== 6 || otpLoading}
+                        style={{ backgroundColor: accentColor }}
+                      >
+                        {otpLoading ? 'Verifying...' : 'Verify Code'}
+                      </Button>
+                      <button
+                        className="text-xs text-gray-400 hover:text-gray-600 w-full text-center cursor-pointer"
+                        onClick={() => { setMagicLinkStep('email'); setOtpCode(''); setOtpError('') }}
+                      >
+                        Use a different email
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Input
+                        placeholder="Enter your email"
+                        type="email"
+                        value={magicLinkEmail}
+                        onChange={(event) => setMagicLinkEmail(event.target.value)}
+                        className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+                      />
+                      {otpError && (
+                        <p className="text-xs text-red-500 text-center">{otpError}</p>
+                      )}
+                      <Button
+                        variant="outline"
+                        className="w-full font-semibold cursor-pointer"
+                        onClick={handleMagicLinkSend}
+                        disabled={!magicLinkEmail || otpLoading}
+                      >
+                        {otpLoading ? 'Sending...' : 'Send Verification Code'}
+                      </Button>
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-500 text-center font-medium relative">
                     <span className="bg-white px-2 relative z-10">or</span>
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-gray-200"></div>
@@ -318,33 +458,88 @@ export function FeedbackWidget({
             // Guest posting disabled - must login
             <>
               {loginHandler === 'feedbackhub' ? (
-                // Show Google/GitHub buttons
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600 text-center">
                     Please login to submit feedback
                   </p>
-                  <div className="flex gap-2">
-                    <Button
-                      className="flex-1"
-                      onClick={() => handleSocialClick('google')}
-                      style={{ 
-                        backgroundColor: accentColor,
-                        boxShadow: `0 2px 8px -2px ${accentColor}40`
-                      }}
-                    >
-                      Google
-                    </Button>
-                    <Button
-                      className="flex-1"
-                      onClick={() => handleSocialClick('github')}
-                      style={{ 
-                        backgroundColor: accentColor,
-                        boxShadow: `0 2px 8px -2px ${accentColor}40`
-                      }}
-                    >
-                      GitHub
-                    </Button>
-                  </div>
+                  {magicLinkStep === 'code' ? (
+                    <>
+                      <p className="text-xs text-gray-500 text-center">
+                        Enter the 6-digit code sent to <strong>{magicLinkEmail}</strong>
+                      </p>
+                      <Input
+                        placeholder="000000"
+                        value={otpCode}
+                        onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                        className="text-center text-2xl tracking-widest font-mono border-gray-200"
+                        maxLength={6}
+                        autoFocus
+                      />
+                      {otpError && (
+                        <p className="text-xs text-red-500 text-center">{otpError}</p>
+                      )}
+                      <Button
+                        className="w-full font-semibold cursor-pointer"
+                        onClick={handleMagicLinkVerify}
+                        disabled={otpCode.length !== 6 || otpLoading}
+                        style={{ backgroundColor: accentColor }}
+                      >
+                        {otpLoading ? 'Verifying...' : 'Verify Code'}
+                      </Button>
+                      <button
+                        className="text-xs text-gray-400 hover:text-gray-600 w-full text-center cursor-pointer"
+                        onClick={() => { setMagicLinkStep('email'); setOtpCode(''); setOtpError('') }}
+                      >
+                        Use a different email
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Input
+                        placeholder="Enter your email"
+                        type="email"
+                        value={magicLinkEmail}
+                        onChange={(event) => setMagicLinkEmail(event.target.value)}
+                        className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+                      />
+                      {otpError && (
+                        <p className="text-xs text-red-500 text-center">{otpError}</p>
+                      )}
+                      <Button
+                        className="w-full font-semibold cursor-pointer"
+                        onClick={handleMagicLinkSend}
+                        disabled={!magicLinkEmail || otpLoading}
+                        style={{
+                          backgroundColor: accentColor,
+                          boxShadow: `0 2px 8px -2px ${accentColor}40`
+                        }}
+                      >
+                        {otpLoading ? 'Sending...' : 'Continue with Email'}
+                      </Button>
+                      <div className="text-xs text-gray-500 text-center font-medium relative">
+                        <span className="bg-white px-2 relative z-10">or</span>
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-gray-200"></div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => handleSocialClick('google')}
+                        >
+                          Google
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => handleSocialClick('github')}
+                        >
+                          GitHub
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : loginHandler === 'customer' ? (
                 // Show "Login" button → redirect to ssoRedirectUrl

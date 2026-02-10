@@ -67,3 +67,12 @@ export function passwordResetEmail(data: { resetUrl: string }) {
       <p style="margin-top: 16px; color: #666; font-size: 14px;">If you didn't request this, ignore this email.</p>
     </div>`
 }
+
+export function magicLinkCodeEmail(data: { code: string; orgName: string }) {
+  return `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Your verification code</h2>
+      <p>Use the following code to sign in to ${data.orgName}:</p>
+      <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; padding: 24px; background: #f4f4f5; border-radius: 8px; margin: 24px 0;">${data.code}</div>
+      <p style="color: #666; font-size: 14px;">This code expires in 15 minutes. If you didn't request this, you can safely ignore this email.</p>
+    </div>`
+}

@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server';
 
-export type UserSource = 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt';
+export type UserSource = 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt' | 'magic_link';
 
 export interface WidgetUserInput {
   external_id?: string;
@@ -29,6 +29,7 @@ const SOURCE_PRIORITY: Record<UserSource, number> = {
   identified: 2,
   social_google: 3,
   social_github: 3,
+  magic_link: 3,
   verified_jwt: 4,
 };
 

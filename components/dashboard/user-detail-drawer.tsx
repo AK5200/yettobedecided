@@ -8,7 +8,7 @@
  import { Input } from '@/components/ui/input'
  import { toast } from 'sonner'
  
- type UserSource = 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt'
+ type UserSource = 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt' | 'magic_link'
  
  interface WidgetUser {
    id: string
