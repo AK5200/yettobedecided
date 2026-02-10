@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Check } from 'lucide-react'
-import { AuthPrompt } from './auth-prompt'
 
 interface FeedbackBoard {
   id: string
@@ -41,12 +40,40 @@ export function FeedbackWidget({
   const [success, setSuccess] = useState(false)
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
   const [isIdentified, setIsIdentified] = useState(false)
+  const [guestPostingEnabled, setGuestPostingEnabled] = useState(true)
+  const [loginHandler, setLoginHandler] = useState<'feedbackhub' | 'customer' | null>(null)
+  const [ssoRedirectUrl, setSsoRedirectUrl] = useState('')
+  const [orgName, setOrgName] = useState('')
+  const [configLoading, setConfigLoading] = useState(true)
+  const [guestEmail, setGuestEmail] = useState('')
+  const [guestName, setGuestName] = useState('')
 
   useEffect(() => {
     if (!selectedBoard && boards.length > 0) {
       setSelectedBoard(boards[0].id)
     }
   }, [boards, selectedBoard])
+
+  // Fetch org config on mount
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const res = await fetch(`/api/widget/config?org=${encodeURIComponent(orgSlug)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setGuestPostingEnabled(data.auth?.guestPostingEnabled ?? true)
+          setLoginHandler(data.auth?.loginHandler || null)
+          setSsoRedirectUrl(data.auth?.ssoRedirectUrl || '')
+          setOrgName(data.org?.name || '')
+        }
+      } catch (error) {
+        console.error('Failed to load widget config:', error)
+      } finally {
+        setConfigLoading(false)
+      }
+    }
+    fetchConfig()
+  }, [orgSlug])
 
   useEffect(() => {
     // Listen for identity from parent via postMessage
@@ -104,13 +131,16 @@ export function FeedbackWidget({
 
   const handleGuestSubmit = (email: string, name: string) => {
     if (!email) return
+    setGuestEmail(email)
+    setGuestName(name)
+    setIsIdentified(true)
+    // Also try to identify in parent if possible
     try {
       if (window.parent && window.parent !== window) {
         try {
           const parentHub = (window.parent as any)?.FeedbackHub
           if (parentHub?.identify) {
             parentHub.identify({ id: email, email, name })
-            setIsIdentified(true)
             setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
           }
         } catch (e) {
@@ -125,6 +155,18 @@ export function FeedbackWidget({
   const handleSocialClick = (provider: 'google' | 'github') => {
     const returnUrl = window.location.href
     window.location.href = `/api/auth/widget/${provider}?org_slug=${encodeURIComponent(orgSlug)}&return_url=${encodeURIComponent(returnUrl)}`
+  }
+
+  const handleCustomerLogin = () => {
+    if (!ssoRedirectUrl) return
+    const currentUrl = window.location.href
+    const redirectUrl = `${ssoRedirectUrl}?redirect=${encodeURIComponent(currentUrl)}&feedbackhub=open`
+    // Use window.top to redirect the entire page, not just the iframe
+    if (window.top) {
+      window.top.location.href = redirectUrl
+    } else {
+      window.location.href = redirectUrl
+    }
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -159,8 +201,8 @@ export function FeedbackWidget({
         board_id: selectedBoard,
         title,
         content,
-        guest_email: identifiedUser?.email,
-        guest_name: identifiedUser?.name,
+        guest_email: identifiedUser?.email || guestEmail,
+        guest_name: identifiedUser?.name || guestName,
         identified_user: identifiedPayload,
       }),
     })
@@ -175,17 +217,156 @@ export function FeedbackWidget({
     setLoading(false)
   }
 
+  if (configLoading) {
+    return (
+      <div className="text-sm text-gray-500 text-center py-4">Loading...</div>
+    )
+  }
+
+  // Render logic based on auth state and config
+  const showForm = isIdentified || identifiedUser
+
   return (
     <div className="space-y-5">
-      {!isIdentified && (
-        <AuthPrompt
-          orgSlug={orgSlug}
-          onGuestSubmit={handleGuestSubmit}
-          onSocialClick={handleSocialClick}
-        />
+      {!showForm && (
+        <div className="space-y-4">
+          {guestPostingEnabled ? (
+            // Guest posting enabled - show email/name form, optionally show login options
+            <>
+              <div className="space-y-3">
+                <Input
+                  placeholder="Email"
+                  value={guestEmail}
+                  onChange={(event) => setGuestEmail(event.target.value)}
+                  className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+                />
+                <Input
+                  placeholder="Name (optional)"
+                  value={guestName}
+                  onChange={(event) => setGuestName(event.target.value)}
+                  className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+                />
+                <Button
+                  className="w-full font-semibold shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => handleGuestSubmit(guestEmail, guestName)}
+                  disabled={!guestEmail}
+                  style={{ 
+                    backgroundColor: accentColor,
+                    boxShadow: `0 2px 8px -2px ${accentColor}40`
+                  }}
+                >
+                  Continue
+                </Button>
+              </div>
+              
+              {/* Show login options below if login handler is configured */}
+              {loginHandler === 'feedbackhub' && (
+                <>
+                  <div className="text-xs text-gray-500 text-center font-medium relative">
+                    <span className="bg-white px-2 relative z-10">or</span>
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handleSocialClick('google')}
+                    >
+                      Google
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handleSocialClick('github')}
+                    >
+                      GitHub
+                    </Button>
+                  </div>
+                </>
+              )}
+              {loginHandler === 'customer' && (
+                <>
+                  <div className="text-xs text-gray-500 text-center font-medium relative">
+                    <span className="bg-white px-2 relative z-10">or</span>
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleCustomerLogin}
+                  >
+                    Login with {orgName || 'your account'}
+                  </Button>
+                </>
+              )}
+            </>
+          ) : (
+            // Guest posting disabled - must login
+            <>
+              {loginHandler === 'feedbackhub' ? (
+                // Show Google/GitHub buttons
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600 text-center">
+                    Please login to submit feedback
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1"
+                      onClick={() => handleSocialClick('google')}
+                      style={{ 
+                        backgroundColor: accentColor,
+                        boxShadow: `0 2px 8px -2px ${accentColor}40`
+                      }}
+                    >
+                      Google
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      onClick={() => handleSocialClick('github')}
+                      style={{ 
+                        backgroundColor: accentColor,
+                        boxShadow: `0 2px 8px -2px ${accentColor}40`
+                      }}
+                    >
+                      GitHub
+                    </Button>
+                  </div>
+                </div>
+              ) : loginHandler === 'customer' ? (
+                // Show "Login" button → redirect to ssoRedirectUrl
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600 text-center">
+                    Please login to submit feedback
+                  </p>
+                  <Button
+                    className="w-full"
+                    onClick={handleCustomerLogin}
+                    style={{ 
+                      backgroundColor: accentColor,
+                      boxShadow: `0 2px 8px -2px ${accentColor}40`
+                    }}
+                  >
+                    Login with {orgName || 'your account'}
+                  </Button>
+                </div>
+              ) : (
+                // No login handler configured
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-600">
+                    Please login to your account first
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       )}
 
-      {isIdentified && (
+      {showForm && (
         <form onSubmit={handleSubmit} className="space-y-4">
           {boards.length > 1 && (
             <Select value={selectedBoard} onValueChange={setSelectedBoard}>
@@ -201,9 +382,9 @@ export function FeedbackWidget({
               </SelectContent>
             </Select>
           )}
-          {identifiedUser && (
+          {(identifiedUser || guestEmail) && (
             <div className="text-sm text-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 rounded-xl border-2 border-gray-200 shadow-sm">
-              Posting as <span className="font-bold">{identifiedUser.name || identifiedUser.email}</span>
+              Posting as <span className="font-bold">{identifiedUser?.name || identifiedUser?.email || guestName || guestEmail}</span>
             </div>
           )}
           <Input
