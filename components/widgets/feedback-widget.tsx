@@ -159,9 +159,19 @@ export function FeedbackWidget({
 
   const handleCustomerLogin = () => {
     if (!ssoRedirectUrl) return
-    const currentUrl = window.location.href
-    const redirectUrl = `${ssoRedirectUrl}?redirect=${encodeURIComponent(currentUrl)}&feedbackhub=open`
-    // Use window.top to redirect the entire page, not just the iframe
+
+    // Get parent page URL, not iframe URL
+    let parentUrl = ''
+    try {
+      // Try to get parent URL (same-origin only)
+      parentUrl = window.top?.location.href || window.location.href
+    } catch (e) {
+      // Cross-origin - use document.referrer as fallback
+      parentUrl = document.referrer || window.location.origin
+    }
+
+    const redirectUrl = `${ssoRedirectUrl}?redirect=${encodeURIComponent(parentUrl)}&feedbackhub=open`
+
     if (window.top) {
       window.top.location.href = redirectUrl
     } else {
