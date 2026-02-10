@@ -1,6 +1,12 @@
 import { Resend } from 'resend'
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+let _resend: Resend | null = null
+function getResend() {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return _resend
+}
 
 export async function sendEmail({
   to,
@@ -12,7 +18,7 @@ export async function sendEmail({
   html: string
 }) {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: process.env.EMAIL_FROM || 'FeedbackHub <noreply@feedbackhub.app>',
       to,
       subject,
