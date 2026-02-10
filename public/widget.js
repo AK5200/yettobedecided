@@ -219,11 +219,10 @@
         closeWidget();
       }
     });
-
-    window.FeedbackHub = {
-      open: openWidget,
-      close: closeWidget
-    };
+    
+    // Attach open/close helpers without overwriting existing methods like identify()
+    window.FeedbackHub.open = openWidget;
+    window.FeedbackHub.close = closeWidget;
   }
 
   function initChangelogPopup(settings, customTrigger, dataTriggerElements) {
@@ -527,11 +526,10 @@
         closePopup();
       }
     });
-
-    window.FeedbackHub = {
-      open: openPopup,
-      close: closePopup
-    };
+    
+    // Attach open/close helpers without overwriting existing methods like identify()
+    window.FeedbackHub.open = openPopup;
+    window.FeedbackHub.close = closePopup;
   }
 
   function initAllInOnePopover(settings, dataTriggerElements) {
@@ -664,11 +662,10 @@
         closePopover();
       }
     });
-
-    window.FeedbackHub = {
-      open: openPopover,
-      close: closePopover
-    };
+    
+    // Attach open/close helpers without overwriting existing methods like identify()
+    window.FeedbackHub.open = openPopover;
+    window.FeedbackHub.close = closePopover;
   }
 
   // Start initialization
