@@ -43,6 +43,13 @@
     
     if (_user) {
       localStorage.setItem('feedbackhub_user', JSON.stringify(_user));
+      // Send identity to all open iframes
+      const iframes = document.querySelectorAll('iframe[id^="feedbackhub-"]');
+      iframes.forEach(function(iframe) {
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+        }
+      });
     }
     
     return _user;
@@ -159,7 +166,18 @@
       const button = document.getElementById('feedbackhub-trigger');
       if (button) button.style.display = 'none';
       iframe.contentWindow.postMessage('open', '*');
+      // Send identified user to iframe
+      if (_user) {
+        iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+      }
     }
+    
+    // Send identity when iframe loads (in case it loads before open)
+    iframe.addEventListener('load', function() {
+      if (_user) {
+        iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+      }
+    });
 
     function closeWidget() {
       iframe.style.display = 'none';
@@ -233,7 +251,18 @@
       overlay.style.display = 'block';
       container.style.display = 'block';
       isOpen = true;
+      // Send identified user to iframe
+      if (_user) {
+        iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+      }
     }
+    
+    // Send identity when iframe loads
+    iframe.addEventListener('load', function() {
+      if (_user) {
+        iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+      }
+    });
 
     function closePopup() {
       overlay.style.display = 'none';
@@ -450,7 +479,18 @@
       const button = document.getElementById('feedbackhub-allinone-trigger');
       if (button) button.style.display = 'none';
       isOpen = true;
+      // Send identified user to iframe
+      if (_user) {
+        iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+      }
     }
+    
+    // Send identity when iframe loads
+    iframe.addEventListener('load', function() {
+      if (_user) {
+        iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+      }
+    });
 
     function closePopup() {
       overlay.style.display = 'none';
@@ -564,7 +604,18 @@
       const button = document.getElementById('feedbackhub-allinone-trigger');
       if (button) button.innerHTML = '✕';
       isOpen = true;
+      // Send identified user to iframe
+      if (_user) {
+        iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+      }
     }
+    
+    // Send identity when iframe loads
+    iframe.addEventListener('load', function() {
+      if (_user) {
+        iframe.contentWindow.postMessage({ type: 'feedbackhub:identity', user: _user }, '*');
+      }
+    });
 
     function closePopover() {
       popover.style.display = 'none';

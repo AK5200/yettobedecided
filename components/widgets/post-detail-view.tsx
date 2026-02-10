@@ -66,32 +66,54 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
 
     fetchComments()
 
-    // Check for identified user - safely handle cross-origin
-    const checkIdentifiedUser = () => {
-      try {
-        // Check if we can access parent window (not cross-origin)
-        if (window.parent && window.parent !== window) {
+    // Listen for identity from parent via postMessage
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'feedbackhub:identity') {
+        const user = event.data.user
+        if (user) {
+          setIdentifiedUser(user)
+          // Store in sessionStorage for persistence
           try {
-            const parentHub = (window.parent as any)?.FeedbackHub
-            if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
-              setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
-              return
-            }
+            sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
           } catch (e) {
-            // Cross-origin error - parent is from different origin
-            // This is expected when embedded, so we'll just continue without parent access
+            // Ignore storage errors
           }
         }
-        // If we can't access parent or no FeedbackHub, check localStorage or other methods
-        setIdentifiedUser(null)
-      } catch (error) {
-        // Silently handle any errors
-        setIdentifiedUser(null)
       }
     }
-    checkIdentifiedUser()
-    const interval = setInterval(checkIdentifiedUser, 1000)
-    return () => clearInterval(interval)
+
+    window.addEventListener('message', handleMessage)
+
+    // Check sessionStorage for existing identity
+    try {
+      const stored = sessionStorage.getItem('feedbackhub_identified_user')
+      if (stored) {
+        const user = JSON.parse(stored)
+        setIdentifiedUser(user)
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
+
+    // Fallback: try to get from parent (same origin only)
+    try {
+      if (window.parent && window.parent !== window) {
+        try {
+          const parentHub = (window.parent as any)?.FeedbackHub
+          if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
+            setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
+          }
+        } catch (e) {
+          // Cross-origin - will rely on postMessage instead
+        }
+      }
+    } catch (error) {
+      // Ignore errors
+    }
+
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
   }, [post.id])
 
   const formatDate = (dateString?: string) => {
@@ -116,16 +138,18 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     setSubmitting(true)
     try {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-      let identifiedPayload = null
-      
-      // Safely try to get identified payload from parent
-      try {
-        if (window.parent && window.parent !== window) {
-          const parentHub = (window.parent as any)?.FeedbackHub
-          identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
+      // Use stored identified user (from postMessage or sessionStorage)
+      let identifiedPayload = identifiedUser || null
+      if (!identifiedPayload) {
+        // Fallback: try to get from parent (same origin only)
+        try {
+          if (window.parent && window.parent !== window) {
+            const parentHub = (window.parent as any)?.FeedbackHub
+            identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
+          }
+        } catch (e) {
+          // Cross-origin error - ignore
         }
-      } catch (e) {
-        // Cross-origin error - ignore and continue without parent payload
       }
 
       const res = await fetch(`${baseUrl}/api/comments`, {

@@ -49,35 +49,57 @@ export function FeedbackWidget({
   }, [boards, selectedBoard])
 
   useEffect(() => {
-    const checkIdentifiedUser = () => {
-      try {
-        // Check if we can access parent window (not cross-origin)
-        if (window.parent && window.parent !== window) {
+    // Listen for identity from parent via postMessage
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'feedbackhub:identity') {
+        const user = event.data.user
+        if (user) {
+          setIsIdentified(true)
+          setIdentifiedUser(user)
+          // Store in sessionStorage for persistence
           try {
-            const parentHub = (window.parent as any)?.FeedbackHub
-            if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
-              setIsIdentified(true)
-              setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
-              return
-            }
+            sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
           } catch (e) {
-            // Cross-origin error - parent is from different origin
-            // This is expected when embedded, so we'll just continue without parent access
+            // Ignore storage errors
           }
         }
-        // If we can't access parent or no FeedbackHub
-        setIsIdentified(false)
-        setIdentifiedUser(null)
-      } catch (error) {
-        // Silently handle any errors
-        setIsIdentified(false)
-        setIdentifiedUser(null)
       }
     }
 
-    checkIdentifiedUser()
-    const interval = setInterval(checkIdentifiedUser, 1000)
-    return () => clearInterval(interval)
+    window.addEventListener('message', handleMessage)
+
+    // Check sessionStorage for existing identity
+    try {
+      const stored = sessionStorage.getItem('feedbackhub_identified_user')
+      if (stored) {
+        const user = JSON.parse(stored)
+        setIsIdentified(true)
+        setIdentifiedUser(user)
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
+
+    // Request identity from parent (if same origin)
+    try {
+      if (window.parent && window.parent !== window) {
+        try {
+          const parentHub = (window.parent as any)?.FeedbackHub
+          if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
+            setIsIdentified(true)
+            setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
+          }
+        } catch (e) {
+          // Cross-origin - will rely on postMessage instead
+        }
+      }
+    } catch (error) {
+      // Ignore errors
+    }
+
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
   }, [])
 
   const handleGuestSubmit = (email: string, name: string) => {
@@ -111,18 +133,22 @@ export function FeedbackWidget({
     setLoading(true)
     setSuccess(false)
 
-    let identifiedPayload = null
-    try {
-      if (window.parent && window.parent !== window) {
-        try {
-          const parentHub = (window.parent as any)?.FeedbackHub
-          identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
-        } catch (e) {
-          // Cross-origin error - ignore and continue without parent payload
+    // Use stored identified user (from postMessage or sessionStorage)
+    let identifiedPayload = identifiedUser || null
+    if (!identifiedPayload) {
+      // Fallback: try to get from parent (same origin only)
+      try {
+        if (window.parent && window.parent !== window) {
+          try {
+            const parentHub = (window.parent as any)?.FeedbackHub
+            identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
+          } catch (e) {
+            // Cross-origin error - ignore
+          }
         }
+      } catch (error) {
+        // Ignore errors
       }
-    } catch (error) {
-      // Silently handle any errors
     }
 
     const response = await fetch('/api/widget/feedback', {

@@ -32,6 +32,28 @@ export default function AllInOneEmbedClient() {
     }
   }, [settings, searchParams])
 
+  // Listen for identity from parent via postMessage
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'feedbackhub:identity') {
+        const user = event.data.user
+        if (user) {
+          // Store in sessionStorage for persistence
+          try {
+            sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
+          } catch (e) {
+            // Ignore storage errors
+          }
+        }
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [])
+
   useEffect(() => {
     if (!org) {
       setLoading(false)
