@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -13,8 +14,7 @@ import { CodeExamples } from './code-examples'
 export default function SSOSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [guestPostingEnabled, setGuestPostingEnabled] = useState(true)
-  const [socialLoginEnabled, setSocialLoginEnabled] = useState(true)
-  const [ssoRedirectEnabled, setSsoRedirectEnabled] = useState(false)
+  const [loginHandler, setLoginHandler] = useState<'feedbackhub' | 'customer' | null>(null)
   const [ssoRedirectUrl, setSsoRedirectUrl] = useState('')
   const [secretKey, setSecretKey] = useState('')
   const [showKey, setShowKey] = useState(false)
@@ -29,8 +29,8 @@ export default function SSOSettingsPage() {
       const res = await fetch('/api/sso/settings')
       const data = await res.json()
       setGuestPostingEnabled(!!data.guest_posting_enabled)
-      setSocialLoginEnabled(!!data.social_login_enabled)
-      setSsoRedirectEnabled(!!data.sso_redirect_enabled)
+      // Set login_handler, fallback to social_login_enabled for backward compatibility
+      setLoginHandler(data.login_handler || (data.social_login_enabled ? 'feedbackhub' : null))
       setSsoRedirectUrl(data.sso_redirect_url || '')
       setSecretKey(data.secret_key || '')
     } catch (error) {
@@ -83,7 +83,8 @@ export default function SSOSettingsPage() {
   const handleSaveRedirect = async () => {
     setSavingRedirect(true)
     await updateSettings({
-      sso_redirect_enabled: ssoRedirectEnabled,
+      login_handler: loginHandler === 'customer' ? 'customer' : loginHandler,
+      sso_redirect_enabled: loginHandler === 'customer',
       sso_redirect_url: ssoRedirectUrl,
     })
     setSavingRedirect(false)
@@ -128,47 +129,67 @@ export default function SSOSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Social Login</CardTitle>
+          <CardTitle>Login Handler</CardTitle>
+          <CardDescription>
+            Choose who handles user login when users try to post while logged out
+          </CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm text-gray-600">
-              Enable Google and GitHub login options for widget users.
-            </p>
-          </div>
-          <Switch
-            checked={socialLoginEnabled}
-            onCheckedChange={(value) => {
-              setSocialLoginEnabled(value)
-              updateSettings({ social_login_enabled: value })
-            }}
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>SSO Redirect (Enterprise)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between gap-4">
-            <Label className="text-sm text-gray-600">
-              Redirect users to your SSO provider for authentication.
-            </Label>
-            <Switch
-              checked={ssoRedirectEnabled}
-              onCheckedChange={setSsoRedirectEnabled}
-            />
-          </div>
-          <Input
-            placeholder="https://sso.yourcompany.com/login"
-            value={ssoRedirectUrl}
-            onChange={(event) => setSsoRedirectUrl(event.target.value)}
-            disabled={!ssoRedirectEnabled}
-          />
-          <div className="flex justify-end">
-            <Button onClick={handleSaveRedirect} disabled={savingRedirect}>
-              {savingRedirect ? 'Saving...' : 'Save Redirect Settings'}
+        <CardContent className="space-y-4">
+          <RadioGroup 
+            value={loginHandler || 'none'} 
+            onValueChange={(value) => setLoginHandler(value === 'none' ? null : value as 'feedbackhub' | 'customer')}
+            className="space-y-3"
+          >
+            <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+              <RadioGroupItem value="feedbackhub" id="feedbackhub" className="mt-1" />
+              <div className="flex-1">
+                <Label htmlFor="feedbackhub" className="font-medium cursor-pointer">FeedbackHub</Label>
+                <p className="text-sm text-gray-500 mt-1">
+                  We handle login (Google/GitHub OAuth)
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+              <RadioGroupItem value="customer" id="customer" className="mt-1" />
+              <div className="flex-1">
+                <Label htmlFor="customer" className="font-medium cursor-pointer">Your Website</Label>
+                <p className="text-sm text-gray-500 mt-1">
+                  Redirect to your login page
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+              <RadioGroupItem value="none" id="none" className="mt-1" />
+              <div className="flex-1">
+                <Label htmlFor="none" className="font-medium cursor-pointer">None</Label>
+                <p className="text-sm text-gray-500 mt-1">
+                  No login handler (users must use guest posting if enabled)
+                </p>
+              </div>
+            </div>
+          </RadioGroup>
+          {loginHandler === 'customer' && (
+            <div className="mt-4 space-y-3 pt-4 border-t">
+              <Label htmlFor="sso_redirect_url">Login Page URL</Label>
+              <Input
+                id="sso_redirect_url"
+                placeholder="https://taskflow.com/login"
+                value={ssoRedirectUrl}
+                onChange={(event) => setSsoRedirectUrl(event.target.value)}
+              />
+            </div>
+          )}
+          <div className="flex justify-end pt-2">
+            <Button 
+              onClick={async () => {
+                await updateSettings({ 
+                  login_handler: loginHandler,
+                  sso_redirect_enabled: loginHandler === 'customer',
+                  sso_redirect_url: loginHandler === 'customer' ? ssoRedirectUrl : '',
+                })
+              }}
+            >
+              Save Login Handler
             </Button>
           </div>
         </CardContent>
