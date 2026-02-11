@@ -4,6 +4,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const orgSlug = searchParams.get('org_slug')
   const returnUrl = searchParams.get('return_url') || ''
+  const popup = searchParams.get('popup') === '1'
 
   if (!orgSlug) {
     return NextResponse.json({ error: 'org_slug is required' }, { status: 400 })
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Google client not configured' }, { status: 500 })
   }
 
-  const state = Buffer.from(JSON.stringify({ org_slug: orgSlug, return_url: returnUrl, provider: 'google' })).toString('base64')
+  const state = Buffer.from(JSON.stringify({ org_slug: orgSlug, return_url: returnUrl, provider: 'google', popup })).toString('base64')
 
   const params = new URLSearchParams({
     client_id: clientId,

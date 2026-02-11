@@ -159,8 +159,8 @@ export function FeedbackWidget({
   }
 
   const handleSocialClick = (provider: 'google' | 'github') => {
-    const returnUrl = window.location.href
-    window.location.href = `/api/auth/widget/${provider}?org_slug=${encodeURIComponent(orgSlug)}&return_url=${encodeURIComponent(returnUrl)}`
+    const url = `/api/auth/widget/${provider}?org_slug=${encodeURIComponent(orgSlug)}&popup=1`
+    window.open(url, 'feedbackhub_oauth', 'width=500,height=600,scrollbars=yes')
   }
 
   const handleCustomerLogin = () => {

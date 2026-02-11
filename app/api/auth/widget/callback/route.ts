@@ -14,14 +14,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing code or state' }, { status: 400 })
   }
 
-  let decodedState: { org_slug: string; return_url?: string; provider: OAuthProvider }
+  let decodedState: { org_slug: string; return_url?: string; provider: OAuthProvider; popup?: boolean }
   try {
     decodedState = JSON.parse(Buffer.from(state, 'base64').toString('utf-8'))
   } catch {
     return NextResponse.json({ error: 'Invalid state' }, { status: 400 })
   }
 
-  const { org_slug: orgSlug, return_url: returnUrl, provider } = decodedState
+  const { org_slug: orgSlug, return_url: returnUrl, provider, popup } = decodedState
   const url = new URL(request.url)
   const proto = request.headers.get('x-forwarded-proto') || url.protocol.replace(':', '')
   const host = request.headers.get('host') || url.host
@@ -138,6 +138,25 @@ export async function GET(request: Request) {
     const jwtSecret = process.env.WIDGET_JWT_SECRET || process.env.JWT_SECRET
     if (!jwtSecret) {
       return NextResponse.json({ error: 'JWT secret not configured' }, { status: 500 })
+    }
+
+    if (popup) {
+      // Popup mode: send user data back to the widget iframe via postMessage, then close
+      const userData = JSON.stringify({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatar_url: user.avatar_url,
+      })
+      const html = `<!DOCTYPE html><html><body><script>
+        if (window.opener) {
+          window.opener.postMessage({ type: 'feedbackhub:identity', user: ${userData} }, '*');
+        }
+        window.close();
+      </script></body></html>`
+      return new NextResponse(html, {
+        headers: { 'Content-Type': 'text/html' },
+      })
     }
 
     const token = jwt.sign(
