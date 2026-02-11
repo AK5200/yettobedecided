@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -172,6 +172,11 @@ export function AllInOneWidget({
   const [searchQuery, setSearchQuery] = useState('')
   const [posts, setPosts] = useState(initialPosts)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
+
+  // Sync when parent passes updated posts (e.g. after new post creation)
+  useEffect(() => {
+    setPosts(initialPosts)
+  }, [initialPosts])
 
   const filteredPosts = posts.filter(
     (post) =>
