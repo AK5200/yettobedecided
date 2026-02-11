@@ -135,11 +135,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error || 'Failed to create user' }, { status: 500 })
     }
 
-    const jwtSecret = process.env.WIDGET_JWT_SECRET || process.env.JWT_SECRET
-    if (!jwtSecret) {
-      return NextResponse.json({ error: 'JWT secret not configured' }, { status: 500 })
-    }
-
     if (popup) {
       // Popup mode: send user data back to the widget iframe via postMessage, then close
       const userData = JSON.stringify({
@@ -157,6 +152,11 @@ export async function GET(request: Request) {
       return new NextResponse(html, {
         headers: { 'Content-Type': 'text/html' },
       })
+    }
+
+    const jwtSecret = process.env.WIDGET_JWT_SECRET || process.env.JWT_SECRET
+    if (!jwtSecret) {
+      return NextResponse.json({ error: 'JWT secret not configured' }, { status: 500 })
     }
 
     const token = jwt.sign(
