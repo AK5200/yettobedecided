@@ -1,19 +1,25 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
 import { notifyIntegrations } from '@/lib/integrations/notify'
 import { triggerNewCommentEmail } from '@/lib/email/triggers'
 import { processIdentifiedUser } from '@/lib/sso'
 import { incrementCounter, upsertWidgetUser } from '@/lib/widget-users'
+import { handleOptions, withCors } from '@/lib/cors'
+
+export async function OPTIONS(request: NextRequest) {
+  return handleOptions(request)
+}
 
 export async function GET(request: Request) {
+  const origin = request.headers.get('origin')
   try {
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const postId = searchParams.get('post_id')
 
     if (!postId) {
-      return NextResponse.json({ error: 'post_id is required' }, { status: 400 })
+      return withCors(NextResponse.json({ error: 'post_id is required' }, { status: 400 }), origin)
     }
 
     const { data: comments, error } = await supabase
@@ -23,23 +29,24 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: true })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return withCors(NextResponse.json({ error: error.message }, { status: 500 }), origin)
     }
 
-    return NextResponse.json({ comments })
+    return withCors(NextResponse.json({ comments }), origin)
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return withCors(NextResponse.json({ error: 'Internal server error' }, { status: 500 }), origin)
   }
 }
 
 export async function POST(request: Request) {
+  const origin = request.headers.get('origin')
   try {
     const supabase = await createClient()
     const body = await request.json()
     const { post_id, content, author_email, author_name, guest_email, guest_name, identified_user, is_from_admin, is_internal = false } = body
 
     if (!post_id || !content) {
-      return NextResponse.json({ error: 'post_id and content are required' }, { status: 400 })
+      return withCors(NextResponse.json({ error: 'post_id and content are required' }, { status: 400 }), origin)
     }
 
     // Get post and board to find org
@@ -50,7 +57,7 @@ export async function POST(request: Request) {
       .single()
 
     if (!postData?.board_id) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+      return withCors(NextResponse.json({ error: 'Post not found' }, { status: 404 }), origin)
     }
 
     const { data: boardData } = await supabase
@@ -60,7 +67,7 @@ export async function POST(request: Request) {
       .single()
 
     if (!boardData?.org_id) {
-      return NextResponse.json({ error: 'Board not found' }, { status: 404 })
+      return withCors(NextResponse.json({ error: 'Board not found' }, { status: 404 }), origin)
     }
 
     // Get org settings
@@ -70,13 +77,13 @@ export async function POST(request: Request) {
       .eq('id', boardData.org_id)
       .single()
     if (!org?.id) {
-      return NextResponse.json({ error: 'Organization not found' }, { status: 404 })
+      return withCors(NextResponse.json({ error: 'Organization not found' }, { status: 404 }), origin)
     }
 
     // Process identified user
     const ssoResult = processIdentifiedUser(identified_user, org?.sso_secret_key || null)
     if (ssoResult.error) {
-      return NextResponse.json({ error: ssoResult.error }, { status: 401 })
+      return withCors(NextResponse.json({ error: ssoResult.error }, { status: 401 }), origin)
     }
     const sourceForRow = ssoResult.source === 'verified_jwt' ? 'verified_sso' : ssoResult.source
 
@@ -85,12 +92,12 @@ export async function POST(request: Request) {
     const nameToUse = ssoResult.user?.name || guest_name || author_name
 
     if (!emailToUse && !is_from_admin && !org?.guest_posting_enabled) {
-      return NextResponse.json({ error: 'Guest posting is disabled' }, { status: 403 })
+      return withCors(NextResponse.json({ error: 'Guest posting is disabled' }, { status: 403 }), origin)
     }
 
     // Require email for non-admin comments
     if (!is_from_admin && !emailToUse) {
-      return NextResponse.json({ error: 'author_email is required' }, { status: 400 })
+      return withCors(NextResponse.json({ error: 'author_email is required' }, { status: 400 }), origin)
     }
 
     let widgetUserId: string | null = null
@@ -108,11 +115,11 @@ export async function POST(request: Request) {
       })
 
       if (userError) {
-        return NextResponse.json({ error: userError }, { status: 500 })
+        return withCors(NextResponse.json({ error: userError }, { status: 500 }), origin)
       }
 
       if (widgetUser?.is_banned) {
-        return NextResponse.json({ error: 'User is banned' }, { status: 403 })
+        return withCors(NextResponse.json({ error: 'User is banned' }, { status: 403 }), origin)
       }
 
       widgetUserId = widgetUser?.id || null
@@ -138,7 +145,7 @@ export async function POST(request: Request) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return withCors(NextResponse.json({ error: error.message }, { status: 500 }), origin)
     }
 
     // Fire webhook for new comment
@@ -191,8 +198,8 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ comment }, { status: 201 })
+    return withCors(NextResponse.json({ comment }, { status: 201 }), origin)
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return withCors(NextResponse.json({ error: 'Internal server error' }, { status: 500 }), origin)
   }
 }

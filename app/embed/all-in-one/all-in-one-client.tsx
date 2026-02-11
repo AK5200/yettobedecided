@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AllInOneWidget } from '@/components/widgets/all-in-one-widget'
 import { FeedbackWidget } from '@/components/widgets/feedback-widget'
@@ -16,21 +16,19 @@ export default function AllInOneEmbedClient() {
   const [settings, setSettings] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
+  const [identifiedUser, setIdentifiedUser] = useState<any>(null)
 
-  // Debug log to help troubleshoot
+  // Read identified user from sessionStorage on mount
   useEffect(() => {
-    if (settings && typeof window !== 'undefined') {
-      const rawValue = settings?.all_in_one_style_variant
-      const styleVariant = String(rawValue || searchParams.get('style') || '1') as '1' | '2' | '3'
-      console.log('FeedbackHub Widget Settings:', {
-        all_in_one_style_variant: rawValue,
-        rawValueType: typeof rawValue,
-        urlStyleParam: searchParams.get('style'),
-        finalStyleVariant: styleVariant,
-        settings: settings,
-      })
+    try {
+      const stored = sessionStorage.getItem('feedbackhub_identified_user')
+      if (stored) {
+        setIdentifiedUser(JSON.parse(stored))
+      }
+    } catch {
+      // Ignore storage errors
     }
-  }, [settings, searchParams])
+  }, [])
 
   // Listen for identity from parent via postMessage
   useEffect(() => {
@@ -38,10 +36,10 @@ export default function AllInOneEmbedClient() {
       if (event.data && event.data.type === 'feedbackhub:identity') {
         const user = event.data.user
         if (user) {
-          // Store in sessionStorage for persistence
+          setIdentifiedUser(user)
           try {
             sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
-          } catch (e) {
+          } catch {
             // Ignore storage errors
           }
         }
@@ -70,9 +68,6 @@ export default function AllInOneEmbedClient() {
           setChangelog(data.changelog || [])
           setSettings(data.settings || {})
 
-          // Use posts from widget response (fetched server-side with admin privileges)
-          console.log('FeedbackHub: Boards loaded:', data.boards?.length)
-          console.log('FeedbackHub: Posts from widget API:', data.posts?.length)
           if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
             const formattedPosts = data.posts.map((p: any) => ({
               id: p.id,
@@ -85,10 +80,7 @@ export default function AllInOneEmbedClient() {
               status: p.status || 'open',
               hasVoted: false,
             }))
-            console.log('FeedbackHub: Total posts loaded:', formattedPosts.length)
             setPosts(formattedPosts)
-          } else {
-            console.log('FeedbackHub: No posts returned from widget API')
           }
         }
       } catch (error) {
@@ -100,6 +92,22 @@ export default function AllInOneEmbedClient() {
 
     fetchData()
   }, [org])
+
+  const handleVote = useCallback(async (postId: string) => {
+    const email = identifiedUser?.email
+    if (!email) return // Optimistic update already happened in widget, but no API call without email
+
+    try {
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+      await fetch(`${baseUrl}/api/widget/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId, email }),
+      })
+    } catch (error) {
+      console.error('Vote failed:', error)
+    }
+  }, [identifiedUser])
 
   if (loading) {
     return (
@@ -131,6 +139,16 @@ export default function AllInOneEmbedClient() {
   }
 
   const handleFeedbackSubmit = async () => {
+    // Re-read identified user from sessionStorage (user may have just authenticated in the feedback form)
+    try {
+      const stored = sessionStorage.getItem('feedbackhub_identified_user')
+      if (stored) {
+        setIdentifiedUser(JSON.parse(stored))
+      }
+    } catch {
+      // Ignore storage errors
+    }
+
     // Re-fetch posts from widget API (uses admin client to bypass RLS)
     try {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
@@ -207,6 +225,9 @@ export default function AllInOneEmbedClient() {
           borderRadius={borderRadius}
           isEmbedded={true}
           onCreatePost={handleCreatePost}
+          onVote={handleVote}
+          identifiedUser={identifiedUser}
+          onPostsChange={setPosts}
         />
       </div>
 

@@ -46,6 +46,8 @@ interface AllInOneWidgetProps {
   isEmbedded?: boolean
   onCreatePost?: () => void
   onVote?: (postId: string) => void
+  identifiedUser?: any
+  onPostsChange?: (posts: Post[]) => void
 }
 
 function getCategoryStyle(category: string): { bg: string; text: string } {
@@ -161,6 +163,8 @@ export function AllInOneWidget({
   isEmbedded = false,
   onCreatePost,
   onVote,
+  identifiedUser,
+  onPostsChange,
 }: AllInOneWidgetProps) {
   // Defensive: ensure styleVariant is always a string for reliable comparison
   const styleVariant = String(rawStyleVariant) as '1' | '2' | '3'
@@ -176,8 +180,8 @@ export function AllInOneWidget({
   )
 
   const handleVote = (postId: string) => {
-    setPosts((prev) =>
-      prev.map((post) =>
+    setPosts((prev) => {
+      const updated = prev.map((post) =>
         post.id === postId
           ? {
               ...post,
@@ -186,7 +190,9 @@ export function AllInOneWidget({
             }
           : post
       )
-    )
+      onPostsChange?.(updated)
+      return updated
+    })
     // Update selected post if it's the one being voted on
     if (selectedPost && selectedPost.id === postId) {
       setSelectedPost({
@@ -309,6 +315,7 @@ export function AllInOneWidget({
           accentColor={accentColor}
           onBack={handleBack}
           onVote={handleVote}
+          identifiedUser={identifiedUser}
         />
         {showBranding && (
           <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">

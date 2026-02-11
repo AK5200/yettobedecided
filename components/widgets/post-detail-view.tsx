@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, ChevronUp, MessageSquare, Send } from 'lucide-react'
 
@@ -32,20 +33,30 @@ interface PostDetailViewProps {
   accentColor?: string
   onBack: () => void
   onVote?: (postId: string) => void
+  identifiedUser?: any
 }
 
-export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59E0B', onBack, onVote }: PostDetailViewProps) {
+export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59E0B', onBack, onVote, identifiedUser: identifiedUserProp }: PostDetailViewProps) {
   const [post, setPost] = useState<PostDetail>(initialPost)
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
   const [newComment, setNewComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [identifiedUser, setIdentifiedUser] = useState<any>(null)
+  const [identifiedUser, setIdentifiedUser] = useState<any>(identifiedUserProp || null)
+  const [commentEmail, setCommentEmail] = useState('')
+  const [commentName, setCommentName] = useState('')
 
   // Update post when prop changes
   useEffect(() => {
     setPost(initialPost)
   }, [initialPost])
+
+  // Sync identifiedUser from prop
+  useEffect(() => {
+    if (identifiedUserProp) {
+      setIdentifiedUser(identifiedUserProp)
+    }
+  }, [identifiedUserProp])
 
   useEffect(() => {
     // Fetch comments
@@ -72,10 +83,9 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         const user = event.data.user
         if (user) {
           setIdentifiedUser(user)
-          // Store in sessionStorage for persistence
           try {
             sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
-          } catch (e) {
+          } catch {
             // Ignore storage errors
           }
         }
@@ -84,37 +94,22 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
 
     window.addEventListener('message', handleMessage)
 
-    // Check sessionStorage for existing identity
-    try {
-      const stored = sessionStorage.getItem('feedbackhub_identified_user')
-      if (stored) {
-        const user = JSON.parse(stored)
-        setIdentifiedUser(user)
-      }
-    } catch (e) {
-      // Ignore storage errors
-    }
-
-    // Fallback: try to get from parent (same origin only)
-    try {
-      if (window.parent && window.parent !== window) {
-        try {
-          const parentHub = (window.parent as any)?.FeedbackHub
-          if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
-            setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
-          }
-        } catch (e) {
-          // Cross-origin - will rely on postMessage instead
+    // Check sessionStorage for existing identity (only if no prop provided)
+    if (!identifiedUserProp) {
+      try {
+        const stored = sessionStorage.getItem('feedbackhub_identified_user')
+        if (stored) {
+          setIdentifiedUser(JSON.parse(stored))
         }
+      } catch {
+        // Ignore storage errors
       }
-    } catch (error) {
-      // Ignore errors
     }
 
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [post.id])
+  }, [post.id, identifiedUserProp])
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return ''
@@ -135,22 +130,13 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     e.preventDefault()
     if (!newComment.trim() || submitting) return
 
+    const email = identifiedUser?.email || commentEmail
+    const name = identifiedUser?.name || commentName
+    if (!email) return
+
     setSubmitting(true)
     try {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-      // Use stored identified user (from postMessage or sessionStorage)
-      let identifiedPayload = identifiedUser || null
-      if (!identifiedPayload) {
-        // Fallback: try to get from parent (same origin only)
-        try {
-          if (window.parent && window.parent !== window) {
-            const parentHub = (window.parent as any)?.FeedbackHub
-            identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
-          }
-        } catch (e) {
-          // Cross-origin error - ignore
-        }
-      }
 
       const res = await fetch(`${baseUrl}/api/comments`, {
         method: 'POST',
@@ -158,9 +144,8 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         body: JSON.stringify({
           post_id: post.id,
           content: newComment,
-          guest_email: identifiedUser?.email,
-          guest_name: identifiedUser?.name,
-          identified_user: identifiedPayload,
+          guest_email: email,
+          guest_name: name,
         }),
       })
 
@@ -186,6 +171,8 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     onVote?.(post.id)
   }
 
+  const canSubmitComment = newComment.trim() && (identifiedUser?.email || commentEmail)
+
   return (
     <div className="space-y-4">
       {/* Back button */}
@@ -210,7 +197,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
             }`}
             style={
               post.hasVoted
-                ? { 
+                ? {
                     backgroundColor: accentColor,
                     boxShadow: `0 4px 12px -2px ${accentColor}40`
                   }
@@ -292,34 +279,50 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
           )}
         </div>
 
-        {/* Add comment form */}
-        {identifiedUser && (
-          <form onSubmit={handleSubmitComment} className="space-y-2">
-            <Textarea
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              rows={3}
-              className="resize-none overflow-y-auto"
-              style={{
-                maxHeight: '120px',
-              }}
-            />
-            <Button
-              type="submit"
-              disabled={!newComment.trim() || submitting}
-              style={{ 
-                backgroundColor: accentColor,
-                boxShadow: `0 4px 12px -2px ${accentColor}40`
-              }}
-              className="text-white font-semibold hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              size="sm"
-            >
-              <Send className="h-4 w-4 mr-2" />
-              {submitting ? 'Posting...' : 'Post comment'}
-            </Button>
-          </form>
-        )}
+        {/* Add comment form - always visible */}
+        <form onSubmit={handleSubmitComment} className="space-y-2">
+          {!identifiedUser && (
+            <div className="flex gap-2">
+              <Input
+                placeholder="Email *"
+                type="email"
+                value={commentEmail}
+                onChange={(e) => setCommentEmail(e.target.value)}
+                className="border-gray-200"
+                required
+              />
+              <Input
+                placeholder="Name (optional)"
+                value={commentName}
+                onChange={(e) => setCommentName(e.target.value)}
+                className="border-gray-200"
+              />
+            </div>
+          )}
+          <Textarea
+            placeholder="Add a comment..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            rows={3}
+            className="resize-none overflow-y-auto"
+            style={{
+              maxHeight: '120px',
+            }}
+          />
+          <Button
+            type="submit"
+            disabled={!canSubmitComment || submitting}
+            style={{
+              backgroundColor: accentColor,
+              boxShadow: `0 4px 12px -2px ${accentColor}40`
+            }}
+            className="text-white font-semibold hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            size="sm"
+          >
+            <Send className="h-4 w-4 mr-2" />
+            {submitting ? 'Posting...' : 'Post comment'}
+          </Button>
+        </form>
       </div>
     </div>
   )
