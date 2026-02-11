@@ -102,6 +102,7 @@ export function TeamMembersList({ members, invitations, orgId }: TeamMembersList
             {members.map((member) => {
               const role = member.role as 'owner' | 'admin' | 'member'
               const email = member.email || member.user_email || member.user_id
+              const name = member.name || null
               return (
                 <div
                   key={member.user_id}
@@ -109,10 +110,11 @@ export function TeamMembersList({ members, invitations, orgId }: TeamMembersList
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium text-sm">
-                      {email.charAt(0).toUpperCase()}
+                      {(name || email).charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{email}</div>
+                      {name && <div className="text-sm font-medium text-gray-900">{name}</div>}
+                      <div className={`text-sm ${name ? 'text-gray-500' : 'font-medium text-gray-900'}`}>{email}</div>
                       <Badge className={`mt-1 gap-1 ${getRoleBadgeClass(role)}`}>
                         {getRoleIcon(role)}
                         {role.charAt(0).toUpperCase() + role.slice(1)}

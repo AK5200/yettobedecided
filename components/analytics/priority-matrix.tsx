@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { EffortSelector } from './effort-selector'
-import { Trophy, Target, HelpCircle, XCircle, Grid3x3 } from 'lucide-react'
+import { Trophy, Target, HelpCircle, XCircle, Grid3x3, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface PriorityMatrixProps {
   orgId: string
@@ -56,9 +56,14 @@ const QUADRANTS = [
   },
 ]
 
+const DEFAULT_VISIBLE = 3
+const DEFAULT_UNSCORED_VISIBLE = 4
+
 export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [expandedQuadrants, setExpandedQuadrants] = useState<Record<string, boolean>>({})
+  const [unscoredExpanded, setUnscoredExpanded] = useState(false)
 
   const fetchData = async () => {
     try {
@@ -83,6 +88,10 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
       fetchData()
     }
   }, [orgId, boardId])
+
+  const toggleQuadrant = (id: string) => {
+    setExpandedQuadrants((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
 
   if (loading) {
     return (
@@ -121,6 +130,10 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
         {QUADRANTS.map((quadrant) => {
           const Icon = quadrant.icon
           const posts = data[quadrant.id] || []
+          const isExpanded = expandedQuadrants[quadrant.id] || false
+          const visiblePosts = isExpanded ? posts : posts.slice(0, DEFAULT_VISIBLE)
+          const hiddenCount = posts.length - DEFAULT_VISIBLE
+
           return (
             <div
               key={quadrant.id}
@@ -145,7 +158,7 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
                 </div>
               </div>
               <div className="space-y-2">
-                {posts.slice(0, 3).map((post: any) => (
+                {visiblePosts.map((post: any) => (
                   <div
                     key={post.id}
                     className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 shadow-sm hover:shadow-md transition-shadow"
@@ -171,10 +184,23 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
                     No posts in this category
                   </div>
                 )}
-                {posts.length > 3 && (
-                  <div className="text-center py-2 text-xs text-gray-500">
-                    +{posts.length - 3} more posts
-                  </div>
+                {hiddenCount > 0 && (
+                  <button
+                    onClick={() => toggleQuadrant(quadrant.id)}
+                    className="w-full text-center py-2 text-xs font-medium text-gray-600 hover:text-gray-900 cursor-pointer flex items-center justify-center gap-1 transition-colors"
+                  >
+                    {isExpanded ? (
+                      <>
+                        <ChevronUp className="h-3 w-3" />
+                        Show less
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-3 w-3" />
+                        Show {hiddenCount} more
+                      </>
+                    )}
+                  </button>
                 )}
               </div>
             </div>
@@ -191,7 +217,7 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
             Unscored Posts - Set effort and time to categorize
           </h4>
           <div className="space-y-3">
-            {data.unscored.map((post: any) => (
+            {(unscoredExpanded ? data.unscored : data.unscored.slice(0, DEFAULT_UNSCORED_VISIBLE)).map((post: any) => (
               <div
                 key={post.id}
                 className="flex items-center justify-between bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-default"
@@ -211,6 +237,24 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
               </div>
             ))}
           </div>
+          {data.unscored.length > DEFAULT_UNSCORED_VISIBLE && (
+            <button
+              onClick={() => setUnscoredExpanded(!unscoredExpanded)}
+              className="mt-3 w-full text-center py-2 text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer flex items-center justify-center gap-1 transition-colors"
+            >
+              {unscoredExpanded ? (
+                <>
+                  <ChevronUp className="h-4 w-4" />
+                  Show less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4" />
+                  Show {data.unscored.length - DEFAULT_UNSCORED_VISIBLE} more
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
     </div>

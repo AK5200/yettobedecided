@@ -13,12 +13,29 @@ interface ChangelogEntry {
   label?: string
 }
 
+const BORDER_RADIUS_MAP: Record<string, string> = {
+  none: '0',
+  small: '8px',
+  medium: '12px',
+  large: '16px',
+  xlarge: '24px',
+}
+
 interface ChangelogDropdownProps {
   orgSlug: string
   accentColor?: string
+  backgroundColor?: string
+  borderRadius?: string
+  showBranding?: boolean
 }
 
-export function ChangelogDropdown({ orgSlug, accentColor = '#000' }: ChangelogDropdownProps) {
+export function ChangelogDropdown({
+  orgSlug,
+  accentColor = '#000',
+  backgroundColor = '#ffffff',
+  borderRadius = 'medium',
+  showBranding = true,
+}: ChangelogDropdownProps) {
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
   const [hasNew, setHasNew] = useState(false)
 
@@ -44,6 +61,8 @@ export function ChangelogDropdown({ orgSlug, accentColor = '#000' }: ChangelogDr
     }
   }
 
+  const radiusValue = BORDER_RADIUS_MAP[borderRadius] || '12px'
+
   return (
     <Popover onOpenChange={(open) => open && markSeen()}>
       <PopoverTrigger asChild>
@@ -54,7 +73,11 @@ export function ChangelogDropdown({ orgSlug, accentColor = '#000' }: ChangelogDr
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-80' align='end'>
+      <PopoverContent
+        className='w-80'
+        align='end'
+        style={{ backgroundColor, borderRadius: radiusValue }}
+      >
         <div className='font-medium mb-2'>Latest Updates</div>
         <div className='space-y-3 max-h-60 overflow-y-auto'>
           {entries.map(entry => (
@@ -71,9 +94,11 @@ export function ChangelogDropdown({ orgSlug, accentColor = '#000' }: ChangelogDr
             </div>
           ))}
         </div>
-        <div className='pt-2 text-center'>
-          <span className='text-xs text-gray-400'>Powered by FeedbackHub</span>
-        </div>
+        {showBranding && (
+          <div className='pt-2 text-center'>
+            <span className='text-xs text-gray-400'>Powered by FeedbackHub</span>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   )

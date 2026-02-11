@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -41,7 +41,6 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [sourceFilter, setSourceFilter] = useState<UserSource | 'all'>('all')
-  const [companyFilter, setCompanyFilter] = useState<string>('all')
   const [selectedUser, setSelectedUser] = useState<WidgetUser | null>(null)
 
   useEffect(() => {
@@ -82,20 +81,12 @@ export default function UsersPage() {
     setLoading(false)
   }
 
-  const companyOptions = useMemo(() => {
-    const companies = users
-      .map((user) => user.company_name)
-      .filter(Boolean) as string[]
-    return Array.from(new Set(companies))
-  }, [users])
-
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.name?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesSource = sourceFilter === 'all' || user.user_source === sourceFilter
-    const matchesCompany = companyFilter === 'all' || user.company_name === companyFilter
-    return matchesSearch && matchesSource && matchesCompany
+    return matchesSearch && matchesSource
   })
 
   const getSourceBadge = (source: UserSource) => {
@@ -146,20 +137,6 @@ export default function UsersPage() {
             <SelectItem value="magic_link">Email (Magic Link)</SelectItem>
           </SelectContent>
         </Select>
-
-        <Select value={companyFilter} onValueChange={setCompanyFilter}>
-          <SelectTrigger className="w-52">
-            <SelectValue placeholder="All Companies" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Companies</SelectItem>
-            {companyOptions.map((company) => (
-              <SelectItem key={company} value={company}>
-                {company}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       <Card>
@@ -173,20 +150,19 @@ export default function UsersPage() {
         ) : (
           <div className="overflow-hidden">
             <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 border-b text-sm font-medium text-gray-500">
-              <div className="col-span-4">User</div>
+              <div className="col-span-5">User</div>
               <div className="col-span-2">Source</div>
-              <div className="col-span-2">Company</div>
               <div className="col-span-3">Activity</div>
-              <div className="col-span-1">Status</div>
+              <div className="col-span-2">Status</div>
             </div>
             <div className="divide-y">
               {filteredUsers.map((user) => (
                 <button
                   key={user.id}
                   onClick={() => setSelectedUser(user)}
-                  className="grid grid-cols-12 gap-4 px-4 py-3 text-left hover:bg-gray-50 transition-colors items-center"
+                  className="w-full grid grid-cols-12 gap-4 px-4 py-3 text-left hover:bg-gray-50 transition-colors items-center"
                 >
-                  <div className="col-span-4 flex items-center gap-3 min-w-0">
+                  <div className="col-span-5 flex items-center gap-3 min-w-0">
                     {user.avatar_url ? (
                       <img
                         src={user.avatar_url}
@@ -206,13 +182,10 @@ export default function UsersPage() {
                     </div>
                   </div>
                   <div className="col-span-2">{getSourceBadge(user.user_source)}</div>
-                  <div className="col-span-2 text-sm text-gray-600">
-                    {user.company_name || '—'}
-                  </div>
                   <div className="col-span-3 text-sm text-gray-600">
                     {user.post_count} posts · {user.vote_count} votes · {user.comment_count} comments
                   </div>
-                  <div className="col-span-1">
+                  <div className="col-span-2">
                     {user.is_banned ? (
                       <Badge variant="destructive">Banned</Badge>
                     ) : (

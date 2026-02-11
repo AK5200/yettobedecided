@@ -4,20 +4,18 @@ import { useState } from 'react'
 
 interface EffortSelectorProps {
   postId: string
-  currentEffort: 'low' | 'medium' | 'high' | null
-  currentTime?: 'easy' | 'mid' | 'high' | null
+  currentEffort: 'low' | 'high' | null
+  currentTime?: 'easy' | 'high' | null
   onUpdate?: () => void
 }
 
 const EFFORT_CONFIG = {
   low: { label: 'Low', color: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' },
-  medium: { label: 'Med', color: 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200' },
   high: { label: 'High', color: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200' },
 }
 
 const TIME_CONFIG = {
   easy: { label: 'Easy', color: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200' },
-  mid: { label: 'Mid', color: 'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200' },
   high: { label: 'High', color: 'bg-pink-100 text-pink-700 border-pink-200 hover:bg-pink-200' },
 }
 
@@ -26,7 +24,7 @@ export function EffortSelector({ postId, currentEffort, currentTime, onUpdate }:
   const [time, setTime] = useState(currentTime)
   const [loading, setLoading] = useState(false)
 
-  const handleEffortClick = async (newEffort: 'low' | 'medium' | 'high' | null) => {
+  const handleEffortClick = async (newEffort: 'low' | 'high' | null) => {
     if (loading) return
     setLoading(true)
 
@@ -48,7 +46,7 @@ export function EffortSelector({ postId, currentEffort, currentTime, onUpdate }:
     }
   }
 
-  const handleTimeClick = async (newTime: 'easy' | 'mid' | 'high' | null) => {
+  const handleTimeClick = async (newTime: 'easy' | 'high' | null) => {
     if (loading) return
     setLoading(true)
 
@@ -75,7 +73,7 @@ export function EffortSelector({ postId, currentEffort, currentTime, onUpdate }:
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-gray-500">Effort:</span>
         <div className="flex gap-1">
-          {(['low', 'medium', 'high'] as const).map((level) => {
+          {(['low', 'high'] as const).map((level) => {
             const isSelected = effort === level
             const config = EFFORT_CONFIG[level]
             return (
@@ -98,7 +96,7 @@ export function EffortSelector({ postId, currentEffort, currentTime, onUpdate }:
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-gray-500">Time:</span>
         <div className="flex gap-1">
-          {(['easy', 'mid', 'high'] as const).map((level) => {
+          {(['easy', 'high'] as const).map((level) => {
             const isSelected = time === level
             const config = TIME_CONFIG[level]
             return (

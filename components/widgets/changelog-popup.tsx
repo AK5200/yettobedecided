@@ -13,12 +13,33 @@ interface ChangelogEntry {
   label?: string
 }
 
+const BORDER_RADIUS_MAP: Record<string, string> = {
+  none: '0',
+  small: '8px',
+  medium: '12px',
+  large: '16px',
+  xlarge: '24px',
+}
+
 interface ChangelogPopupProps {
   orgSlug: string
   accentColor?: string
+  backgroundColor?: string
+  borderRadius?: string
+  showBranding?: boolean
+  heading?: string
+  subheading?: string
 }
 
-export function ChangelogPopup({ orgSlug, accentColor = '#000' }: ChangelogPopupProps) {
+export function ChangelogPopup({
+  orgSlug,
+  accentColor = '#000',
+  backgroundColor = '#ffffff',
+  borderRadius = 'medium',
+  showBranding = true,
+  heading = 'Welcome back 👋',
+  subheading = "Here's what we added while you were away.",
+}: ChangelogPopupProps) {
   const [open, setOpen] = useState(false)
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
 
@@ -47,14 +68,19 @@ export function ChangelogPopup({ orgSlug, accentColor = '#000' }: ChangelogPopup
     window.parent.postMessage('feedbackhub:close', '*')
   }
 
+  const radiusValue = BORDER_RADIUS_MAP[borderRadius] || '12px'
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent className='max-w-lg'>
+      <DialogContent
+        className='max-w-lg'
+        style={{ backgroundColor, borderRadius: radiusValue }}
+      >
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
-            Welcome back 👋
+            {heading}
           </DialogTitle>
-          <p className='text-sm text-gray-500'>Here is what we added while you were away.</p>
+          <p className='text-sm text-gray-500'>{subheading}</p>
         </DialogHeader>
 
         <div className='space-y-4 max-h-80 overflow-y-auto'>
@@ -72,7 +98,11 @@ export function ChangelogPopup({ orgSlug, accentColor = '#000' }: ChangelogPopup
         </div>
 
         <div className='flex justify-between items-center pt-4'>
-          <span className='text-xs text-gray-400'>Powered by FeedbackHub</span>
+          {showBranding ? (
+            <span className='text-xs text-gray-400'>Powered by FeedbackHub</span>
+          ) : (
+            <span />
+          )}
           <Button variant='outline' size='sm' onClick={handleClose}>
             Got it
           </Button>

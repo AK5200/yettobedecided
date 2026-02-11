@@ -457,7 +457,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
       </Card>
 
       {/* Widget Cards */}
-      <div className="grid gap-6">
+      <div className="grid grid-cols-2 gap-6">
         {/* 1. Changelog Popup Widget */}
         <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50/30 to-white shadow-md hover:shadow-lg transition-all">
           <CardHeader>

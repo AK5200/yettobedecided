@@ -36,6 +36,7 @@ export async function GET(request: Request) {
     )
     .in('board_id', boardIds)
     .eq('is_approved', true)
+    .gt('vote_count', 0)
     .order('vote_count', { ascending: false })
     .limit(limit)
 

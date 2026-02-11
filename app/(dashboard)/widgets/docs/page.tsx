@@ -164,6 +164,31 @@ app.get('/api/feedbackhub-token', (req, res) => {
   res.json({ token });
 });`
 
+  const jwtPythonCode = `import jwt
+import os
+from datetime import datetime, timedelta
+
+# Your SSO secret from FeedbackHub settings
+SSO_SECRET = os.environ["FEEDBACKHUB_SSO_SECRET"]
+
+def create_feedbackhub_token(user):
+    payload = {
+        "sub": user["id"],           # Required: unique user ID
+        "email": user["email"],       # Required: user email
+        "name": user.get("name"),     # Optional: display name
+        "avatar": user.get("avatar"), # Optional: avatar URL
+        "plan": user.get("plan"),     # Optional: custom attribute
+        "exp": datetime.utcnow() + timedelta(hours=24),
+    }
+    return jwt.encode(payload, SSO_SECRET, algorithm="HS256")
+
+# Flask example
+@app.route("/api/feedbackhub-token")
+def feedbackhub_token():
+    user = get_current_user()  # From your auth middleware
+    token = create_feedbackhub_token(user)
+    return {"token": token}`
+
   const jwtFrontendCode = `<!-- Load widget SDK -->
 <script 
   src="${baseUrl}/widget.js" 
@@ -227,6 +252,9 @@ if (window.FeedbackHub) {
               </a>
               <a href="#jwt-mode" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
                 JWT Mode (SSO)
+              </a>
+              <a href="#widget-auth" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                Widget Auth
               </a>
             </div>
             
@@ -928,6 +956,35 @@ if (window.FeedbackHub) {
               </div>
             </Card>
 
+            <Card className="bg-[#1e1e1e] border-gray-800 mt-4">
+              <div className="flex items-center justify-between p-3 border-b border-gray-700">
+                <span className="text-xs text-gray-400">Python</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-gray-400 hover:text-white"
+                  onClick={() => copyCode(jwtPythonCode, 'jwt-python')}
+                >
+                  {copiedCode === 'jwt-python' ? (
+                    <>
+                      <Check className="h-3 w-3 mr-1" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="p-5 overflow-x-auto">
+                <pre className="text-sm text-gray-300 font-mono">
+                  <code>{jwtPythonCode}</code>
+                </pre>
+              </div>
+            </Card>
+
             <h3 className="text-xl font-semibold mt-8 mb-3">Step 2: Frontend implementation</h3>
             <p className="text-muted-foreground mb-4">Fetch the token from your server and pass it to FeedbackHub:</p>
 
@@ -966,6 +1023,87 @@ if (window.FeedbackHub) {
               <li>User data stored with <code className="bg-muted px-1.5 py-0.5 rounded text-sm">source: 'verified_jwt'</code></li>
               <li>Custom attributes available for filtering and prioritization</li>
             </ul>
+          </section>
+
+          <hr className="my-12" />
+
+          {/* Widget Authentication */}
+          <section id="widget-auth" className="mb-16 scroll-mt-8">
+            <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Widget Authentication</h2>
+            <p className="text-muted-foreground mb-6">
+              In addition to identifying users via the JS SDK (Trust Mode / JWT Mode), the widget has built-in authentication options that allow users to log in directly from the widget.
+            </p>
+
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6 flex gap-3">
+              <div className="text-purple-600 text-xl">
+                <Shield className="h-5 w-5 mt-0.5" />
+              </div>
+              <div>
+                <div className="font-semibold text-purple-900 mb-1">No code required</div>
+                <p className="text-sm text-purple-700">
+                  Widget authentication works out of the box. Users see login buttons inside the widget and authenticate via a popup window.
+                </p>
+              </div>
+            </div>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Supported methods</h3>
+            <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4 mb-6">
+              <li><strong>Google OAuth</strong> — Users click &quot;Sign in with Google&quot; in the widget</li>
+              <li><strong>GitHub OAuth</strong> — Users click &quot;Sign in with GitHub&quot; in the widget</li>
+              <li><strong>Magic Link (OTP)</strong> — Users enter their email and receive a one-time login link</li>
+            </ul>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">How the popup flow works</h3>
+            <p className="text-muted-foreground mb-4">
+              Since the widget runs inside an iframe, third-party OAuth providers (Google, GitHub) block direct login within iframes due to security restrictions. FeedbackHub solves this with a popup-based flow:
+            </p>
+            <ol className="list-decimal list-inside space-y-2 text-muted-foreground ml-4 mb-6">
+              <li>User clicks a login button inside the widget iframe</li>
+              <li>A popup window opens for the OAuth provider&apos;s consent screen</li>
+              <li>User completes authentication in the popup</li>
+              <li>The popup sends the authenticated user data back to the widget via <code className="bg-muted px-1.5 py-0.5 rounded text-sm">postMessage</code> (<code className="bg-muted px-1.5 py-0.5 rounded text-sm">feedbackhub:identity</code>)</li>
+              <li>The popup closes and the widget is now authenticated</li>
+            </ol>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Guest commenting</h3>
+            <p className="text-muted-foreground mb-4">
+              If no authentication method is used, users can still submit feedback and comments as guests by entering their email address. Posts from guests will show a &quot;Guest&quot; label.
+            </p>
+
+            <h3 className="text-xl font-semibold mt-8 mb-3">Choosing the right approach</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3 font-semibold">Method</th>
+                    <th className="text-left p-3 font-semibold">Best for</th>
+                    <th className="text-left p-3 font-semibold">Verified</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="p-3 font-medium">Guest Mode</td>
+                    <td className="p-3 text-muted-foreground">Public landing pages, low-friction feedback</td>
+                    <td className="p-3 text-muted-foreground">No</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="p-3 font-medium">Widget Auth (Google/GitHub)</td>
+                    <td className="p-3 text-muted-foreground">Users not logged into your app, public boards</td>
+                    <td className="p-3 text-muted-foreground">Yes (social)</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="p-3 font-medium">Trust Mode</td>
+                    <td className="p-3 text-muted-foreground">Quick integration, internal tools</td>
+                    <td className="p-3 text-muted-foreground">No</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="p-3 font-medium">JWT Mode (SSO)</td>
+                    <td className="p-3 text-muted-foreground">Production apps, maximum security</td>
+                    <td className="p-3 text-muted-foreground">Yes (verified badge)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <hr className="my-12" />
@@ -1196,6 +1334,13 @@ FeedbackHubChangelog.close(); // Close changelog`}</code>
                     </td>
                     <td className="p-3 text-muted-foreground">Changelog iframe</td>
                     <td className="p-3 text-muted-foreground">Changelog popup requests to close</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="p-3">
+                      <code className="bg-muted px-1.5 py-0.5 rounded">{'{ type: \'feedbackhub:identity\', user }'}</code>
+                    </td>
+                    <td className="p-3 text-muted-foreground">SDK / OAuth popup</td>
+                    <td className="p-3 text-muted-foreground">User identity sent from SDK to widget iframe (via <code className="bg-muted px-1.5 py-0.5 rounded">identify()</code> or OAuth popup callback)</td>
                   </tr>
                 </tbody>
               </table>

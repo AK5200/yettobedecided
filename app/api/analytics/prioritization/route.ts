@@ -79,9 +79,8 @@ export async function GET(request: Request) {
       return
     }
 
-    // Determine if high effort/time (medium or high effort, or mid/high time)
-    const isHighEffort = effort === 'medium' || effort === 'high'
-    const isHighTime = time === 'mid' || time === 'high'
+    const isHighEffort = effort === 'high'
+    const isHighTime = time === 'high'
     const isHighEffortOrTime = isHighEffort || isHighTime
 
     // Quick Wins: High value, Low effort, Low time
@@ -126,12 +125,12 @@ export async function PATCH(request: Request) {
   }
 
   // Validate effort if provided
-  if (effort !== undefined && !['low', 'medium', 'high', null].includes(effort)) {
+  if (effort !== undefined && !['low', 'high', null].includes(effort)) {
     return NextResponse.json({ error: 'Invalid effort value' }, { status: 400 })
   }
 
   // Validate time if provided
-  if (time !== undefined && !['easy', 'mid', 'high', null].includes(time)) {
+  if (time !== undefined && !['easy', 'high', null].includes(time)) {
     return NextResponse.json({ error: 'Invalid time value' }, { status: 400 })
   }
 
