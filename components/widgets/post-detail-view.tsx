@@ -134,6 +134,20 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     const name = identifiedUser?.name || commentName
     if (!email) return
 
+    const content = newComment.trim()
+
+    // Optimistic: show the comment immediately
+    const tempId = `temp-${Date.now()}`
+    const optimisticComment: Comment = {
+      id: tempId,
+      content,
+      author_name: name || undefined,
+      author_email: email,
+      created_at: new Date().toISOString(),
+    }
+    setComments((prev) => [...prev, optimisticComment])
+    setNewComment('')
+
     setSubmitting(true)
     try {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
@@ -143,7 +157,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           post_id: post.id,
-          content: newComment,
+          content,
           guest_email: email,
           guest_name: name,
         }),
@@ -151,8 +165,8 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
 
       if (res.ok) {
         const data = await res.json()
-        setComments((prev) => [...prev, data.comment])
-        setNewComment('')
+        // Replace optimistic comment with real server data
+        setComments((prev) => prev.map((c) => c.id === tempId ? data.comment : c))
       }
     } catch (error) {
       console.error('Failed to submit comment:', error)
