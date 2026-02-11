@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     status: 'open',
   }
 
-  const { error } = await supabase.from('posts').insert(insertData)
+  const { data: post, error } = await supabase.from('posts').insert(insertData).select().single()
 
   if (error) {
     return withCors(
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
   }
 
   return withCors(
-    NextResponse.json({ success: true, user_source: ssoResult.source }),
+    NextResponse.json({ success: true, post, user_source: ssoResult.source }),
     origin
   )
 }

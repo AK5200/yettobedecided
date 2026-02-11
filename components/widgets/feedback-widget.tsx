@@ -21,7 +21,7 @@ interface FeedbackBoard {
 interface FeedbackWidgetProps {
   boards: FeedbackBoard[]
   orgSlug: string
-  onSubmit?: () => void
+  onSubmit?: (post?: any) => void
   accentColor?: string
   showBranding?: boolean
 }
@@ -299,10 +299,11 @@ export function FeedbackWidget({
     })
 
     if (response.ok) {
+      const data = await response.json()
       setTitle('')
       setContent('')
       setSuccess(true)
-      onSubmit?.()
+      onSubmit?.(data.post)
     }
 
     setLoading(false)

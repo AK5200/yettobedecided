@@ -138,7 +138,7 @@ export default function AllInOneEmbedClient() {
     setShowFeedbackForm(true)
   }
 
-  const handleFeedbackSubmit = async () => {
+  const handleFeedbackSubmit = async (post?: any) => {
     // Re-read identified user from sessionStorage (user may have just authenticated in the feedback form)
     try {
       const stored = sessionStorage.getItem('feedbackhub_identified_user')
@@ -149,30 +149,22 @@ export default function AllInOneEmbedClient() {
       // Ignore storage errors
     }
 
-    // Re-fetch posts from widget API (uses admin client to bypass RLS)
-    try {
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-      const res = await fetch(`${baseUrl}/api/widget?org=${encodeURIComponent(org || '')}`)
-      if (res.ok) {
-        const data = await res.json()
-        if (data.posts && Array.isArray(data.posts)) {
-          const formattedPosts = data.posts.map((p: any) => ({
-            id: p.id,
-            title: p.title,
-            content: p.content || '',
-            votes: p.vote_count || 0,
-            author_name: p.author_name || p.guest_name || 'Anonymous',
-            author_email: p.author_email || p.guest_email,
-            tags: p.tags || [],
-            status: p.status || 'open',
-            hasVoted: false,
-          }))
-          setPosts(formattedPosts)
-        }
+    // Add the new post to the list immediately
+    if (post) {
+      const newPost = {
+        id: post.id,
+        title: post.title,
+        content: post.content || '',
+        votes: post.vote_count || 0,
+        author_name: post.author_name || post.guest_name || 'Anonymous',
+        author_email: post.author_email || post.guest_email,
+        tags: post.tags || [],
+        status: post.status || 'open',
+        hasVoted: false,
       }
-    } catch (error) {
-      console.error('Failed to refresh posts:', error)
+      setPosts((prev) => [newPost, ...prev])
     }
+
     setShowFeedbackForm(false)
   }
 
