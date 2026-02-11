@@ -22,7 +22,10 @@ export async function GET(request: Request) {
   }
 
   const { org_slug: orgSlug, return_url: returnUrl, provider } = decodedState
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const url = new URL(request.url)
+  const proto = request.headers.get('x-forwarded-proto') || url.protocol.replace(':', '')
+  const host = request.headers.get('host') || url.host
+  const baseUrl = `${proto}://${host}`
 
   try {
     let accessToken = ''

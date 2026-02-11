@@ -10,7 +10,10 @@ export async function GET(request: Request) {
   }
 
   const clientId = process.env.GOOGLE_CLIENT_ID
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const url = new URL(request.url)
+  const proto = request.headers.get('x-forwarded-proto') || url.protocol.replace(':', '')
+  const host = request.headers.get('host') || url.host
+  const baseUrl = `${proto}://${host}`
 
   if (!clientId) {
     return NextResponse.json({ error: 'Google client not configured' }, { status: 500 })
