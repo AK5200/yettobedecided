@@ -177,10 +177,11 @@ export async function triggerPostMergedEmail(sourcePostId: string, targetPostId:
     }
 }
 
-export async function triggerInvitationEmail(email: string, token: string, inviterName?: string) {
+export async function triggerInvitationEmail(email: string, token: string, inviterName?: string, baseUrl?: string) {
     const resend = getResendClient();
     if (!resend) return;
-    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/accept-invite?token=${token}`;
+    const appUrl = baseUrl || process.env.NEXT_PUBLIC_APP_URL || '';
+    const inviteUrl = `${appUrl}/accept-invite?token=${token}`;
 
     await sendEmailSafely({
         from: getFromEmail(),

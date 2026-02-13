@@ -40,7 +40,11 @@ export async function POST(request: Request) {
 
   // Trigger email
   try {
-    await triggerInvitationEmail(email, token, invited_by);
+    const { headers } = request
+    const host = headers.get('x-forwarded-host') || headers.get('host') || ''
+    const protocol = headers.get('x-forwarded-proto') || 'https'
+    const baseUrl = `${protocol}://${host}`
+    await triggerInvitationEmail(email, token, invited_by, baseUrl);
   } catch (e) {
     console.error('Failed to send invitation email:', e);
   }

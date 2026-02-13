@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { MessageSquare, ThumbsUp, FileText } from 'lucide-react'
+import { MessageSquare, ThumbsUp, FileText, ChevronLeft, Eye } from 'lucide-react'
 
 type UserSource = 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt' | 'magic_link'
 
@@ -32,21 +32,39 @@ interface WidgetUser {
 interface RecentPost {
   id: string
   title: string
+  board_id: string
   created_at: string
   boards?: { name: string }[] | null
 }
 
 interface UserVote {
   id: string
+  post_id: string
   created_at: string
-  posts?: { title: string } | null
+  posts?: { title: string; board_id: string } | null
 }
 
 interface UserComment {
   id: string
+  post_id: string
   content: string
   created_at: string
-  posts?: { title: string } | null
+  posts?: { title: string; board_id: string } | null
+}
+
+interface FullPost {
+  id: string
+  title: string
+  content: string | null
+  status: string
+  vote_count: number
+  comment_count: number
+  created_at: string
+  author_name: string | null
+  author_email: string | null
+  guest_email: string | null
+  boards?: { name: string } | null
+  comments?: { id: string; content: string; author_name: string | null; author_email: string | null; created_at: string }[]
 }
 
 type TabType = 'posts' | 'votes' | 'comments'
@@ -66,21 +84,32 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [loadingVotes, setLoadingVotes] = useState(false)
   const [loadingComments, setLoadingComments] = useState(false)
+  const [votesLoaded, setVotesLoaded] = useState(false)
+  const [commentsLoaded, setCommentsLoaded] = useState(false)
   const [banReason, setBanReason] = useState('')
   const [banLoading, setBanLoading] = useState(false)
+
+  // Inline post detail
+  const [selectedPost, setSelectedPost] = useState<FullPost | null>(null)
+  const [loadingPost, setLoadingPost] = useState(false)
 
   useEffect(() => {
     if (!user?.id) return
     setActiveTab('posts')
+    setVotes([])
+    setComments([])
+    setVotesLoaded(false)
+    setCommentsLoaded(false)
+    setSelectedPost(null)
     fetchPosts()
   }, [user?.id])
 
   useEffect(() => {
     if (!user?.email) return
-    if (activeTab === 'votes' && votes.length === 0) {
+    if (activeTab === 'votes' && !votesLoaded) {
       fetchVotes()
     }
-    if (activeTab === 'comments' && comments.length === 0) {
+    if (activeTab === 'comments' && !commentsLoaded) {
       fetchComments()
     }
   }, [activeTab, user?.email])
@@ -90,7 +119,7 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
     setLoadingPosts(true)
     const { data } = await supabase
       .from('posts')
-      .select('id, title, created_at, boards(name)')
+      .select('id, title, board_id, created_at, boards(name)')
       .eq('widget_user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20)
@@ -103,11 +132,12 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
     setLoadingVotes(true)
     const { data } = await supabase
       .from('votes')
-      .select('id, created_at, posts(title)')
+      .select('id, post_id, created_at, posts(title, board_id)')
       .eq('voter_email', user.email)
       .order('created_at', { ascending: false })
       .limit(20)
     setVotes(data || [])
+    setVotesLoaded(true)
     setLoadingVotes(false)
   }
 
@@ -116,12 +146,33 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
     setLoadingComments(true)
     const { data } = await supabase
       .from('comments')
-      .select('id, content, created_at, posts(title)')
+      .select('id, post_id, content, created_at, posts(title, board_id)')
       .eq('author_email', user.email)
       .order('created_at', { ascending: false })
       .limit(20)
     setComments(data || [])
+    setCommentsLoaded(true)
     setLoadingComments(false)
+  }
+
+  const openPost = async (postId: string) => {
+    setLoadingPost(true)
+    const [{ data: postData }, { data: commentData }] = await Promise.all([
+      supabase
+        .from('posts')
+        .select('*, boards(name)')
+        .eq('id', postId)
+        .single(),
+      supabase
+        .from('comments')
+        .select('id, content, author_name, author_email, created_at')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true })
+    ])
+    if (postData) {
+      setSelectedPost({ ...postData, comments: commentData || [] } as FullPost)
+    }
+    setLoadingPost(false)
   }
 
   const handleBanToggle = async () => {
@@ -155,11 +206,101 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
 
   if (!user) return null
 
+  const postCount = recentPosts.length
+  const voteCount = votesLoaded ? votes.length : user.vote_count
+  const commentCount = commentsLoaded ? comments.length : user.comment_count
+
   const tabs: { id: TabType; label: string; icon: any; count: number }[] = [
-    { id: 'posts', label: 'Posts', icon: FileText, count: user.post_count },
-    { id: 'votes', label: 'Votes', icon: ThumbsUp, count: user.vote_count },
-    { id: 'comments', label: 'Comments', icon: MessageSquare, count: user.comment_count },
+    { id: 'posts', label: 'Posts', icon: FileText, count: postCount },
+    { id: 'votes', label: 'Votes', icon: ThumbsUp, count: voteCount },
+    { id: 'comments', label: 'Comments', icon: MessageSquare, count: commentCount },
   ]
+
+  const statusColors: Record<string, string> = {
+    open: 'bg-blue-100 text-blue-800',
+    'in-progress': 'bg-yellow-100 text-yellow-800',
+    planned: 'bg-purple-100 text-purple-800',
+    completed: 'bg-green-100 text-green-800',
+    closed: 'bg-gray-100 text-gray-800',
+  }
+
+  // Inline post detail view
+  if (selectedPost || loadingPost) {
+    return (
+      <Dialog open={!!user} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedPost(null)}
+                className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              Post Details
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingPost ? (
+            <div className="text-sm text-gray-500 py-8 text-center">Loading post...</div>
+          ) : selectedPost ? (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">{selectedPost.title}</h3>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge className={statusColors[selectedPost.status] || 'bg-gray-100 text-gray-800'}>
+                    {selectedPost.status}
+                  </Badge>
+                  <span className="text-sm text-gray-500">
+                    {(selectedPost.boards as any)?.name || 'Board'}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    · {new Date(selectedPost.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+
+              {selectedPost.content && (
+                <div className="text-sm text-gray-700 whitespace-pre-wrap border rounded-lg p-4 bg-gray-50">
+                  {selectedPost.content}
+                </div>
+              )}
+
+              <div className="flex gap-4 text-sm text-gray-500">
+                <span className="flex items-center gap-1">
+                  <ThumbsUp className="h-4 w-4" /> {selectedPost.vote_count} votes
+                </span>
+                <span className="flex items-center gap-1">
+                  <MessageSquare className="h-4 w-4" /> {selectedPost.comment_count} comments
+                </span>
+              </div>
+
+              {selectedPost.comments && selectedPost.comments.length > 0 && (
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-semibold mb-3">Comments</h4>
+                  <div className="space-y-3">
+                    {selectedPost.comments.map((c) => (
+                      <div key={c.id} className="text-sm border rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-gray-900">
+                            {c.author_name || c.author_email || 'Anonymous'}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(c.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="text-gray-700">{c.content}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    )
+  }
 
   return (
     <Dialog open={!!user} onOpenChange={onOpenChange}>
@@ -244,12 +385,19 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
                 <div className="text-sm text-gray-500 text-center py-6">No posts yet.</div>
               ) : (
                 recentPosts.map((post) => (
-                  <div key={post.id} className="text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50">
-                    <div className="font-medium">{post.title}</div>
+                  <button
+                    key={post.id}
+                    onClick={() => openPost(post.id)}
+                    className="w-full text-left text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer group"
+                  >
+                    <div className="font-medium flex items-center justify-between">
+                      <span>{post.title}</span>
+                      <Eye className="h-3.5 w-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                     <div className="text-gray-500">
                       {post.boards?.[0]?.name || 'Board'} · {new Date(post.created_at).toLocaleDateString()}
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
@@ -263,16 +411,22 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
                 <div className="text-sm text-gray-500 text-center py-6">No votes yet.</div>
               ) : (
                 votes.map((vote) => {
-                  const postTitle = Array.isArray(vote.posts)
-                    ? (vote.posts as any)[0]?.title
-                    : (vote.posts as any)?.title
+                  const post = Array.isArray(vote.posts) ? (vote.posts as any)[0] : vote.posts
+                  const postTitle = post?.title
                   return (
-                    <div key={vote.id} className="text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50">
-                      <div className="font-medium">{postTitle || 'Unknown post'}</div>
+                    <button
+                      key={vote.id}
+                      onClick={() => openPost(vote.post_id)}
+                      className="w-full text-left text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer group"
+                    >
+                      <div className="font-medium flex items-center justify-between">
+                        <span>{postTitle || 'Unknown post'}</span>
+                        <Eye className="h-3.5 w-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <div className="text-gray-500">
                         Voted on {new Date(vote.created_at).toLocaleDateString()}
                       </div>
-                    </div>
+                    </button>
                   )
                 })
               )}
@@ -287,16 +441,20 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
                 <div className="text-sm text-gray-500 text-center py-6">No comments yet.</div>
               ) : (
                 comments.map((comment) => {
-                  const postTitle = Array.isArray(comment.posts)
-                    ? (comment.posts as any)[0]?.title
-                    : (comment.posts as any)?.title
+                  const post = Array.isArray(comment.posts) ? (comment.posts as any)[0] : comment.posts
+                  const postTitle = post?.title
                   return (
-                    <div key={comment.id} className="text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50">
-                      <div className="text-gray-500 text-xs mb-1">
-                        On: {postTitle || 'Unknown post'} · {new Date(comment.created_at).toLocaleDateString()}
+                    <button
+                      key={comment.id}
+                      onClick={() => openPost(comment.post_id)}
+                      className="w-full text-left text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer group"
+                    >
+                      <div className="text-gray-500 text-xs mb-1 flex items-center justify-between">
+                        <span>On: {postTitle || 'Unknown post'} · {new Date(comment.created_at).toLocaleDateString()}</span>
+                        <Eye className="h-3.5 w-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                       <div className="text-gray-900 line-clamp-2">{comment.content}</div>
-                    </div>
+                    </button>
                   )
                 })
               )}
