@@ -179,7 +179,7 @@ export async function POST(request: Request) {
           payload: {
             title: 'New Comment',
             description: `Comment on: ${postDataForWebhook.title}`,
-            url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`,
+            url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/boards/${postDataForWebhook.board_id}`,
           },
         })
       }

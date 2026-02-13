@@ -40,6 +40,8 @@ import {
   Webhook,
   Key,
   MessageSquare,
+  Menu,
+  X,
 } from 'lucide-react'
 
 interface Organization {
@@ -54,6 +56,7 @@ export function Sidebar() {
   const supabase = createClient()
   const [org, setOrg] = useState<Organization | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     const fetchOrg = async () => {
@@ -85,6 +88,11 @@ export function Sidebar() {
     if (pathname.startsWith('/settings')) {
       setSettingsOpen(true)
     }
+  }, [pathname])
+
+  // Close mobile sidebar on navigation
+  useEffect(() => {
+    setMobileOpen(false)
   }, [pathname])
 
   const handleLogout = async () => {
@@ -126,8 +134,8 @@ export function Sidebar() {
     { href: '/settings/sso', label: 'User Identification', icon: Shield },
   ]
 
-  return (
-    <div className="w-64 border-r bg-white h-screen flex flex-col sticky top-0">
+  const sidebarContent = (
+    <>
       {/* Organization Header */}
       <div className="p-4 border-b shrink-0">
         <div className="flex items-center justify-between">
@@ -139,16 +147,25 @@ export function Sidebar() {
               {org?.name || 'FeedbackHub'}
             </span>
           </div>
-          {org?.slug && (
-            <Link
-              href={`/${org.slug}`}
-              target="_blank"
-              className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
-              title="View public hub"
+          <div className="flex items-center gap-1">
+            {org?.slug && (
+              <Link
+                href={`/${org.slug}`}
+                target="_blank"
+                className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+                title="View public hub"
+              >
+                <ExternalLink className="h-4 w-4 text-gray-500" />
+              </Link>
+            )}
+            {/* Close button for mobile */}
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="p-1.5 hover:bg-gray-100 rounded-md transition-colors md:hidden"
             >
-              <ExternalLink className="h-4 w-4 text-gray-500" />
-            </Link>
-          )}
+              <X className="h-4 w-4 text-gray-500" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -293,6 +310,50 @@ export function Sidebar() {
           Logout
         </button>
       </div>
-    </div>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="fixed top-0 left-0 right-0 z-30 md:hidden bg-white border-b h-14 px-4 flex items-center gap-3">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <Menu className="h-5 w-5 text-gray-700" />
+        </button>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center text-white font-semibold text-xs shrink-0">
+            {org?.name?.charAt(0) || 'F'}
+          </div>
+          <span className="font-semibold text-gray-900 truncate">
+            {org?.name || 'FeedbackHub'}
+          </span>
+        </div>
+      </div>
+
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile sidebar drawer */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r flex flex-col transform transition-transform duration-300 ease-in-out md:hidden ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {sidebarContent}
+      </div>
+
+      {/* Desktop sidebar */}
+      <div className="hidden md:flex w-64 border-r bg-white h-screen flex-col sticky top-0">
+        {sidebarContent}
+      </div>
+    </>
   )
 }

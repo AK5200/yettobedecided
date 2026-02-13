@@ -81,8 +81,8 @@ export function MiniMetricCards({ orgId }: MiniMetricCardsProps) {
       color: 'text-blue-600',
     },
     {
-      label: 'Completed',
-      value: data.by_status?.completed || 0,
+      label: 'Resolved',
+      value: (data.by_status?.shipped || 0) + (data.by_status?.closed || 0),
       current: data.period?.posts || 0,
       previous: data.period?.posts_prev || 0,
       icon: CheckCircle2,

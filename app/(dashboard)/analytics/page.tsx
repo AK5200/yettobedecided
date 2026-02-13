@@ -51,7 +51,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="flex-1 bg-gradient-to-br from-gray-50 to-white min-h-screen">
-      <div className="p-8 max-w-7xl mx-auto">
+      <div className="p-4 md:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
               <p className="text-sm text-gray-500 mt-1">Insights into your feedback and engagement</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-6">
+          <div className="flex flex-wrap items-center gap-3 mt-6">
             <DateRangePicker defaultDays={days} />
             <BoardFilter orgId={orgId} />
           </div>
@@ -95,13 +95,13 @@ export default function AnalyticsPage() {
 
           {/* Bottom Row */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div>
+            <div className="min-h-0">
               <TrendingPosts orgId={orgId} boardId={boardId} />
             </div>
-            <div>
+            <div className="min-h-0">
               <TopContributors orgId={orgId} />
             </div>
-            <div>
+            <div className="min-h-0">
               <FeedbackHealth orgId={orgId} />
             </div>
           </section>

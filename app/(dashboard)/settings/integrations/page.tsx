@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { IntegrationsManager } from '@/components/settings/integrations-manager'
 
 export default async function IntegrationsSettingsPage() {
@@ -30,11 +31,14 @@ export default async function IntegrationsSettingsPage() {
     .eq('org_id', orgId)
     .maybeSingle()
 
-  // Build Linear OAuth URL
+  // Build Linear OAuth URL — derive baseUrl from headers (NEXT_PUBLIC_APP_URL unreliable on Vercel)
+  const headersList = await headers()
+  const host = headersList.get('host') || 'localhost:3000'
+  const protocol = headersList.get('x-forwarded-proto') || 'http'
+  const baseUrl = `${protocol}://${host}`
+
   const linearClientId = process.env.LINEAR_CLIENT_ID
-  const linearRedirectUri = process.env.NEXT_PUBLIC_APP_URL
-    ? `${process.env.NEXT_PUBLIC_APP_URL}/api/linear/callback`
-    : 'http://localhost:3000/api/linear/callback'
+  const linearRedirectUri = `${baseUrl}/api/auth/linear/callback`
   const linearAuthUrl = linearClientId
     ? `https://linear.app/oauth/authorize?client_id=${linearClientId}&redirect_uri=${encodeURIComponent(linearRedirectUri)}&response_type=code&scope=read,write`
     : null

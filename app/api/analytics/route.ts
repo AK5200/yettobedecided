@@ -85,12 +85,12 @@ export async function GET(request: Request) {
     statusCounts[p.status] = (statusCounts[p.status] || 0) + 1
   })
 
-  // Count completed posts for feedback health
+  // Count resolved posts (shipped + closed) for feedback health
   const { count: completedPosts } = await supabase
     .from('posts')
     .select('*', { count: 'exact', head: true })
     .in('board_id', boardIds)
-    .eq('status', 'completed')
+    .in('status', ['shipped', 'closed'])
 
   return NextResponse.json({
     totals: {

@@ -60,7 +60,7 @@ export function TopContributors({ orgId }: TopContributorsProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 h-full flex flex-col">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-blue-100 rounded-xl">
           <Users className="h-6 w-6 text-blue-600" />
@@ -78,6 +78,7 @@ export function TopContributors({ orgId }: TopContributorsProps) {
           <p className="text-xs text-gray-400 mt-1">Users will appear here as they engage</p>
         </div>
       ) : (
+        <div className="flex-1 min-h-0 max-h-[400px] overflow-y-auto subtle-scrollbar">
         <div className="space-y-3">
           {users.map((user, index) => {
             const displayName = user.name || user.email || 'Anonymous'
@@ -127,6 +128,7 @@ export function TopContributors({ orgId }: TopContributorsProps) {
               </div>
             )
           })}
+        </div>
         </div>
       )}
     </div>

@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     .from('posts')
     .select('id, title, vote_count, status, created_at, updated_at')
     .in('board_id', boardIds)
-    .not('status', 'in', '("completed","closed")')
+    .not('status', 'in', '("shipped","closed")')
     .lt('updated_at', thirtyDaysAgo)
     .lt('created_at', thirtyDaysAgo)
     .order('updated_at', { ascending: true })

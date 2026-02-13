@@ -50,7 +50,7 @@ export function TrendingPosts({ orgId, boardId }: TrendingPostsProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-orange-100 rounded-xl">
@@ -92,38 +92,46 @@ export function TrendingPosts({ orgId, boardId }: TrendingPostsProps) {
           <p className="text-xs text-gray-400 mt-1">Posts will appear here as they gain traction</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {posts.map((post, index) => (
-            <div
-              key={post.id}
-              className="flex items-start gap-4 p-4 rounded-xl bg-white border border-gray-200 hover:shadow-md transition-all group cursor-default"
-            >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-sm font-bold shadow-md">
-                #{index + 1}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-gray-900 truncate mb-2 group-hover:text-orange-600 transition-colors">
-                  {post.title}
+        <div className="flex-1 min-h-0 max-h-[400px] overflow-y-auto subtle-scrollbar">
+          <div className="space-y-3">
+            {posts.map((post, index) => (
+              <div
+                key={post.id}
+                className="flex items-start gap-4 p-4 rounded-xl bg-white border border-gray-200 hover:shadow-md transition-all group cursor-default"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-sm font-bold shadow-md">
+                  #{index + 1}
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-violet-500" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {post.vote_count || 0} votes
-                    </span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-gray-900 truncate mb-2 group-hover:text-orange-600 transition-colors">
+                    {post.title}
                   </div>
-                  {post.velocity > 0 && (
-                    <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-md">
-                      <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-                      <span className="text-xs font-semibold text-emerald-700">
-                        +{post.velocity}/day
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-violet-500" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {post.vote_count || 0} votes
                       </span>
                     </div>
-                  )}
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {post.comment_count || 0} comments
+                      </span>
+                    </div>
+                    {post.velocity > 0 && (
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-md">
+                        <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+                        <span className="text-xs font-semibold text-emerald-700">
+                          +{post.velocity}/day
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

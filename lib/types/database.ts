@@ -167,7 +167,7 @@ export interface ApiKey {
 export interface Integration {
   id: string
   org_id: string
-  type: 'slack' | 'discord'
+  type: 'slack' | 'discord' | 'teams' | 'telegram' | 'webhook'
   webhook_url: string | null
   channel_name: string | null
   notify_on_new_feedback: boolean
