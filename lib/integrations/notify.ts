@@ -13,15 +13,25 @@ function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
+function truncate(text: string, max: number): string {
+  if (!text || text.length <= max) return text || ''
+  return text.slice(0, max).trimEnd() + '...'
+}
+
 function formatSlackBlocks(payload: NotificationPayload) {
+  const descLine = payload.description
+    ? `\n>${truncate(payload.description, 150).replace(/\n/g, '\n>')}`
+    : ''
+  const fallback = `*${payload.title}*${descLine}`
+
   return {
-    text: `*${payload.title}*\n${payload.description}`,
+    text: fallback,
     blocks: [
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*${payload.title}*\n${payload.description}`,
+          text: fallback,
         },
       },
       {

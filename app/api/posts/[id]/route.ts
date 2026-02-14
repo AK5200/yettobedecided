@@ -96,8 +96,8 @@ export async function PATCH(
           orgId: boardData.org_id,
           type: 'status_change',
           payload: {
-            title: 'Status Changed',
-            description: `${post.title}: ${oldPost.status} → ${status}`,
+            title: `${post.title}`,
+            description: `Status changed: ${oldPost.status} → ${status}`,
             url: `${baseUrl}/boards/${oldPost.board_id}`,
           },
         })

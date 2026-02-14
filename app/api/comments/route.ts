@@ -180,8 +180,8 @@ export async function POST(request: Request) {
           orgId: boardDataForWebhook.org_id,
           type: 'new_comment',
           payload: {
-            title: 'New Comment',
-            description: `Comment on: ${postDataForWebhook.title}`,
+            title: `Comment on: ${postDataForWebhook.title}`,
+            description: comment.content || '',
             url: `${baseUrl}/boards/${postDataForWebhook.board_id}`,
           },
         })
