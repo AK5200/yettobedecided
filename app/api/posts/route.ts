@@ -193,26 +193,23 @@ export async function POST(request: Request) {
     }
 
     // Fire webhook for new post
-    const { data: boardData } = await supabase
-      .from('boards')
-      .select('org_id')
-      .eq('id', board_id)
-      .single()
-
-    if (boardData?.org_id) {
+    if (board.org_id) {
       fireWebhooks({
-        orgId: boardData.org_id,
+        orgId: board.org_id,
         event: 'post.created',
         payload: post
       })
       // Notify Slack/Discord
+      const host = request.headers.get('host') || 'localhost:3000'
+      const protocol = request.headers.get('x-forwarded-proto') || 'https'
+      const baseUrl = `${protocol}://${host}`
       notifyIntegrations({
-        orgId: boardData.org_id,
+        orgId: board.org_id,
         type: 'new_feedback',
         payload: {
           title: 'New Feedback',
           description: post.title,
-          url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/boards/${board_id}`,
+          url: `${baseUrl}/boards/${board_id}`,
         },
       })
     }

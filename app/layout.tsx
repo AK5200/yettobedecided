@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Raleway, Libre_Baskerville, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const raleway = Raleway({
   weight: ["400", "500", "600", "700"],
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body className={`${raleway.variable} ${libreBaskerville.variable} ${nunito.variable} antialiased`}>
         {children}
         <Toaster />
+        <SpeedInsights />
       </body>
     </html>
   );

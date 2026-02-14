@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 type NotificationType = 'new_feedback' | 'status_change' | 'new_comment'
 
@@ -130,7 +130,7 @@ export async function notifyIntegrations({
   type: NotificationType
   payload: NotificationPayload
 }) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data: integrations } = await supabase
     .from('integrations')
     .select('*')

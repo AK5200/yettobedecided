@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
 
 export type WebhookEvent = 
@@ -18,7 +18,7 @@ export async function fireWebhooks({
   payload: any
 }) {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     
     // Fetch all active webhooks for the org
     const { data: allWebhooks } = await supabase

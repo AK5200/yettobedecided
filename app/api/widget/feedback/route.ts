@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { processIdentifiedUser } from '@/lib/sso'
 import { incrementCounter, upsertWidgetUser } from '@/lib/widget-users'
 import { handleOptions, withCors } from '@/lib/cors'
+import { notifyIntegrations } from '@/lib/integrations/notify'
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request)
@@ -132,6 +133,21 @@ export async function POST(request: NextRequest) {
   if (widgetUser?.id) {
     await incrementCounter(widgetUser.id, 'post_count')
   }
+
+  // Notify integrations (Slack, Discord, etc.)
+  const host = request.headers.get('host') || 'localhost:3000'
+  const protocol = request.headers.get('x-forwarded-proto') || 'https'
+  const baseUrl = `${protocol}://${host}`
+
+  notifyIntegrations({
+    orgId: board.org_id,
+    type: 'new_feedback',
+    payload: {
+      title: 'New Feedback',
+      description: post.title,
+      url: `${baseUrl}/boards/${board_id}`,
+    },
+  })
 
   return withCors(
     NextResponse.json({ success: true, post, user_source: ssoResult.source }),
