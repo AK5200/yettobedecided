@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
@@ -49,12 +50,14 @@ export default async function IntegrationsSettingsPage() {
       <p className="text-gray-500 mb-8">
         Connect your favorite tools to receive notifications and sync feedback.
       </p>
-      <IntegrationsManager
-        orgId={orgId}
-        initialIntegrations={integrations || []}
-        linearIntegration={linearIntegration}
-        linearAuthUrl={linearAuthUrl}
-      />
+      <Suspense fallback={<div className="text-gray-400">Loading integrations...</div>}>
+        <IntegrationsManager
+          orgId={orgId}
+          initialIntegrations={integrations || []}
+          linearIntegration={linearIntegration}
+          linearAuthUrl={linearAuthUrl}
+        />
+      </Suspense>
     </div>
   )
 }

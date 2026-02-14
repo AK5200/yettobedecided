@@ -13,6 +13,31 @@ function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
+function formatSlackBlocks(payload: NotificationPayload) {
+  return {
+    text: `*${payload.title}*\n${payload.description}`,
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*${payload.title}*\n${payload.description}`,
+        },
+      },
+      {
+        type: 'actions',
+        elements: [
+          {
+            type: 'button',
+            text: { type: 'plain_text', text: 'View in FeedbackHub' },
+            url: payload.url,
+          },
+        ],
+      },
+    ],
+  }
+}
+
 function formatBody(integrationType: string, payload: NotificationPayload): object {
   switch (integrationType) {
     case 'slack':
@@ -76,6 +101,26 @@ function formatBody(integrationType: string, payload: NotificationPayload): obje
   }
 }
 
+async function sendSlackOAuth(accessToken: string, channelId: string, payload: NotificationPayload) {
+  const message = formatSlackBlocks(payload)
+  const response = await fetch('https://slack.com/api/chat.postMessage', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      channel: channelId,
+      ...message,
+    }),
+  })
+
+  const result = await response.json()
+  if (!result.ok) {
+    console.error('Slack API error:', result.error)
+  }
+}
+
 export async function notifyIntegrations({
   orgId,
   type,
@@ -99,9 +144,16 @@ export async function notifyIntegrations({
     if (type === 'status_change' && !i.notify_on_status_change) continue
     if (type === 'new_comment' && !i.notify_on_new_comment) continue
 
-    if (!i.webhook_url) continue
-
     try {
+      // Slack OAuth: use API with token + channel_id
+      if (i.type === 'slack' && i.access_token && i.channel_id) {
+        await sendSlackOAuth(i.access_token, i.channel_id, payload)
+        continue
+      }
+
+      // Fallback: webhook URL (all types including legacy Slack)
+      if (!i.webhook_url) continue
+
       await fetch(i.webhook_url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

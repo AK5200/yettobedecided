@@ -170,6 +170,13 @@ export interface Integration {
   type: 'slack' | 'discord' | 'teams' | 'telegram' | 'webhook'
   webhook_url: string | null
   channel_name: string | null
+  access_token: string | null
+  team_id: string | null
+  team_name: string | null
+  channel_id: string | null
+  bot_user_id: string | null
+  installed_by: string | null
+  installed_at: string | null
   notify_on_new_feedback: boolean
   notify_on_status_change: boolean
   notify_on_new_comment: boolean

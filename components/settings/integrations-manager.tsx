@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,9 +13,15 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { Settings, ExternalLink, Unlink, Link2 } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Settings, ExternalLink, Unlink, Link2, Hash, Lock, Loader2 } from 'lucide-react'
 
 type WebhookIntegrationType = 'slack' | 'discord' | 'teams' | 'telegram' | 'webhook'
 
@@ -24,6 +30,11 @@ interface Integration {
   type: WebhookIntegrationType
   webhook_url: string | null
   channel_name: string | null
+  access_token: string | null
+  team_id: string | null
+  team_name: string | null
+  channel_id: string | null
+  bot_user_id: string | null
   notify_on_new_feedback: boolean
   notify_on_status_change: boolean
   notify_on_new_comment: boolean
@@ -62,6 +73,13 @@ interface IntegrationConfig {
   helpText?: string
   helperNote?: React.ReactNode
   showChannelField: boolean
+}
+
+interface SlackChannel {
+  id: string
+  name: string
+  is_private: boolean
+  type: string
 }
 
 // Slack Logo SVG
@@ -135,17 +153,8 @@ const LinearLogo = () => (
   </svg>
 )
 
-const INTEGRATION_CONFIGS: IntegrationConfig[] = [
-  {
-    type: 'slack',
-    name: 'Slack',
-    description: 'Get notified about new feedback and updates in Slack',
-    logo: <SlackLogo />,
-    placeholder: 'https://hooks.slack.com/services/...',
-    helpUrl: 'https://api.slack.com/messaging/webhooks',
-    helpText: 'Learn how to create a webhook',
-    showChannelField: true,
-  },
+// Webhook-only configs (Slack is handled separately with OAuth)
+const WEBHOOK_CONFIGS: IntegrationConfig[] = [
   {
     type: 'discord',
     name: 'Discord',
@@ -213,23 +222,120 @@ export function IntegrationsManager({
   linearAuthUrl,
 }: IntegrationsManagerProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
-  const [states, setStates] = useState<Record<WebhookIntegrationType, IntegrationState>>(() => {
+  // Slack OAuth state
+  const slackIntegration = initialIntegrations.find((i) => i.type === 'slack')
+  const slackOAuthConnected = !!(slackIntegration?.access_token)
+  const [slackChannels, setSlackChannels] = useState<SlackChannel[]>([])
+  const [loadingChannels, setLoadingChannels] = useState(false)
+  const [slackChannel, setSlackChannel] = useState(slackIntegration?.channel_id || '')
+  const [slackNotify, setSlackNotify] = useState({
+    notify_on_new_feedback: slackIntegration?.notify_on_new_feedback ?? true,
+    notify_on_status_change: slackIntegration?.notify_on_status_change ?? true,
+    notify_on_new_comment: slackIntegration?.notify_on_new_comment ?? false,
+  })
+  const [savingSlack, setSavingSlack] = useState(false)
+  const [disconnectingSlack, setDisconnectingSlack] = useState(false)
+
+  // Webhook-based integrations state
+  const [states, setStates] = useState<Record<string, IntegrationState>>(() => {
     const findIntegration = (type: WebhookIntegrationType) =>
       initialIntegrations.find((i) => i.type === type)
-    return {
-      slack: getDefaultState(findIntegration('slack')),
-      discord: getDefaultState(findIntegration('discord')),
-      teams: getDefaultState(findIntegration('teams')),
-      telegram: getDefaultState(findIntegration('telegram')),
-      webhook: getDefaultState(findIntegration('webhook')),
+    const result: Record<string, IntegrationState> = {}
+    for (const config of WEBHOOK_CONFIGS) {
+      result[config.type] = getDefaultState(findIntegration(config.type))
     }
+    return result
   })
 
   const [saving, setSaving] = useState(false)
   const [configuring, setConfiguring] = useState<WebhookIntegrationType | null>(null)
 
-  const updateState = (type: WebhookIntegrationType, updates: Partial<IntegrationState>) => {
+  // Show toast on OAuth callback
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const error = searchParams.get('error')
+    if (success === 'slack_connected') {
+      toast.success('Slack connected successfully!')
+      // Clean URL
+      window.history.replaceState({}, '', '/settings/integrations')
+    } else if (error === 'slack_denied') {
+      toast.error('Slack authorization was denied')
+      window.history.replaceState({}, '', '/settings/integrations')
+    } else if (error) {
+      toast.error(`Connection failed: ${error.replace(/_/g, ' ')}`)
+      window.history.replaceState({}, '', '/settings/integrations')
+    }
+  }, [searchParams])
+
+  // Slack OAuth actions
+  const handleSlackConnect = () => {
+    window.location.href = `/api/auth/slack?org_id=${orgId}`
+  }
+
+  const handleSlackDisconnect = async () => {
+    setDisconnectingSlack(true)
+    const response = await fetch('/api/integrations/slack/disconnect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ org_id: orgId }),
+    })
+    if (response.ok) {
+      toast.success('Slack disconnected')
+      router.refresh()
+    } else {
+      toast.error('Failed to disconnect Slack')
+    }
+    setDisconnectingSlack(false)
+  }
+
+  const fetchSlackChannels = async () => {
+    setLoadingChannels(true)
+    const res = await fetch(`/api/integrations/slack/channels?org_id=${orgId}`)
+    if (res.ok) {
+      const data = await res.json()
+      setSlackChannels(data.channels)
+    }
+    setLoadingChannels(false)
+  }
+
+  const handleChannelChange = async (channelId: string) => {
+    const channel = slackChannels.find((c) => c.id === channelId)
+    setSlackChannel(channelId)
+    await fetch('/api/integrations/slack/channel', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        org_id: orgId,
+        channel_id: channelId,
+        channel_name: channel?.name || null,
+      }),
+    })
+    toast.success(`Channel set to #${channel?.name}`)
+  }
+
+  const saveSlackNotifications = async () => {
+    setSavingSlack(true)
+    const response = await fetch('/api/integrations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        org_id: orgId,
+        type: 'slack',
+        ...slackNotify,
+      }),
+    })
+    if (response.ok) {
+      toast.success('Slack notification settings saved!')
+    } else {
+      toast.error('Failed to save settings')
+    }
+    setSavingSlack(false)
+  }
+
+  // Webhook-based integration actions
+  const updateState = (type: string, updates: Partial<IntegrationState>) => {
     setStates((prev) => ({
       ...prev,
       [type]: { ...prev[type], ...updates },
@@ -250,22 +356,164 @@ export function IntegrationsManager({
       setSaving(false)
       return
     }
-    const config = INTEGRATION_CONFIGS.find((c) => c.type === type)
+    const config = WEBHOOK_CONFIGS.find((c) => c.type === type)
     toast.success(`${config?.name || type} integration saved!`)
     setSaving(false)
     setConfiguring(null)
   }
 
-  const isConnected = (type: WebhookIntegrationType) => !!states[type].webhook_url
+  const isConnected = (type: string) => !!states[type]?.webhook_url
 
   const activeConfig = configuring
-    ? INTEGRATION_CONFIGS.find((c) => c.type === configuring)
+    ? WEBHOOK_CONFIGS.find((c) => c.type === configuring)
     : null
 
   return (
     <div className="space-y-4">
+      {/* Slack OAuth Card */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-white border flex items-center justify-center">
+              <SlackLogo />
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-900 flex items-center gap-2">
+                Slack
+                {slackOAuthConnected && (
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                    Connected
+                  </span>
+                )}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {slackOAuthConnected
+                  ? `Connected to ${slackIntegration?.team_name || 'Slack'}`
+                  : 'Get notified about new feedback and updates in Slack'}
+              </p>
+            </div>
+          </div>
+          {slackOAuthConnected ? (
+            <Button
+              variant="outline"
+              className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleSlackDisconnect}
+              disabled={disconnectingSlack}
+            >
+              <Unlink className="h-4 w-4" />
+              {disconnectingSlack ? 'Disconnecting...' : 'Disconnect'}
+            </Button>
+          ) : (
+            <Button
+              className="gap-2 bg-[#4A154B] hover:bg-[#3a1139] text-white"
+              onClick={handleSlackConnect}
+            >
+              <SlackLogo />
+              Add to Slack
+            </Button>
+          )}
+        </div>
+
+        {/* Slack Connected Settings */}
+        {slackOAuthConnected && (
+          <div className="mt-6 pt-6 border-t space-y-5">
+            {/* Channel Selector */}
+            <div className="space-y-2">
+              <Label>Channel</Label>
+              <Select
+                value={slackChannel}
+                onValueChange={handleChannelChange}
+                onOpenChange={(open) => { if (open) fetchSlackChannels() }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a channel">
+                    {slackChannel
+                      ? `# ${slackIntegration?.channel_name || slackChannels.find(c => c.id === slackChannel)?.name || slackChannel}`
+                      : 'Select a channel'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {loadingChannels ? (
+                    <div className="flex items-center justify-center py-4 text-sm text-gray-500">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Loading channels...
+                    </div>
+                  ) : (
+                    slackChannels.map((channel) => (
+                      <SelectItem key={channel.id} value={channel.id}>
+                        <span className="flex items-center gap-1.5">
+                          {channel.is_private ? (
+                            <Lock className="h-3 w-3 text-gray-400" />
+                          ) : (
+                            <Hash className="h-3 w-3 text-gray-400" />
+                          )}
+                          {channel.name}
+                        </span>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Notification Toggles */}
+            <div className="space-y-3">
+              <Label>Notification Events</Label>
+
+              <div className="flex items-center justify-between py-1.5">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">New Feedback</p>
+                  <p className="text-xs text-gray-500">When someone submits new feedback</p>
+                </div>
+                <Switch
+                  checked={slackNotify.notify_on_new_feedback}
+                  onCheckedChange={(checked) =>
+                    setSlackNotify((prev) => ({ ...prev, notify_on_new_feedback: checked }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between py-1.5">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Status Changes</p>
+                  <p className="text-xs text-gray-500">When feedback status is updated</p>
+                </div>
+                <Switch
+                  checked={slackNotify.notify_on_status_change}
+                  onCheckedChange={(checked) =>
+                    setSlackNotify((prev) => ({ ...prev, notify_on_status_change: checked }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between py-1.5">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">New Comments</p>
+                  <p className="text-xs text-gray-500">When someone comments on feedback</p>
+                </div>
+                <Switch
+                  checked={slackNotify.notify_on_new_comment}
+                  onCheckedChange={(checked) =>
+                    setSlackNotify((prev) => ({ ...prev, notify_on_new_comment: checked }))
+                  }
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={saveSlackNotifications}
+              disabled={savingSlack}
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+              size="sm"
+            >
+              {savingSlack ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </div>
+        )}
+      </Card>
+
       {/* Webhook-based integration cards */}
-      {INTEGRATION_CONFIGS.map((config) => (
+      {WEBHOOK_CONFIGS.map((config) => (
         <Card key={config.type} className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -295,7 +543,7 @@ export function IntegrationsManager({
         </Card>
       ))}
 
-      {/* Configuration Dialog */}
+      {/* Webhook Configuration Dialog */}
       <Dialog
         open={configuring !== null}
         onOpenChange={(open) => { if (!open) setConfiguring(null) }}
