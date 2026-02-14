@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
     orgId: board.org_id,
     type: 'new_feedback',
     payload: {
-      title: post.title,
+      title: `New Feedback: ${post.title}`,
       description: post.content || '',
       url: `${baseUrl}/boards/${board_id}`,
     },
