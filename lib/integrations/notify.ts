@@ -117,7 +117,38 @@ async function sendSlackOAuth(accessToken: string, channelId: string, payload: N
 
   const result = await response.json()
   if (!result.ok) {
-    console.error('Slack API error:', result.error)
+    // Auto-join channel if bot is not a member, then retry
+    if (result.error === 'not_in_channel') {
+      console.log(`[notify] Bot not in channel ${channelId}, attempting to join...`)
+      const joinRes = await fetch('https://slack.com/api/conversations.join', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ channel: channelId }),
+      })
+      const joinResult = await joinRes.json()
+      if (joinResult.ok) {
+        // Retry sending the message
+        const retryRes = await fetch('https://slack.com/api/chat.postMessage', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ channel: channelId, ...message }),
+        })
+        const retryResult = await retryRes.json()
+        if (!retryResult.ok) {
+          console.error('Slack API error after join:', retryResult.error)
+        }
+      } else {
+        console.error('Slack join channel failed:', joinResult.error)
+      }
+    } else {
+      console.error('Slack API error:', result.error)
+    }
   }
 }
 

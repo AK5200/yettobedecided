@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
   const protocol = request.headers.get('x-forwarded-proto') || 'https'
   const baseUrl = `${protocol}://${host}`
 
-  notifyIntegrations({
+  await notifyIntegrations({
     orgId: board.org_id,
     type: 'new_feedback',
     payload: {

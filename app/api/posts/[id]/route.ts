@@ -79,7 +79,7 @@ export async function PATCH(
         .single()
 
       if (boardData?.org_id) {
-        fireWebhooks({
+        await fireWebhooks({
           orgId: boardData.org_id,
           event: 'post.status_changed',
           payload: {
@@ -89,13 +89,16 @@ export async function PATCH(
           }
         })
         // Notify Slack/Discord on status change
-        notifyIntegrations({
+        const host = request.headers.get('host') || 'localhost:3000'
+        const protocol = request.headers.get('x-forwarded-proto') || 'https'
+        const baseUrl = `${protocol}://${host}`
+        await notifyIntegrations({
           orgId: boardData.org_id,
           type: 'status_change',
           payload: {
             title: 'Status Changed',
             description: `${post.title}: ${oldPost.status} → ${status}`,
-            url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/boards/${oldPost.board_id}`,
+            url: `${baseUrl}/boards/${oldPost.board_id}`,
           },
         })
       }

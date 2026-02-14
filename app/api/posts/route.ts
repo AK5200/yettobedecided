@@ -194,7 +194,7 @@ export async function POST(request: Request) {
 
     // Fire webhook for new post
     if (board.org_id) {
-      fireWebhooks({
+      await fireWebhooks({
         orgId: board.org_id,
         event: 'post.created',
         payload: post
@@ -203,7 +203,7 @@ export async function POST(request: Request) {
       const host = request.headers.get('host') || 'localhost:3000'
       const protocol = request.headers.get('x-forwarded-proto') || 'https'
       const baseUrl = `${protocol}://${host}`
-      notifyIntegrations({
+      await notifyIntegrations({
         orgId: board.org_id,
         type: 'new_feedback',
         payload: {

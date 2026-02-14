@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
   // State contains org_id for callback
   const state = Buffer.from(JSON.stringify({ org_id: orgId })).toString('base64')
 
-  const scopes = ['chat:write', 'channels:read', 'groups:read'].join(',')
+  const scopes = ['chat:write', 'channels:read', 'channels:join', 'groups:read'].join(',')
 
   const slackAuthUrl = new URL('https://slack.com/oauth/v2/authorize')
   slackAuthUrl.searchParams.set('client_id', clientId)

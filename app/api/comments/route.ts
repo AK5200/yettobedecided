@@ -163,7 +163,7 @@ export async function POST(request: Request) {
         .single()
 
       if (boardDataForWebhook?.org_id) {
-        fireWebhooks({
+        await fireWebhooks({
           orgId: boardDataForWebhook.org_id,
           event: 'comment.created',
           payload: {
@@ -173,13 +173,16 @@ export async function POST(request: Request) {
           }
         })
         // Notify Slack/Discord on new comment
-        notifyIntegrations({
+        const host = request.headers.get('host') || 'localhost:3000'
+        const protocol = request.headers.get('x-forwarded-proto') || 'https'
+        const baseUrl = `${protocol}://${host}`
+        await notifyIntegrations({
           orgId: boardDataForWebhook.org_id,
           type: 'new_comment',
           payload: {
             title: 'New Comment',
             description: `Comment on: ${postDataForWebhook.title}`,
-            url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/boards/${postDataForWebhook.board_id}`,
+            url: `${baseUrl}/boards/${postDataForWebhook.board_id}`,
           },
         })
       }
