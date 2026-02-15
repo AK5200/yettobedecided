@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select'
 import { Settings, ExternalLink, Unlink, Link2, Hash, Lock, Loader2 } from 'lucide-react'
 
-type WebhookIntegrationType = 'slack' | 'discord' | 'teams' | 'telegram' | 'webhook'
+type WebhookIntegrationType = 'slack' | 'discord' | 'teams' | 'telegram'
 
 interface Integration {
   id: string
@@ -187,19 +187,6 @@ const WEBHOOK_CONFIGS: IntegrationConfig[] = [
       <p className="text-xs text-gray-500 mt-1">
         Format: https://api.telegram.org/bot&lt;TOKEN&gt;/sendMessage?chat_id=&lt;CHAT_ID&gt;
       </p>
-    ),
-    showChannelField: false,
-  },
-  {
-    type: 'webhook',
-    name: 'Webhook',
-    description: 'Send events to any URL (Zapier, Make, n8n, etc.)',
-    logo: <WebhookLogo />,
-    placeholder: 'https://your-endpoint.com/webhook',
-    helperNote: (
-      <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded font-mono mt-1">
-        {'{ "event": "...", "timestamp": "...", "data": { "title": "...", ... } }'}
-      </div>
     ),
     showChannelField: false,
   },

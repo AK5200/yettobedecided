@@ -38,8 +38,11 @@ export default async function WebhooksSettingsPage() {
   return (
     <div className="p-8 max-w-4xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Webhooks</h1>
-      <p className="text-gray-500 mb-8">
+      <p className="text-gray-500 mb-2">
         Send real-time notifications to your server when events happen in your feedback hub.
+      </p>
+      <p className="text-sm text-gray-400 mb-8">
+        Connect to any app via webhooks: n8n, Zapier, Make, Pipedream, custom servers, and more.
       </p>
       <WebhooksManager orgId={orgId} initialWebhooks={webhooks || []} availableEvents={AVAILABLE_EVENTS} />
     </div>
