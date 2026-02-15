@@ -15,6 +15,7 @@ const STATUS_COLORS: Record<string, string> = {
   planned: '#8b5cf6',
   in_progress: '#f97316',
   completed: '#10b981',
+  shipped: '#22c55e',
   closed: '#6b7280',
 }
 
@@ -24,6 +25,7 @@ const STATUS_NAMES: Record<string, string> = {
   planned: 'Planned',
   in_progress: 'In Progress',
   completed: 'Completed',
+  shipped: 'Shipped',
   closed: 'Closed',
 }
 
