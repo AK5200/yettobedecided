@@ -4,6 +4,7 @@ import { processIdentifiedUser } from '@/lib/sso'
 import { incrementCounter, upsertWidgetUser } from '@/lib/widget-users'
 import { handleOptions, withCors } from '@/lib/cors'
 import { notifyIntegrations } from '@/lib/integrations/notify'
+import { autoSyncToLinear } from '@/lib/linear/auto-sync'
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request)
@@ -147,6 +148,16 @@ export async function POST(request: NextRequest) {
       description: post.content || '',
       url: `${baseUrl}/boards/${board_id}`,
     },
+  })
+
+  // Auto-sync to Linear if enabled
+  await autoSyncToLinear({
+    postId: post.id,
+    orgId: board.org_id,
+    title: post.title,
+    content: post.content,
+    authorEmail: post.author_email,
+    guestEmail: post.guest_email,
   })
 
   return withCors(

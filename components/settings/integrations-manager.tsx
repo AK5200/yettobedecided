@@ -46,6 +46,7 @@ interface LinearIntegration {
   team_id: string | null
   team_name: string | null
   access_token: string
+  auto_sync_enabled: boolean
 }
 
 interface IntegrationsManagerProps {
@@ -225,6 +226,10 @@ export function IntegrationsManager({
   const [savingSlack, setSavingSlack] = useState(false)
   const [disconnectingSlack, setDisconnectingSlack] = useState(false)
 
+  // Linear state
+  const [linearAutoSync, setLinearAutoSync] = useState(linearIntegration?.auto_sync_enabled ?? false)
+  const [savingLinear, setSavingLinear] = useState(false)
+
   // Webhook-based integrations state
   const [states, setStates] = useState<Record<string, IntegrationState>>(() => {
     const findIntegration = (type: WebhookIntegrationType) =>
@@ -319,6 +324,25 @@ export function IntegrationsManager({
       toast.error('Failed to save settings')
     }
     setSavingSlack(false)
+  }
+
+  // Linear actions
+  const saveLinearSettings = async () => {
+    setSavingLinear(true)
+    const response = await fetch('/api/linear/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        org_id: orgId,
+        auto_sync_enabled: linearAutoSync,
+      }),
+    })
+    if (response.ok) {
+      toast.success('Linear settings saved!')
+    } else {
+      toast.error('Failed to save Linear settings')
+    }
+    setSavingLinear(false)
   }
 
   // Webhook-based integration actions
@@ -700,6 +724,35 @@ export function IntegrationsManager({
             </Button>
           )}
         </div>
+
+        {/* Linear Connected Settings */}
+        {linearIntegration && (
+          <div className="mt-6 pt-6 border-t space-y-5">
+            <div className="space-y-3">
+              <Label>Sync Settings</Label>
+
+              <div className="flex items-center justify-between py-1.5">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Auto-sync New Feedback</p>
+                  <p className="text-xs text-gray-500">Automatically create Linear issues for new feedback posts</p>
+                </div>
+                <Switch
+                  checked={linearAutoSync}
+                  onCheckedChange={setLinearAutoSync}
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={saveLinearSettings}
+              disabled={savingLinear}
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+              size="sm"
+            >
+              {savingLinear ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </div>
+        )}
       </Card>
     </div>
   )

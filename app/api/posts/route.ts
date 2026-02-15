@@ -5,6 +5,7 @@ import { notifyIntegrations } from '@/lib/integrations/notify'
 import { triggerNewPostEmail } from '@/lib/email/triggers'
 import { processIdentifiedUser } from '@/lib/sso'
 import { upsertWidgetUser, incrementCounter } from '@/lib/widget-users'
+import { autoSyncToLinear } from '@/lib/linear/auto-sync'
 
 export async function GET(request: Request) {
   try {
@@ -211,6 +212,16 @@ export async function POST(request: Request) {
           description: post.content || '',
           url: `${baseUrl}/boards/${board_id}`,
         },
+      })
+
+      // Auto-sync to Linear if enabled
+      await autoSyncToLinear({
+        postId: post.id,
+        orgId: board.org_id,
+        title: post.title,
+        content: post.content,
+        authorEmail: post.author_email,
+        guestEmail: post.guest_email,
       })
     }
 
