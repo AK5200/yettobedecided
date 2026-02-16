@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card } from '@/components/ui/card'
-import { Building2, Globe, Link2, FileText, Image } from 'lucide-react'
+import { Building2, Globe, Link2, FileText, Image, Loader2 } from 'lucide-react'
 
 interface OrgSettingsFormProps {
   orgId: string
@@ -53,54 +52,63 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Card className="p-6">
+      {/* Basic Information */}
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
         <div className="flex items-start gap-4 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+          <div className="p-2.5 bg-amber-100 rounded-xl group-hover:scale-110 transition-transform">
             <Building2 className="h-5 w-5 text-amber-600" />
           </div>
           <div>
-            <h3 className="font-medium text-gray-900">Basic Information</h3>
-            <p className="text-sm text-gray-500">Your organization's public profile details.</p>
+            <h3 className="font-semibold text-gray-900">Basic Information</h3>
+            <p className="text-sm text-gray-500">Your organization&apos;s public profile details.</p>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="name">Organization Name</Label>
+            <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+              Organization Name
+            </Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Acme Inc."
               required
+              className="h-11"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="slug">URL Slug</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">feedbackhub.com/</span>
+            <Label htmlFor="slug" className="text-sm font-medium text-gray-700">
+              URL Slug
+            </Label>
+            <div className="flex items-center gap-0">
+              <span className="inline-flex items-center h-11 px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-sm text-gray-500 select-none">
+                feedbackhub.com/
+              </span>
               <Input
                 id="slug"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
                 placeholder="acme"
-                className="flex-1"
+                className="flex-1 rounded-l-none h-11"
                 required
               />
             </div>
-            <p className="text-xs text-gray-500">This is used in your public feedback hub URL.</p>
+            <p className="text-xs text-gray-400">This is used in your public feedback hub URL.</p>
           </div>
         </div>
-      </Card>
+      </div>
 
-      <Card className="p-6">
+      {/* Description */}
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
         <div className="flex items-start gap-4 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+          <div className="p-2.5 bg-blue-100 rounded-xl">
             <FileText className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <h3 className="font-medium text-gray-900">Description</h3>
+            <h3 className="font-semibold text-gray-900">Description</h3>
             <p className="text-sm text-gray-500">Tell users what your organization does.</p>
           </div>
         </div>
@@ -111,23 +119,25 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
           onChange={(e) => setDescription(e.target.value)}
           placeholder="A brief description of your organization..."
           rows={4}
+          className="resize-none"
         />
-      </Card>
+      </div>
 
-      <Card className="p-6">
+      {/* Website & Branding */}
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
         <div className="flex items-start gap-4 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+          <div className="p-2.5 bg-green-100 rounded-xl">
             <Globe className="h-5 w-5 text-green-600" />
           </div>
           <div>
-            <h3 className="font-medium text-gray-900">Website & Branding</h3>
-            <p className="text-sm text-gray-500">Links and visual identity.</p>
+            <h3 className="font-semibold text-gray-900">Website & Branding</h3>
+            <p className="text-sm text-gray-500">Links and visual identity for your organization.</p>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="website" className="flex items-center gap-2">
+            <Label htmlFor="website" className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <Link2 className="h-4 w-4 text-gray-400" />
               Website URL
             </Label>
@@ -136,11 +146,12 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="https://acme.com"
+              className="h-11"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="logoUrl" className="flex items-center gap-2">
+            <Label htmlFor="logoUrl" className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <Image className="h-4 w-4 text-gray-400" />
               Logo URL
             </Label>
@@ -149,13 +160,14 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
               value={logoUrl}
               onChange={(e) => setLogoUrl(e.target.value)}
               placeholder="https://acme.com/logo.png"
+              className="h-11"
             />
             {logoUrl && (
-              <div className="mt-2 p-4 bg-gray-50 rounded-lg inline-block">
+              <div className="mt-3 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center">
                 <img
                   src={logoUrl}
                   alt="Logo preview"
-                  className="h-12 w-auto object-contain"
+                  className="h-16 w-auto object-contain"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none'
                   }}
@@ -164,15 +176,23 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
             )}
           </div>
         </div>
-      </Card>
+      </div>
 
-      <div className="flex justify-end">
+      {/* Submit */}
+      <div className="flex justify-end pt-2">
         <Button
           type="submit"
           disabled={loading}
-          className="bg-amber-500 hover:bg-amber-600 text-white"
+          className="bg-amber-500 hover:bg-amber-600 text-white h-11 px-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
         >
-          {loading ? 'Saving...' : 'Save Changes'}
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            'Save Changes'
+          )}
         </Button>
       </div>
     </form>

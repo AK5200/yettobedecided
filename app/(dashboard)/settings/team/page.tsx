@@ -2,6 +2,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { InviteMemberForm } from '@/components/settings/invite-member-form'
 import { TeamMembersList } from '@/components/settings/team-members-list'
+import { UsersRound } from 'lucide-react'
 
 export default async function TeamSettingsPage() {
   const supabase = await createClient()
@@ -49,14 +50,23 @@ export default async function TeamSettingsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="p-8 max-w-3xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Team</h1>
-      <p className="text-gray-500 mb-8">
-        Manage your team members and their roles.
-      </p>
-      <div className="space-y-6">
-        <InviteMemberForm orgId={orgId} />
-        <TeamMembersList members={enrichedMembers} invitations={invitations || []} orgId={orgId} />
+    <div className="flex-1 bg-gradient-to-br from-gray-50 to-white min-h-screen">
+      <div className="p-4 md:p-8 max-w-3xl mx-auto">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="p-3 bg-blue-100 rounded-xl">
+            <UsersRound className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Team</h1>
+            <p className="text-sm text-gray-500">
+              Manage your team members and their roles.
+            </p>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <InviteMemberForm orgId={orgId} />
+          <TeamMembersList members={enrichedMembers} invitations={invitations || []} orgId={orgId} />
+        </div>
       </div>
     </div>
   )
