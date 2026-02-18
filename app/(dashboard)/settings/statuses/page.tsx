@@ -210,7 +210,7 @@ export default function StatusesSettingsPage() {
               Add Status
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Create New Status</DialogTitle>
             </DialogHeader>
@@ -323,7 +323,7 @@ export default function StatusesSettingsPage() {
 
       {/* Edit Status Dialog */}
       <Dialog open={!!editingStatus} onOpenChange={() => setEditingStatus(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Status</DialogTitle>
           </DialogHeader>

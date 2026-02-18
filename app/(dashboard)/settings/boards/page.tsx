@@ -272,7 +272,7 @@ export default function BoardsSettingsPage() {
                   Add Board
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Create New Board</DialogTitle>
                 </DialogHeader>

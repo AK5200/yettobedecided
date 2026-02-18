@@ -187,7 +187,7 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
 
       {/* Edit Comment Dialog */}
       <Dialog open={editingComment !== null} onOpenChange={() => setEditingComment(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Comment</DialogTitle>
           </DialogHeader>
@@ -210,7 +210,7 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
 
       {/* Delete Comment Confirmation Dialog */}
       <Dialog open={deleteConfirm !== null} onOpenChange={() => setDeleteConfirm(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Delete Comment</DialogTitle>
           </DialogHeader>

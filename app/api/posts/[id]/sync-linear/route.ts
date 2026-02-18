@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { LinearClient } from '@linear/sdk';
 
@@ -15,8 +15,11 @@ export async function POST(
     }
 
     try {
+        // Use admin client for data access (same as auto-sync) to bypass RLS
+        const adminSupabase = createAdminClient();
+
         // Get post detail
-        const { data: post } = await supabase
+        const { data: post } = await adminSupabase
             .from('posts')
             .select('*, boards(org_id)')
             .eq('id', postId)
@@ -25,7 +28,7 @@ export async function POST(
         if (!post) throw new Error('Post not found');
 
         // Get Linear integration for org
-        const { data: linearIntegration } = await supabase
+        const { data: linearIntegration } = await adminSupabase
             .from('linear_integrations')
             .select('*')
             .eq('org_id', post.boards.org_id)
@@ -48,7 +51,7 @@ export async function POST(
 
         if (issue) {
             // Update post with Linear info
-            await supabase
+            await adminSupabase
                 .from('posts')
                 .update({
                     linear_issue_id: issue.id,

@@ -472,7 +472,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                       Add Status
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                       <DialogTitle>Create New Status</DialogTitle>
                     </DialogHeader>
@@ -606,7 +606,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
 
               {/* Edit Status Dialog */}
               <Dialog open={!!editingStatus} onOpenChange={() => setEditingStatus(null)}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-lg">
                   <DialogHeader>
                     <DialogTitle>Edit Status</DialogTitle>
                   </DialogHeader>
@@ -695,7 +695,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                   setReassignTarget('')
                 }
               }}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-lg">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-amber-500" />

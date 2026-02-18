@@ -71,7 +71,7 @@ export default function HomePage() {
         {/* Subtle yellow background elements */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-100/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-100/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
-        
+
         <div className="relative z-10 max-w-2xl mx-auto">
           {/* Eyebrow Badge */}
           <div className="inline-flex items-center px-4 py-2 rounded-full border border-yellow-200 bg-white mb-4 mt-4">
@@ -87,7 +87,7 @@ export default function HomePage() {
                 The <span className="italic font-normal text-gray-500" style={{ fontFamily: 'var(--font-libre-baskerville), serif' }}>simplest</span> way to collect feedback and ship what users want
               </span>
               {/* Yellow light ray effect - like light falling on text */}
-              <span 
+              <span
                 className="absolute inset-0 bg-gradient-to-br from-yellow-300/50 via-yellow-200/30 to-transparent blur-2xl opacity-70 pointer-events-none"
                 style={{
                   transform: 'translateY(10%) translateX(10%)',
@@ -105,16 +105,16 @@ export default function HomePage() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-12 py-8 text-xl rounded-lg"
               style={{ fontFamily: 'Inter, sans-serif' }}
               asChild
             >
               <Link href="/signup">Start free</Link>
             </Button>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               variant="outline"
               className="bg-white border-2 border-gray-300 hover:bg-gray-50 text-gray-900 font-semibold px-12 py-8 text-xl rounded-lg"
               style={{ fontFamily: 'Inter, sans-serif' }}

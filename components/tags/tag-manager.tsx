@@ -112,7 +112,7 @@ export function TagManager({ orgId }: TagManagerProps) {
               Add Tag
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Create New Tag</DialogTitle>
             </DialogHeader>

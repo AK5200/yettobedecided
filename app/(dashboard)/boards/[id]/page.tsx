@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { BoardDetailTabs } from '@/components/boards/board-detail-tabs'
-import { BoardFilters } from '@/components/boards/board-filters'
+import { BoardDetailRedesign } from '@/components/boards/board-detail-redesign'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Settings, Plus } from 'lucide-react'
@@ -132,50 +131,15 @@ export default async function BoardDetailPage({
   const filteredAll = sortPosts((allPosts || []).filter(matchesFilters))
 
   return (
-    <div className="p-8">
-      <div className="text-sm text-gray-500 mb-4">
-        <Link href="/boards" className="hover:underline">Boards</Link>
-        <span className="mx-2">/</span>
-        <span>{board.name}</span>
-      </div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">{board.name}</h1>
-        <div className="flex gap-2">
-          <Link href={`/boards/${board.id}/new-post`}>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Post
-            </Button>
-          </Link>
-          <Link href={`/boards/${board.id}/settings`}>
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-          </Link>
-        </div>
-      </div>
-      <p className="text-muted-foreground mt-2">
-        {board.description || 'No description'}
-      </p>
-      <div className="mt-6">
-        <BoardFilters
-          search={resolvedSearchParams.q || ''}
-          status={status}
-          sort={sort}
-          orgId={board.org_id}
-        />
-      </div>
-      <div className="mt-8">
-        <BoardDetailTabs
-          boardId={id}
-          orgId={board.org_id}
-          pendingPosts={filteredPending}
-          approvedPosts={filteredApproved}
-          allPosts={filteredAll}
-          adminEmail={user?.email || ''}
-        />
-      </div>
-    </div>
+    <BoardDetailRedesign
+      boardId={id}
+      boardName={board.name}
+      boardDescription={board.description}
+      orgId={board.org_id}
+      pendingPosts={filteredPending}
+      approvedPosts={filteredApproved}
+      allPosts={filteredAll}
+      adminEmail={user?.email || ''}
+    />
   )
 }

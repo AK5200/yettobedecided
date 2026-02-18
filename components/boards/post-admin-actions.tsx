@@ -122,7 +122,7 @@ export function PostAdminActions({
               Reject
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Reject Post</DialogTitle>
             </DialogHeader>
@@ -220,7 +220,7 @@ export function PostAdminActions({
 
       {/* Delete Post Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Delete Post</DialogTitle>
           </DialogHeader>
@@ -240,7 +240,7 @@ export function PostAdminActions({
 
       {/* Reset Dialog */}
       <Dialog open={showResetDialog !== null} onOpenChange={() => setShowResetDialog(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
               {showResetDialog === 'comments' && 'Reset Comments'}

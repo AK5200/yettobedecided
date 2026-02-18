@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Check, Circle } from 'lucide-react'
+import { ChevronDown, Check } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function PricingPage() {
@@ -152,16 +152,16 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <section id="pricing" className="px-8 py-16 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
-            Simple, transparent pricing
+      <section id="pricing" className="px-6 py-20 bg-white">
+        <div className="max-w-[1200px] mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-3" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
+            Choose the Perfect Plan for You
           </h2>
-          <p className="text-center text-gray-600 mb-8 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Choose the plan that works for you
+          <p className="text-center text-gray-500 mb-10 font-medium text-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+            Simple, transparent pricing. No per-seat fees.
           </p>
-          
-          <div className="flex justify-center mb-12">
+
+          <div className="flex justify-center mb-14">
             <Tabs value={billingPeriod} onValueChange={(value) => setBillingPeriod(value as 'yearly' | 'monthly')} className="w-auto">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="yearly" className="font-semibold" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -173,22 +173,34 @@ export default function PricingPage() {
               </TabsList>
             </Tabs>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
             {/* Free Plan */}
-            <div 
+            <div
               data-card-index="0"
-              className={`border-2 rounded-xl p-6 bg-white hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 ${
+              className={`flex flex-col rounded-2xl border border-gray-200 bg-white p-7 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 ${
                 visibleCards.has(0) ? 'animate-slide-in-left opacity-100' : 'opacity-0 translate-x-[-50px]'
               }`}
             >
               <h3 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>FREE</h3>
-              <div className="mb-6">
+              <p className="text-sm text-gray-400 mb-4">Best for personal use.</p>
+
+              <div className="mb-6 h-16 flex items-end">
                 <span className="text-4xl font-bold tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>$0</span>
-                <span className="text-gray-600 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/mo</span>
+                <span className="text-gray-500 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/mo</span>
               </div>
-              <div className="mb-6">
-                <p className="text-sm font-semibold mb-3 text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>Features Included:</p>
+
+              <Button
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl py-6"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+                asChild
+              >
+                <Link href="/signup">Get Started</Link>
+              </Button>
+
+              <div className="border-t border-gray-100 mt-6 pt-5 flex-1">
+                <p className="text-sm font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>What you will get</p>
                 <ul className="text-sm text-gray-700 space-y-2.5 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
@@ -214,85 +226,47 @@ export default function PricingPage() {
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>Basic Widget</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Private Boards</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Custom Branding</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Custom Domain</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Email Notifications</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Integrations</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">API & Webhooks</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">SSO/SAML</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">User Segmentation</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">AI Insights</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Revenue Tracking</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Dedicated Support</span>
-                  </li>
                 </ul>
               </div>
-              <Button 
-                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg py-6"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-                asChild
-              >
-                <Link href="/signup">Sign up for free</Link>
-              </Button>
             </div>
 
             {/* Starter Plan */}
-            <div 
+            <div
               data-card-index="1"
-              className={`border-2 rounded-xl p-6 bg-white hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 ${
+              className={`flex flex-col rounded-2xl border border-gray-200 bg-white p-7 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 ${
                 visibleCards.has(1) ? 'animate-slide-in-left opacity-100' : 'opacity-0 translate-x-[-50px]'
               }`}
             >
               <h3 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>STARTER</h3>
-              <div className="mb-6">
+              <p className="text-sm text-gray-400 mb-4">Best for small teams.</p>
+
+              <div className="mb-6 h-16 flex items-end">
                 {billingPeriod === 'yearly' ? (
-                  <>
-                    <span className="text-4xl font-bold tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>$16</span>
-                    <span className="text-gray-600 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/month</span>
-                    <p className="text-sm text-gray-500 mt-1 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>billed yearly</p>
-                  </>
+                  <div>
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>$16</span>
+                      <span className="text-gray-500 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/month</span>
+                    </div>
+                    <p className="text-sm text-gray-400 mt-1 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>billed yearly</p>
+                  </div>
                 ) : (
-                  <>
+                  <div className="flex items-baseline">
                     <span className="text-4xl font-bold tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>$19</span>
-                    <span className="text-gray-600 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/mo</span>
-                  </>
+                    <span className="text-gray-500 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/mo</span>
+                  </div>
                 )}
               </div>
-              <div className="mb-6">
-                <p className="text-sm font-semibold mb-3 text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>Features Included:</p>
+
+              <Button
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl py-6"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+                asChild
+              >
+                <Link href="/signup">Get Started</Link>
+              </Button>
+
+              <div className="border-t border-gray-100 mt-6 pt-5 flex-1">
+                <p className="text-sm font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>What you will get</p>
                 <ul className="text-sm text-gray-700 space-y-2.5 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
@@ -338,194 +312,157 @@ export default function PricingPage() {
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>Slack & Discord</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Jira & Linear</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">API & Webhooks</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">SSO/SAML</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Custom CSS</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">User Segmentation</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">AI Insights</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Revenue Tracking</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                    <span className="text-gray-400">Dedicated Support</span>
-                  </li>
                 </ul>
               </div>
-              <Button 
-                variant="outline" 
-                className="w-full border-2 border-gray-300 hover:bg-gray-50 text-gray-900 font-semibold rounded-lg py-6"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-                asChild
-              >
-                <Link href="/signup">Get started</Link>
-              </Button>
             </div>
 
-            {/* Pro Plan */}
-            <div 
+            {/* Pro Plan — Highlighted */}
+            <div
               data-card-index="2"
-              className={`border-2 rounded-xl p-6 bg-gradient-to-br from-yellow-400 via-yellow-300 to-yellow-500 hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border-yellow-400/50 relative backdrop-blur-sm ${
+              className={`flex flex-col relative rounded-2xl p-7 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 ${
                 visibleCards.has(2) ? 'animate-slide-in-right opacity-100' : 'opacity-0 translate-x-[50px]'
               }`}
               style={{
-                background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.95) 0%, rgba(234, 179, 8, 0.9) 50%, rgba(202, 138, 4, 0.95) 100%)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 20px 60px rgba(250, 204, 21, 0.3)'
+                background: 'linear-gradient(165deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)',
+                boxShadow: '0 25px 60px rgba(15, 52, 96, 0.3)'
               }}
             >
-              <div className="absolute -top-3 right-4 z-10">
-                <span className="text-xs font-bold bg-white/90 backdrop-blur-sm text-yellow-700 px-3 py-1 rounded-full shadow-lg">Popular</span>
+              <div className="absolute -top-3 right-5 z-10">
+                <span className="text-xs font-bold bg-yellow-400 text-gray-900 px-3 py-1 rounded-full shadow-lg">Popular</span>
               </div>
+
               <h3 className="text-xl font-bold mb-2 text-white" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>PRO</h3>
-              <div className="mb-6">
+              <p className="text-sm text-gray-400 mb-4">For growing teams & companies.</p>
+
+              <div className="mb-6 h-16 flex items-end">
                 {billingPeriod === 'yearly' ? (
-                  <>
-                    <span className="text-4xl font-bold tabular-nums text-white" style={{ fontFamily: 'Inter, sans-serif' }}>$33</span>
-                    <span className="text-white/90 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/month</span>
-                    <p className="text-sm text-white/80 mt-1 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>billed yearly</p>
-                  </>
+                  <div>
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold tabular-nums text-white" style={{ fontFamily: 'Inter, sans-serif' }}>$33</span>
+                      <span className="text-gray-400 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/month</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>billed yearly</p>
+                  </div>
                 ) : (
-                  <>
+                  <div className="flex items-baseline">
                     <span className="text-4xl font-bold tabular-nums text-white" style={{ fontFamily: 'Inter, sans-serif' }}>$39</span>
-                    <span className="text-white/90 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/mo</span>
-                  </>
+                    <span className="text-gray-400 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/mo</span>
+                  </div>
                 )}
               </div>
-              <div className="mb-6">
-                <p className="text-sm font-semibold mb-3 text-white" style={{ fontFamily: 'Inter, sans-serif' }}>Features Included:</p>
-                <ul className="text-sm text-white space-y-2.5 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Unlimited Boards</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>15 Admins</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Unlimited End Users</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Public Roadmap</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Changelog</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>All Widgets</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Private Boards</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Custom Branding</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Custom Domain</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Email Notifications</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Slack & Discord</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Jira & Linear</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>API & Webhooks</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>SSO/SAML</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-white flex-shrink-0" />
-                    <span>Custom CSS</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-white/50 flex-shrink-0" />
-                    <span className="text-white/70">User Segmentation</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-white/50 flex-shrink-0" />
-                    <span className="text-white/70">AI Insights</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-white/50 flex-shrink-0" />
-                    <span className="text-white/70">Revenue Tracking</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Circle className="h-4 w-4 text-white/50 flex-shrink-0" />
-                    <span className="text-white/70">Dedicated Support</span>
-                  </li>
-                </ul>
-              </div>
-              <Button 
-                className="w-full bg-white hover:bg-gray-100 text-yellow-600 font-semibold rounded-lg py-6"
+
+              <Button
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-xl py-6"
                 style={{ fontFamily: 'Inter, sans-serif' }}
                 asChild
               >
-                <Link href="/signup">Get started</Link>
+                <Link href="/signup">Get Started</Link>
               </Button>
+
+              <div className="border-t border-white/10 mt-6 pt-5 flex-1">
+                <p className="text-sm font-semibold text-white mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>What you will get</p>
+                <ul className="text-sm text-white space-y-2.5 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Unlimited Boards</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>15 Admins</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Unlimited End Users</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Public Roadmap</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Changelog</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>All Widgets</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Private Boards</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Custom Branding</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Custom Domain</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Email Notifications</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Slack & Discord</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Jira & Linear</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>API & Webhooks</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>SSO/SAML</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                    <span>Custom CSS</span>
+                  </li>
+                </ul>
+              </div>
             </div>
 
             {/* Scale Plan */}
-            <div 
+            <div
               data-card-index="3"
-              className={`border-2 rounded-xl p-6 bg-white hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 ${
+              className={`flex flex-col rounded-2xl border border-gray-200 bg-white p-7 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 ${
                 visibleCards.has(3) ? 'animate-slide-in-right opacity-100' : 'opacity-0 translate-x-[50px]'
               }`}
             >
               <h3 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>SCALE</h3>
-              <div className="mb-6">
+              <p className="text-sm text-gray-400 mb-4">Best for large organizations.</p>
+
+              <div className="mb-6 h-16 flex items-end">
                 {billingPeriod === 'yearly' ? (
-                  <>
-                    <span className="text-4xl font-bold tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>$83</span>
-                    <span className="text-gray-600 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/month</span>
-                    <p className="text-sm text-gray-500 mt-1 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>billed yearly</p>
-                  </>
+                  <div>
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>$83</span>
+                      <span className="text-gray-500 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/month</span>
+                    </div>
+                    <p className="text-sm text-gray-400 mt-1 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>billed yearly</p>
+                  </div>
                 ) : (
-                  <>
+                  <div className="flex items-baseline">
                     <span className="text-4xl font-bold tabular-nums" style={{ fontFamily: 'Inter, sans-serif' }}>$99</span>
-                    <span className="text-gray-600 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/mo</span>
-                  </>
+                    <span className="text-gray-500 ml-2 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>/mo</span>
+                  </div>
                 )}
               </div>
-              <div className="mb-6">
-                <p className="text-sm font-semibold mb-3 text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>Features Included:</p>
+
+              <Button
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl py-6"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+                asChild
+              >
+                <Link href="/signup">Get Started</Link>
+              </Button>
+
+              <div className="border-t border-gray-100 mt-6 pt-5 flex-1">
+                <p className="text-sm font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>What you will get</p>
                 <ul className="text-sm text-gray-700 space-y-2.5 font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
@@ -605,15 +542,8 @@ export default function PricingPage() {
                   </li>
                 </ul>
               </div>
-              <Button 
-                variant="outline" 
-                className="w-full border-2 border-gray-300 hover:bg-gray-50 text-gray-900 font-semibold rounded-lg py-6"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-                asChild
-              >
-                <Link href="/signup">Get started</Link>
-              </Button>
             </div>
+
           </div>
         </div>
       </section>

@@ -282,7 +282,7 @@ export default function EditChangelogPage({ params }: PageProps) {
       />
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Delete Changelog Entry</DialogTitle>
             <DialogDescription>
