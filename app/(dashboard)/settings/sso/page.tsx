@@ -156,7 +156,14 @@ export default function SSOSettingsPage() {
 
           <RadioGroup
             value={loginHandler || 'none'}
-            onValueChange={(value) => setLoginHandler(value === 'none' ? null : value as 'feedbackhub' | 'customer')}
+            onValueChange={(value) => {
+              const handler = value === 'none' ? null : value as 'feedbackhub' | 'customer'
+              setLoginHandler(handler)
+              if (handler === null && !guestPostingEnabled) {
+                setGuestPostingEnabled(true)
+                updateSettings({ guest_posting_enabled: true })
+              }
+            }}
             className="space-y-3"
           >
             <label

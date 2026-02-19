@@ -157,54 +157,58 @@ function PostDetailContent({
   const currentStatusObj = statuses.find(s => s.key === currentStatus)
 
   return (
-    <div className="flex flex-col lg:flex-row gap-0 lg:gap-6 min-h-0">
+    <div className="flex flex-col lg:flex-row gap-0 lg:gap-6 min-h-0" style={{ height: 'calc(85vh - 80px)' }}>
       {/* Left Column — Content + Comments */}
-      <div className="flex-1 min-w-0 overflow-y-auto pr-0 lg:pr-6 lg:border-r lg:border-gray-100" style={{ maxHeight: 'calc(85vh - 80px)' }}>
+      <div className="flex-1 min-w-0 flex flex-col pr-0 lg:pr-6 lg:border-r lg:border-gray-100 overflow-hidden">
         {/* Title */}
-        <DialogHeader className="mb-4">
+        <DialogHeader className="mb-4 flex-shrink-0">
           <DialogTitle className="text-xl font-bold text-gray-900 leading-tight">
             {post.title}
           </DialogTitle>
         </DialogHeader>
 
-        {/* Content */}
-        {post.content && (
-          <div className="text-sm text-gray-600 leading-relaxed mb-6 whitespace-pre-wrap">
-            {post.content}
-          </div>
-        )}
+        {/* Scrollable area: content + comments */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Content */}
+          {post.content && (
+            <div className="text-sm text-gray-600 leading-relaxed mb-6 whitespace-pre-wrap">
+              {post.content}
+            </div>
+          )}
 
-        {/* Admin Note */}
-        {post.admin_note && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700">
-              <span className="font-semibold">Admin note:</span> {post.admin_note}
-            </p>
-          </div>
-        )}
+          {/* Admin Note */}
+          {post.admin_note && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">
+                <span className="font-semibold">Admin note:</span> {post.admin_note}
+              </p>
+            </div>
+          )}
 
-        {/* Comments Section */}
-        <div className="border-t border-gray-100 pt-5">
-          <div className="flex items-center gap-2 mb-4">
-            <MessageSquare className="h-4 w-4 text-gray-400" />
-            <h3 className="text-sm font-semibold text-gray-900">Comments</h3>
+          {/* Comments */}
+          <div className="border-t border-gray-100 pt-5">
+            <div className="flex items-center gap-2 mb-4">
+              <MessageSquare className="h-4 w-4 text-gray-400" />
+              <h3 className="text-sm font-semibold text-gray-900">Comments</h3>
+            </div>
+            <CommentList postId={post.id} isAdmin={isAdmin} refreshTrigger={refreshTrigger} userEmail={adminEmail} />
           </div>
-          <CommentList postId={post.id} isAdmin={isAdmin} refreshTrigger={refreshTrigger} userEmail={adminEmail} />
+        </div>
 
-          <div className="mt-5 pt-4 border-t border-gray-100">
-            <CommentForm
-              postId={post.id}
-              isAdmin={isAdmin}
-              authorEmail={adminEmail}
-              authorName={isAdmin ? 'Admin' : undefined}
-              onCommentAdded={handleCommentAdded}
-            />
-          </div>
+        {/* Fixed comment form at bottom */}
+        <div className="flex-shrink-0 pt-4 border-t border-gray-100">
+          <CommentForm
+            postId={post.id}
+            isAdmin={isAdmin}
+            authorEmail={adminEmail}
+            authorName={isAdmin ? 'Admin' : undefined}
+            onCommentAdded={handleCommentAdded}
+          />
         </div>
       </div>
 
       {/* Right Column — Sidebar */}
-      <div className="w-full lg:w-[320px] flex-shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 80px)' }}>
+      <div className="w-full lg:w-[320px] flex-shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100 overflow-y-auto">
         <div className="space-y-5">
           {/* Status */}
           <div>

@@ -25,7 +25,7 @@ export default async function DashboardLayout({
   // Check for organization membership with error handling
   const { data: memberships, error } = await supabase
     .from('org_members')
-    .select('org_id')
+    .select('org_id, role, organizations(onboarding_completed)')
     .eq('user_id', user.id)
     .limit(1)
 
@@ -33,6 +33,15 @@ export default async function DashboardLayout({
   // Skip redirect if already on onboarding to prevent infinite loop
   if (!isOnboarding && (error || !memberships || memberships.length === 0)) {
     redirect('/onboarding')
+  }
+
+  // If landing on /dashboard and onboarding not complete, redirect to /onboarding as first page
+  const isDashboard = pathname === '/dashboard' || pathname === ''
+  if (isDashboard && memberships && memberships.length > 0) {
+    const membership = memberships[0] as any
+    if (membership.organizations?.onboarding_completed === false) {
+      redirect('/onboarding')
+    }
   }
 
   return (

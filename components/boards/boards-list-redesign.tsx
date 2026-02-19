@@ -136,28 +136,28 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
 
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-2 text-gray-500 mb-1">
-                <div className="p-1.5 rounded-lg bg-amber-50">
+            <div className="rounded-xl p-4 border border-amber-100 shadow-sm bg-gradient-to-br from-amber-50 to-orange-50/60">
+              <div className="flex items-center gap-2 text-amber-700 mb-1">
+                <div className="p-1.5 rounded-lg bg-amber-100/80">
                   <LayoutGrid className="h-3.5 w-3.5 text-amber-600" />
                 </div>
                 <span className="text-xs font-semibold uppercase tracking-wide">Boards</span>
               </div>
               <div className="text-2xl font-bold text-gray-900">{activeBoards.length}</div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-2 text-gray-500 mb-1">
-                <div className="p-1.5 rounded-lg bg-blue-50">
+            <div className="rounded-xl p-4 border border-blue-100 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50/60">
+              <div className="flex items-center gap-2 text-blue-700 mb-1">
+                <div className="p-1.5 rounded-lg bg-blue-100/80">
                   <MessageSquare className="h-3.5 w-3.5 text-blue-600" />
                 </div>
                 <span className="text-xs font-semibold uppercase tracking-wide">Feedback</span>
               </div>
               <div className="text-2xl font-bold text-gray-900">{totalPosts}</div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-2 text-gray-500 mb-1">
-                <div className="p-1.5 rounded-lg bg-green-50">
-                  <TrendingUp className="h-3.5 w-3.5 text-green-600" />
+            <div className="rounded-xl p-4 border border-emerald-100 shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50/60">
+              <div className="flex items-center gap-2 text-emerald-700 mb-1">
+                <div className="p-1.5 rounded-lg bg-emerald-100/80">
+                  <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
                 </div>
                 <span className="text-xs font-semibold uppercase tracking-wide">Votes</span>
               </div>
@@ -261,11 +261,11 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                 key={board.id}
                 className="group relative overflow-hidden border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 bg-white"
               >
-                <Link href={`/boards/${board.id}`}>
-                  <div className="p-6">
-                    {/* Accent bar on hover */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                {/* Always-visible subtle accent strip at top */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-300 to-amber-200 opacity-40 group-hover:opacity-100 transition-opacity" />
 
+                <Link href={`/boards/${board.id}`}>
+                  <div className="p-6 pt-5">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg text-gray-900 mb-1 group-hover:text-amber-600 transition-colors">
@@ -278,30 +278,37 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                       <ArrowUpRight className="h-4 w-4 text-gray-300 group-hover:text-amber-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </div>
 
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
+                    {/* Stats with colored icons */}
+                    <div className="flex items-center gap-4 pt-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/80 to-transparent -mx-6 px-6 -mb-6 pb-4 rounded-b-lg">
                       <div className="flex items-center gap-1.5">
-                        <MessageSquare className="h-3.5 w-3.5 text-gray-400" />
+                        <div className="p-1 rounded bg-blue-50">
+                          <MessageSquare className="h-3 w-3 text-blue-500" />
+                        </div>
                         <span className="text-sm font-semibold text-gray-800">{board.total_posts || 0}</span>
                         <span className="text-xs text-gray-400">posts</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <TrendingUp className="h-3.5 w-3.5 text-gray-400" />
+                        <div className="p-1 rounded bg-emerald-50">
+                          <TrendingUp className="h-3 w-3 text-emerald-500" />
+                        </div>
                         <span className="text-sm font-semibold text-gray-800">{board.total_votes || 0}</span>
                         <span className="text-xs text-gray-400">votes</span>
                       </div>
+                      {board.created_at && (
+                        <div className="flex items-center gap-1.5 ml-auto">
+                          <div className="p-1 rounded bg-violet-50">
+                            <Calendar className="h-3 w-3 text-violet-400" />
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(board.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                      )}
                     </div>
-
-                    {board.created_at && (
-                      <div className="flex items-center gap-1.5 mt-3 text-xs text-gray-400">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(board.created_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </div>
-                    )}
                   </div>
                 </Link>
 
@@ -350,6 +357,9 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                 key={board.id}
                 className="group relative overflow-hidden border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 bg-white"
               >
+                {/* Subtle left accent */}
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+
                 <Link href={`/boards/${board.id}`}>
                   <div className="p-4 flex items-center gap-4">
                     <div className="flex-1">
@@ -365,16 +375,22 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="flex items-center gap-1.5">
-                        <MessageSquare className="h-3.5 w-3.5 text-gray-400" />
+                        <div className="p-1 rounded bg-blue-50">
+                          <MessageSquare className="h-3 w-3 text-blue-500" />
+                        </div>
                         <span className="text-sm font-semibold text-gray-800">{board.total_posts || 0}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <TrendingUp className="h-3.5 w-3.5 text-gray-400" />
+                        <div className="p-1 rounded bg-emerald-50">
+                          <TrendingUp className="h-3 w-3 text-emerald-500" />
+                        </div>
                         <span className="text-sm font-semibold text-gray-800">{board.total_votes || 0}</span>
                       </div>
                       {board.created_at && (
-                        <div className="flex items-center gap-1.5 text-xs text-gray-400 min-w-[100px]">
-                          <Calendar className="h-3 w-3" />
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 min-w-[100px]">
+                          <div className="p-1 rounded bg-violet-50">
+                            <Calendar className="h-3 w-3 text-violet-400" />
+                          </div>
                           {new Date(board.created_at).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
