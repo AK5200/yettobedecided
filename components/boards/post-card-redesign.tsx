@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -64,6 +65,7 @@ export function PostCardRedesign({
   isPending = false,
   statuses,
 }: PostCardRedesignProps) {
+  const router = useRouter()
   const [isUpdating, setIsUpdating] = useState(false)
 
   const handleStatusChange = async (newStatus: string) => {
@@ -317,7 +319,22 @@ export function PostCardRedesign({
                       {post.is_pinned ? 'Unpin' : 'Pin'}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={async () => {
+                        if (!window.confirm('Are you sure you want to delete this post?')) return
+                        try {
+                          const response = await fetch(`/api/posts/${post.id}`, { method: 'DELETE' })
+                          if (!response.ok) {
+                            console.error('Failed to delete post:', response.statusText)
+                            return
+                          }
+                          router.refresh()
+                        } catch (error) {
+                          console.error('Failed to delete post:', error)
+                        }
+                      }}
+                    >
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

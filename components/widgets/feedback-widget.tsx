@@ -53,6 +53,7 @@ export function FeedbackWidget({
   const [otpCode, setOtpCode] = useState('')
   const [otpError, setOtpError] = useState('')
   const [otpLoading, setOtpLoading] = useState(false)
+  const [oauthError, setOauthError] = useState('')
 
   useEffect(() => {
     if (!selectedBoard && boards.length > 0) {
@@ -89,9 +90,9 @@ export function FeedbackWidget({
         if (user) {
           setIsIdentified(true)
           setIdentifiedUser(user)
-          // Store in sessionStorage for persistence
+          // Store in sessionStorage for persistence (scoped per org)
           try {
-            sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
+            sessionStorage.setItem(`feedbackhub_identified_user_${orgSlug}`, JSON.stringify(user))
           } catch (e) {
             // Ignore storage errors
           }
@@ -101,9 +102,9 @@ export function FeedbackWidget({
 
     window.addEventListener('message', handleMessage)
 
-    // Check sessionStorage for existing identity
+    // Check sessionStorage for existing identity (scoped per org)
     try {
-      const stored = sessionStorage.getItem('feedbackhub_identified_user')
+      const stored = sessionStorage.getItem(`feedbackhub_identified_user_${orgSlug}`)
       if (stored) {
         const user = JSON.parse(stored)
         setIsIdentified(true)
@@ -133,7 +134,7 @@ export function FeedbackWidget({
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [])
+  }, [orgSlug])
 
   const handleGuestSubmit = (email: string, name: string) => {
     if (!email) return
@@ -159,8 +160,52 @@ export function FeedbackWidget({
   }
 
   const handleSocialClick = (provider: 'google' | 'github') => {
+    setOauthError('')
     const url = `/api/auth/widget/${provider}?org_slug=${encodeURIComponent(orgSlug)}&popup=1`
-    window.open(url, 'feedbackhub_oauth', 'width=500,height=600,scrollbars=yes')
+    const popup = window.open(url, 'feedbackhub_oauth', 'width=500,height=600,scrollbars=yes')
+
+    if (!popup || popup.closed) {
+      setOauthError('Popup was blocked by your browser. Please allow popups for this site and try again.')
+      return
+    }
+
+    // Set a timeout for waiting for the OAuth postMessage response
+    const OAUTH_TIMEOUT_MS = 120_000 // 2 minutes
+    const timeoutId = setTimeout(() => {
+      window.removeEventListener('message', oauthMessageHandler)
+      if (!popup.closed) {
+        popup.close()
+      }
+      setOauthError('Login timed out. Please try again.')
+    }, OAUTH_TIMEOUT_MS)
+
+    const oauthMessageHandler = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'feedbackhub:oauth-success') {
+        clearTimeout(timeoutId)
+        window.removeEventListener('message', oauthMessageHandler)
+        const user = event.data.user
+        if (user) {
+          setIdentifiedUser(user)
+          setIsIdentified(true)
+          try {
+            sessionStorage.setItem(`feedbackhub_identified_user_${orgSlug}`, JSON.stringify(user))
+          } catch {
+            // Ignore storage errors
+          }
+        }
+      }
+    }
+
+    window.addEventListener('message', oauthMessageHandler)
+
+    // Also clean up if user closes the popup manually
+    const pollTimer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(pollTimer)
+        clearTimeout(timeoutId)
+        window.removeEventListener('message', oauthMessageHandler)
+      }
+    }, 500)
   }
 
   const handleCustomerLogin = () => {
@@ -249,7 +294,7 @@ export function FeedbackWidget({
       setMagicLinkStep(null)
 
       try {
-        sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
+        sessionStorage.setItem(`feedbackhub_identified_user_${orgSlug}`, JSON.stringify(user))
       } catch {
         // Ignore storage errors
       }
@@ -419,6 +464,9 @@ export function FeedbackWidget({
                       <div className="w-full border-t border-gray-200"></div>
                     </div>
                   </div>
+                  {oauthError && (
+                    <p className="text-xs text-red-500 text-center">{oauthError}</p>
+                  )}
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -523,6 +571,9 @@ export function FeedbackWidget({
                           <div className="w-full border-t border-gray-200"></div>
                         </div>
                       </div>
+                      {oauthError && (
+                        <p className="text-xs text-red-500 text-center">{oauthError}</p>
+                      )}
                       <div className="flex gap-2">
                         <Button
                           variant="outline"

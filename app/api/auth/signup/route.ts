@@ -17,7 +17,11 @@ export async function POST(request: Request) {
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/callback`,
+        emailRedirectTo: `${(() => {
+          const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
+          const protocol = request.headers.get('x-forwarded-proto') || 'https'
+          return host ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+        })()}/api/auth/callback`,
         // Disable Supabase's default email - we'll send via Resend
         data: {
           skip_email_confirmation: false, // We'll handle this manually

@@ -105,6 +105,7 @@ export default function NewChangelogPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
+                  maxLength={200}
                   className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
                   placeholder="Enter changelog title..."
                 />

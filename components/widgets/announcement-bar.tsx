@@ -14,7 +14,12 @@ export function AnnouncementBar({ orgSlug, accentColor = '#000', link }: Announc
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    const dismissedId = localStorage.getItem(`feedbackhub-bar-${orgSlug}`)
+    let dismissedId: string | null = null
+    try {
+      dismissedId = localStorage.getItem(`feedbackhub-bar-${orgSlug}`)
+    } catch {
+      // localStorage may be unavailable in private browsing mode
+    }
 
     fetch(`/api/changelog?org=${orgSlug}&limit=1`)
       .then(res => res.json())
@@ -35,7 +40,11 @@ export function AnnouncementBar({ orgSlug, accentColor = '#000', link }: Announc
       .then(res => res.json())
       .then(data => {
         if (data.entries?.[0]) {
-          localStorage.setItem(`feedbackhub-bar-${orgSlug}`, data.entries[0].id)
+          try {
+            localStorage.setItem(`feedbackhub-bar-${orgSlug}`, data.entries[0].id)
+          } catch {
+            // localStorage may be unavailable in private browsing mode
+          }
         }
       })
     setDismissed(true)

@@ -1,7 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { handleOptions, withCors } from '@/lib/cors'
 
 export const dynamic = 'force-dynamic'
+
+export async function OPTIONS(request: NextRequest) {
+  return handleOptions(request)
+}
 
 const defaultSettings = {
   widget_type: 'all-in-one',
@@ -13,6 +18,7 @@ const defaultSettings = {
 }
 
 export async function GET(request: Request) {
+  const origin = request.headers.get('origin')
   const supabase = await createClient()
   const { searchParams } = new URL(request.url)
   const orgId = searchParams.get('org_id')
@@ -35,7 +41,7 @@ export async function GET(request: Request) {
   }
 
   if (!resolvedOrgId) {
-    return NextResponse.json({ error: 'org_id or org (slug) is required' }, { status: 400 })
+    return withCors(NextResponse.json({ error: 'org_id or org (slug) is required' }, { status: 400 }), origin)
   }
 
   const { data, error } = await supabase
@@ -45,21 +51,21 @@ export async function GET(request: Request) {
     .single()
 
   if (error && error.code !== 'PGRST116') {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return withCors(NextResponse.json({ error: error.message }, { status: 500 }), origin)
   }
 
   if (!data) {
-    const response = NextResponse.json({
+    const response = withCors(NextResponse.json({
       settings: {
         ...defaultSettings,
         org_id: resolvedOrgId,
       },
-    })
+    }), origin)
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
     return response
   }
 
-  const response = NextResponse.json({ settings: data })
+  const response = withCors(NextResponse.json({ settings: data }), origin)
   response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
   return response
 }

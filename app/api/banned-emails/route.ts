@@ -11,6 +11,21 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Verify user is member of org
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('role')
+    .eq('org_id', orgId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!membership) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const { data, error } = await supabase
     .from('banned_emails')
     .select('*')
@@ -74,6 +89,21 @@ export async function DELETE(request: Request) {
   }
 
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Verify user is admin/owner of org
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('role')
+    .eq('org_id', orgId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const { error } = await supabase
     .from('banned_emails')

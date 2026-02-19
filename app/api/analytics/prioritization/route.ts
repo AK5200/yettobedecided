@@ -14,6 +14,23 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
+  // Auth check
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('id')
+    .eq('org_id', orgId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!membership) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+
   let boardQuery = supabase.from('boards').select('id').eq('org_id', orgId)
   if (boardId) {
     boardQuery = boardQuery.eq('id', boardId)
@@ -83,6 +100,37 @@ export async function PATCH(request: Request) {
   }
 
   const supabase = await createClient()
+
+  // Auth check
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Verify user owns the post's org via board membership
+  const { data: post } = await supabase
+    .from('posts')
+    .select('board_id, boards(org_id)')
+    .eq('id', post_id)
+    .single()
+
+  if (!post) {
+    return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+  }
+
+  const postOrgId = (post.boards as any)?.org_id
+  if (postOrgId) {
+    const { data: membership } = await supabase
+      .from('org_members')
+      .select('id')
+      .eq('org_id', postOrgId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+  }
 
   const { error } = await supabase
     .from('posts')

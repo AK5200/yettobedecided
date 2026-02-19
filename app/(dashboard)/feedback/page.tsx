@@ -17,7 +17,7 @@ export default async function FeedbackPage() {
     .select('org_id')
     .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!membership) {
     redirect('/onboarding')

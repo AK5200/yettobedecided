@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -31,7 +32,12 @@ export function NewPostForm({ boardId }: NewPostFormProps) {
       if (res.ok) {
         router.push(`/boards/${boardId}`)
         router.refresh()
+      } else {
+        const data = await res.json().catch(() => null)
+        toast.error(data?.error || 'Failed to create post. Please try again.')
       }
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -47,6 +53,7 @@ export function NewPostForm({ boardId }: NewPostFormProps) {
           onChange={(e) => setTitle(e.target.value)}
           placeholder='Feature title'
           required
+          maxLength={200}
         />
       </div>
       <div>

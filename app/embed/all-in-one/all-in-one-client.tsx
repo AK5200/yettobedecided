@@ -21,14 +21,14 @@ export default function AllInOneEmbedClient() {
   // Read identified user from sessionStorage on mount
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem('feedbackhub_identified_user')
+      const stored = sessionStorage.getItem(`feedbackhub_identified_user_${org}`)
       if (stored) {
         setIdentifiedUser(JSON.parse(stored))
       }
     } catch {
       // Ignore storage errors
     }
-  }, [])
+  }, [org])
 
   // Listen for identity from parent via postMessage
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function AllInOneEmbedClient() {
         if (user) {
           setIdentifiedUser(user)
           try {
-            sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
+            sessionStorage.setItem(`feedbackhub_identified_user_${org}`, JSON.stringify(user))
           } catch {
             // Ignore storage errors
           }
@@ -50,7 +50,7 @@ export default function AllInOneEmbedClient() {
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [])
+  }, [org])
 
   useEffect(() => {
     if (!org) {
@@ -141,7 +141,7 @@ export default function AllInOneEmbedClient() {
   const handleFeedbackSubmit = async (post?: any) => {
     // Re-read identified user from sessionStorage (user may have just authenticated in the feedback form)
     try {
-      const stored = sessionStorage.getItem('feedbackhub_identified_user')
+      const stored = sessionStorage.getItem(`feedbackhub_identified_user_${org}`)
       if (stored) {
         setIdentifiedUser(JSON.parse(stored))
       }

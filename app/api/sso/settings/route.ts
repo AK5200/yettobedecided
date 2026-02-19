@@ -35,7 +35,8 @@ export async function GET() {
   return NextResponse.json({
     sso_mode: org.sso_mode || 'guest_only',
     has_secret_key: !!org.sso_secret_key,
-    secret_key: org.sso_secret_key,
+    // Only expose secret key to owners
+    secret_key: member.role === 'owner' ? org.sso_secret_key : undefined,
     guest_posting_enabled: org.guest_posting_enabled ?? true,
     social_login_enabled: org.social_login_enabled ?? true, // Keep for backward compatibility
     login_handler: org.login_handler || null,

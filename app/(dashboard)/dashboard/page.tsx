@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MiniMetricCards } from '@/components/analytics/mini-metric-cards'
 
@@ -8,15 +10,23 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
+  if (!user) {
+    redirect('/login')
+  }
+
   const { data: membership } = await supabase
     .from('org_members')
     .select('org_id, organizations(name)')
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  const orgId = membership?.org_id
-  const orgName = (membership?.organizations as any)?.name || 'Your Organization'
+  if (!membership) {
+    redirect('/onboarding')
+  }
+
+  const orgId = membership.org_id
+  const orgName = (membership.organizations as any)?.name || 'Your Organization'
 
   const { count: boardCount } = await supabase
     .from('boards')
@@ -41,16 +51,40 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Boards</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold">
-            {boardCount || 0}
+          <CardContent>
+            {boardCount ? (
+              <span className="text-2xl font-bold">{boardCount}</span>
+            ) : (
+              <div>
+                <span className="text-2xl font-bold text-gray-400">0</span>
+                <p className="text-sm text-gray-500 mt-1">
+                  No boards yet.{' '}
+                  <Link href="/boards/new" className="text-blue-600 hover:underline font-medium">
+                    Create your first board
+                  </Link>
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Changelog</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold">
-            {changelogCount || 0}
+          <CardContent>
+            {changelogCount ? (
+              <span className="text-2xl font-bold">{changelogCount}</span>
+            ) : (
+              <div>
+                <span className="text-2xl font-bold text-gray-400">0</span>
+                <p className="text-sm text-gray-500 mt-1">
+                  No entries yet.{' '}
+                  <Link href="/changelog/new" className="text-blue-600 hover:underline font-medium">
+                    Write your first changelog
+                  </Link>
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

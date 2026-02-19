@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { post_id, content, author_email, author_name, guest_email, guest_name, identified_user, is_from_admin, is_internal = false } = body
+    const { post_id, content, author_email, author_name, guest_email, guest_name, identified_user, is_internal = false } = body
 
     if (!post_id || !content) {
       return withCors(NextResponse.json({ error: 'post_id and content are required' }, { status: 400 }), origin)
@@ -69,6 +69,23 @@ export async function POST(request: Request) {
     if (!boardData?.org_id) {
       return withCors(NextResponse.json({ error: 'Board not found' }, { status: 404 }), origin)
     }
+
+    // Verify is_from_admin and is_internal server-side — only actual org admins/owners can set these
+    let verifiedIsAdmin = false
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (authUser) {
+      const { data: membership } = await supabase
+        .from('org_members')
+        .select('role')
+        .eq('org_id', boardData.org_id)
+        .eq('user_id', authUser.id)
+        .maybeSingle()
+      if (membership && (membership.role === 'admin' || membership.role === 'owner')) {
+        verifiedIsAdmin = true
+      }
+    }
+    const is_from_admin = verifiedIsAdmin
+    const verifiedIsInternal = verifiedIsAdmin ? is_internal : false
 
     // Get org settings
     const { data: org } = await supabase
@@ -134,8 +151,8 @@ export async function POST(request: Request) {
       identified_user_id: ssoResult.user?.id || null,
       identified_user_avatar: ssoResult.user?.avatar || null,
       user_source: sourceForRow,
-      is_from_admin: is_from_admin || false,
-      is_internal
+      is_from_admin,
+      is_internal: verifiedIsInternal
     }
 
     const { data: comment, error } = await supabase

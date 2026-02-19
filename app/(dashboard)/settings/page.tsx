@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Plus, Trash2 } from 'lucide-react'
 
 interface Organization {
   id: string
@@ -25,18 +24,11 @@ interface Organization {
   language?: string
 }
 
-interface FooterLink {
-  id: string
-  label: string
-  url: string
-}
-
 export default function GeneralSettingsPage() {
   const supabase = createClient()
   const [org, setOrg] = useState<Organization | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [footerLinks, setFooterLinks] = useState<FooterLink[]>([])
 
   useEffect(() => {
     fetchOrg()
@@ -80,22 +72,6 @@ export default function GeneralSettingsPage() {
       toast.success('Settings saved!')
     }
     setSaving(false)
-  }
-
-  const addFooterLink = () => {
-    setFooterLinks([...footerLinks, { id: Date.now().toString(), label: '', url: '' }])
-  }
-
-  const removeFooterLink = (id: string) => {
-    setFooterLinks(footerLinks.filter((link) => link.id !== id))
-  }
-
-  const updateFooterLink = (id: string, field: 'label' | 'url', value: string) => {
-    setFooterLinks(
-      footerLinks.map((link) =>
-        link.id === id ? { ...link, [field]: value } : link
-      )
-    )
   }
 
   if (loading) {
@@ -208,53 +184,6 @@ export default function GeneralSettingsPage() {
             </SelectContent>
           </Select>
         </div>
-      </section>
-
-      <hr className="my-8" />
-
-      {/* Footer Links Section */}
-      <section className="mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-medium text-gray-900">Footer Links</h3>
-            <p className="text-sm text-gray-500">
-              These links will help your users to connect with you or go to your website.
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={addFooterLink}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Link
-          </Button>
-        </div>
-
-        {footerLinks.length > 0 && (
-          <div className="space-y-3">
-            {footerLinks.map((link) => (
-              <div key={link.id} className="flex items-center gap-3">
-                <Input
-                  placeholder="Link label"
-                  value={link.label}
-                  onChange={(e) => updateFooterLink(link.id, 'label', e.target.value)}
-                  className="flex-1"
-                />
-                <Input
-                  placeholder="https://example.com"
-                  value={link.url}
-                  onChange={(e) => updateFooterLink(link.id, 'url', e.target.value)}
-                  className="flex-1"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFooterLink(link.id)}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
       </section>
 
       {/* Save Button */}

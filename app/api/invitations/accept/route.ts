@@ -3,8 +3,16 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { token, user_id } = body
+  const { token } = body
   const supabase = await createClient()
+
+  // Authenticate user - user_id must come from auth, not request body
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'You must be logged in to accept an invitation' }, { status: 401 })
+  }
+  const user_id = user.id
+
   const { data: invitation, error: findError } = await supabase
     .from('invitations')
     .select('*')

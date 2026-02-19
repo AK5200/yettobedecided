@@ -3,17 +3,16 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id: orgId } = await params
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-
-        const orgId = params.id
 
         // Check membership
         const { data: membership } = await supabase
@@ -45,17 +44,16 @@ export async function GET(
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id: orgId } = await params
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-
-        const orgId = params.id
 
         // Check admin/owner role
         const { data: membership } = await supabase

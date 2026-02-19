@@ -84,7 +84,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         if (user) {
           setIdentifiedUser(user)
           try {
-            sessionStorage.setItem('feedbackhub_identified_user', JSON.stringify(user))
+            sessionStorage.setItem(`feedbackhub_identified_user_${orgSlug}`, JSON.stringify(user))
           } catch {
             // Ignore storage errors
           }
@@ -97,7 +97,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     // Check sessionStorage for existing identity (only if no prop provided)
     if (!identifiedUserProp) {
       try {
-        const stored = sessionStorage.getItem('feedbackhub_identified_user')
+        const stored = sessionStorage.getItem(`feedbackhub_identified_user_${orgSlug}`)
         if (stored) {
           setIdentifiedUser(JSON.parse(stored))
         }

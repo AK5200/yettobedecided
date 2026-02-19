@@ -36,14 +36,21 @@ export function isOriginAllowed(origin: string | null): boolean {
  * Get CORS headers for a response
  */
 export function corsHeaders(origin?: string | null): Record<string, string> {
-  const allowedOrigin = origin && isOriginAllowed(origin) ? origin : '*'
-  
-  return {
+  const isAllowed = origin && isOriginAllowed(origin)
+  const allowedOrigin = isAllowed ? origin : '*'
+
+  const headers: Record<string, string> = {
     'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-    'Access-Control-Allow-Credentials': 'true',
   }
+
+  // Only set credentials when origin is specific (browsers reject credentials + wildcard)
+  if (isAllowed) {
+    headers['Access-Control-Allow-Credentials'] = 'true'
+  }
+
+  return headers
 }
 
 /**

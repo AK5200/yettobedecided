@@ -4,11 +4,11 @@ import { LinearClient } from '@linear/sdk';
 
 export async function POST(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id: postId } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    const postId = params.id;
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

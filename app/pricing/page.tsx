@@ -56,7 +56,7 @@ export default function PricingPage() {
         }`}
       >
         <div className="text-xl font-bold" style={{ fontFamily: 'var(--font-raleway), sans-serif', fontWeight: 700 }}>
-          <Link href="/">Example</Link>
+          <Link href="/">FeedbackHub</Link>
         </div>
         <nav className="flex items-center gap-6 text-sm font-semibold" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
           <DropdownMenu>

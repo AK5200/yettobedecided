@@ -230,9 +230,8 @@ export default function WidgetsPage() {
     fetchOrg()
   }, [])
 
-  // Use deployed URL for widget code generation
-  // This ensures clients get the correct production URL in their embed code
-  const baseUrl = 'https://yettobedecided-8lws.vercel.app'
+  // Derive base URL from current window location for correct embed code generation
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://yettobedecided-8lws.vercel.app'
 
   // Generate embed codes with comments for customization
   const generateChangelogPopupCode = () => {

@@ -36,22 +36,32 @@ export function PostAdminActions({
 
   const handleApprove = async () => {
     setLoading(true)
-    await fetch(`/api/posts/${postId}`, {
+    const response = await fetch(`/api/posts/${postId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_approved: true }),
     })
+    if (!response.ok) {
+      console.error('Failed to approve post:', response.statusText)
+      setLoading(false)
+      return
+    }
     onUpdate()
     setLoading(false)
   }
 
   const handleReject = async () => {
     setLoading(true)
-    await fetch(`/api/posts/${postId}`, {
+    const response = await fetch(`/api/posts/${postId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_approved: false, admin_note: rejectNote }),
     })
+    if (!response.ok) {
+      console.error('Failed to reject post:', response.statusText)
+      setLoading(false)
+      return
+    }
     setShowRejectDialog(false)
     onUpdate()
     setLoading(false)
@@ -59,20 +69,30 @@ export function PostAdminActions({
 
   const handleTogglePin = async () => {
     setLoading(true)
-    await fetch(`/api/posts/${postId}`, {
+    const response = await fetch(`/api/posts/${postId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_pinned: !isPinned }),
     })
+    if (!response.ok) {
+      console.error('Failed to toggle pin:', response.statusText)
+      setLoading(false)
+      return
+    }
     onUpdate()
     setLoading(false)
   }
 
   const handleDeletePost = async () => {
     setLoading(true)
-    await fetch(`/api/posts/${postId}`, {
+    const response = await fetch(`/api/posts/${postId}`, {
       method: 'DELETE',
     })
+    if (!response.ok) {
+      console.error('Failed to delete post:', response.statusText)
+      setLoading(false)
+      return
+    }
     setShowDeleteDialog(false)
     router.refresh()
     setLoading(false)
@@ -80,9 +100,14 @@ export function PostAdminActions({
 
   const handleResetComments = async () => {
     setLoading(true)
-    await fetch(`/api/posts/${postId}/reset-comments`, {
+    const response = await fetch(`/api/posts/${postId}/reset-comments`, {
       method: 'DELETE',
     })
+    if (!response.ok) {
+      console.error('Failed to reset comments:', response.statusText)
+      setLoading(false)
+      return
+    }
     setShowResetDialog(null)
     onUpdate()
     setLoading(false)
@@ -90,9 +115,14 @@ export function PostAdminActions({
 
   const handleResetVotes = async () => {
     setLoading(true)
-    await fetch(`/api/posts/${postId}/reset-votes`, {
+    const response = await fetch(`/api/posts/${postId}/reset-votes`, {
       method: 'DELETE',
     })
+    if (!response.ok) {
+      console.error('Failed to reset votes:', response.statusText)
+      setLoading(false)
+      return
+    }
     setShowResetDialog(null)
     onUpdate()
     setLoading(false)
@@ -100,9 +130,14 @@ export function PostAdminActions({
 
   const handleResetAll = async () => {
     setLoading(true)
-    await fetch(`/api/posts/${postId}/reset`, {
+    const response = await fetch(`/api/posts/${postId}/reset`, {
       method: 'DELETE',
     })
+    if (!response.ok) {
+      console.error('Failed to reset all:', response.statusText)
+      setLoading(false)
+      return
+    }
     setShowResetDialog(null)
     onUpdate()
     setLoading(false)

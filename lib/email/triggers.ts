@@ -10,6 +10,15 @@ function getResendClient(): Resend | null {
     return new Resend(apiKey);
 }
 
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function getFromEmail(): string {
     // Resend requires either:
     // 1. A verified domain (for production)
@@ -86,7 +95,7 @@ export async function triggerNewPostEmail(postId: string) {
                 from: getFromEmail(),
                 to: user.user.email,
                 subject: `New feedback: ${post.title}`,
-                html: `<p>New feedback submitted: <strong>${post.title}</strong></p><p>${post.content || ''}</p>`
+                html: `<p>New feedback submitted: <strong>${escapeHtml(post.title)}</strong></p><p>${escapeHtml(post.content || '')}</p>`
             });
         }
     }
@@ -116,7 +125,7 @@ export async function triggerStatusChangeEmail(postId: string, oldStatus: string
             from: getFromEmail(),
             to: email,
             subject: `Update: ${post.title} is now ${newStatus}`,
-            html: `<p>Status changed from <strong>${oldStatus}</strong> to <strong>${newStatus}</strong></p><p>${post.title}</p>`
+            html: `<p>Status changed from <strong>${escapeHtml(oldStatus)}</strong> to <strong>${escapeHtml(newStatus)}</strong></p><p>${escapeHtml(post.title)}</p>`
         });
     }
 }
@@ -140,7 +149,7 @@ export async function triggerNewCommentEmail(postId: string, commentContent: str
         from: getFromEmail(),
         to: email,
         subject: `New comment on: ${post.title}`,
-        html: `<p>New comment on your post: <strong>${post.title}</strong></p><p>${commentContent}</p>`
+        html: `<p>New comment on your post: <strong>${escapeHtml(post.title)}</strong></p><p>${escapeHtml(commentContent)}</p>`
     });
 }
 
@@ -172,7 +181,7 @@ export async function triggerPostMergedEmail(sourcePostId: string, targetPostId:
             from: getFromEmail(),
             to: email,
             subject: `Your feedback was merged`,
-            html: `<p>Your feedback <strong>${sourcePost.title}</strong> was merged into <strong>${targetPost.title}</strong></p>`
+            html: `<p>Your feedback <strong>${escapeHtml(sourcePost.title)}</strong> was merged into <strong>${escapeHtml(targetPost.title)}</strong></p>`
         });
     }
 }

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Lock, Globe } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface CommentFormProps {
   postId: string
@@ -39,7 +40,7 @@ export function CommentForm({
     event.preventDefault()
     if (!content.trim()) return
     if (!effectiveEmail.trim()) {
-      window.alert('Please enter your email to comment.')
+      toast.error('Please enter your email to comment.')
       return
     }
     setLoading(true)
@@ -58,7 +59,7 @@ export function CommentForm({
 
     if (!response.ok) {
       const data = await response.json()
-      window.alert(data.error || 'Failed to post comment')
+      toast.error(data.error || 'Failed to post comment')
       setLoading(false)
       return
     }

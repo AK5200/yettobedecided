@@ -245,18 +245,16 @@ export default function EditChangelogPage({ params }: PageProps) {
                   >
                     Cancel
                   </Button>
-                  {!isPublished && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      disabled={saving || deleting}
-                      onClick={() => setShowDeleteDialog(true)}
-                      className="ml-2"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled={saving || deleting}
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="ml-2"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
                 </div>
                 <Button
                   type="button"

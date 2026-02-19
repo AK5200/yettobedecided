@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -25,7 +26,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const { data: widgetUser } = await admin
     .from('widget_users')
     .select('id, org_id')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!widgetUser) {
@@ -43,7 +44,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       banned_at: new Date().toISOString(),
       banned_reason: reason || null,
     })
-    .eq('id', params.id)
+    .eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -52,7 +53,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
   return NextResponse.json({ success: true })
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -75,7 +77,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   const { data: widgetUser } = await admin
     .from('widget_users')
     .select('id, org_id')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!widgetUser) {
@@ -93,7 +95,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       banned_at: null,
       banned_reason: null,
     })
-    .eq('id', params.id)
+    .eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

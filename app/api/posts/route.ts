@@ -24,7 +24,11 @@ export async function GET(request: Request) {
     }
 
     if (search) {
-      query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`)
+      // Sanitize search to prevent PostgREST filter injection
+      const sanitized = search.replace(/[%_.,()]/g, '')
+      if (sanitized) {
+        query = query.or(`title.ilike.%${sanitized}%,content.ilike.%${sanitized}%`)
+      }
     }
 
     if (exclude) {

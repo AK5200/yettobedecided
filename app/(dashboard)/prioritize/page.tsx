@@ -7,16 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
   Search,
   Filter,
   BarChart3,
-  ChevronDown,
   Trophy,
   Target,
   HelpCircle,
@@ -35,45 +28,6 @@ interface Post {
   board_id: string
   boards?: { name: string; emoji?: string }
 }
-
-const QUADRANTS = [
-  {
-    id: 'easy-wins',
-    label: 'Easy wins',
-    icon: Trophy,
-    bgColor: 'bg-emerald-100',
-    iconColor: 'text-emerald-500',
-    borderColor: 'border-emerald-200',
-    position: 'top-left',
-  },
-  {
-    id: 'big-bets',
-    label: 'Big bets',
-    icon: Target,
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-500',
-    borderColor: 'border-blue-200',
-    position: 'top-right',
-  },
-  {
-    id: 'maybes',
-    label: 'Maybes',
-    icon: HelpCircle,
-    bgColor: 'bg-amber-100',
-    iconColor: 'text-amber-500',
-    borderColor: 'border-amber-200',
-    position: 'bottom-left',
-  },
-  {
-    id: 'avoid',
-    label: 'Avoid',
-    icon: XCircle,
-    bgColor: 'bg-pink-100',
-    iconColor: 'text-pink-500',
-    borderColor: 'border-pink-200',
-    position: 'bottom-right',
-  },
-]
 
 export default function PrioritizePage() {
   const router = useRouter()
@@ -150,19 +104,7 @@ export default function PrioritizePage() {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900">Prioritize</h1>
               <span className="text-gray-400">&gt;</span>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="font-semibold text-lg">
-                    Value vs Effort
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>Value vs Effort</DropdownMenuItem>
-                  <DropdownMenuItem>Impact vs Effort</DropdownMenuItem>
-                  <DropdownMenuItem>RICE Score</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <span className="font-semibold text-lg text-gray-900">Value vs Effort</span>
             </div>
             <div className="flex items-center gap-3">
               {/* Search */}
@@ -177,13 +119,13 @@ export default function PrioritizePage() {
               </div>
 
               {/* Filter */}
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" disabled title="Coming soon">
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
 
               {/* Chart Toggle */}
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" disabled title="Coming soon">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Chart
               </Button>
@@ -213,7 +155,6 @@ export default function PrioritizePage() {
                 <div
                   key={post.id}
                   className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                  draggable
                   onClick={() => router.push(`/boards/${post.board_id}?post=${post.id}`)}
                 >
                   <div className="flex items-start gap-3">

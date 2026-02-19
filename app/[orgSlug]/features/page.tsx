@@ -1,6 +1,27 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { PublicFeaturesView } from '@/components/public/public-features-view'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orgSlug: string }>
+}): Promise<Metadata> {
+  const { orgSlug } = await params
+  const supabase = await createClient()
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('name')
+    .eq('slug', orgSlug)
+    .single()
+
+  const name = org?.name || orgSlug
+  return {
+    title: `${name} - Feature Requests`,
+    description: `Browse and vote on feature requests for ${name}.`,
+  }
+}
 
 export default async function PublicFeaturesPage({
   params,

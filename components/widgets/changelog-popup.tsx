@@ -65,7 +65,7 @@ export function ChangelogPopup({
       localStorage.setItem(`feedbackhub-changelog-${orgSlug}`, entries[0].id)
     }
     setOpen(false)
-    window.parent.postMessage('feedbackhub:close', '*')
+    window.parent.postMessage('feedbackhub:close-changelog', '*')
   }
 
   const radiusValue = BORDER_RADIUS_MAP[borderRadius] || '12px'

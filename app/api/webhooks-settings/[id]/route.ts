@@ -92,10 +92,29 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
+    // Whitelist allowed fields to prevent arbitrary field injection
+    const allowedFields: Record<string, any> = {}
+    if (body.name !== undefined) allowedFields.name = body.name
+    if (body.url !== undefined) {
+      // Validate URL format
+      try {
+        const parsed = new URL(body.url)
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+          return NextResponse.json({ error: 'Webhook URL must use http or https' }, { status: 400 })
+        }
+        allowedFields.url = body.url
+      } catch {
+        return NextResponse.json({ error: 'Invalid webhook URL' }, { status: 400 })
+      }
+    }
+    if (body.events !== undefined) allowedFields.events = body.events
+    if (body.secret !== undefined) allowedFields.secret = body.secret
+    if (body.is_active !== undefined) allowedFields.is_active = body.is_active
+
     const { data: updatedWebhook, error: updateError } = await supabase
       .from('webhooks')
       .update({
-        ...body,
+        ...allowedFields,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)

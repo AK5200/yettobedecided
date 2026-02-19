@@ -1,7 +1,28 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orgSlug: string }>
+}): Promise<Metadata> {
+  const { orgSlug } = await params
+  const supabase = await createClient()
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('name')
+    .eq('slug', orgSlug)
+    .single()
+
+  const name = org?.name || orgSlug
+  return {
+    title: `${name} - Feedback`,
+    description: `View feedback boards and feature requests for ${name}.`,
+  }
+}
 
 export default async function PublicOrgPage({
   params,

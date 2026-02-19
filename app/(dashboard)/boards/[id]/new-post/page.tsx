@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { NewPostForm } from '@/components/posts/new-post-form'
 
-export default async function NewPostPage({ params }: { params: { id: string } }) {
+export default async function NewPostPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -10,7 +11,7 @@ export default async function NewPostPage({ params }: { params: { id: string } }
   const { data: board } = await supabase
     .from('boards')
     .select('*, organizations(*)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!board) redirect('/boards')
@@ -18,7 +19,7 @@ export default async function NewPostPage({ params }: { params: { id: string } }
   return (
     <div className='p-8'>
       <h1 className='text-2xl font-bold mb-6'>Create New Post</h1>
-      <NewPostForm boardId={params.id} />
+      <NewPostForm boardId={id} />
     </div>
   )
 }

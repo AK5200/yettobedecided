@@ -67,8 +67,8 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
     {
       label: 'Votes',
       value: data.totals?.votes || 0,
-      current: data.period?.posts || 0,
-      previous: data.period?.posts_prev || 0,
+      current: 0,
+      previous: 0,
       icon: ThumbsUp,
       gradient: 'from-violet-500 to-violet-600',
       bgGradient: 'from-violet-50 to-violet-100',
@@ -78,8 +78,8 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
     {
       label: 'Comments',
       value: data.totals?.comments || 0,
-      current: data.period?.posts || 0,
-      previous: data.period?.posts_prev || 0,
+      current: 0,
+      previous: 0,
       icon: MessageSquare,
       gradient: 'from-emerald-500 to-emerald-600',
       bgGradient: 'from-emerald-50 to-emerald-100',
@@ -89,8 +89,8 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
     {
       label: 'Users',
       value: data.totals?.users || 0,
-      current: data.period?.posts || 0,
-      previous: data.period?.posts_prev || 0,
+      current: 0,
+      previous: 0,
       icon: Users,
       gradient: 'from-blue-500 to-blue-600',
       bgGradient: 'from-blue-50 to-blue-100',
@@ -100,8 +100,8 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
     {
       label: 'Resolved',
       value: (data.by_status?.shipped || 0) + (data.by_status?.closed || 0),
-      current: data.period?.posts || 0,
-      previous: data.period?.posts_prev || 0,
+      current: 0,
+      previous: 0,
       icon: CheckCircle2,
       gradient: 'from-green-500 to-green-600',
       bgGradient: 'from-green-50 to-green-100',

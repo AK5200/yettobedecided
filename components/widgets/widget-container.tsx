@@ -28,20 +28,40 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10_000)
+
     const fetchWidgetData = async () => {
       setLoading(true)
       const baseUrl = apiUrl || window.location.origin
-      const response = await fetch(`${baseUrl}/api/widget?org=${orgSlug}`)
-      if (response.ok) {
-        const data = await response.json()
-        setSettings(data.settings)
-        setBoards(data.boards || [])
-        setChangelog(data.changelog || [])
+      try {
+        const response = await fetch(`${baseUrl}/api/widget?org=${orgSlug}`, {
+          signal: controller.signal,
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setSettings(data.settings)
+          setBoards(data.boards || [])
+          setChangelog(data.changelog || [])
+        }
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') {
+          console.error('Widget data fetch timed out after 10 seconds')
+        } else {
+          console.error('Failed to fetch widget data:', error)
+        }
+      } finally {
+        clearTimeout(timeoutId)
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     fetchWidgetData()
+
+    return () => {
+      clearTimeout(timeoutId)
+      controller.abort()
+    }
   }, [apiUrl, orgSlug])
 
   useEffect(() => {

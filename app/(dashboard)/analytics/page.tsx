@@ -19,7 +19,7 @@ import { BarChart3 } from 'lucide-react'
 
 export default function AnalyticsPage() {
   const searchParams = useSearchParams()
-  const days = parseInt(searchParams.get('days') || '30')
+  const days = parseInt(searchParams.get('days') || '30') || 30
   const boardId = searchParams.get('board_id') || undefined
   const [orgId, setOrgId] = useState<string | null>(null)
 

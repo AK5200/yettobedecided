@@ -1,8 +1,29 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { ChangelogSubscribeForm } from '@/components/changelog/changelog-subscribe-form'
 import Link from 'next/link'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orgSlug: string }>
+}): Promise<Metadata> {
+  const { orgSlug } = await params
+  const supabase = await createClient()
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('name')
+    .eq('slug', orgSlug)
+    .single()
+
+  const name = org?.name || orgSlug
+  return {
+    title: `${name} - Changelog`,
+    description: `Stay up to date with the latest updates and changes from ${name}.`,
+  }
+}
 
 export default async function PublicChangelogPage({
   params,

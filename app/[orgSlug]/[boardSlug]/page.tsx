@@ -18,6 +18,7 @@ import {
 import { CommentList } from '@/components/boards/comment-list'
 import { CommentForm } from '@/components/boards/comment-form'
 import { Separator } from '@/components/ui/separator'
+import { toast } from 'sonner'
 
 type Org = { id: string; name: string }
 type Board = { id: string; name: string }
@@ -149,7 +150,7 @@ export default function PublicBoardPage({
 
   const handleVote = async (postId: string) => {
     if (!userEmail) {
-      window.alert('Please enter your email before voting.')
+      toast.error('Please enter your email before voting.')
       return
     }
 
@@ -165,7 +166,7 @@ export default function PublicBoardPage({
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}))
-        window.alert(errorBody?.error || 'Unable to update vote. Please try again.')
+        toast.error(errorBody?.error || 'Unable to update vote. Please try again.')
         return
       }
 
@@ -185,7 +186,7 @@ export default function PublicBoardPage({
     if (!board?.id) return
     if (!newTitle.trim()) return
     if (!userEmail.trim()) {
-      window.alert('Please enter your email to submit feedback.')
+      toast.error('Please enter your email to submit feedback.')
       return
     }
     setSubmitLoading(true)

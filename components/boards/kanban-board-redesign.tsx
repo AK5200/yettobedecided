@@ -14,6 +14,7 @@ import { Circle, ChevronUp, Eye, EyeOff, Calendar, MessageSquare, Pin } from 'lu
 import { PostDetailDialog } from './post-detail-dialog'
 import type { Post } from '@/lib/types/database'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface Status {
   id: string
@@ -65,12 +66,22 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
   }, [posts, displayStatuses])
 
   const handleStatusChange = async (postId: string, newStatus: string) => {
-    await fetch(`/api/posts/${postId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
-    })
-    router.refresh()
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (!response.ok) {
+        toast.error('Failed to update status')
+        console.error('Failed to update status:', response.statusText)
+        return
+      }
+      router.refresh()
+    } catch (error) {
+      toast.error('Failed to update status')
+      console.error('Failed to update status:', error)
+    }
   }
 
   const getAuthorName = (post: Post) => {

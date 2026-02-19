@@ -12,10 +12,27 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const body = await request.json()
   const { org_id, name, color } = body
   if (!org_id || !name) return NextResponse.json({ error: 'org_id and name required' }, { status: 400 })
-  const supabase = await createClient()
+
+  // Verify user is admin/owner of org
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('role')
+    .eq('org_id', org_id)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const { data, error } = await supabase
     .from('tags')
     .insert({ org_id, name, color: color || '#6B7280' })

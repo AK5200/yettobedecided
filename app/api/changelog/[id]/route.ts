@@ -82,7 +82,8 @@ export async function PATCH(
     if (category !== undefined) updates.category = category
     if (is_published !== undefined) {
       updates.is_published = is_published
-      if (is_published) {
+      // Only set published_at when transitioning from draft to published
+      if (is_published && !oldEntry.is_published) {
         updates.published_at = new Date().toISOString()
       }
     }
@@ -135,6 +136,28 @@ export async function DELETE(
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Verify entry exists and user has permission (org membership)
+    const { data: entry } = await supabase
+      .from('changelog_entries')
+      .select('org_id')
+      .eq('id', id)
+      .single()
+
+    if (!entry) {
+      return NextResponse.json({ error: 'Changelog entry not found' }, { status: 404 })
+    }
+
+    const { data: membership } = await supabase
+      .from('org_members')
+      .select('id')
+      .eq('org_id', entry.org_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     const { error } = await supabase

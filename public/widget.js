@@ -9,7 +9,7 @@
     return;
   }
 
-  const baseUrl = script.src.replace('/widget.js', '');
+  const baseUrl = new URL(script.src).origin;
 
   // Initialize FeedbackHub global object
   window.FeedbackHub = window.FeedbackHub || {};

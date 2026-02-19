@@ -6,11 +6,23 @@ export async function GET(request: Request) {
   try {
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
-    const orgId = searchParams.get('org_id')
+    const orgIdParam = searchParams.get('org_id')
+    const orgSlug = searchParams.get('org')
     const publishedOnly = searchParams.get('published_only') === 'true'
 
+    // Support both org_id and org (slug) parameters
+    let orgId = orgIdParam
+    if (!orgId && orgSlug) {
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('slug', orgSlug)
+        .single()
+      if (org) orgId = org.id
+    }
+
     if (!orgId) {
-      return NextResponse.json({ error: 'org_id is required' }, { status: 400 })
+      return NextResponse.json({ error: 'org_id or org (slug) is required' }, { status: 400 })
     }
 
     let query = supabase

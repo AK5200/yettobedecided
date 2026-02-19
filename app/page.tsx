@@ -3,13 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
 
 export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -31,28 +24,10 @@ export default function HomePage() {
             : 'bg-white border-gray-200 shadow-[0_10px_40px_rgba(250,204,21,0.15)]'
         }`}
       >
-        <div className="text-xl font-bold" style={{ fontFamily: 'var(--font-raleway), sans-serif', fontWeight: 700 }}>Example</div>
+        <div className="text-xl font-bold" style={{ fontFamily: 'var(--font-raleway), sans-serif', fontWeight: 700 }}>FeedbackHub</div>
         <nav className="flex items-center gap-6 text-sm font-semibold" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-1 text-gray-700 hover:text-gray-900 font-semibold">
-              Features
-              <ChevronDown className="h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem asChild>
-                <Link href="#features">Feedback Boards</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="#roadmap">Product Roadmap</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="#catalog">Product Catalog</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Link href="#demo" className="text-gray-700 hover:text-gray-900 font-semibold">Demo</Link>
+          <Link href="#features" className="text-gray-700 hover:text-gray-900 font-semibold">Features</Link>
           <Link href="/pricing" className="text-gray-700 hover:text-gray-900 font-semibold">Pricing</Link>
-          <Link href="#changelog" className="text-gray-700 hover:text-gray-900 font-semibold">Changelog</Link>
         </nav>
         <div className="flex gap-3">
           <Button variant="ghost" asChild>

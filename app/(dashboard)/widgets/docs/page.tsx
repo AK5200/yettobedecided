@@ -34,7 +34,7 @@ export default function WidgetDocsPage() {
       }
     }
     fetchOrg()
-    setBaseUrl('https://yettobedecided-8lws.vercel.app')
+    setBaseUrl(typeof window !== 'undefined' ? window.location.origin : 'https://yettobedecided-8lws.vercel.app')
   }, [])
 
   const copyCode = (code: string, id: string) => {

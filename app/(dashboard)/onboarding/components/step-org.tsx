@@ -79,7 +79,8 @@ export function StepOrg({ onComplete }: StepOrgProps) {
         return
       }
 
-      onComplete(data.id, data.slug)
+      const org = data.organization || data
+      onComplete(org.id, org.slug)
     } catch {
       setError('Something went wrong. Please try again.')
       setLoading(false)

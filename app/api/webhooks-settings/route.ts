@@ -18,6 +18,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'org_id, name, url, and events are required' }, { status: 400 })
     }
 
+    // Validate webhook URL format
+    try {
+      const parsedUrl = new URL(url)
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return NextResponse.json({ error: 'Webhook URL must use http or https' }, { status: 400 })
+      }
+    } catch {
+      return NextResponse.json({ error: 'Invalid webhook URL' }, { status: 400 })
+    }
+
     // Verify user is admin of org
     const { data: membership, error: membershipError } = await supabase
       .from('org_members')

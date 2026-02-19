@@ -1,8 +1,29 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
 import { PostDetailDialog } from '@/components/boards/post-detail-dialog'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orgSlug: string }>
+}): Promise<Metadata> {
+  const { orgSlug } = await params
+  const supabase = await createClient()
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('name')
+    .eq('slug', orgSlug)
+    .single()
+
+  const name = org?.name || orgSlug
+  return {
+    title: `${name} - Roadmap`,
+    description: `See what's planned, in progress, and completed for ${name}.`,
+  }
+}
 
 export default async function PublicRoadmapPage({
   params,
@@ -96,7 +117,7 @@ export default async function PublicRoadmapPage({
         </nav>
       </header>
       <h2 className="text-xl font-semibold mb-6">Roadmap</h2>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="space-y-3">
           <h3 className="font-semibold">Planned</h3>
           {planned.map((post) => (

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export default function InviteAcceptPage({ params }: { params: { token: string } }) {
   const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [accepting, setAccepting] = useState(false)
   const [message, setMessage] = useState('')
   const router = useRouter()
   const supabase = createClient()
@@ -26,19 +27,24 @@ export default function InviteAcceptPage({ params }: { params: { token: string }
   const handleAccept = async () => {
     if (!userId) return
     setMessage('')
-    const response = await fetch('/api/invitations/accept', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: params.token, user_id: userId }),
-    })
+    setAccepting(true)
+    try {
+      const response = await fetch('/api/invitations/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: params.token }),
+      })
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      setMessage(errorData.error || 'Failed to accept invitation.')
-      return
+      if (!response.ok) {
+        const errorData = await response.json()
+        setMessage(errorData.error || 'Failed to accept invitation.')
+        return
+      }
+
+      router.push('/dashboard')
+    } finally {
+      setAccepting(false)
     }
-
-    router.push('/dashboard')
   }
 
   if (loading) {
@@ -57,10 +63,10 @@ export default function InviteAcceptPage({ params }: { params: { token: string }
             <div className="space-y-2">
               <p className="text-sm text-gray-600">Please log in or sign up to accept this invitation.</p>
               <div className="flex gap-2">
-                <Link href="/login">
+                <Link href={`/login?redirect=/invite/${params.token}`}>
                   <Button variant="outline">Login</Button>
                 </Link>
-                <Link href="/signup">
+                <Link href={`/signup?redirect=/invite/${params.token}`}>
                   <Button>Sign Up</Button>
                 </Link>
               </div>
@@ -68,7 +74,9 @@ export default function InviteAcceptPage({ params }: { params: { token: string }
           ) : (
             <div className="space-y-2">
               <p className="text-sm text-gray-600">You are signed in and can accept this invitation.</p>
-              <Button onClick={handleAccept}>Accept Invitation</Button>
+              <Button onClick={handleAccept} disabled={accepting}>
+                {accepting ? 'Accepting...' : 'Accept Invitation'}
+              </Button>
             </div>
           )}
           {message && <p className="text-sm text-red-600">{message}</p>}

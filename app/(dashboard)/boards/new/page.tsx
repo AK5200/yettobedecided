@@ -30,9 +30,14 @@ export default function NewBoardPage() {
         .select('org_id')
         .eq('user_id', user.id)
         .limit(1)
-        .single()
+        .maybeSingle()
 
-      setOrgId(data?.org_id ?? null)
+      if (!data) {
+        router.push('/onboarding')
+        return
+      }
+
+      setOrgId(data.org_id)
     }
 
     fetchOrgId()
@@ -81,6 +86,7 @@ export default function NewBoardPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                maxLength={100}
               />
             </div>
             <div className="space-y-2">

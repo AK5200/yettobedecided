@@ -14,11 +14,7 @@ export function DateRangePicker({ defaultDays = 30 }: DateRangePickerProps) {
 
   const handleChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value === '365') {
-      params.delete('days')
-    } else {
-      params.set('days', value)
-    }
+    params.set('days', value)
     router.push(`/analytics?${params.toString()}`)
   }
 

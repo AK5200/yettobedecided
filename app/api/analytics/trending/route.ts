@@ -14,6 +14,23 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
+  // Auth check
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('id')
+    .eq('org_id', orgId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!membership) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+
   // Get boards for this org
   let boardQuery = supabase.from('boards').select('id, name').eq('org_id', orgId)
   if (boardId) {
