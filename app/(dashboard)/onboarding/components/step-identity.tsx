@@ -15,11 +15,11 @@ interface StepIdentityProps {
 
 const METHODS = [
   {
-    id: 'feedbackhub' as const,
+    id: 'kelo' as const,
     icon: LogIn,
     iconColor: 'text-amber-600',
     iconBg: 'from-amber-100 to-amber-50',
-    label: 'FeedbackHub Login',
+    label: 'Kelo Login',
     badge: 'Recommended',
     badgeCls: 'bg-amber-50 text-amber-600 border-amber-200',
     short: 'We handle authentication. Zero work on your end.',
@@ -61,22 +61,22 @@ const METHODS = [
     short: 'Identify users from your own auth system.',
     details: [
       { icon: Key, text: 'Your backend generates a signed JWT token with the user\'s identity' },
-      { icon: Shield, text: 'Pass the token to the FeedbackHub widget on page load' },
+      { icon: Shield, text: 'Pass the token to the Kelo widget on page load' },
       { icon: UserCheck, text: 'We verify the token and auto-identify the user — no separate login' },
     ],
-    note: 'Best for SaaS products. Users stay logged in via your app — they never see a login screen on FeedbackHub.',
+    note: 'Best for SaaS products. Users stay logged in via your app — they never see a login screen on Kelo.',
     docSection: '#jwt-mode',
     docLabel: 'JWT / SSO setup guide',
   },
 ]
 
 export function StepIdentity({ onComplete, onBack }: StepIdentityProps) {
-  const [loginHandler, setLoginHandler] = useState<'feedbackhub' | 'customer' | 'none'>('feedbackhub')
-  const [expandedMethod, setExpandedMethod] = useState<string | null>('feedbackhub')
+  const [loginHandler, setLoginHandler] = useState<'kelo' | 'customer' | 'none'>('kelo')
+  const [expandedMethod, setExpandedMethod] = useState<string | null>('kelo')
   const [ssoRedirectUrl, setSsoRedirectUrl] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const handleSelect = (id: 'feedbackhub' | 'customer' | 'none') => {
+  const handleSelect = (id: 'kelo' | 'customer' | 'none') => {
     setLoginHandler(id)
     setExpandedMethod(expandedMethod === id ? null : id)
   }

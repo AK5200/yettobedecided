@@ -17,7 +17,7 @@ import { CodeExamples } from './code-examples'
 export default function SSOSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [guestPostingEnabled, setGuestPostingEnabled] = useState(true)
-  const [loginHandler, setLoginHandler] = useState<'feedbackhub' | 'customer' | null>(null)
+  const [loginHandler, setLoginHandler] = useState<'kelo' | 'customer' | null>(null)
   const [ssoRedirectUrl, setSsoRedirectUrl] = useState('')
   const [secretKey, setSecretKey] = useState('')
   const [showKey, setShowKey] = useState(false)
@@ -33,7 +33,7 @@ export default function SSOSettingsPage() {
       const res = await fetch('/api/sso/settings')
       const data = await res.json()
       setGuestPostingEnabled(!!data.guest_posting_enabled)
-      setLoginHandler(data.login_handler || (data.social_login_enabled ? 'feedbackhub' : null))
+      setLoginHandler(data.login_handler || (data.social_login_enabled ? 'kelo' : null))
       setSsoRedirectUrl(data.sso_redirect_url || '')
       setSecretKey(data.secret_key || '')
     } catch (error) {
@@ -157,7 +157,7 @@ export default function SSOSettingsPage() {
           <RadioGroup
             value={loginHandler || 'none'}
             onValueChange={(value) => {
-              const handler = value === 'none' ? null : value as 'feedbackhub' | 'customer'
+              const handler = value === 'none' ? null : value as 'kelo' | 'customer'
               setLoginHandler(handler)
               if (handler === null && !guestPostingEnabled) {
                 setGuestPostingEnabled(true)
@@ -167,17 +167,17 @@ export default function SSOSettingsPage() {
             className="space-y-3"
           >
             <label
-              htmlFor="feedbackhub"
+              htmlFor="kelo"
               className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
-                loginHandler === 'feedbackhub'
+                loginHandler === 'kelo'
                   ? 'border-amber-300 bg-amber-50/50 shadow-sm'
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
               }`}
             >
-              <RadioGroupItem value="feedbackhub" id="feedbackhub" className="mt-0.5" />
+              <RadioGroupItem value="kelo" id="kelo" className="mt-0.5" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900">FeedbackHub</span>
+                  <span className="font-medium text-gray-900">Kelo</span>
                   <Badge className="text-[10px] bg-amber-100 text-amber-700 border-amber-200">Recommended</Badge>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
@@ -278,7 +278,7 @@ export default function SSOSettingsPage() {
                 )}
               </div>
               <p className="text-sm text-gray-500 mt-0.5">
-                Generate a secret key to identify users via the FeedbackHub SDK.
+                Generate a secret key to identify users via the Kelo SDK.
               </p>
             </div>
           </div>

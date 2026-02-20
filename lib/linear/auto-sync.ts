@@ -59,7 +59,7 @@ export async function autoSyncToLinear({
 
     // Create Linear issue
     const author = authorEmail || guestEmail || 'Anonymous'
-    const description = `**Source**: FeedbackHub\n**Author**: ${author}\n\n${content || ''}`
+    const description = `**Source**: Kelo\n**Author**: ${author}\n\n${content || ''}`
 
     const issueCreate = await linear.createIssue({
       teamId: linearIntegration.team_id!,

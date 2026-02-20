@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     .eq('is_public', true)
 
   // Determine login handler: use login_handler if set, otherwise fallback to social_login_enabled for backward compatibility
-  const loginHandler = org.login_handler || (org.social_login_enabled ? 'feedbackhub' : null)
+  const loginHandler = org.login_handler || (org.social_login_enabled ? 'kelo' : null)
 
   return withCors(
     NextResponse.json({
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       auth: {
         guestPostingEnabled: org.guest_posting_enabled,
         loginHandler: loginHandler,
-        socialLoginEnabled: loginHandler === 'feedbackhub', // Keep for backward compatibility
+        socialLoginEnabled: loginHandler === 'kelo', // Keep for backward compatibility
         ssoRedirectEnabled: loginHandler === 'customer',
         ssoRedirectUrl: org.sso_redirect_url,
       },

@@ -145,7 +145,7 @@ export async function GET(request: Request) {
       }).replace(/</g, '\\u003c')  // Prevent </script> XSS breakout
       const html = `<!DOCTYPE html><html><body><script>
         if (window.opener) {
-          window.opener.postMessage({ type: 'feedbackhub:identity', user: ${userData} }, '${baseUrl}');
+          window.opener.postMessage({ type: 'kelo:identity', user: ${userData} }, '${baseUrl}');
         }
         window.close();
       </script></body></html>`

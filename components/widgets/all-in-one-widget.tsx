@@ -329,7 +329,7 @@ export function AllInOneWidget({
         {showBranding && (
           <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">
             <Zap className="h-3 w-3" style={{ color: accentColor }} />
-            Powered by FeedbackHub
+            Powered by Kelo
           </div>
         )}
       </div>
@@ -729,7 +729,7 @@ export function AllInOneWidget({
           {showBranding ? (
             <span className="text-xs text-gray-400 flex items-center gap-1">
               <Zap className="h-3 w-3" style={{ color: accentColor }} />
-              Powered by FeedbackHub
+              Powered by Kelo
             </span>
           ) : (
             <span />
@@ -747,7 +747,7 @@ export function AllInOneWidget({
       ) : showBranding ? (
         <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">
           <Zap className="h-3 w-3" style={{ color: accentColor }} />
-          Powered by FeedbackHub
+          Powered by Kelo
         </div>
       ) : null}
     </div>

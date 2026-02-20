@@ -51,7 +51,7 @@ export default function WidgetDocsPage() {
   const getCodeTab = (blockId: string) => activeCodeTab[blockId] || 'html'
 
   const initCode = {
-    html: `<!-- FeedbackHub Widget -->
+    html: `<!-- Kelo Widget -->
 <script 
   src="${baseUrl}/widget.js" 
   data-org="${orgSlug}"
@@ -59,7 +59,7 @@ export default function WidgetDocsPage() {
 
 <!-- Optional: Identify user (Trust Mode) -->
 <script>
-  FeedbackHub.identify({
+  Kelo.identify({
     id: 'user_123',
     email: 'john@example.com',
     name: 'John Smith',
@@ -68,7 +68,7 @@ export default function WidgetDocsPage() {
 </script>`,
     react: `import { useEffect } from 'react';
 
-export function FeedbackHubWidget() {
+export function KeloWidget() {
   useEffect(() => {
     // Load SDK
     const script = document.createElement('script');
@@ -77,8 +77,8 @@ export function FeedbackHubWidget() {
     script.async = true;
     script.onload = () => {
       // Optional: Identify user after SDK loads
-      if (window.FeedbackHub) {
-        window.FeedbackHub.identify({
+      if (window.Kelo) {
+        window.Kelo.identify({
           id: 'user_123',
           email: 'john@example.com',
           name: 'John Smith'
@@ -96,7 +96,7 @@ export function FeedbackHubWidget() {
 
 import Script from 'next/script';
 
-export function FeedbackHubWidget() {
+export function KeloWidget() {
   return (
     <>
       <Script
@@ -105,8 +105,8 @@ export function FeedbackHubWidget() {
         strategy="afterInteractive"
         onLoad={() => {
           // Optional: Identify user after SDK loads
-          if (window.FeedbackHub) {
-            window.FeedbackHub.identify({
+          if (window.Kelo) {
+            window.Kelo.identify({
               id: 'user_123',
               email: 'john@example.com',
               name: 'John Smith'
@@ -120,7 +120,7 @@ export function FeedbackHubWidget() {
   }
 
   const identifyCode = `// Identify the logged-in user (Trust Mode)
-FeedbackHub.identify({
+Kelo.identify({
   id: 'user_123',          // Required: unique user ID
   email: 'john@example.com', // Required: user email
   name: 'John Smith',        // Optional: display name
@@ -134,10 +134,10 @@ FeedbackHub.identify({
 
   const jwtNodeCode = `const jwt = require('jsonwebtoken');
 
-// Your SSO secret from FeedbackHub settings
+// Your SSO secret from Kelo settings
 const SSO_SECRET = process.env.FEEDBACKHUB_SSO_SECRET;
 
-function createFeedbackHubToken(user) {
+function createKeloToken(user) {
   const payload = {
     sub: user.id,             // Required: unique user ID
     email: user.email,         // Required: user email
@@ -158,9 +158,9 @@ function createFeedbackHubToken(user) {
 }
 
 // Express.js example endpoint
-app.get('/api/feedbackhub-token', (req, res) => {
+app.get('/api/kelo-token', (req, res) => {
   const user = req.user; // From your auth middleware
-  const token = createFeedbackHubToken(user);
+  const token = createKeloToken(user);
   res.json({ token });
 });`
 
@@ -168,10 +168,10 @@ app.get('/api/feedbackhub-token', (req, res) => {
 import os
 from datetime import datetime, timedelta
 
-# Your SSO secret from FeedbackHub settings
+# Your SSO secret from Kelo settings
 SSO_SECRET = os.environ["FEEDBACKHUB_SSO_SECRET"]
 
-def create_feedbackhub_token(user):
+def create_kelo_token(user):
     payload = {
         "sub": user["id"],           # Required: unique user ID
         "email": user["email"],       # Required: user email
@@ -183,10 +183,10 @@ def create_feedbackhub_token(user):
     return jwt.encode(payload, SSO_SECRET, algorithm="HS256")
 
 # Flask example
-@app.route("/api/feedbackhub-token")
-def feedbackhub_token():
+@app.route("/api/kelo-token")
+def kelo_token():
     user = get_current_user()  # From your auth middleware
-    token = create_feedbackhub_token(user)
+    token = create_kelo_token(user)
     return {"token": token}`
 
   const jwtFrontendCode = `<!-- Load widget SDK -->
@@ -197,21 +197,21 @@ def feedbackhub_token():
 
 <script>
 // Fetch token from your server
-async function initFeedbackHub() {
-  const response = await fetch('/api/feedbackhub-token');
+async function initKelo() {
+  const response = await fetch('/api/kelo-token');
   const { token } = await response.json();
   
   // Identify with JWT token
-  FeedbackHub.identify({
+  Kelo.identify({
     token: token
   });
 }
 
 // Wait for SDK to load, then identify
-if (window.FeedbackHub) {
-  initFeedbackHub();
+if (window.Kelo) {
+  initKelo();
 } else {
-  window.addEventListener('load', initFeedbackHub);
+  window.addEventListener('load', initKelo);
 }
 </script>`
 
@@ -224,7 +224,7 @@ if (window.FeedbackHub) {
             <div className="p-2 bg-primary rounded-lg">
               <BookOpen className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">FeedbackHub</span>
+            <span className="font-bold text-lg">Kelo</span>
           </div>
           
           <nav className="space-y-6">
@@ -302,7 +302,7 @@ if (window.FeedbackHub) {
           <section id="introduction" className="mb-16 scroll-mt-8">
             <h1 className="text-4xl font-bold mb-4">Widget Integration Guide</h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Embed FeedbackHub into your website to collect user feedback, display your roadmap, and share product updates — all without leaving your app.
+              Embed Kelo into your website to collect user feedback, display your roadmap, and share product updates — all without leaving your app.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
@@ -342,7 +342,7 @@ if (window.FeedbackHub) {
           {/* Quick Start */}
           <section id="quickstart" className="mb-16 scroll-mt-8">
             <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Quick Start</h2>
-            <p className="text-muted-foreground mb-8">Get up and running with FeedbackHub in under 5 minutes.</p>
+            <p className="text-muted-foreground mb-8">Get up and running with Kelo in under 5 minutes.</p>
 
             <div className="space-y-8">
               <div className="relative pl-12 border-l-2">
@@ -351,7 +351,7 @@ if (window.FeedbackHub) {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Get your credentials</h3>
                 <p className="text-muted-foreground mb-3">
-                  Log in to your FeedbackHub dashboard and navigate to <strong>Settings → Widgets</strong> to find your:
+                  Log in to your Kelo dashboard and navigate to <strong>Settings → Widgets</strong> to find your:
                 </p>
                 <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
                   <li><strong>Workspace slug</strong> — Your unique workspace identifier (required)</li>
@@ -470,7 +470,7 @@ if (window.FeedbackHub) {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">That&apos;s it! 🎉</h3>
                 <p className="text-muted-foreground">
-                  Your users can now submit feedback directly from your website. All submissions will appear in your FeedbackHub dashboard.
+                  Your users can now submit feedback directly from your website. All submissions will appear in your Kelo dashboard.
                 </p>
               </div>
             </div>
@@ -482,7 +482,7 @@ if (window.FeedbackHub) {
           <section id="widget-types" className="mb-16 scroll-mt-8">
             <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Widget Types</h2>
             <p className="text-muted-foreground mb-6">
-              FeedbackHub supports multiple widget types. Use the <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-type</code> attribute to specify which widget to load. You can also embed custom buttons or divs that trigger the widgets.
+              Kelo supports multiple widget types. Use the <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-type</code> attribute to specify which widget to load. You can also embed custom buttons or divs that trigger the widgets.
             </p>
 
             <div className="space-y-6">
@@ -503,7 +503,7 @@ if (window.FeedbackHub) {
   src="${baseUrl}/widget.js" 
   data-org="${orgSlug}"
 ></script>
-<button data-feedbackhub-feedback>Give Feedback</button>`}</code>
+<button data-kelo-feedback>Give Feedback</button>`}</code>
                     </pre>
                   </div>
                 </Card>
@@ -522,16 +522,16 @@ if (window.FeedbackHub) {
 ></script>
 
 <!-- 2. Add data attribute to any element (Supahub-style) -->
-<button data-feedbackhub-changelog-popup>What's New</button>
+<button data-kelo-changelog-popup>What's New</button>
 <!-- or -->
-<a href="#" data-feedbackhub-changelog-popup>Changelog</a>
+<a href="#" data-kelo-changelog-popup>Changelog</a>
 <!-- or -->
-<div data-feedbackhub-changelog-popup style="cursor: pointer;">📢 Updates</div>`}</code>
+<div data-kelo-changelog-popup style="cursor: pointer;">📢 Updates</div>`}</code>
                     </pre>
                   </div>
                 </Card>
                 <p className="text-sm text-muted-foreground">
-                  <strong>Note:</strong> The widget automatically detects elements with <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-feedbackhub-changelog-popup</code> and attaches click handlers. No IDs needed!
+                  <strong>Note:</strong> The widget automatically detects elements with <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-kelo-changelog-popup</code> and attaches click handlers. No IDs needed!
                 </p>
               </div>
 
@@ -548,7 +548,7 @@ if (window.FeedbackHub) {
 ></script>
 
 <!-- 2. Add data attribute to any element -->
-<button data-feedbackhub-changelog-dropdown>What's New</button>`}</code>
+<button data-kelo-changelog-dropdown>What's New</button>`}</code>
                     </pre>
                   </div>
                 </Card>
@@ -593,7 +593,7 @@ if (window.FeedbackHub) {
                   <div className="p-5 overflow-x-auto">
                     <pre className="text-sm text-gray-300 font-mono">
                       <code>{`<!-- Announcement Banner (opens changelog popup) -->
-<a href="#" id="feedbackhub-announcement-trigger" class="feedbackhub-announcement">
+<a href="#" id="kelo-announcement-trigger" class="kelo-announcement">
   <span>New</span>
   <span>Check out our latest updates</span>
 </a>
@@ -602,7 +602,7 @@ if (window.FeedbackHub) {
   src="${baseUrl}/widget.js" 
   data-org="${orgSlug}"
   data-type="changelog-popup"
-  data-trigger="feedbackhub-announcement-trigger"
+  data-trigger="kelo-announcement-trigger"
 ></script>`}</code>
                     </pre>
                   </div>
@@ -796,7 +796,7 @@ if (window.FeedbackHub) {
 
             <h3 className="text-xl font-semibold mt-8 mb-3">Implementation</h3>
             <p className="text-muted-foreground mb-4">
-              Simply load the widget without calling <code className="bg-muted px-1.5 py-0.5 rounded text-sm">FeedbackHub.identify()</code>:
+              Simply load the widget without calling <code className="bg-muted px-1.5 py-0.5 rounded text-sm">Kelo.identify()</code>:
             </p>
 
             <Card className="bg-[#1e1e1e] border-gray-800">
@@ -903,7 +903,7 @@ if (window.FeedbackHub) {
           <section id="jwt-mode" className="mb-16 scroll-mt-8">
             <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">JWT Mode (SSO)</h2>
             <p className="text-muted-foreground mb-6">
-              The most secure method. Your server signs a JWT token that FeedbackHub verifies. Users get a verified badge (✓) and their data is cryptographically authenticated.
+              The most secure method. Your server signs a JWT token that Kelo verifies. Users get a verified badge (✓) and their data is cryptographically authenticated.
             </p>
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex gap-3">
@@ -920,8 +920,8 @@ if (window.FeedbackHub) {
             <ol className="list-decimal list-inside space-y-1 text-muted-foreground ml-4 mb-6">
               <li>User logs into your application</li>
               <li>Your server generates a JWT token signed with your SSO secret</li>
-              <li>Frontend passes the token to FeedbackHub</li>
-              <li>FeedbackHub verifies the signature and authenticates the user</li>
+              <li>Frontend passes the token to Kelo</li>
+              <li>Kelo verifies the signature and authenticates the user</li>
             </ol>
 
             <h3 className="text-xl font-semibold mt-8 mb-3">Step 1: Server-side token generation</h3>
@@ -986,7 +986,7 @@ if (window.FeedbackHub) {
             </Card>
 
             <h3 className="text-xl font-semibold mt-8 mb-3">Step 2: Frontend implementation</h3>
-            <p className="text-muted-foreground mb-4">Fetch the token from your server and pass it to FeedbackHub:</p>
+            <p className="text-muted-foreground mb-4">Fetch the token from your server and pass it to Kelo:</p>
 
             <Card className="bg-[#1e1e1e] border-gray-800">
               <div className="flex items-center justify-end p-3 border-b border-gray-700">
@@ -1055,13 +1055,13 @@ if (window.FeedbackHub) {
 
             <h3 className="text-xl font-semibold mt-8 mb-3">How the popup flow works</h3>
             <p className="text-muted-foreground mb-4">
-              Since the widget runs inside an iframe, third-party OAuth providers (Google, GitHub) block direct login within iframes due to security restrictions. FeedbackHub solves this with a popup-based flow:
+              Since the widget runs inside an iframe, third-party OAuth providers (Google, GitHub) block direct login within iframes due to security restrictions. Kelo solves this with a popup-based flow:
             </p>
             <ol className="list-decimal list-inside space-y-2 text-muted-foreground ml-4 mb-6">
               <li>User clicks a login button inside the widget iframe</li>
               <li>A popup window opens for the OAuth provider&apos;s consent screen</li>
               <li>User completes authentication in the popup</li>
-              <li>The popup sends the authenticated user data back to the widget via <code className="bg-muted px-1.5 py-0.5 rounded text-sm">postMessage</code> (<code className="bg-muted px-1.5 py-0.5 rounded text-sm">feedbackhub:identity</code>)</li>
+              <li>The popup sends the authenticated user data back to the widget via <code className="bg-muted px-1.5 py-0.5 rounded text-sm">postMessage</code> (<code className="bg-muted px-1.5 py-0.5 rounded text-sm">kelo:identity</code>)</li>
               <li>The popup closes and the widget is now authenticated</li>
             </ol>
 
@@ -1163,7 +1163,7 @@ if (window.FeedbackHub) {
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.identify(data)</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">Kelo.identify(data)</code>
                 </h3>
                 <p className="text-muted-foreground mb-4">
                   Identify the current user. Can use direct user data (Trust mode) or a JWT token (SSO mode).
@@ -1178,35 +1178,35 @@ if (window.FeedbackHub) {
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.clearIdentity()</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">Kelo.clearIdentity()</code>
                 </h3>
                 <p className="text-muted-foreground">Clear the current user identity. Call this when the user logs out.</p>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.open()</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">Kelo.open()</code>
                 </h3>
                 <p className="text-muted-foreground">Programmatically open the widget.</p>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.close()</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">Kelo.close()</code>
                 </h3>
                 <p className="text-muted-foreground">Programmatically close the widget.</p>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.getUser()</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">Kelo.getUser()</code>
                 </h3>
                 <p className="text-muted-foreground">Get the currently identified user object.</p>
               </div>
 
               <div>
                 <h3 className="text-xl font-semibold mb-3">
-                  <code className="bg-muted px-2 py-1 rounded text-sm">FeedbackHub.isIdentified()</code>
+                  <code className="bg-muted px-2 py-1 rounded text-sm">Kelo.isIdentified()</code>
                 </h3>
                 <p className="text-muted-foreground">Check if a user is currently identified. Returns <code className="bg-muted px-1.5 py-0.5 rounded">true</code> or <code className="bg-muted px-1.5 py-0.5 rounded">false</code>.</p>
               </div>
@@ -1289,24 +1289,24 @@ if (window.FeedbackHub) {
                 <pre className="text-sm text-gray-300 font-mono">
                   <code>{`// Listen for widget close events
 window.addEventListener('message', function(e) {
-  if (e.data === 'feedbackhub:close') {
+  if (e.data === 'kelo:close') {
     console.log('Widget closed');
     // Your code here
   }
   
-  if (e.data === 'feedbackhub:close-changelog') {
+  if (e.data === 'kelo:close-changelog') {
     console.log('Changelog popup closed');
     // Your code here
   }
 });
 
 // Programmatically control the widget
-FeedbackHub.open();  // Open widget
-FeedbackHub.close(); // Close widget
+Kelo.open();  // Open widget
+Kelo.close(); // Close widget
 
 // For changelog widgets
-FeedbackHubChangelog.open();  // Open changelog
-FeedbackHubChangelog.close(); // Close changelog`}</code>
+KeloChangelog.open();  // Open changelog
+KeloChangelog.close(); // Close changelog`}</code>
                 </pre>
               </div>
             </Card>
@@ -1323,21 +1323,21 @@ FeedbackHubChangelog.close(); // Close changelog`}</code>
                 <tbody>
                   <tr className="border-b">
                     <td className="p-3">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">'feedbackhub:close'</code>
+                      <code className="bg-muted px-1.5 py-0.5 rounded">'kelo:close'</code>
                     </td>
                     <td className="p-3 text-muted-foreground">Widget iframe</td>
                     <td className="p-3 text-muted-foreground">Widget requests to close</td>
                   </tr>
                   <tr className="border-b">
                     <td className="p-3">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">'feedbackhub:close-changelog'</code>
+                      <code className="bg-muted px-1.5 py-0.5 rounded">'kelo:close-changelog'</code>
                     </td>
                     <td className="p-3 text-muted-foreground">Changelog iframe</td>
                     <td className="p-3 text-muted-foreground">Changelog popup requests to close</td>
                   </tr>
                   <tr className="border-b">
                     <td className="p-3">
-                      <code className="bg-muted px-1.5 py-0.5 rounded">{'{ type: \'feedbackhub:identity\', user }'}</code>
+                      <code className="bg-muted px-1.5 py-0.5 rounded">{'{ type: \'kelo:identity\', user }'}</code>
                     </td>
                     <td className="p-3 text-muted-foreground">SDK / OAuth popup</td>
                     <td className="p-3 text-muted-foreground">User identity sent from SDK to widget iframe (via <code className="bg-muted px-1.5 py-0.5 rounded">identify()</code> or OAuth popup callback)</td>
@@ -1471,7 +1471,7 @@ FeedbackHubChangelog.close(); // Close changelog`}</code>
                   variant="ghost"
                   size="sm"
                   className="h-7 text-xs text-gray-400 hover:text-white"
-                  onClick={() => copyCode(`<button id="feedbackhub-changelog-trigger">What's New</button>
+                  onClick={() => copyCode(`<button id="kelo-changelog-trigger">What's New</button>
 
 <script 
   src="${baseUrl}/widget.js" 
@@ -1494,7 +1494,7 @@ FeedbackHubChangelog.close(); // Close changelog`}</code>
               </div>
               <div className="p-5 overflow-x-auto">
                 <pre className="text-sm text-gray-300 font-mono">
-                  <code>{`<button id="feedbackhub-changelog-trigger">What's New</button>
+                  <code>{`<button id="kelo-changelog-trigger">What's New</button>
 
 <script 
   src="${baseUrl}/widget.js" 

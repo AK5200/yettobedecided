@@ -211,7 +211,7 @@ export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: 
           }}
         >
           {settings.showBranding ? (
-            <span className="text-xs text-gray-400">Powered by FeedbackHub</span>
+            <span className="text-xs text-gray-400">Powered by Kelo</span>
           ) : (
             <span />
           )}

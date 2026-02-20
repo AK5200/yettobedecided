@@ -670,7 +670,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
           {settings.showBranding ? (
             <span className="text-[10px] text-gray-400 flex items-center gap-1">
               <Zap className="h-2.5 w-2.5" style={{ color: settings.accentColor }} />
-              Powered by FeedbackHub
+              Powered by Kelo
             </span>
           ) : (
             <span />

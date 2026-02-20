@@ -89,7 +89,7 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
 
   const handleClose = () => {
     setIsOpen(false)
-    window.parent.postMessage('feedbackhub:close', '*')
+    window.parent.postMessage('kelo:close', '*')
   }
 
   return (
@@ -129,7 +129,7 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
         <Dialog open={isOpen} onOpenChange={(isOpen) => {
           setIsOpen(isOpen)
           if (!isOpen) {
-            window.parent.postMessage('feedbackhub:close', '*')
+            window.parent.postMessage('kelo:close', '*')
           }
         }}>
           <DialogContent className="max-w-md">

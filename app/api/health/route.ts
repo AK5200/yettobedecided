@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     NextResponse.json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
-      service: 'FeedbackHub'
+      service: 'Kelo'
     }),
     origin
   )

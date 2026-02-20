@@ -47,7 +47,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Login to FeedbackHub</CardTitle>
+          <CardTitle>Login to Kelo</CardTitle>
           <CardDescription>Enter your email and password</CardDescription>
         </CardHeader>
         <CardContent>

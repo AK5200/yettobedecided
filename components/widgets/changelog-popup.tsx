@@ -45,7 +45,7 @@ export function ChangelogPopup({
 
   useEffect(() => {
     // Check if user has seen latest changelog
-    const lastSeen = localStorage.getItem(`feedbackhub-changelog-${orgSlug}`)
+    const lastSeen = localStorage.getItem(`kelo-changelog-${orgSlug}`)
 
     fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=5`)
       .then(res => res.json())
@@ -62,10 +62,10 @@ export function ChangelogPopup({
 
   const handleClose = () => {
     if (entries.length > 0) {
-      localStorage.setItem(`feedbackhub-changelog-${orgSlug}`, entries[0].id)
+      localStorage.setItem(`kelo-changelog-${orgSlug}`, entries[0].id)
     }
     setOpen(false)
-    window.parent.postMessage('feedbackhub:close-changelog', '*')
+    window.parent.postMessage('kelo:close-changelog', '*')
   }
 
   const radiusValue = BORDER_RADIUS_MAP[borderRadius] || '12px'
@@ -99,7 +99,7 @@ export function ChangelogPopup({
 
         <div className='flex justify-between items-center pt-4'>
           {showBranding ? (
-            <span className='text-xs text-gray-400'>Powered by FeedbackHub</span>
+            <span className='text-xs text-gray-400'>Powered by Kelo</span>
           ) : (
             <span />
           )}

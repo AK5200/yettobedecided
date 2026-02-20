@@ -85,7 +85,7 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
             </Label>
             <div className="flex items-center gap-0">
               <span className="inline-flex items-center h-11 px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-sm text-gray-500 select-none">
-                feedbackhub.com/
+                kelo.com/
               </span>
               <Input
                 id="slug"

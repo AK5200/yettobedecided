@@ -79,7 +79,7 @@ export function CodeExamples({ secretKey }: CodeExamplesProps) {
         <CodeBlock
           label="Frontend (JavaScript)"
           icon={<Globe className="h-4 w-4 text-amber-500" />}
-          code={`FeedbackHub.identify({
+          code={`Kelo.identify({
   id: user.id,
   email: user.email,
   name: user.name,
@@ -160,7 +160,7 @@ $token = JWT::encode($payload, '${resolvedSecret}', 'HS256');`}
         <CodeBlock
           label="Frontend"
           icon={<Globe className="h-4 w-4 text-amber-500" />}
-          code={`FeedbackHub.identify({
+          code={`Kelo.identify({
   token: tokenFromBackend
 });`}
         />

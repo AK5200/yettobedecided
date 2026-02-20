@@ -24,7 +24,7 @@ export default function HomePage() {
             : 'bg-white border-gray-200 shadow-[0_10px_40px_rgba(250,204,21,0.15)]'
         }`}
       >
-        <div className="text-xl font-bold" style={{ fontFamily: 'var(--font-raleway), sans-serif', fontWeight: 700 }}>FeedbackHub</div>
+        <div className="text-xl font-bold" style={{ fontFamily: 'var(--font-raleway), sans-serif', fontWeight: 700 }}>Kelo</div>
         <nav className="flex items-center gap-6 text-sm font-semibold" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
           <Link href="#features" className="text-gray-700 hover:text-gray-900 font-semibold">Features</Link>
           <Link href="/pricing" className="text-gray-700 hover:text-gray-900 font-semibold">Pricing</Link>
@@ -168,7 +168,7 @@ export default function HomePage() {
       </section>
 
       <footer className="px-8 py-8 border-t text-sm text-muted-foreground text-center">
-        © {new Date().getFullYear()} FeedbackHub. All rights reserved.
+        © {new Date().getFullYear()} Kelo. All rights reserved.
       </footer>
     </main>
   )

@@ -16,7 +16,7 @@ export function AnnouncementBar({ orgSlug, accentColor = '#000', link }: Announc
   useEffect(() => {
     let dismissedId: string | null = null
     try {
-      dismissedId = localStorage.getItem(`feedbackhub-bar-${orgSlug}`)
+      dismissedId = localStorage.getItem(`kelo-bar-${orgSlug}`)
     } catch {
       // localStorage may be unavailable in private browsing mode
     }
@@ -39,7 +39,7 @@ export function AnnouncementBar({ orgSlug, accentColor = '#000', link }: Announc
     e.stopPropagation()
     if (entry) {
       try {
-        localStorage.setItem(`feedbackhub-bar-${orgSlug}`, entry.id)
+        localStorage.setItem(`kelo-bar-${orgSlug}`, entry.id)
       } catch {
         // localStorage may be unavailable in private browsing mode
       }

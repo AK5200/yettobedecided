@@ -44,7 +44,7 @@ export async function POST(
         const issueCreate = await linear.createIssue({
             teamId: linearIntegration.team_id!,
             title: post.title,
-            description: `**Source**: FeedbackHub\n**Author**: ${post.author_email || post.guest_email || 'Anonymous'}\n\n${post.content || ''}`
+            description: `**Source**: Kelo\n**Author**: ${post.author_email || post.guest_email || 'Anonymous'}\n\n${post.content || ''}`
         });
 
         const issue = await issueCreate.issue;

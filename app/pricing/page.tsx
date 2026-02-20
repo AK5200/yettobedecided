@@ -56,7 +56,7 @@ export default function PricingPage() {
         }`}
       >
         <div className="text-xl font-bold" style={{ fontFamily: 'var(--font-raleway), sans-serif', fontWeight: 700 }}>
-          <Link href="/">FeedbackHub</Link>
+          <Link href="/">Kelo</Link>
         </div>
         <nav className="flex items-center gap-6 text-sm font-semibold" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
           <DropdownMenu>
@@ -549,7 +549,7 @@ export default function PricingPage() {
       </section>
 
       <footer className="px-8 py-8 border-t text-sm text-muted-foreground text-center">
-        © {new Date().getFullYear()} FeedbackHub. All rights reserved.
+        © {new Date().getFullYear()} Kelo. All rights reserved.
       </footer>
     </main>
   )

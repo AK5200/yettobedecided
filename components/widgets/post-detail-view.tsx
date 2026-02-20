@@ -79,12 +79,12 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
 
     // Listen for identity from parent via postMessage
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'feedbackhub:identity') {
+      if (event.data && event.data.type === 'kelo:identity') {
         const user = event.data.user
         if (user) {
           setIdentifiedUser(user)
           try {
-            sessionStorage.setItem(`feedbackhub_identified_user_${orgSlug}`, JSON.stringify(user))
+            sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
           } catch {
             // Ignore storage errors
           }
@@ -97,7 +97,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     // Check sessionStorage for existing identity (only if no prop provided)
     if (!identifiedUserProp) {
       try {
-        const stored = sessionStorage.getItem(`feedbackhub_identified_user_${orgSlug}`)
+        const stored = sessionStorage.getItem(`kelo_identified_user_${orgSlug}`)
         if (stored) {
           setIdentifiedUser(JSON.parse(stored))
         }

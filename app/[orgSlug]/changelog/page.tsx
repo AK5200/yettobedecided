@@ -87,7 +87,7 @@ export default async function PublicChangelogPage({
         ))}
       </div>
       {org.show_branding ? (
-        <div className="mt-12 text-sm text-muted-foreground">Powered by FeedbackHub</div>
+        <div className="mt-12 text-sm text-muted-foreground">Powered by Kelo</div>
       ) : null}
     </div>
   )

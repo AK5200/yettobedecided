@@ -235,12 +235,12 @@ export default function WidgetsPage() {
 
   // Generate embed codes with comments for customization
   const generateChangelogPopupCode = () => {
-    return `<!-- FeedbackHub Changelog Popup Widget -->
+    return `<!-- Kelo Changelog Popup Widget -->
 <!-- Add this script tag before closing </body> tag -->
 <script>
   (function() {
     var script = document.createElement('script');
-    // Change this URL to your FeedbackHub instance URL
+    // Change this URL to your Kelo instance URL
     script.src = '${baseUrl}/widget.js';
     script.async = true;
     // Replace 'your-workspace' with your actual workspace slug
@@ -253,19 +253,19 @@ export default function WidgetsPage() {
 <!-- Optional: Custom trigger button -->
 <!-- Uncomment and customize the button below to trigger the popup manually -->
 <!--
-<button id="feedbackhub-changelog-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+<button id="kelo-changelog-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
   What's New
 </button>
 -->`
   }
 
   const generateChangelogDropdownCode = () => {
-    return `<!-- FeedbackHub Changelog Dropdown Widget -->
+    return `<!-- Kelo Changelog Dropdown Widget -->
 <!-- Add this script tag before closing </body> tag -->
 <script>
   (function() {
     var script = document.createElement('script');
-    // Change this URL to your FeedbackHub instance URL
+    // Change this URL to your Kelo instance URL
     script.src = '${baseUrl}/widget.js';
     script.async = true;
     // Replace 'your-workspace' with your actual workspace slug
@@ -277,7 +277,7 @@ export default function WidgetsPage() {
 
 <!-- Add this button where you want the dropdown trigger -->
 <!-- Customize the button style below -->
-<button id="feedbackhub-changelog-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+<button id="kelo-changelog-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
   What's New
 </button>`
   }
@@ -288,9 +288,9 @@ export default function WidgetsPage() {
       : announcementSettings.borderRadius === 'small' ? '8px' 
       : '0px'
     
-    return `<!-- FeedbackHub Announcement Banner -->
+    return `<!-- Kelo Announcement Banner -->
 <!-- Customize colors, size, and text below -->
-<div class="feedbackhub-announcement" style="
+<div class="kelo-announcement" style="
   display: inline-flex; 
   align-items: center; 
   gap: 8px; 
@@ -332,19 +332,19 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
     script.async = true;
     script.dataset.org = '${orgSlug}';
     script.dataset.type = 'changelog-popup';
-    script.dataset.trigger = 'feedbackhub-announcement-trigger';
+    script.dataset.trigger = 'kelo-announcement-trigger';
     document.head.appendChild(script);
   })();
 </script>` : ''}`
   }
 
   const generateAllInOneCode = (variant: 'popup' | 'popover') => {
-    return `<!-- FeedbackHub All-in-One Widget (${variant === 'popup' ? 'Pop-up' : 'Popover'}) -->
+    return `<!-- Kelo All-in-One Widget (${variant === 'popup' ? 'Pop-up' : 'Popover'}) -->
 <!-- This widget combines feedback board and changelog in one -->
 <script>
   (function() {
     var script = document.createElement('script');
-    // Change this URL to your FeedbackHub instance URL
+    // Change this URL to your Kelo instance URL
     // Adding version parameter to prevent caching issues
     script.src = '${baseUrl}/widget.js?v=' + new Date().getTime();
     script.async = true;
@@ -358,7 +358,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
 <!-- Optional: Custom trigger button -->
 <!-- Uncomment and customize the button below -->
 <!--
-<button id="feedbackhub-all-in-one-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+<button id="kelo-all-in-one-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
   Feedback & Updates
 </button>
 -->`
@@ -860,7 +860,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <div className="space-y-0.5">
                 <Label>Show Branding</Label>
                 <p className="text-xs text-muted-foreground">
-                  Display "Powered by FeedbackHub"
+                  Display "Powered by Kelo"
                 </p>
               </div>
               <Switch
@@ -1184,7 +1184,7 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
               <div className="space-y-0.5">
                 <Label>Show Branding</Label>
                 <p className="text-xs text-muted-foreground">
-                  Display "Powered by FeedbackHub"
+                  Display "Powered by Kelo"
                 </p>
               </div>
               <Switch

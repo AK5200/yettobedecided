@@ -19,7 +19,7 @@ export async function sendEmail({
 }) {
   try {
     const { data, error } = await getResend().emails.send({
-      from: process.env.EMAIL_FROM || 'FeedbackHub <noreply@feedbackhub.app>',
+      from: process.env.EMAIL_FROM || 'Kelo <noreply@kelohq.com>',
       to,
       subject,
       html,

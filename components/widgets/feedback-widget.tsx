@@ -42,7 +42,7 @@ export function FeedbackWidget({
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
   const [isIdentified, setIsIdentified] = useState(false)
   const [guestPostingEnabled, setGuestPostingEnabled] = useState(true)
-  const [loginHandler, setLoginHandler] = useState<'feedbackhub' | 'customer' | null>(null)
+  const [loginHandler, setLoginHandler] = useState<'kelo' | 'customer' | null>(null)
   const [ssoRedirectUrl, setSsoRedirectUrl] = useState('')
   const [orgName, setOrgName] = useState('')
   const [configLoading, setConfigLoading] = useState(true)
@@ -86,14 +86,14 @@ export function FeedbackWidget({
   useEffect(() => {
     // Listen for identity from parent via postMessage
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'feedbackhub:identity') {
+      if (event.data && event.data.type === 'kelo:identity') {
         const user = event.data.user
         if (user) {
           setIsIdentified(true)
           setIdentifiedUser(user)
           // Store in sessionStorage for persistence (scoped per org)
           try {
-            sessionStorage.setItem(`feedbackhub_identified_user_${orgSlug}`, JSON.stringify(user))
+            sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
           } catch (e) {
             // Ignore storage errors
           }
@@ -105,7 +105,7 @@ export function FeedbackWidget({
 
     // Check sessionStorage for existing identity (scoped per org)
     try {
-      const stored = sessionStorage.getItem(`feedbackhub_identified_user_${orgSlug}`)
+      const stored = sessionStorage.getItem(`kelo_identified_user_${orgSlug}`)
       if (stored) {
         const user = JSON.parse(stored)
         setIsIdentified(true)
@@ -119,7 +119,7 @@ export function FeedbackWidget({
     try {
       if (window.parent && window.parent !== window) {
         try {
-          const parentHub = (window.parent as any)?.FeedbackHub
+          const parentHub = (window.parent as any)?.Kelo
           if (parentHub && parentHub.isIdentified && parentHub.isIdentified()) {
             setIsIdentified(true)
             setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
@@ -146,7 +146,7 @@ export function FeedbackWidget({
     try {
       if (window.parent && window.parent !== window) {
         try {
-          const parentHub = (window.parent as any)?.FeedbackHub
+          const parentHub = (window.parent as any)?.Kelo
           if (parentHub?.identify) {
             parentHub.identify({ id: email, email, name })
             setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
@@ -163,7 +163,7 @@ export function FeedbackWidget({
   const handleSocialClick = (provider: 'google' | 'github') => {
     setOauthError('')
     const url = `/api/auth/widget/${provider}?org_slug=${encodeURIComponent(orgSlug)}&popup=1`
-    const popup = window.open(url, 'feedbackhub_oauth', 'width=500,height=600,scrollbars=yes')
+    const popup = window.open(url, 'kelo_oauth', 'width=500,height=600,scrollbars=yes')
 
     if (!popup || popup.closed) {
       setOauthError('Popup was blocked by your browser. Please allow popups for this site and try again.')
@@ -181,7 +181,7 @@ export function FeedbackWidget({
     }, OAUTH_TIMEOUT_MS)
 
     const oauthMessageHandler = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'feedbackhub:oauth-success') {
+      if (event.data && event.data.type === 'kelo:oauth-success') {
         clearTimeout(timeoutId)
         window.removeEventListener('message', oauthMessageHandler)
         const user = event.data.user
@@ -189,7 +189,7 @@ export function FeedbackWidget({
           setIdentifiedUser(user)
           setIsIdentified(true)
           try {
-            sessionStorage.setItem(`feedbackhub_identified_user_${orgSlug}`, JSON.stringify(user))
+            sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
           } catch {
             // Ignore storage errors
           }
@@ -222,7 +222,7 @@ export function FeedbackWidget({
       parentUrl = document.referrer || window.location.origin
     }
 
-    const redirectUrl = `${ssoRedirectUrl}?redirect=${encodeURIComponent(parentUrl)}&feedbackhub=open`
+    const redirectUrl = `${ssoRedirectUrl}?redirect=${encodeURIComponent(parentUrl)}&kelo=open`
 
     if (window.top) {
       window.top.location.href = redirectUrl
@@ -295,7 +295,7 @@ export function FeedbackWidget({
       setMagicLinkStep(null)
 
       try {
-        sessionStorage.setItem(`feedbackhub_identified_user_${orgSlug}`, JSON.stringify(user))
+        sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
       } catch {
         // Ignore storage errors
       }
@@ -319,7 +319,7 @@ export function FeedbackWidget({
       try {
         if (window.parent && window.parent !== window) {
           try {
-            const parentHub = (window.parent as any)?.FeedbackHub
+            const parentHub = (window.parent as any)?.Kelo
             identifiedPayload = parentHub?._getIdentifyPayload ? parentHub._getIdentifyPayload() : null
           } catch (e) {
             // Cross-origin error - ignore
@@ -406,7 +406,7 @@ export function FeedbackWidget({
               </div>
               
               {/* Show login options below if login handler is configured */}
-              {loginHandler === 'feedbackhub' && (
+              {loginHandler === 'kelo' && (
                 <>
                   <div className="text-xs text-gray-500 text-center font-medium relative">
                     <span className="bg-white px-2 relative z-10">or verify your email</span>
@@ -515,7 +515,7 @@ export function FeedbackWidget({
           ) : (
             // Guest posting disabled - must login
             <>
-              {loginHandler === 'feedbackhub' ? (
+              {loginHandler === 'kelo' ? (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600 text-center">
                     Please login to submit feedback
@@ -695,7 +695,7 @@ export function FeedbackWidget({
       )}
 
       {showBranding && (
-        <div className="text-xs text-gray-500 text-center">Powered by FeedbackHub</div>
+        <div className="text-xs text-gray-500 text-center">Powered by Kelo</div>
       )}
     </div>
   )

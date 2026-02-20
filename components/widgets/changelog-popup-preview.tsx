@@ -207,7 +207,7 @@ export function ChangelogPopupPreview({ orgId, orgSlug, onClose, settings }: Cha
           style={{ borderBottomLeftRadius: borderRadius, borderBottomRightRadius: borderRadius }}
         >
           {settings.showBranding ? (
-            <span className="text-xs text-gray-400">Powered by FeedbackHub</span>
+            <span className="text-xs text-gray-400">Powered by Kelo</span>
           ) : (
             <span />
           )}

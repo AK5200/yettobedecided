@@ -56,7 +56,7 @@ export default function InviteAcceptPage({ params }: { params: { token: string }
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Accept Invitation</CardTitle>
-          <CardDescription>Join your team in FeedbackHub</CardDescription>
+          <CardDescription>Join your team in Kelo</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {!userId ? (

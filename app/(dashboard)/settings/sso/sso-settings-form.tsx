@@ -162,7 +162,7 @@
                <Label className='mb-2 block'>Trust Mode (Frontend)</Label>
                <div className='relative'>
                  <pre className='p-4 bg-gray-100 rounded text-sm overflow-x-auto'>
-                   {`FeedbackHub.identify({
+                   {`Kelo.identify({
    id: 'user-123',
    email: 'user@example.com',
    name: 'John Doe',
@@ -173,7 +173,7 @@
                    variant='outline'
                    size='sm'
                    className='absolute top-2 right-2'
-                   onClick={() => copyToClipboard(`FeedbackHub.identify({\n  id: 'user-123',\n  email: 'user@example.com',\n  name: 'John Doe',\n  avatar: 'https://...'\n});`)}
+                   onClick={() => copyToClipboard(`Kelo.identify({\n  id: 'user-123',\n  email: 'user@example.com',\n  name: 'John Doe',\n  avatar: 'https://...'\n});`)}
                  >
                    <Copy className='h-3 w-3' />
                  </Button>
@@ -201,7 +201,7 @@
                  <Label className='mb-2 block'>Frontend</Label>
                  <div className='relative'>
                    <pre className='p-4 bg-gray-100 rounded text-sm overflow-x-auto'>
-                     {`FeedbackHub.identify({
+                     {`Kelo.identify({
    token: 'eyJhbGciOiJIUzI1NiIs...'
  });`}
                    </pre>

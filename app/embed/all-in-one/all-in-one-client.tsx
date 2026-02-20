@@ -21,7 +21,7 @@ export default function AllInOneEmbedClient() {
   // Read identified user from sessionStorage on mount
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem(`feedbackhub_identified_user_${org}`)
+      const stored = sessionStorage.getItem(`kelo_identified_user_${org}`)
       if (stored) {
         setIdentifiedUser(JSON.parse(stored))
       }
@@ -33,12 +33,12 @@ export default function AllInOneEmbedClient() {
   // Listen for identity from parent via postMessage
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'feedbackhub:identity') {
+      if (event.data && event.data.type === 'kelo:identity') {
         const user = event.data.user
         if (user) {
           setIdentifiedUser(user)
           try {
-            sessionStorage.setItem(`feedbackhub_identified_user_${org}`, JSON.stringify(user))
+            sessionStorage.setItem(`kelo_identified_user_${org}`, JSON.stringify(user))
           } catch {
             // Ignore storage errors
           }
@@ -72,7 +72,7 @@ export default function AllInOneEmbedClient() {
             // Read previously voted post IDs from sessionStorage
             let votedPostIds: Set<string> = new Set()
             try {
-              const stored = sessionStorage.getItem(`feedbackhub_votes_${org}`)
+              const stored = sessionStorage.getItem(`kelo_votes_${org}`)
               if (stored) votedPostIds = new Set(JSON.parse(stored))
             } catch {}
 
@@ -129,7 +129,7 @@ export default function AllInOneEmbedClient() {
         const data = await res.json()
         // Persist vote state in sessionStorage so hasVoted is correct on next load
         try {
-          const storageKey = `feedbackhub_votes_${org}`
+          const storageKey = `kelo_votes_${org}`
           const stored = sessionStorage.getItem(storageKey)
           let votedIds: string[] = stored ? JSON.parse(stored) : []
           if (data.voted) {
@@ -181,7 +181,7 @@ export default function AllInOneEmbedClient() {
   const handleFeedbackSubmit = async (post?: any) => {
     // Re-read identified user from sessionStorage (user may have just authenticated in the feedback form)
     try {
-      const stored = sessionStorage.getItem(`feedbackhub_identified_user_${org}`)
+      const stored = sessionStorage.getItem(`kelo_identified_user_${org}`)
       if (stored) {
         setIdentifiedUser(JSON.parse(stored))
       }
@@ -210,7 +210,7 @@ export default function AllInOneEmbedClient() {
 
   const handleClose = () => {
     if (typeof window !== 'undefined' && window.parent) {
-      window.parent.postMessage('feedbackhub:close', '*')
+      window.parent.postMessage('kelo:close', '*')
     }
   }
 

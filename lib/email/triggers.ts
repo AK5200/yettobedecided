@@ -26,7 +26,7 @@ function getFromEmail(): string {
     // You CANNOT use Gmail or other personal emails directly
     // 
     // For now, using Resend's test domain which works without verification
-    return process.env.RESEND_FROM_EMAIL || 'FeedbackHub <onboarding@resend.dev>';
+    return process.env.RESEND_FROM_EMAIL || 'Kelo <onboarding@resend.dev>';
 }
 
 async function sendEmailSafely(params: {
@@ -195,9 +195,9 @@ export async function triggerInvitationEmail(email: string, token: string, invit
     await sendEmailSafely({
         from: getFromEmail(),
         to: email,
-        subject: `You've been invited to join FeedbackHub`,
+        subject: `You've been invited to join Kelo`,
         html: `
-            <p>You've been invited to join the team on FeedbackHub${inviterName ? ` by ${inviterName}` : ''}.</p>
+            <p>You've been invited to join the team on Kelo${inviterName ? ` by ${inviterName}` : ''}.</p>
             <p><a href="${inviteUrl}">Click here to accept the invitation</a></p>
             <p>Or copy this link: ${inviteUrl}</p>
         `
@@ -217,10 +217,10 @@ export async function sendSignupConfirmationEmail(email: string, confirmationUrl
     const result = await sendEmailSafely({
         from: getFromEmail(),
         to: email,
-        subject: 'Confirm your FeedbackHub account',
+        subject: 'Confirm your Kelo account',
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #000;">Welcome to FeedbackHub!</h1>
+                <h1 style="color: #000;">Welcome to Kelo!</h1>
                 <p>Thank you for signing up. Please confirm your email address to get started.</p>
                 <p style="margin: 24px 0;">
                     <a href="${confirmationUrl}" 
@@ -257,7 +257,7 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string) {
     const result = await sendEmailSafely({
         from: getFromEmail(),
         to: email,
-        subject: 'Reset your FeedbackHub password',
+        subject: 'Reset your Kelo password',
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #000;">Reset Your Password</h1>

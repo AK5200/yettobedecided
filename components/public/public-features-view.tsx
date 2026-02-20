@@ -465,7 +465,7 @@ export function PublicFeaturesView({
         {/* Footer */}
         {org.show_branding && (
           <div className="mt-12 text-center text-sm text-muted-foreground">
-            Powered by FeedbackHub
+            Powered by Kelo
           </div>
         )}
       </div>

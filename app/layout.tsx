@@ -24,20 +24,20 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://feedbackhub.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://kelohq.com'),
   title: {
-    default: "FeedbackHub - Collect & Prioritize Customer Feedback",
-    template: "%s | FeedbackHub",
+    default: "Kelo - Collect & Prioritize Customer Feedback",
+    template: "%s | Kelo",
   },
   description: "Collect customer feedback, prioritize feature requests, and share your product roadmap. The feedback tool that grows with you.",
   openGraph: {
-    title: "FeedbackHub - Collect & Prioritize Customer Feedback",
+    title: "Kelo - Collect & Prioritize Customer Feedback",
     description: "Collect customer feedback, prioritize feature requests, and share your product roadmap.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "FeedbackHub - Collect & Prioritize Customer Feedback",
+    title: "Kelo - Collect & Prioritize Customer Feedback",
     description: "Collect customer feedback, prioritize feature requests, and share your product roadmap.",
   },
 };

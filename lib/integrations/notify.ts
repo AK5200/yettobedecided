@@ -39,7 +39,7 @@ function formatSlackBlocks(payload: NotificationPayload) {
         elements: [
           {
             type: 'button',
-            text: { type: 'plain_text', text: 'View in FeedbackHub' },
+            text: { type: 'plain_text', text: 'View in Kelo' },
             url: payload.url,
           },
         ],
@@ -83,7 +83,7 @@ function formatBody(integrationType: string, payload: NotificationPayload): obje
         potentialAction: [
           {
             '@type': 'OpenUri',
-            name: 'View in FeedbackHub',
+            name: 'View in Kelo',
             targets: [{ os: 'default', uri: payload.url }],
           },
         ],
@@ -91,7 +91,7 @@ function formatBody(integrationType: string, payload: NotificationPayload): obje
 
     case 'telegram':
       return {
-        text: `<b>${escapeHtml(payload.title)}</b>\n${escapeHtml(payload.description)}\n\n<a href="${payload.url}">View in FeedbackHub</a>`,
+        text: `<b>${escapeHtml(payload.title)}</b>\n${escapeHtml(payload.description)}\n\n<a href="${payload.url}">View in Kelo</a>`,
         parse_mode: 'HTML',
       }
 

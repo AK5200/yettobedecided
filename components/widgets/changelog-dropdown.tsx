@@ -40,7 +40,7 @@ export function ChangelogDropdown({
   const [hasNew, setHasNew] = useState(false)
 
   useEffect(() => {
-    const lastSeen = localStorage.getItem(`feedbackhub-dropdown-${orgSlug}`)
+    const lastSeen = localStorage.getItem(`kelo-dropdown-${orgSlug}`)
 
     fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=5`)
       .then(res => res.json())
@@ -56,7 +56,7 @@ export function ChangelogDropdown({
 
   const markSeen = () => {
     if (entries.length > 0) {
-      localStorage.setItem(`feedbackhub-dropdown-${orgSlug}`, entries[0].id)
+      localStorage.setItem(`kelo-dropdown-${orgSlug}`, entries[0].id)
       setHasNew(false)
     }
   }
@@ -96,7 +96,7 @@ export function ChangelogDropdown({
         </div>
         {showBranding && (
           <div className='pt-2 text-center'>
-            <span className='text-xs text-gray-400'>Powered by FeedbackHub</span>
+            <span className='text-xs text-gray-400'>Powered by Kelo</span>
           </div>
         )}
       </PopoverContent>

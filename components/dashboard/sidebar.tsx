@@ -145,7 +145,7 @@ export function Sidebar() {
               {org?.name?.charAt(0) || 'F'}
             </div>
             <span className="font-semibold text-gray-900 truncate max-w-[140px]">
-              {org?.name || 'FeedbackHub'}
+              {org?.name || 'Kelo'}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -350,7 +350,7 @@ export function Sidebar() {
             {org?.name?.charAt(0) || 'F'}
           </div>
           <span className="font-semibold text-gray-900 truncate">
-            {org?.name || 'FeedbackHub'}
+            {org?.name || 'Kelo'}
           </span>
         </div>
       </div>

@@ -67,7 +67,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Invalid SSO mode' }, { status: 400 });
   }
 
-  if (login_handler !== undefined && login_handler !== null && !['feedbackhub', 'customer'].includes(login_handler)) {
+  if (login_handler !== undefined && login_handler !== null && !['kelo', 'customer'].includes(login_handler)) {
     return NextResponse.json({ error: 'Invalid login_handler' }, { status: 400 });
   }
   
