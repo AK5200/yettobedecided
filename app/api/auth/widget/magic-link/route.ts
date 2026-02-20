@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/resend'
 import { magicLinkCodeEmail } from '@/lib/email/templates'
 import { handleOptions, withCors } from '@/lib/cors'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request)
@@ -14,6 +15,15 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin')
 
   try {
+    const ip = getClientIp(request)
+    const { allowed } = checkRateLimit(`magic-link:${ip}`, 5, 60)
+    if (!allowed) {
+      return withCors(
+        NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 }),
+        origin
+      )
+    }
+
     const body = await request.json()
     const { email, org_slug } = body
 

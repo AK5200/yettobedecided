@@ -51,7 +51,6 @@ export async function autoSyncToLinear({
       .single()
 
     if (post?.linear_issue_id) {
-      console.log(`[autoSyncToLinear] Post ${postId} already synced, skipping`)
       return
     }
 
@@ -80,7 +79,7 @@ export async function autoSyncToLinear({
         })
         .eq('id', postId)
 
-      console.log(`[autoSyncToLinear] Successfully synced post ${postId} to Linear: ${issue.url}`)
+
     } else {
       console.error('[autoSyncToLinear] Failed to create Linear issue - no issue returned')
     }

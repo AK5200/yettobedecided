@@ -5,6 +5,7 @@ import { incrementCounter, upsertWidgetUser } from '@/lib/widget-users'
 import { handleOptions, withCors } from '@/lib/cors'
 import { notifyIntegrations } from '@/lib/integrations/notify'
 import { autoSyncToLinear } from '@/lib/linear/auto-sync'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request)
@@ -12,6 +13,14 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin')
+  const ip = getClientIp(request)
+  const { allowed } = checkRateLimit(`widget-feedback:${ip}`, 10, 60)
+  if (!allowed) {
+    return withCors(
+      NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 }),
+      origin
+    )
+  }
   const supabase = await createClient()
   const body = await request.json()
   const { org_slug, board_id, title, content, guest_email, guest_name, identified_user } = body

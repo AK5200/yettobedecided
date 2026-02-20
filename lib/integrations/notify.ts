@@ -129,7 +129,7 @@ async function sendSlackOAuth(accessToken: string, channelId: string, payload: N
   if (!result.ok) {
     // Auto-join channel if bot is not a member, then retry
     if (result.error === 'not_in_channel') {
-      console.log(`[notify] Bot not in channel ${channelId}, attempting to join...`)
+      console.error(`[notify] Bot not in channel ${channelId}, attempting to join`)
       const joinRes = await fetch('https://slack.com/api/conversations.join', {
         method: 'POST',
         headers: {
@@ -178,16 +178,12 @@ export async function notifyIntegrations({
     .eq('org_id', orgId)
     .eq('is_active', true)
 
-  console.log(`[notify] orgId=${orgId} type=${type} integrations=${integrations?.length ?? 0} fetchError=${fetchError?.message ?? 'none'}`)
-
   if (!integrations || integrations.length === 0) return
 
   for (const i of integrations) {
     if (type === 'new_feedback' && !i.notify_on_new_feedback) continue
     if (type === 'status_change' && !i.notify_on_status_change) continue
     if (type === 'new_comment' && !i.notify_on_new_comment) continue
-
-    console.log(`[notify] Processing ${i.type}: access_token=${!!i.access_token} channel_id=${i.channel_id ?? 'null'} webhook_url=${!!i.webhook_url}`)
 
     try {
       // Slack OAuth: use API with token + channel_id
@@ -198,7 +194,6 @@ export async function notifyIntegrations({
 
       // Fallback: webhook URL (all types including legacy Slack)
       if (!i.webhook_url) {
-        console.log(`[notify] Skipping ${i.type}: no webhook_url and no OAuth credentials`)
         continue
       }
 

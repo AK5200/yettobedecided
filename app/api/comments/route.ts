@@ -6,6 +6,7 @@ import { triggerNewCommentEmail } from '@/lib/email/triggers'
 import { processIdentifiedUser } from '@/lib/sso'
 import { incrementCounter, upsertWidgetUser } from '@/lib/widget-users'
 import { handleOptions, withCors } from '@/lib/cors'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request)
@@ -41,6 +42,14 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const origin = request.headers.get('origin')
   try {
+    const ip = getClientIp(request)
+    const { allowed } = checkRateLimit(`comments:${ip}`, 20, 60)
+    if (!allowed) {
+      return withCors(
+        NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 }),
+        origin
+      )
+    }
     const supabase = await createClient()
     const body = await request.json()
     const { post_id, content, author_email, author_name, guest_email, guest_name, identified_user, is_internal = false } = body

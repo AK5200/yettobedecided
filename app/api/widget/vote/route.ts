@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { processIdentifiedUser } from '@/lib/sso'
 import { incrementCounter, upsertWidgetUser } from '@/lib/widget-users'
 import { handleOptions, withCors } from '@/lib/cors'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request)
@@ -10,6 +11,14 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin')
+  const ip = getClientIp(request)
+  const { allowed } = checkRateLimit(`widget-vote:${ip}`, 30, 60)
+  if (!allowed) {
+    return withCors(
+      NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 }),
+      origin
+    )
+  }
   const supabase = await createClient()
   const body = await request.json()
   const { post_id, voter_email, email, guest_email, identified_user } = body
