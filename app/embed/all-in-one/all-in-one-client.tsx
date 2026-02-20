@@ -69,6 +69,13 @@ export default function AllInOneEmbedClient() {
           setSettings(data.settings || {})
 
           if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+            // Read previously voted post IDs from sessionStorage
+            let votedPostIds: Set<string> = new Set()
+            try {
+              const stored = sessionStorage.getItem(`feedbackhub_votes_${org}`)
+              if (stored) votedPostIds = new Set(JSON.parse(stored))
+            } catch {}
+
             const formattedPosts = data.posts.map((p: any) => ({
               id: p.id,
               title: p.title,
@@ -78,7 +85,7 @@ export default function AllInOneEmbedClient() {
               author_email: p.author_email || p.guest_email,
               tags: p.tags || [],
               status: p.status || 'open',
-              hasVoted: false,
+              hasVoted: votedPostIds.has(p.id),
             }))
             setPosts(formattedPosts)
           }
@@ -93,21 +100,54 @@ export default function AllInOneEmbedClient() {
     fetchData()
   }, [org])
 
+  // Revert an optimistic vote UI update (called when API fails or no email)
+  const revertVote = useCallback((postId: string) => {
+    setPosts(prev => prev.map(p =>
+      p.id === postId
+        ? { ...p, hasVoted: !p.hasVoted, votes: p.hasVoted ? p.votes - 1 : p.votes + 1 }
+        : p
+    ))
+  }, [])
+
   const handleVote = useCallback(async (postId: string) => {
     const email = identifiedUser?.email
-    if (!email) return // Optimistic update already happened in widget, but no API call without email
+    if (!email) {
+      // No email — revert the optimistic update the widget already applied
+      revertVote(postId)
+      return
+    }
 
     try {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-      await fetch(`${baseUrl}/api/widget/vote`, {
+      const res = await fetch(`${baseUrl}/api/widget/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ post_id: postId, email }),
       })
+
+      if (res.ok) {
+        const data = await res.json()
+        // Persist vote state in sessionStorage so hasVoted is correct on next load
+        try {
+          const storageKey = `feedbackhub_votes_${org}`
+          const stored = sessionStorage.getItem(storageKey)
+          let votedIds: string[] = stored ? JSON.parse(stored) : []
+          if (data.voted) {
+            if (!votedIds.includes(postId)) votedIds.push(postId)
+          } else {
+            votedIds = votedIds.filter((id: string) => id !== postId)
+          }
+          sessionStorage.setItem(storageKey, JSON.stringify(votedIds))
+        } catch {}
+      } else {
+        // API returned error — revert optimistic update
+        revertVote(postId)
+      }
     } catch (error) {
       console.error('Vote failed:', error)
+      revertVote(postId)
     }
-  }, [identifiedUser])
+  }, [identifiedUser, org, revertVote])
 
   if (loading) {
     return (
