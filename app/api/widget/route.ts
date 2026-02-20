@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
   const { data: org, error: orgError } = await supabase
     .from('organizations')
-    .select('*')
+    .select('id, name, slug, logo_url, description')
     .eq('slug', orgSlug)
     .single()
 
@@ -70,9 +70,10 @@ export async function GET(request: NextRequest) {
     const boardIds = boards.map((b: any) => b.id)
     const { data: posts } = await adminClient
       .from('posts')
-      .select('*')
+      .select('id, title, content, vote_count, status, created_at, tags, author_name, guest_name, is_pinned, board_id, user_source')
       .in('board_id', boardIds)
       .is('merged_into_id', null)
+      .eq('is_approved', true)
       .order('is_pinned', { ascending: false })
       .order('vote_count', { ascending: false })
       .order('created_at', { ascending: false })

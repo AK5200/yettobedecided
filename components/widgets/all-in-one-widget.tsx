@@ -240,11 +240,15 @@ export function AllInOneWidget({
 
   const borderRadiusClass = getBorderRadiusClass(borderRadius)
   
-  // Helper function to convert hex to rgba
+  // Helper function to convert hex to rgba (handles 3 and 6 char hex)
   const hexToRgba = (hex: string, alpha: number) => {
-    const r = parseInt(hex.slice(1, 3), 16)
-    const g = parseInt(hex.slice(3, 5), 16)
-    const b = parseInt(hex.slice(5, 7), 16)
+    if (!hex || hex[0] !== '#') return `rgba(0, 0, 0, ${alpha})`
+    let h = hex.slice(1)
+    if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2]
+    const r = parseInt(h.slice(0, 2), 16)
+    const g = parseInt(h.slice(2, 4), 16)
+    const b = parseInt(h.slice(4, 6), 16)
+    if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(0, 0, 0, ${alpha})`
     return `rgba(${r}, ${g}, ${b}, ${alpha})`
   }
   
@@ -346,7 +350,7 @@ export function AllInOneWidget({
       {/* Header */}
       <div className={`px-6 pt-6 pb-4`} style={{
         backgroundColor: headerBackgroundColor || variantStyles.headerBg || 'transparent',
-        borderRadius: borderRadiusClass
+        borderRadius: getBorderRadiusStyle(borderRadius)
       }}>
         <div
           className={`w-10 h-10 ${styleVariant === '2' ? 'rounded-2xl shadow-lg' : borderRadiusClass} flex items-center justify-center mb-4`}

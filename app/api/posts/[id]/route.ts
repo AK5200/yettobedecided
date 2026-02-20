@@ -14,12 +14,17 @@ export async function GET(
 
     const { data: post, error } = await supabase
       .from('posts')
-      .select('*')
+      .select('id, title, content, vote_count, status, created_at, updated_at, tags, author_name, guest_name, is_pinned, board_id, is_approved')
       .eq('id', id)
       .single()
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 404 })
+    if (error || !post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    }
+
+    // Only return approved posts (or posts where approval isn't required)
+    if (post.is_approved === false) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
     }
 
     return NextResponse.json({ post })

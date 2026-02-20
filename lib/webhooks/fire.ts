@@ -40,11 +40,12 @@ export async function fireWebhooks({
       timestamp: new Date().toISOString(),
     })
     
-    for (const webhook of webhooks) {
+    // Fire all webhooks concurrently and await — fire-and-forget drops on serverless
+    const sends = webhooks.map((webhook) => {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       }
-      
+
       if (webhook.secret) {
         const signature = crypto
           .createHmac('sha256', webhook.secret)
@@ -52,13 +53,27 @@ export async function fireWebhooks({
           .digest('hex')
         headers['X-Webhook-Signature'] = signature
       }
-      
-      fetch(webhook.url, {
+
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000) // 10s timeout
+
+      return fetch(webhook.url, {
         method: 'POST',
         headers,
         body,
-      }).catch(err => console.error('Webhook failed:', err))
-    }
+        signal: controller.signal,
+      })
+        .then((res) => {
+          clearTimeout(timeout)
+          if (!res.ok) console.error(`Webhook ${webhook.url} returned ${res.status}`)
+        })
+        .catch((err) => {
+          clearTimeout(timeout)
+          console.error(`Webhook ${webhook.url} failed:`, err.message)
+        })
+    })
+
+    await Promise.allSettled(sends)
   } catch (error) {
     console.error('fireWebhooks error:', error)
   }

@@ -35,7 +35,7 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
       setLoading(true)
       const baseUrl = apiUrl || window.location.origin
       try {
-        const response = await fetch(`${baseUrl}/api/widget?org=${orgSlug}`, {
+        const response = await fetch(`${baseUrl}/api/widget?org=${encodeURIComponent(orgSlug)}`, {
           signal: controller.signal,
         })
         if (response.ok) {

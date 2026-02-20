@@ -47,7 +47,7 @@ export function ChangelogPopup({
     // Check if user has seen latest changelog
     const lastSeen = localStorage.getItem(`feedbackhub-changelog-${orgSlug}`)
 
-    fetch(`/api/changelog?org=${orgSlug}&limit=5`)
+    fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=5`)
       .then(res => res.json())
       .then(data => {
         if (data.entries && data.entries.length > 0) {

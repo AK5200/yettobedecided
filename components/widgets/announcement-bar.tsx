@@ -10,7 +10,7 @@ interface AnnouncementBarProps {
 }
 
 export function AnnouncementBar({ orgSlug, accentColor = '#000', link }: AnnouncementBarProps) {
-  const [entry, setEntry] = useState<{ title: string; label?: string } | null>(null)
+  const [entry, setEntry] = useState<{ title: string; label?: string; id: string } | null>(null)
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
@@ -21,32 +21,29 @@ export function AnnouncementBar({ orgSlug, accentColor = '#000', link }: Announc
       // localStorage may be unavailable in private browsing mode
     }
 
-    fetch(`/api/changelog?org=${orgSlug}&limit=1`)
-      .then(res => res.json())
+    fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=1`)
+      .then(res => res.ok ? res.json() : Promise.reject())
       .then(data => {
         if (data.entries && data.entries.length > 0) {
           const latest = data.entries[0]
           if (dismissedId !== latest.id) {
-            setEntry({ title: latest.title, label: latest.label })
+            setEntry({ id: latest.id, title: latest.title, label: latest.label })
           }
         }
       })
+      .catch(() => {})
   }, [orgSlug])
 
   const dismiss = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    fetch(`/api/changelog?org=${orgSlug}&limit=1`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.entries?.[0]) {
-          try {
-            localStorage.setItem(`feedbackhub-bar-${orgSlug}`, data.entries[0].id)
-          } catch {
-            // localStorage may be unavailable in private browsing mode
-          }
-        }
-      })
+    if (entry) {
+      try {
+        localStorage.setItem(`feedbackhub-bar-${orgSlug}`, entry.id)
+      } catch {
+        // localStorage may be unavailable in private browsing mode
+      }
+    }
     setDismissed(true)
   }
 

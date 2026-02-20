@@ -42,7 +42,7 @@ export function ChangelogDropdown({
   useEffect(() => {
     const lastSeen = localStorage.getItem(`feedbackhub-dropdown-${orgSlug}`)
 
-    fetch(`/api/changelog?org=${orgSlug}&limit=5`)
+    fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=5`)
       .then(res => res.json())
       .then(data => {
         if (data.entries) {

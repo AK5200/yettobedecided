@@ -38,6 +38,7 @@ export function FeedbackWidget({
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
   const [isIdentified, setIsIdentified] = useState(false)
   const [guestPostingEnabled, setGuestPostingEnabled] = useState(true)
@@ -329,29 +330,37 @@ export function FeedbackWidget({
       }
     }
 
-    const response = await fetch('/api/widget/feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        org_slug: orgSlug,
-        board_id: selectedBoard,
-        title,
-        content,
-        guest_email: identifiedUser?.email || guestEmail,
-        guest_name: identifiedUser?.name || guestName,
-        identified_user: identifiedPayload,
-      }),
-    })
+    setSubmitError('')
+    try {
+      const response = await fetch('/api/widget/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          org_slug: orgSlug,
+          board_id: selectedBoard,
+          title,
+          content,
+          guest_email: identifiedUser?.email || guestEmail,
+          guest_name: identifiedUser?.name || guestName,
+          identified_user: identifiedPayload,
+        }),
+      })
 
-    if (response.ok) {
-      const data = await response.json()
-      setTitle('')
-      setContent('')
-      setSuccess(true)
-      onSubmit?.(data.post)
+      if (response.ok) {
+        const data = await response.json()
+        setTitle('')
+        setContent('')
+        setSuccess(true)
+        onSubmit?.(data.post)
+      } else {
+        const data = await response.json().catch(() => ({}))
+        setSubmitError(data.error || 'Failed to submit feedback. Please try again.')
+      }
+    } catch {
+      setSubmitError('Network error. Please check your connection and try again.')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   if (configLoading) {
@@ -675,6 +684,11 @@ export function FeedbackWidget({
             <p className="text-sm text-green-600 flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
               <Check className="h-4 w-4" />
               Thanks for the feedback!
+            </p>
+          )}
+          {submitError && (
+            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+              {submitError}
             </p>
           )}
         </form>

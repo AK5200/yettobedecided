@@ -167,9 +167,14 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         const data = await res.json()
         // Replace optimistic comment with real server data
         setComments((prev) => prev.map((c) => c.id === tempId ? data.comment : c))
+      } else {
+        // Rollback optimistic comment on failure
+        setComments((prev) => prev.filter((c) => c.id !== tempId))
       }
     } catch (error) {
       console.error('Failed to submit comment:', error)
+      // Rollback optimistic comment on network error
+      setComments((prev) => prev.filter((c) => c.id !== tempId))
     } finally {
       setSubmitting(false)
     }

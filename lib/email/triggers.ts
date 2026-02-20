@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 
 function getResendClient(): Resend | null {
     const apiKey = process.env.RESEND_API_KEY;
@@ -65,7 +65,7 @@ async function sendEmailSafely(params: {
 export async function triggerNewPostEmail(postId: string) {
     const resend = getResendClient();
     if (!resend) return;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data: post } = await supabase
         .from('posts')
         .select('*, boards(*, organizations(*))')
@@ -104,7 +104,7 @@ export async function triggerNewPostEmail(postId: string) {
 export async function triggerStatusChangeEmail(postId: string, oldStatus: string, newStatus: string) {
     const resend = getResendClient();
     if (!resend) return;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data: post } = await supabase
         .from('posts')
         .select('*, votes(user_id, users:user_id(email))')
@@ -133,7 +133,7 @@ export async function triggerStatusChangeEmail(postId: string, oldStatus: string
 export async function triggerNewCommentEmail(postId: string, commentContent: string) {
     const resend = getResendClient();
     if (!resend) return;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data: post } = await supabase
         .from('posts')
         .select('*')
@@ -156,7 +156,7 @@ export async function triggerNewCommentEmail(postId: string, commentContent: str
 export async function triggerPostMergedEmail(sourcePostId: string, targetPostId: string) {
     const resend = getResendClient();
     if (!resend) return;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data: sourcePost } = await supabase
         .from('posts')
         .select('*, votes(user_id, users:user_id(email))')
@@ -190,7 +190,7 @@ export async function triggerInvitationEmail(email: string, token: string, invit
     const resend = getResendClient();
     if (!resend) return;
     const appUrl = baseUrl || process.env.NEXT_PUBLIC_APP_URL || '';
-    const inviteUrl = `${appUrl}/accept-invite?token=${token}`;
+    const inviteUrl = `${appUrl}/invite/${token}`;
 
     await sendEmailSafely({
         from: getFromEmail(),

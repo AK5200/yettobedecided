@@ -16,8 +16,8 @@
 
   let _user = null;
 
-  // Load saved session
-  const saved = localStorage.getItem('feedbackhub_user');
+  // Load saved session (scoped per org to prevent cross-tenant leakage)
+  const saved = localStorage.getItem('feedbackhub_user_' + org);
   if (saved) {
     try { _user = JSON.parse(saved); } catch(e) {}
   }
@@ -42,7 +42,7 @@
     }
     
     if (_user) {
-      localStorage.setItem('feedbackhub_user', JSON.stringify(_user));
+      localStorage.setItem('feedbackhub_user_' + org, JSON.stringify(_user));
       // Send identity to all open iframes
       const iframes = document.querySelectorAll('iframe[id^="feedbackhub-"]');
       iframes.forEach(function(iframe) {
@@ -60,7 +60,7 @@
    */
   FeedbackHub.clearIdentity = function() {
     _user = null;
-    localStorage.removeItem('feedbackhub_user');
+    localStorage.removeItem('feedbackhub_user_' + org);
   };
   
   /**
@@ -494,8 +494,6 @@
     iframe.setAttribute('allowtransparency', 'true');
     container.appendChild(iframe);
     
-    // Debug log
-    console.log('FeedbackHub: Initializing All-in-One Popup with style variant:', styleVariant, 'from settings:', settings);
 
     function openPopup() {
       overlay.style.display = 'block';
@@ -619,8 +617,6 @@
     iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
     popover.appendChild(iframe);
     
-    // Debug log
-    console.log('FeedbackHub: Initializing All-in-One Popover with style variant:', styleVariant, 'from settings:', settings);
 
     function openPopover() {
       popover.style.display = 'block';
