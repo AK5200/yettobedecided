@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { sendSignupConfirmationEmail } from '@/lib/email/triggers'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
@@ -17,57 +17,52 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    if (password.length < 6) {
+      return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
+    }
 
-    // Sign up the user (Supabase will create the user but we'll send email via Resend)
-    const { data, error } = await supabase.auth.signUp({
+    const adminClient = createAdminClient()
+
+    const baseUrl = (() => {
+      const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
+      const protocol = request.headers.get('x-forwarded-proto') || 'https'
+      return host ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+    })()
+
+    // Use admin.generateLink to create user + get confirmation link
+    // This does NOT send Supabase's default email — we send via Resend instead
+    const { data: linkData, error } = await adminClient.auth.admin.generateLink({
+      type: 'signup',
       email,
       password,
       options: {
-        emailRedirectTo: `${(() => {
-          const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
-          const protocol = request.headers.get('x-forwarded-proto') || 'https'
-          return host ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
-        })()}/api/auth/callback`,
-        // Disable Supabase's default email - we'll send via Resend
-        data: {
-          skip_email_confirmation: false, // We'll handle this manually
-        },
+        redirectTo: `${baseUrl}/api/auth/callback`,
       },
     })
 
     if (error) {
+      if (error.message?.includes('already been registered') || error.message?.includes('already exists')) {
+        return NextResponse.json({ error: 'An account with this email already exists' }, { status: 400 })
+      }
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    // If user was created and needs confirmation, send email via Resend
-    if (data.user && data.user.email && !data.user.email_confirmed_at) {
+    // Send confirmation email via Resend
+    if (linkData?.properties?.action_link && linkData.user?.email) {
       try {
-        // Use admin client to generate confirmation link
-        const { createAdminClient } = await import('@/lib/supabase/server')
-        const adminClient = createAdminClient()
-        
-        const { data: linkData } = await adminClient.auth.admin.generateLink({
-          type: 'signup',
-          email: data.user.email,
-          password: password, // Required for signup type
-        })
-
-        if (linkData?.properties?.action_link) {
-          await sendSignupConfirmationEmail(
-            data.user.email,
-            linkData.properties.action_link
-          )
-        }
+        await sendSignupConfirmationEmail(
+          linkData.user.email,
+          linkData.properties.action_link
+        )
       } catch (emailError) {
         console.error('Failed to send confirmation email via Resend:', emailError)
-        // Don't fail the signup if email fails - user can request resend
+        // Don't fail the signup if email fails — user can request resend
       }
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Account created! Please check your email to confirm your account.',
-      user: data.user 
+      user: linkData?.user ?? null
     })
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
