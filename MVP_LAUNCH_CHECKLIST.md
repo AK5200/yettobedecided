@@ -1,8 +1,8 @@
 # Kelo — MVP Launch Checklist
 
-**Last Updated**: Feb 20, 2026
-**Overall Readiness**: ~90% — Core features complete, security hardened, major bugs fixed
-**Estimated Remaining Work**: 1 day focused effort
+**Last Updated**: Feb 23, 2026
+**Overall Readiness**: ~95% — Core features complete, security hardened, brand renamed to Kelo
+**Estimated Remaining Work**: Cleanup + testing
 
 ---
 
@@ -137,30 +137,19 @@
 
 ### Security & Stability
 
-- [ ] **Add error boundaries**
-  Create `app/error.tsx` and `app/(dashboard)/error.tsx`
-  Unhandled errors currently show raw React error screen in production
+- [x] **Add error boundaries** _(done Feb 20)_
+  Created `app/error.tsx` and `app/(dashboard)/error.tsx`
 
-- [ ] **Implement rate limiting**
-  Protect: `/api/auth/signup`, `/api/auth/widget/magic-link`, `/api/widget/feedback`, `/api/widget/vote`, `/api/comments`
-  Use Upstash Ratelimit or Vercel's built-in rate limiting
+- [x] **Implement rate limiting** _(done Feb 20)_
+  In-memory sliding window (`lib/rate-limit.ts`): signup 5/min, magic-link 5/min, feedback 10/min, vote 30/min, comments 20/min
 
-- [ ] **Gate/remove destructive debug routes**
-  - `app/api/changelog/seed/route.ts` — creates duplicate seed data on every call
-  - `app/api/posts/[id]/reset/route.ts` — deletes all comments + votes
-  - `app/api/posts/[id]/reset-votes/route.ts`
-  - `app/api/posts/[id]/reset-comments/route.ts`
-  Add admin-only auth check or remove entirely before launch
+- [x] **Gate/remove destructive debug routes** _(done Feb 20)_
+  Deleted: `changelog/seed`, `posts/[id]/reset`, `posts/[id]/reset-votes`, `posts/[id]/reset-comments`
 
 ### Cleanup
 
-- [ ] **Remove remaining console.log statements** (or gate behind `NODE_ENV === 'development'`)
-  Still present in:
-  - `lib/integrations/notify.ts` (debug logging)
-  - `lib/linear/auto-sync.ts`
-  - `app/api/posts/route.ts`
-  - `app/api/posts/[id]/merge/route.ts`
-  - `app/api/posts/[id]/sync-linear/route.ts`
+- [x] **Remove remaining console.log statements** _(done Feb 20)_
+  Removed from: `notify.ts`, `auto-sync.ts`, `posts/route.ts`, `merge/route.ts`, `sync-linear/route.ts`
 
 - [ ] **Delete test SQL files from root**
   `create_test_user.sql`, `create_org_only.sql`, `check_user_setup.sql`, `quick_fix_sarah.sql`, `cleanup_duplicate_orgs.sql`
@@ -168,24 +157,8 @@
 - [ ] **Delete unused markdown files from root**
   `QUICK_START.md`, `REDESIGN_NOTES.md`, `REDESIGN_SUMMARY.md`, `UI_IMPROVEMENTS.md`, `COMPONENT_API.md`
 
-- [ ] **Create `.env.example`**
-  Document all required env vars:
-  ```
-  NEXT_PUBLIC_SUPABASE_URL=
-  NEXT_PUBLIC_SUPABASE_ANON_KEY=
-  SUPABASE_SERVICE_ROLE_KEY=
-  GOOGLE_CLIENT_ID=
-  GOOGLE_CLIENT_SECRET=
-  GITHUB_CLIENT_ID=
-  GITHUB_CLIENT_SECRET=
-  SLACK_CLIENT_ID=
-  SLACK_CLIENT_SECRET=
-  LINEAR_CLIENT_ID=
-  LINEAR_CLIENT_SECRET=
-  RESEND_API_KEY=
-  RESEND_FROM_EMAIL=Kelo <noreply@yourdomain.com>
-  ALLOWED_ORIGINS=https://yourdomain.com
-  ```
+- [x] **Create `.env.example`** _(done Feb 20)_
+  Documents all 13 required env vars with placeholder values
 
 ### Database
 
