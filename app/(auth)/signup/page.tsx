@@ -18,6 +18,7 @@ import Link from 'next/link'
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const supabase = createClient()
@@ -26,6 +27,12 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
     setMessage('')
+
+    if (password !== confirmPassword) {
+      setMessage('Passwords do not match')
+      setLoading(false)
+      return
+    }
 
     try {
       const response = await fetch('/api/auth/signup', {
@@ -76,6 +83,18 @@ export default function SignupPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
               />
