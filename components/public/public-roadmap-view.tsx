@@ -2,7 +2,7 @@
 
 import { PostDetailDialog } from '@/components/boards/post-detail-dialog'
 import { PublicHubNav } from '@/components/public/public-hub-nav'
-import { ChevronUp, MessageSquare, Map, Zap } from 'lucide-react'
+import { ChevronUp, MessageSquare, Map } from 'lucide-react'
 import type { Post, Organization } from '@/lib/types/database'
 
 interface RoadmapColumn {
@@ -80,44 +80,27 @@ export function PublicRoadmapView({
                   ) : (
                     column.posts.map((post) => (
                       <PostDetailDialog key={post.id} post={post}>
-                        <div
-                          className="group bg-white rounded-2xl p-5 hover:shadow-md transition-all cursor-pointer overflow-hidden"
-                          style={{
-                            borderLeft: `3px solid ${column.dotColor}`,
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
-                          }}
-                        >
-                          <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-1.5">
+                        <div className="group bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md hover:border-yellow-300/50 transition-all cursor-pointer">
+                          <h3 className="text-sm font-bold text-gray-900 mb-2 group-hover:text-yellow-600 transition-colors">
                             {post.title}
                           </h3>
 
                           {post.content && (
-                            <p className="text-[13px] text-gray-500 line-clamp-2 leading-relaxed mb-4">
+                            <p className="text-xs text-gray-500 leading-relaxed mb-4 line-clamp-2">
                               {post.content}
                             </p>
                           )}
 
                           {!post.content && <div className="mb-4" />}
 
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-amber-600">
-                                <ChevronUp className="h-3.5 w-3.5" />
-                                {post.vote_count ?? 0}
-                              </span>
-                              <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-400">
-                                <MessageSquare className="h-3.5 w-3.5" />
-                                {commentCountMap[post.id] || 0}
-                              </span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 text-gray-400 group-hover:text-yellow-500 transition-colors">
+                              <ChevronUp className="h-4 w-4" />
+                              <span className="text-[11px] font-bold">{post.vote_count ?? 0}</span>
                             </div>
-                            <div
-                              className="w-7 h-7 rounded-full flex items-center justify-center"
-                              style={{ backgroundColor: column.dotColor + '15' }}
-                            >
-                              <Zap
-                                className="h-3.5 w-3.5"
-                                style={{ color: column.dotColor }}
-                              />
+                            <div className="flex items-center gap-1 text-gray-400">
+                              <MessageSquare className="h-4 w-4" />
+                              <span className="text-[11px] font-bold">{commentCountMap[post.id] || 0}</span>
                             </div>
                           </div>
                         </div>
