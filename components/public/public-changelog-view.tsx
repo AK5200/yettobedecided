@@ -80,7 +80,7 @@ function SubscribeForm({ orgId }: { orgId: string }) {
         <Button
           type="submit"
           disabled={loading}
-          className="h-10 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow-sm"
+          className="h-10 px-4 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 rounded-lg text-sm font-semibold shadow-sm border border-yellow-400/50"
         >
           <Bell className="h-3.5 w-3.5 mr-1.5" />
           {loading ? 'Subscribing...' : 'Subscribe'}
@@ -111,8 +111,8 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
         {/* Entries */}
         {entries.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="h-5 w-5 text-gray-400" />
+            <div className="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="h-5 w-5 text-yellow-500" />
             </div>
             <p className="text-sm font-medium text-gray-900">No updates yet</p>
             <p className="text-sm text-gray-500 mt-1">Subscribe to get notified when we ship</p>
@@ -120,7 +120,7 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
         ) : (
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-[7px] top-2 bottom-0 w-px bg-gray-200" />
+            <div className="absolute left-[7px] top-2 bottom-0 w-px bg-linear-to-b from-yellow-300 via-gray-200 to-gray-200" />
 
             <div className="space-y-10">
               {entries.map((entry, index) => {
@@ -130,7 +130,10 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
                 return (
                   <div key={entry.id} className="relative pl-8">
                     {/* Timeline dot */}
-                    <div className="absolute left-0 top-1.5 w-[15px] h-[15px] rounded-full bg-white border-2 border-gray-300 z-10" />
+                    <div
+                      className="absolute left-0 top-1.5 w-[15px] h-[15px] rounded-full bg-white border-2 z-10"
+                      style={{ borderColor: index === 0 ? '#FACC15' : '#D1D5DB' }}
+                    />
 
                     {/* Date */}
                     <time className="text-xs font-medium text-gray-400 uppercase tracking-wide">
@@ -138,7 +141,7 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
                     </time>
 
                     {/* Card */}
-                    <div className="mt-2 bg-white border border-gray-200 rounded-xl p-5">
+                    <div className="mt-2 bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-sm transition-all">
                       <div className="flex items-center gap-2 mb-3">
                         <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md ${config.bg} ${config.color}`}>
                           <Icon className="h-3 w-3" />

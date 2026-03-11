@@ -43,8 +43,8 @@ export function PublicRoadmapView({
 
         {totalPosts === 0 ? (
           <div className="text-center py-16">
-            <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-              <Map className="h-5 w-5 text-gray-400" />
+            <div className="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center mx-auto mb-4">
+              <Map className="h-5 w-5 text-yellow-500" />
             </div>
             <p className="text-sm font-medium text-gray-900">Roadmap is empty</p>
             <p className="text-sm text-gray-500 mt-1">Check back soon for updates</p>
@@ -54,13 +54,19 @@ export function PublicRoadmapView({
             {columns.map((column) => (
               <div key={column.key} className="flex flex-col">
                 {/* Column header */}
-                <div className="flex items-center gap-2.5 mb-4 px-1">
+                <div
+                  className="flex items-center gap-2.5 mb-4 px-3 py-2 rounded-lg"
+                  style={{ backgroundColor: column.dotColor + '10' }}
+                >
                   <div
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: column.dotColor }}
                   />
                   <h2 className="text-sm font-semibold text-gray-900">{column.label}</h2>
-                  <span className="text-xs font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+                  <span
+                    className="text-[11px] font-semibold rounded-full px-2 py-0.5 ml-auto"
+                    style={{ backgroundColor: column.dotColor + '18', color: column.dotColor }}
+                  >
                     {column.posts.length}
                   </span>
                 </div>
@@ -74,8 +80,11 @@ export function PublicRoadmapView({
                   ) : (
                     column.posts.map((post) => (
                       <PostDetailDialog key={post.id} post={post}>
-                        <div className="group bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
-                          <h3 className="text-[13px] font-semibold text-gray-900 leading-snug mb-2.5">
+                        <div
+                          className="group bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-all cursor-pointer overflow-hidden relative"
+                          style={{ borderLeftColor: column.dotColor, borderLeftWidth: '2px' }}
+                        >
+                          <h3 className="text-[13px] font-semibold text-gray-900 leading-snug mb-2.5 group-hover:text-gray-800">
                             {post.title}
                           </h3>
 
@@ -86,11 +95,11 @@ export function PublicRoadmapView({
                           )}
 
                           <div className="flex items-center gap-3">
-                            <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                            <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded">
                               <ChevronUp className="h-3 w-3" />
                               {post.vote_count ?? 0}
                             </span>
-                            <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                            <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded">
                               <MessageSquare className="h-3 w-3" />
                               {commentCountMap[post.id] || 0}
                             </span>

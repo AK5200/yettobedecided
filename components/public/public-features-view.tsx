@@ -178,7 +178,7 @@ export function PublicFeaturesView({
           </div>
           <Dialog open={createPostOpen} onOpenChange={setCreatePostOpen}>
             <DialogTrigger asChild>
-              <Button className="h-9 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow-sm">
+              <Button className="h-9 px-4 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 rounded-lg text-sm font-semibold shadow-sm border border-yellow-400/50">
                 <Plus className="h-4 w-4 mr-1.5" />
                 New Post
               </Button>
@@ -255,7 +255,7 @@ export function PublicFeaturesView({
               placeholder="Search posts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-10 rounded-lg border-gray-200 bg-white text-sm placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300"
+              className="pl-9 h-10 rounded-lg border-gray-200 bg-white text-sm placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-yellow-300 focus-visible:border-yellow-300"
             />
           </form>
 
@@ -324,8 +324,8 @@ export function PublicFeaturesView({
         <div className="space-y-3">
           {sortedPosts.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="h-5 w-5 text-gray-400" />
+              <div className="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="h-5 w-5 text-yellow-500" />
               </div>
               <p className="text-sm font-medium text-gray-900">No posts yet</p>
               <p className="text-sm text-gray-500 mt-1">Be the first to share an idea</p>
@@ -340,18 +340,18 @@ export function PublicFeaturesView({
 
               return (
                 <PostDetailDialog key={post.id} post={post}>
-                  <div className="group flex items-stretch bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
+                  <div className="group flex items-stretch bg-white border border-gray-200 rounded-xl hover:border-yellow-200 hover:shadow-[0_2px_12px_rgba(250,204,21,0.08)] transition-all cursor-pointer">
                     {/* Vote button */}
                     <button
                       onClick={(e) => handleVote(post.id, e)}
                       disabled={isVoting}
                       className={`flex flex-col items-center justify-center gap-1 w-16 shrink-0 border-r border-gray-100 transition-colors rounded-l-xl ${
                         isVoted
-                          ? 'bg-blue-50 text-blue-600'
+                          ? 'bg-yellow-50 text-yellow-600'
                           : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
                       } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      <ChevronUp className={`h-4 w-4 ${isVoted ? 'text-blue-600' : ''}`} />
+                      <ChevronUp className={`h-4 w-4 ${isVoted ? 'text-yellow-600' : ''}`} />
                       <span className="text-sm font-semibold">{post.vote_count || 0}</span>
                     </button>
 

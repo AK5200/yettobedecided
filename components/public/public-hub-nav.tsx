@@ -31,8 +31,8 @@ export function PublicHubNav({ org, orgSlug }: PublicHubNavProps) {
                 className="h-7 w-7 rounded-lg object-cover"
               />
             ) : (
-              <div className="h-7 w-7 rounded-lg bg-gray-900 flex items-center justify-center">
-                <span className="text-xs font-semibold text-white">
+              <div className="h-7 w-7 rounded-lg bg-linear-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-sm">
+                <span className="text-xs font-bold text-gray-900">
                   {org.name?.charAt(0)?.toUpperCase() || 'K'}
                 </span>
               </div>
@@ -58,7 +58,7 @@ export function PublicHubNav({ org, orgSlug }: PublicHubNavProps) {
                 >
                   {link.label}
                   {isActive && (
-                    <span className="absolute bottom-[-13px] left-3 right-3 h-[2px] bg-gray-900 rounded-full" />
+                    <span className="absolute bottom-[-13px] left-3 right-3 h-[2px] bg-yellow-400 rounded-full" />
                   )}
                 </Link>
               )

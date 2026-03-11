@@ -146,7 +146,7 @@ export function GuestPostForm({ boardId, onPostCreated }: GuestPostFormProps) {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full h-10 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow-sm"
+        className="w-full h-10 bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 rounded-lg text-sm font-semibold shadow-sm border border-yellow-400/50"
       >
         {loading ? 'Submitting...' : 'Submit'}
       </Button>
