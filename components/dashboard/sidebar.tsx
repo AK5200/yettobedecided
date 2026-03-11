@@ -151,7 +151,7 @@ export function Sidebar() {
           <div className="flex items-center gap-1">
             {org?.slug && (
               <Link
-                href={`/${org.slug}`}
+                href={`/${org.slug}/features`}
                 target="_blank"
                 className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
                 title="View public hub"
@@ -226,7 +226,7 @@ export function Sidebar() {
         {/* Quick Links */}
         <div className="px-4 space-y-1">
           <Link
-            href={org?.slug ? `/${org.slug}` : '#'}
+            href={org?.slug ? `/${org.slug}/features` : '#'}
             target="_blank"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
           >
