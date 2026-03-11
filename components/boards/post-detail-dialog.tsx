@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
 import { CommentList } from './comment-list'
 import { CommentForm } from './comment-form'
 import { TagSelector } from '@/components/tags/tag-selector'
@@ -63,7 +62,6 @@ function formatDate(dateString?: string | null): string {
   })
 }
 
-// Inner component that only mounts when dialog is open — all fetching happens here
 function PostDetailContent({
   post,
   isAdmin,
@@ -89,12 +87,8 @@ function PostDetailContent({
         .select('org_id')
         .eq('id', post.board_id)
         .single()
-
-      if (board?.org_id) {
-        setOrgId(board.org_id)
-      }
+      if (board?.org_id) setOrgId(board.org_id)
     }
-
     fetchOrgId()
   }, [post.board_id])
 
@@ -103,20 +97,15 @@ function PostDetailContent({
       try {
         const res = await fetch('/api/statuses')
         const data = await res.json()
-        if (data.statuses) {
-          setStatuses(data.statuses)
-        }
+        if (data.statuses) setStatuses(data.statuses)
       } catch (error) {
         console.error('Failed to fetch statuses:', error)
       }
     }
-
     fetchStatuses()
   }, [])
 
-  const handleCommentAdded = () => {
-    setRefreshTrigger((prev) => prev + 1)
-  }
+  const handleCommentAdded = () => setRefreshTrigger((prev) => prev + 1)
 
   const handleStatusChange = async (newStatus: string) => {
     setUpdatingStatus(true)
@@ -128,57 +117,56 @@ function PostDetailContent({
       })
       if (res.ok) {
         setCurrentStatus(newStatus)
-        const statusObj = statuses.find(s => s.key === newStatus)
+        const statusObj = statuses.find((s) => s.key === newStatus)
         toast.success(`Status updated to ${statusObj?.name || newStatus}`)
         router.refresh()
       } else {
         toast.error('Failed to update status')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to update status')
     } finally {
       setUpdatingStatus(false)
     }
   }
 
-  const getCurrentStatusDisplay = () => {
-    const status = statuses.find(s => s.key === currentStatus)
-    if (status) {
-      return (
-        <span className="flex items-center gap-2">
-          <Circle className="h-3.5 w-3.5" style={{ color: status.color, fill: status.color }} />
-          {status.name}
-        </span>
-      )
-    }
-    return currentStatus
-  }
-
-  const currentStatusObj = statuses.find(s => s.key === currentStatus)
+  const currentStatusObj = statuses.find((s) => s.key === currentStatus)
 
   return (
-    <div className="flex flex-col lg:flex-row gap-0 lg:gap-6 min-h-0" style={{ height: 'calc(85vh - 80px)' }}>
-      {/* Left Column — Content + Comments */}
-      <div className="flex-1 min-w-0 flex flex-col pr-0 lg:pr-6 lg:border-r lg:border-gray-100 overflow-hidden">
-        {/* Title */}
-        <DialogHeader className="mb-4 flex-shrink-0">
-          <DialogTitle className="text-xl font-bold text-gray-900 leading-tight">
+    <div
+      className="flex flex-col lg:flex-row gap-0 lg:gap-0 min-h-0"
+      style={{ height: 'calc(85vh - 80px)' }}
+    >
+      {/* Left — Content + Comments */}
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        <DialogHeader className="mb-5 shrink-0 pr-6">
+          <DialogTitle className="text-xl font-bold text-gray-900 leading-tight tracking-tight">
             {post.title}
           </DialogTitle>
+          <div className="flex items-center gap-3 mt-2">
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                <User className="h-3 w-3 text-gray-500" />
+              </div>
+              <span className="text-xs font-medium text-gray-600">
+                {post.is_guest ? post.guest_name || 'Guest' : post.author_name || 'Anonymous'}
+              </span>
+            </div>
+            <span className="text-xs text-gray-300">·</span>
+            <span className="text-xs text-gray-400">{formatDate(post.created_at)}</span>
+          </div>
         </DialogHeader>
 
-        {/* Scrollable area: content + comments */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          {/* Content */}
+        {/* Scrollable area */}
+        <div className="flex-1 overflow-y-auto min-h-0 pr-6 lg:pr-8">
           {post.content && (
-            <div className="text-sm text-gray-600 leading-relaxed mb-6 whitespace-pre-wrap">
+            <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
               {post.content}
             </div>
           )}
 
-          {/* Admin Note */}
           {post.admin_note && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="mb-6 p-3.5 bg-red-50 border border-red-100 rounded-lg">
               <p className="text-sm text-red-700">
                 <span className="font-semibold">Admin note:</span> {post.admin_note}
               </p>
@@ -189,14 +177,21 @@ function PostDetailContent({
           <div className="border-t border-gray-100 pt-5">
             <div className="flex items-center gap-2 mb-4">
               <MessageSquare className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-900">Comments</h3>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Comments
+              </h3>
             </div>
-            <CommentList postId={post.id} isAdmin={isAdmin} refreshTrigger={refreshTrigger} userEmail={adminEmail} />
+            <CommentList
+              postId={post.id}
+              isAdmin={isAdmin}
+              refreshTrigger={refreshTrigger}
+              userEmail={adminEmail}
+            />
           </div>
         </div>
 
-        {/* Fixed comment form at bottom */}
-        <div className="flex-shrink-0 pt-4 border-t border-gray-100">
+        {/* Fixed comment form */}
+        <div className="shrink-0 pt-4 pr-6 lg:pr-8 border-t border-gray-100">
           <CommentForm
             postId={post.id}
             isAdmin={isAdmin}
@@ -207,24 +202,41 @@ function PostDetailContent({
         </div>
       </div>
 
-      {/* Right Column — Sidebar */}
-      <div className="w-full lg:w-[320px] flex-shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100 overflow-y-auto">
+      {/* Right — Sidebar */}
+      <div className="w-full lg:w-[280px] shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-gray-100 overflow-y-auto lg:pl-6">
         <div className="space-y-5">
           {/* Status */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Status</label>
+            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+              Status
+            </label>
             {isAdmin && statuses.length > 0 ? (
-              <Select value={currentStatus} onValueChange={handleStatusChange} disabled={updatingStatus}>
-                <SelectTrigger className="w-full h-9 text-sm border-gray-200">
+              <Select
+                value={currentStatus}
+                onValueChange={handleStatusChange}
+                disabled={updatingStatus}
+              >
+                <SelectTrigger className="w-full h-9 text-sm border-gray-200 rounded-lg">
                   <SelectValue>
-                    {getCurrentStatusDisplay()}
+                    <span className="flex items-center gap-2">
+                      {currentStatusObj && (
+                        <Circle
+                          className="h-3 w-3"
+                          style={{ color: currentStatusObj.color, fill: currentStatusObj.color }}
+                        />
+                      )}
+                      {currentStatusObj?.name || currentStatus}
+                    </span>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {statuses.map((status) => (
                     <SelectItem key={status.key} value={status.key}>
                       <span className="flex items-center gap-2">
-                        <Circle className="h-3.5 w-3.5" style={{ color: status.color, fill: status.color }} />
+                        <Circle
+                          className="h-3 w-3"
+                          style={{ color: status.color, fill: status.color }}
+                        />
                         {status.name}
                       </span>
                     </SelectItem>
@@ -234,7 +246,10 @@ function PostDetailContent({
             ) : (
               <div className="flex items-center gap-2">
                 {currentStatusObj && (
-                  <Circle className="h-3 w-3" style={{ color: currentStatusObj.color, fill: currentStatusObj.color }} />
+                  <Circle
+                    className="h-3 w-3"
+                    style={{ color: currentStatusObj.color, fill: currentStatusObj.color }}
+                  />
                 )}
                 <span className="text-sm text-gray-700">
                   {currentStatusObj?.name || post.status}
@@ -245,25 +260,27 @@ function PostDetailContent({
 
           {/* Votes */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Votes</label>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
-                <ChevronUp className="h-4 w-4 text-amber-500" />
-                <span className="text-lg font-bold text-gray-900">{post.vote_count}</span>
-              </div>
+            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+              Votes
+            </label>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
+              <ChevronUp className="h-4 w-4 text-gray-500" />
+              <span className="text-base font-bold text-gray-900">{post.vote_count}</span>
             </div>
           </div>
 
           {/* Author */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Author</label>
-            <div className="flex items-center gap-2">
+            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+              Author
+            </label>
+            <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
                 <User className="h-3.5 w-3.5 text-gray-500" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')}
+                  {post.is_guest ? post.guest_name || 'Guest' : post.author_name || 'Anonymous'}
                 </p>
                 <p className="text-xs text-gray-400">
                   {post.is_guest ? post.guest_email : post.author_email}
@@ -274,7 +291,9 @@ function PostDetailContent({
 
           {/* Date */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Created</label>
+            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+              Created
+            </label>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Calendar className="h-3.5 w-3.5 text-gray-400" />
               {formatDate(post.created_at)}
@@ -284,7 +303,7 @@ function PostDetailContent({
           {/* Tags (Admin) */}
           {isAdmin && orgId && (
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Tag className="h-3 w-3" />
                 Tags
               </label>
@@ -294,13 +313,15 @@ function PostDetailContent({
 
           {/* Actions (Admin) */}
           {isAdmin && (
-            <div className="pt-3 border-t border-gray-100 space-y-2">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Actions</label>
+            <div className="pt-4 border-t border-gray-100 space-y-2">
+              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+                Actions
+              </label>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setMergeOpen(true)}
-                className="w-full justify-start gap-2 h-9 text-sm border-gray-200 hover:bg-gray-50"
+                className="w-full justify-start gap-2 h-9 text-sm border-gray-200 rounded-lg hover:bg-gray-50"
               >
                 <GitMerge className="h-3.5 w-3.5" />
                 Merge Duplicate
@@ -310,7 +331,7 @@ function PostDetailContent({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start gap-2 h-9 text-sm border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
+                    className="w-full justify-start gap-2 h-9 text-sm border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     View in Linear
@@ -326,35 +347,29 @@ function PostDetailContent({
         <MergeModal
           open={mergeOpen}
           onClose={() => setMergeOpen(false)}
-          sourcePost={{ id: post.id, title: post.title, content: post.content || '', vote_count: post.vote_count || 0 }}
-          boardId={post.board_id}
-          onMerged={() => {
-            router.refresh()
+          sourcePost={{
+            id: post.id,
+            title: post.title,
+            content: post.content || '',
+            vote_count: post.vote_count || 0,
           }}
+          boardId={post.board_id}
+          onMerged={() => router.refresh()}
         />
       )}
     </div>
   )
 }
 
-export function PostDetailDialog({
-  post,
-  isAdmin,
-  adminEmail,
-  children,
-}: PostDetailDialogProps) {
+export function PostDetailDialog({ post, isAdmin, adminEmail, children }: PostDetailDialogProps) {
   const [open, setOpen] = useState(false)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-6xl w-[95vw] max-h-[85vh] overflow-hidden p-8">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] overflow-hidden p-6 lg:p-8 rounded-xl border-gray-200">
         {open && (
-          <PostDetailContent
-            post={post}
-            isAdmin={isAdmin}
-            adminEmail={adminEmail}
-          />
+          <PostDetailContent post={post} isAdmin={isAdmin} adminEmail={adminEmail} />
         )}
       </DialogContent>
     </Dialog>

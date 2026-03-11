@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PostDetailDialog } from '@/components/boards/post-detail-dialog'
 import { GuestPostForm } from '@/components/posts/guest-post-form'
+import { PublicHubNav } from '@/components/public/public-hub-nav'
 import {
   Dialog,
   DialogContent,
@@ -16,8 +15,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, MessageSquare, ThumbsUp, Bug, Lightbulb, Link2, Plus } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Search,
+  ChevronUp,
+  Plus,
+  MessageSquare,
+  Star,
+  SlidersHorizontal,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import type { Board, Post, ChangelogEntry, Organization } from '@/lib/types/database'
 
@@ -31,6 +43,14 @@ interface PublicFeaturesViewProps {
   currentBoard?: string
   currentStatus: string
   searchQuery: string
+}
+
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  all: { label: 'All', color: 'text-gray-700', bg: 'bg-gray-100' },
+  open: { label: 'Open', color: 'text-blue-700', bg: 'bg-blue-50' },
+  planned: { label: 'Planned', color: 'text-violet-700', bg: 'bg-violet-50' },
+  in_progress: { label: 'In Progress', color: 'text-amber-700', bg: 'bg-amber-50' },
+  shipped: { label: 'Shipped', color: 'text-emerald-700', bg: 'bg-emerald-50' },
 }
 
 export function PublicFeaturesView({
@@ -52,87 +72,79 @@ export function PublicFeaturesView({
   const [votingIds, setVotingIds] = useState<string[]>([])
   const [createPostOpen, setCreatePostOpen] = useState(false)
   const [selectedBoardForPost, setSelectedBoardForPost] = useState<string>(
-    currentBoard ? boards.find(b => b.slug === currentBoard)?.id || boards[0]?.id || '' : boards[0]?.id || ''
+    currentBoard
+      ? boards.find((b) => b.slug === currentBoard)?.id || boards[0]?.id || ''
+      : boards[0]?.id || ''
   )
+
+  const buildUrl = (overrides: { board?: string | null; status?: string; q?: string }) => {
+    const params = new URLSearchParams()
+    const board = overrides.board !== undefined ? overrides.board : currentBoard
+    const status = overrides.status !== undefined ? overrides.status : currentStatus
+    const q = overrides.q !== undefined ? overrides.q : searchQuery
+
+    if (board) params.set('board', board)
+    if (status && status !== 'all') params.set('status', status)
+    if (q) params.set('q', q)
+    const qs = params.toString()
+    return `/${orgSlug}/features${qs ? `?${qs}` : ''}`
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    const params = new URLSearchParams()
-    if (currentBoard) params.set('board', currentBoard)
-    if (currentStatus !== 'all') params.set('status', currentStatus)
-    if (searchQuery) params.set('q', searchQuery)
-    window.location.href = `/${orgSlug}/features?${params.toString()}`
+    window.location.href = buildUrl({ q: searchQuery })
   }
 
-  const getBoardIcon = (boardName: string) => {
-    const name = boardName.toLowerCase()
-    if (name.includes('bug')) return <Bug className="h-4 w-4" />
-    if (name.includes('feature')) return <Lightbulb className="h-4 w-4" />
-    if (name.includes('feedback')) return <MessageSquare className="h-4 w-4" />
-    if (name.includes('integration')) return <Link2 className="h-4 w-4" />
-    return <MessageSquare className="h-4 w-4" />
-  }
-
-  // Fetch vote statuses for all boards
   useEffect(() => {
     if (!voterEmail || boards.length === 0) {
       setVotedPostIds([])
       return
     }
-
     const fetchVoteStatuses = async () => {
       try {
-        // Fetch votes for each board and combine
-        const votePromises = boards.map(board =>
-          fetch(`/api/votes/by-email?board_id=${board.id}&voter_email=${encodeURIComponent(voterEmail)}`)
-            .then(res => res.ok ? res.json() : { post_ids: [] })
-            .then(data => data.post_ids || [])
+        const votePromises = boards.map((board) =>
+          fetch(
+            `/api/votes/by-email?board_id=${board.id}&voter_email=${encodeURIComponent(voterEmail)}`
+          )
+            .then((res) => (res.ok ? res.json() : { post_ids: [] }))
+            .then((data) => data.post_ids || [])
             .catch(() => [])
         )
-
         const allVotedIds = await Promise.all(votePromises)
-        const uniqueIds = Array.from(new Set(allVotedIds.flat()))
-        setVotedPostIds(uniqueIds)
-      } catch (error) {
-        // Silently fail
+        setVotedPostIds(Array.from(new Set(allVotedIds.flat())))
+      } catch {
+        // silently fail
       }
     }
-
     fetchVoteStatuses()
   }, [voterEmail, boards])
 
   const handleVote = async (postId: string, e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
-
     if (!voterEmail) {
-      const email = window.prompt('Please enter your email to vote:')
+      const email = window.prompt('Enter your email to vote:')
       if (!email) return
       setVoterEmail(email)
-      // Retry vote after setting email
       setTimeout(() => handleVote(postId, e), 100)
       return
     }
-
     if (votingIds.includes(postId)) return
     setVotingIds((prev) => [...prev, postId])
-
     try {
       const response = await fetch('/api/votes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ post_id: postId, voter_email: voterEmail }),
       })
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        toast.error(errorData?.error || 'Unable to update vote. Please try again.')
+        toast.error(errorData?.error || 'Unable to vote. Please try again.')
         return
       }
-
       toast.success('Vote updated!')
       router.refresh()
-    } catch (error) {
+    } catch {
       toast.error('Failed to vote')
     } finally {
       setVotingIds((prev) => prev.filter((id) => id !== postId))
@@ -145,327 +157,284 @@ export function PublicFeaturesView({
   }
 
   const sortedPosts = [...posts].sort((a, b) => {
-    // Featured posts always come first
     if (a.is_pinned && !b.is_pinned) return -1
     if (!a.is_pinned && b.is_pinned) return 1
-
-    // Then apply the selected sort
-    if (sortBy === 'most_votes') {
-      return (b.vote_count || 0) - (a.vote_count || 0)
-    }
+    if (sortBy === 'most_votes') return (b.vote_count || 0) - (a.vote_count || 0)
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header - Sticky Navbar */}
-      <header className="sticky top-0 z-50 bg-background border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-4">
-            <nav className="flex gap-4 text-sm">
-              <Link href={`/${orgSlug}/features`} className="font-medium">
-                Features
-              </Link>
-              <Link href={`/${orgSlug}/roadmap`} className="text-muted-foreground">
-                Roadmap
-              </Link>
-              <Link href={`/${orgSlug}/changelog`} className="text-muted-foreground">
-                Changelog
-              </Link>
-            </nav>
+    <div className="min-h-screen bg-[#FAFAFA]">
+      <PublicHubNav org={org} orgSlug={orgSlug} />
+
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        {/* Page header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Feature Requests</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Browse, vote, and submit ideas
+            </p>
+          </div>
+          <Dialog open={createPostOpen} onOpenChange={setCreatePostOpen}>
+            <DialogTrigger asChild>
+              <Button className="h-9 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-sm font-medium shadow-sm">
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Post
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg p-0 gap-0 rounded-xl overflow-hidden border-gray-200">
+              <DialogHeader className="px-6 pt-6 pb-0">
+                <DialogTitle className="text-lg font-semibold text-gray-900">Submit feedback</DialogTitle>
+                <p className="text-sm text-gray-500 mt-1">Share your idea or report an issue</p>
+              </DialogHeader>
+              {boards.length > 0 && (
+                <div className="p-6 space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Board</label>
+                    <Select value={selectedBoardForPost} onValueChange={setSelectedBoardForPost}>
+                      <SelectTrigger className="h-10 rounded-lg border-gray-200 text-sm">
+                        <SelectValue placeholder="Select a board" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {boards.map((board) => (
+                          <SelectItem key={board.id} value={board.id}>
+                            {board.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {selectedBoardForPost && (
+                    <GuestPostForm
+                      boardId={selectedBoardForPost}
+                      onPostCreated={handlePostCreated}
+                    />
+                  )}
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Board filter pills */}
+        {boards.length > 1 && (
+          <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
+            <button
+              onClick={() => (window.location.href = buildUrl({ board: null }))}
+              className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                !currentBoard
+                  ? 'bg-gray-900 text-white shadow-sm'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-900'
+              }`}
+            >
+              All Boards
+            </button>
+            {boards.map((board) => (
+              <button
+                key={board.id}
+                onClick={() => (window.location.href = buildUrl({ board: board.slug }))}
+                className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  currentBoard === board.slug
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-900'
+                }`}
+              >
+                {board.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Search + filters row */}
+        <div className="flex items-center gap-3 mb-6">
+          <form onSubmit={handleSearch} className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search posts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-10 rounded-lg border-gray-200 bg-white text-sm placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300"
+            />
+          </form>
+
+          {/* Status filter */}
+          <div className="flex items-center bg-white border border-gray-200 rounded-lg p-0.5">
+            {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+              <button
+                key={key}
+                onClick={() => (window.location.href = buildUrl({ status: key }))}
+                className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  currentStatus === key
+                    ? `${config.bg} ${config.color}`
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {config.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort toggle */}
+          <div className="flex items-center bg-white border border-gray-200 rounded-lg p-0.5">
+            <button
+              onClick={() => setSortBy('latest')}
+              className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                sortBy === 'latest'
+                  ? 'bg-gray-100 text-gray-700'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Latest
+            </button>
+            <button
+              onClick={() => setSortBy('most_votes')}
+              className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                sortBy === 'most_votes'
+                  ? 'bg-gray-100 text-gray-700'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Top
+            </button>
           </div>
         </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar - Boards */}
-          <aside className="w-64 flex-shrink-0">
-            <div className="sticky top-28">
-              <h2 className="text-sm font-semibold mb-4">Boards</h2>
-              <nav className="space-y-1">
-                <Link
-                  href={`/${orgSlug}/features${currentStatus !== 'all' ? `?status=${currentStatus}` : ''}`}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                    !currentBoard
-                      ? 'bg-accent text-accent-foreground font-medium'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  }`}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  All Boards
-                </Link>
-                {boards.map((board) => {
-                  const isActive = currentBoard === board.slug
-                  return (
-                    <Link
-                      key={board.id}
-                      href={`/${orgSlug}/features?board=${board.slug}${currentStatus !== 'all' ? `&status=${currentStatus}` : ''}`}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                        isActive
-                          ? 'bg-accent text-accent-foreground font-medium'
-                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                      }`}
-                    >
-                      {getBoardIcon(board.name)}
-                      {board.name}
-                    </Link>
-                  )
-                })}
-              </nav>
+        {/* Voter email bar */}
+        {voterEmail && (
+          <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-2.5 mb-6">
+            <p className="text-sm text-gray-600">
+              Voting as <span className="font-medium text-gray-900">{voterEmail}</span>
+            </p>
+            <button
+              onClick={() => {
+                setVoterEmail('')
+                setVotedPostIds([])
+                toast.success('Email cleared')
+              }}
+              className="text-xs text-gray-500 hover:text-gray-700 font-medium"
+            >
+              Clear
+            </button>
+          </div>
+        )}
+
+        {/* Posts list */}
+        <div className="space-y-3">
+          {sortedPosts.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="h-5 w-5 text-gray-400" />
+              </div>
+              <p className="text-sm font-medium text-gray-900">No posts yet</p>
+              <p className="text-sm text-gray-500 mt-1">Be the first to share an idea</p>
             </div>
-          </aside>
+          ) : (
+            sortedPosts.map((post) => {
+              const board = post.boards || boards.find((b) => b.id === post.board_id)
+              const tags = tagsByPostId[post.id] || []
+              const isVoted = votedPostIds.includes(post.id)
+              const isVoting = votingIds.includes(post.id)
+              const statusConfig = STATUS_CONFIG[post.status] || STATUS_CONFIG.open
 
-          {/* Main Content */}
-          <main className="flex-1">
-            {/* Create New Post Button */}
-            <div className="mb-6">
-              <Dialog open={createPostOpen} onOpenChange={setCreatePostOpen}>
-                <DialogTrigger asChild>
-                  <Button className="w-full md:w-auto">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New Post
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Create New Post</DialogTitle>
-                  </DialogHeader>
-                  {boards.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Select Board</label>
-                        <Select value={selectedBoardForPost} onValueChange={setSelectedBoardForPost}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a board" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {boards.map((board) => (
-                              <SelectItem key={board.id} value={board.id}>
-                                {board.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+              return (
+                <PostDetailDialog key={post.id} post={post}>
+                  <div className="group flex items-stretch bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
+                    {/* Vote button */}
+                    <button
+                      onClick={(e) => handleVote(post.id, e)}
+                      disabled={isVoting}
+                      className={`flex flex-col items-center justify-center gap-1 w-16 shrink-0 border-r border-gray-100 transition-colors rounded-l-xl ${
+                        isVoted
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+                      } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <ChevronUp className={`h-4 w-4 ${isVoted ? 'text-blue-600' : ''}`} />
+                      <span className="text-sm font-semibold">{post.vote_count || 0}</span>
+                    </button>
+
+                    {/* Content */}
+                    <div className="flex-1 px-4 py-3.5 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {post.is_pinned && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                            <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                            Featured
+                          </span>
+                        )}
+                        {board && (
+                          <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                            {board.name}
+                          </span>
+                        )}
+                        {tags.map((tag: any) => (
+                          <span
+                            key={tag.id}
+                            className="text-[11px] font-medium px-1.5 py-0.5 rounded"
+                            style={{
+                              backgroundColor: tag.color + '18',
+                              color: tag.color,
+                            }}
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
                       </div>
-                      {selectedBoardForPost && (
-                        <GuestPostForm boardId={selectedBoardForPost} onPostCreated={handlePostCreated} />
+
+                      <h3 className="text-[15px] font-semibold text-gray-900 leading-snug">
+                        {post.title}
+                      </h3>
+
+                      {post.content && (
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-1 leading-relaxed">
+                          {post.content}
+                        </p>
                       )}
+
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="text-xs text-gray-400">
+                          {post.is_guest
+                            ? post.guest_name || 'Guest'
+                            : post.author_name || 'Anonymous'}
+                        </span>
+                        {post.status && post.status !== 'open' && (
+                          <span
+                            className={`text-[11px] font-medium px-1.5 py-0.5 rounded ${statusConfig.bg} ${statusConfig.color}`}
+                          >
+                            {statusConfig.label}
+                          </span>
+                        )}
+                        <span className="text-xs text-gray-400">
+                          {new Date(post.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {/* Search and Filters */}
-            <div className="mb-6 space-y-4">
-              {/* Voter Email Input */}
-              <div className="p-3 bg-muted rounded-md">
-                <label className="text-sm font-medium mb-2 block">Your Email (for voting)</label>
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email to vote on posts"
-                    value={voterEmail}
-                    onChange={(e) => setVoterEmail(e.target.value)}
-                    className="flex-1"
-                  />
-                  {voterEmail && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setVoterEmail('')
-                        setVotedPostIds([])
-                        toast.success('Email cleared')
-                      }}
-                    >
-                      Clear
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <form onSubmit={handleSearch} className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search posts..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Button type="submit">Search</Button>
-              </form>
-
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  <Button
-                    variant={currentStatus === 'all' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => {
-                      const params = new URLSearchParams()
-                      if (currentBoard) params.set('board', currentBoard)
-                      if (searchQuery) params.set('q', searchQuery)
-                      window.location.href = `/${orgSlug}/features?${params.toString()}`
-                    }}
-                  >
-                    All
-                  </Button>
-                  <Button
-                    variant={currentStatus === 'open' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => {
-                      const params = new URLSearchParams()
-                      if (currentBoard) params.set('board', currentBoard)
-                      params.set('status', 'open')
-                      if (searchQuery) params.set('q', searchQuery)
-                      window.location.href = `/${orgSlug}/features?${params.toString()}`
-                    }}
-                  >
-                    Open
-                  </Button>
-                  <Button
-                    variant={currentStatus === 'planned' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => {
-                      const params = new URLSearchParams()
-                      if (currentBoard) params.set('board', currentBoard)
-                      params.set('status', 'planned')
-                      if (searchQuery) params.set('q', searchQuery)
-                      window.location.href = `/${orgSlug}/features?${params.toString()}`
-                    }}
-                  >
-                    Planned
-                  </Button>
-                  <Button
-                    variant={currentStatus === 'in_progress' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => {
-                      const params = new URLSearchParams()
-                      if (currentBoard) params.set('board', currentBoard)
-                      params.set('status', 'in_progress')
-                      if (searchQuery) params.set('q', searchQuery)
-                      window.location.href = `/${orgSlug}/features?${params.toString()}`
-                    }}
-                  >
-                    In Progress
-                  </Button>
-                  <Button
-                    variant={currentStatus === 'shipped' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => {
-                      const params = new URLSearchParams()
-                      if (currentBoard) params.set('board', currentBoard)
-                      params.set('status', 'shipped')
-                      if (searchQuery) params.set('q', searchQuery)
-                      window.location.href = `/${orgSlug}/features?${params.toString()}`
-                    }}
-                  >
-                    Shipped
-                  </Button>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant={sortBy === 'latest' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSortBy('latest')}
-                  >
-                    Latest
-                  </Button>
-                  <Button
-                    variant={sortBy === 'most_votes' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSortBy('most_votes')}
-                  >
-                    Most Votes
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Posts List */}
-            <div className="space-y-4">
-              {sortedPosts.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <p>No posts found.</p>
-                </div>
-              ) : (
-                sortedPosts.map((post) => {
-                  const board = post.boards || boards.find((b) => b.id === post.board_id)
-                  const tags = tagsByPostId[post.id] || []
-                  return (
-                    <PostDetailDialog key={post.id} post={post}>
-                      <Card className="cursor-pointer hover:shadow-md transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 space-y-2">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                {post.is_pinned && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Featured
-                                  </Badge>
-                                )}
-                                {board && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {board.name}
-                                  </Badge>
-                                )}
-                                {tags.map((tag: any) => (
-                                  <Badge
-                                    key={tag.id}
-                                    className="text-xs"
-                                    style={{ backgroundColor: tag.color, color: '#fff' }}
-                                  >
-                                    {tag.name}
-                                  </Badge>
-                                ))}
-                              </div>
-                              <h3 className="text-lg font-semibold">{post.title}</h3>
-                              {post.content && (
-                                <p className="text-sm text-muted-foreground line-clamp-2">{post.content}</p>
-                              )}
-                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <span>By {post.is_guest ? (post.guest_name || 'Guest') : (post.author_name || 'Anonymous')}</span>
-                                {post.status && (
-                                  <Badge variant="outline" className="capitalize text-xs">
-                                    {post.status.replace('_', ' ')}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-center gap-1">
-                              <button
-                                onClick={(e) => handleVote(post.id, e)}
-                                disabled={votingIds.includes(post.id)}
-                                className={`flex flex-col items-center gap-1 transition-colors ${
-                                  votedPostIds.includes(post.id)
-                                    ? 'text-primary'
-                                    : 'text-muted-foreground hover:text-primary'
-                                } ${votingIds.includes(post.id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                              >
-                                <ThumbsUp className={`h-5 w-5 ${votedPostIds.includes(post.id) ? 'fill-current' : ''}`} />
-                                <span className="text-sm font-medium">{post.vote_count || 0}</span>
-                              </button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </PostDetailDialog>
-                  )
-                })
-              )}
-            </div>
-          </main>
+                  </div>
+                </PostDetailDialog>
+              )
+            })
+          )}
         </div>
 
-        {/* Footer */}
+        {/* Branding footer */}
         {org.show_branding && (
-          <div className="mt-12 text-center text-sm text-muted-foreground">
-            Powered by Kelo
+          <div className="mt-16 pb-8 text-center">
+            <span className="text-xs text-gray-400">
+              Powered by{' '}
+              <a
+                href="https://kelohq.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                Kelo
+              </a>
+            </span>
           </div>
         )}
       </div>

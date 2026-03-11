@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Card } from '@/components/ui/card'
-import Link from 'next/link'
-import { PostDetailDialog } from '@/components/boards/post-detail-dialog'
+import { PublicRoadmapView } from '@/components/public/public-roadmap-view'
 
 export async function generateMetadata({
   params,
@@ -54,25 +52,12 @@ export default async function PublicRoadmapPage({
 
   if (boardIds.length === 0) {
     return (
-      <div className="min-h-screen p-8">
-        <header className="flex flex-col md:flex-row md:items-center md:justify-center gap-4 mb-8">
-          <nav className="flex gap-4 text-sm">
-            <Link href={`/${orgSlug}/features`} className="text-muted-foreground">
-              Features
-            </Link>
-            <Link href={`/${orgSlug}/roadmap`} className="font-medium">
-              Roadmap
-            </Link>
-            <Link href={`/${orgSlug}/changelog`} className="text-muted-foreground">
-              Changelog
-            </Link>
-          </nav>
-        </header>
-        <h2 className="text-xl font-semibold mb-6">Roadmap</h2>
-        <div className="text-center py-12 text-muted-foreground">
-          <p>No public boards available.</p>
-        </div>
-      </div>
+      <PublicRoadmapView
+        org={org}
+        orgSlug={orgSlug}
+        columns={[]}
+        commentCountMap={{}}
+      />
     )
   }
 
@@ -101,76 +86,19 @@ export default async function PublicRoadmapPage({
     return acc
   }, {})
 
+  const columns = [
+    { key: 'planned', label: 'Planned', color: 'bg-violet-50', dotColor: '#8B5CF6', posts: planned },
+    { key: 'in_progress', label: 'In Progress', color: 'bg-amber-50', dotColor: '#F59E0B', posts: inProgress },
+    { key: 'next', label: 'Under Review', color: 'bg-blue-50', dotColor: '#3B82F6', posts: nextUp },
+    { key: 'completed', label: 'Complete', color: 'bg-emerald-50', dotColor: '#10B981', posts: completed },
+  ]
+
   return (
-    <div className="min-h-screen p-8">
-      <header className="flex flex-col md:flex-row md:items-center md:justify-center gap-4 mb-8">
-        <nav className="flex gap-4 text-sm">
-          <Link href={`/${orgSlug}/features`} className="text-muted-foreground">
-            Features
-          </Link>
-          <Link href={`/${orgSlug}/roadmap`} className="font-medium">
-            Roadmap
-          </Link>
-          <Link href={`/${orgSlug}/changelog`} className="text-muted-foreground">
-            Changelog
-          </Link>
-        </nav>
-      </header>
-      <h2 className="text-xl font-semibold mb-6">Roadmap</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="space-y-3">
-          <h3 className="font-semibold">Planned</h3>
-          {planned.map((post) => (
-            <PostDetailDialog key={post.id} post={post}>
-              <Card className="p-3 cursor-pointer">
-                <div className="font-medium">{post.title}</div>
-                <div className="text-sm text-muted-foreground">
-                  {post.vote_count ?? 0} votes • {commentCountMap[post.id] || 0} comments
-                </div>
-              </Card>
-            </PostDetailDialog>
-          ))}
-        </div>
-        <div className="space-y-3">
-          <h3 className="font-semibold">In Progress</h3>
-          {inProgress.map((post) => (
-            <PostDetailDialog key={post.id} post={post}>
-              <Card className="p-3 cursor-pointer">
-                <div className="font-medium">{post.title}</div>
-                <div className="text-sm text-muted-foreground">
-                  {post.vote_count ?? 0} votes • {commentCountMap[post.id] || 0} comments
-                </div>
-              </Card>
-            </PostDetailDialog>
-          ))}
-        </div>
-        <div className="space-y-3">
-          <h3 className="font-semibold">Next</h3>
-          {nextUp.map((post) => (
-            <PostDetailDialog key={post.id} post={post}>
-              <Card className="p-3 cursor-pointer">
-                <div className="font-medium">{post.title}</div>
-                <div className="text-sm text-muted-foreground">
-                  {post.vote_count ?? 0} votes • {commentCountMap[post.id] || 0} comments
-                </div>
-              </Card>
-            </PostDetailDialog>
-          ))}
-        </div>
-        <div className="space-y-3">
-          <h3 className="font-semibold">Completed</h3>
-          {completed.map((post) => (
-            <PostDetailDialog key={post.id} post={post}>
-              <Card className="p-3 cursor-pointer">
-                <div className="font-medium">{post.title}</div>
-                <div className="text-sm text-muted-foreground">
-                  {post.vote_count ?? 0} votes • {commentCountMap[post.id] || 0} comments
-                </div>
-              </Card>
-            </PostDetailDialog>
-          ))}
-        </div>
-      </div>
-    </div>
+    <PublicRoadmapView
+      org={org}
+      orgSlug={orgSlug}
+      columns={columns}
+      commentCountMap={commentCountMap}
+    />
   )
 }
