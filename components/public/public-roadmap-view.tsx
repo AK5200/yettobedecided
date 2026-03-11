@@ -80,11 +80,8 @@ export function PublicRoadmapView({
                   ) : (
                     column.posts.map((post) => (
                       <PostDetailDialog key={post.id} post={post}>
-                        <div
-                          className="group bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-all cursor-pointer overflow-hidden relative"
-                          style={{ borderLeftColor: column.dotColor, borderLeftWidth: '2px' }}
-                        >
-                          <h3 className="text-[13px] font-semibold text-gray-900 leading-snug mb-2.5 group-hover:text-gray-800">
+                        <div className="group bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
+                          <h3 className="text-[13px] font-semibold text-gray-900 leading-snug mb-2.5">
                             {post.title}
                           </h3>
 
@@ -95,11 +92,11 @@ export function PublicRoadmapView({
                           )}
 
                           <div className="flex items-center gap-3">
-                            <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-yellow-600 bg-yellow-50 px-1.5 py-0.5 rounded">
                               <ChevronUp className="h-3 w-3" />
                               {post.vote_count ?? 0}
                             </span>
-                            <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
                               <MessageSquare className="h-3 w-3" />
                               {commentCountMap[post.id] || 0}
                             </span>
