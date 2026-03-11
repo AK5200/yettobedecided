@@ -53,18 +53,25 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 }
 
 // Deterministic color for author names
-const AUTHOR_COLORS = [
-  'text-blue-600', 'text-violet-600', 'text-emerald-600', 'text-rose-600',
-  'text-amber-600', 'text-cyan-600', 'text-indigo-600', 'text-teal-600',
-  'text-pink-600', 'text-orange-600',
+const AUTHOR_PALETTE = [
+  { text: 'text-blue-600', bg: '#2563EB' },
+  { text: 'text-violet-600', bg: '#7C3AED' },
+  { text: 'text-emerald-600', bg: '#059669' },
+  { text: 'text-rose-600', bg: '#E11D48' },
+  { text: 'text-amber-600', bg: '#D97706' },
+  { text: 'text-cyan-600', bg: '#0891B2' },
+  { text: 'text-indigo-600', bg: '#4F46E5' },
+  { text: 'text-teal-600', bg: '#0D9488' },
+  { text: 'text-pink-600', bg: '#DB2777' },
+  { text: 'text-orange-600', bg: '#EA580C' },
 ]
 
-function getAuthorColor(name: string): string {
+function getAuthorStyle(name: string) {
   let hash = 0
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash)
   }
-  return AUTHOR_COLORS[Math.abs(hash) % AUTHOR_COLORS.length]
+  return AUTHOR_PALETTE[Math.abs(hash) % AUTHOR_PALETTE.length]
 }
 
 // Board tag colors
@@ -418,44 +425,54 @@ export function PublicFeaturesView({
                   const authorName = post.is_guest
                     ? post.guest_name || 'Guest'
                     : post.author_name || 'Anonymous'
-                  const authorColor = getAuthorColor(authorName)
+                  const authorStyle = getAuthorStyle(authorName)
                   const boardColorConfig = board ? getBoardColor(board.name) : null
 
                   return (
                     <PostDetailDialog key={post.id} post={post}>
-                      <div className="group flex items-stretch bg-white border border-gray-200 rounded-xl hover:border-yellow-200 hover:shadow-[0_2px_12px_rgba(250,204,21,0.08)] transition-all cursor-pointer">
-                        {/* Vote button */}
+                      <article className="bg-white rounded-xl p-4 shadow-sm flex gap-4 hover:shadow-md transition-all cursor-pointer">
+                        {/* Upvote box */}
                         <button
                           onClick={(e) => handleVote(post.id, e)}
                           disabled={isVoting}
-                          className={`flex flex-col items-center justify-center gap-1 w-16 shrink-0 border-r border-gray-100 transition-colors rounded-l-xl cursor-pointer ${
+                          className={`w-[60px] h-[64px] shrink-0 border rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer ${
                             isVoted
-                              ? 'bg-yellow-50 text-yellow-600'
-                              : 'text-gray-400 hover:bg-gray-50 hover:text-yellow-500'
+                              ? 'bg-yellow-50 border-yellow-300 text-yellow-600'
+                              : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-50 hover:border-yellow-300'
                           } ${isVoting ? 'opacity-50 cursor-not-allowed!' : ''}`}
                         >
-                          <ChevronUp className={`h-4 w-4 ${isVoted ? 'text-yellow-600' : ''}`} />
-                          <span className="text-sm font-semibold">{post.vote_count || 0}</span>
+                          <span className="text-2xl font-bold leading-none mb-1">
+                            {post.vote_count || 0}
+                          </span>
+                          <span className={`text-[10px] ${isVoted ? 'text-yellow-500' : 'text-gray-500'}`}>
+                            Upvote
+                          </span>
                         </button>
 
                         {/* Content */}
-                        <div className="flex-1 px-4 py-3.5 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <div className="flex-1 min-w-0">
+                          {/* Badges row */}
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
                             {post.is_pinned && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
                                 <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                                 Featured
                               </span>
                             )}
+                            {post.status && (
+                              <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.color}`}>
+                                {statusConfig.label}
+                              </span>
+                            )}
                             {board && boardColorConfig && (
-                              <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded border ${boardColorConfig.text} ${boardColorConfig.bg} ${boardColorConfig.border}`}>
+                              <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${boardColorConfig.text} ${boardColorConfig.bg}`}>
                                 {board.name}
                               </span>
                             )}
                             {tags.map((tag: any) => (
                               <span
                                 key={tag.id}
-                                className="text-[11px] font-medium px-1.5 py-0.5 rounded"
+                                className="text-[11px] font-medium px-2 py-0.5 rounded-full"
                                 style={{ backgroundColor: tag.color + '18', color: tag.color }}
                               >
                                 {tag.name}
@@ -463,26 +480,29 @@ export function PublicFeaturesView({
                             ))}
                           </div>
 
-                          <h3 className="text-[15px] font-semibold text-gray-900 leading-snug">
+                          <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">
                             {post.title}
                           </h3>
 
                           {post.content && (
-                            <p className="text-sm text-gray-500 mt-1 line-clamp-1 leading-relaxed">
+                            <p className="text-sm text-gray-500 mb-3 line-clamp-1">
                               {post.content}
                             </p>
                           )}
 
-                          <div className="flex items-center gap-3 mt-2">
-                            <span className={`text-xs font-medium ${authorColor}`}>
-                              {authorName}
-                            </span>
-                            {post.status && post.status !== 'open' && (
-                              <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded ${statusConfig.bg} ${statusConfig.color}`}>
-                                {statusConfig.label}
-                              </span>
-                            )}
-                            <span className="text-xs font-medium text-blue-500">
+                          {!post.content && <div className="mb-3" />}
+
+                          {/* Author + date */}
+                          <div className="flex items-center text-xs text-gray-500 gap-2">
+                            <div
+                              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                              style={{ backgroundColor: authorStyle.bg }}
+                            >
+                              {authorName.charAt(0).toUpperCase()}
+                            </div>
+                            <span className={`font-medium ${authorStyle.text}`}>{authorName}</span>
+                            <span className="text-gray-300">•</span>
+                            <span>
                               {new Date(post.created_at).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
@@ -490,7 +510,7 @@ export function PublicFeaturesView({
                             </span>
                           </div>
                         </div>
-                      </div>
+                      </article>
                     </PostDetailDialog>
                   )
                 })
