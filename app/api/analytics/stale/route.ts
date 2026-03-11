@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 
   const { data: posts } = await supabase
     .from('posts')
-    .select('id, title, vote_count, status, created_at, updated_at')
+    .select('*')
     .in('board_id', boardIds)
     .not('status', 'in', '("shipped","closed")')
     .lt('updated_at', thirtyDaysAgo)

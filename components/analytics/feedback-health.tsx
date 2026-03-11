@@ -1,7 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Activity, AlertCircle, CheckCircle2, Clock } from 'lucide-react'
+import { Activity, AlertCircle, CheckCircle2, Clock, ChevronRight } from 'lucide-react'
+import { PostDetailDialog } from '@/components/boards/post-detail-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import type { Post } from '@/lib/types/database'
 
 interface FeedbackHealthProps {
   orgId: string
@@ -88,16 +97,55 @@ export function FeedbackHealth({ orgId }: FeedbackHealthProps) {
       </div>
 
       {stalePosts.length > 0 && (
-        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-4 flex items-start gap-3 shadow-sm">
-          <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-          <div className="flex-1">
-            <div className="font-semibold text-amber-900 mb-1 text-sm">Attention Needed</div>
-            <div className="text-xs text-amber-800">
-              {stalePosts.length} {stalePosts.length === 1 ? 'post' : 'posts'} haven't been
-              updated in over 30 days
+        <Dialog>
+          <DialogTrigger asChild>
+            <button className="w-full bg-linear-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-4 flex items-start gap-3 shadow-sm cursor-pointer hover:border-amber-400 transition-colors text-left">
+              <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <div className="font-semibold text-amber-900 mb-1 text-sm">Attention Needed</div>
+                <div className="text-xs text-amber-800">
+                  {stalePosts.length} {stalePosts.length === 1 ? 'post' : 'posts'} haven&apos;t been
+                  updated in over 30 days &mdash; click to view
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg p-0 gap-0 rounded-xl overflow-hidden border-gray-200">
+            <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
+              <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                <AlertCircle className="h-5 w-5 text-amber-500" />
+                Stale posts
+              </DialogTitle>
+              <p className="text-sm text-gray-500 mt-1">
+                These posts haven&apos;t been updated in over 30 days
+              </p>
+            </DialogHeader>
+            <div className="max-h-[400px] overflow-y-auto">
+              {stalePosts.map((post: any) => (
+                <PostDetailDialog key={post.id} post={post as Post} isAdmin>
+                  <div className="flex items-center gap-3 px-6 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100 last:border-b-0">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-semibold text-gray-900 truncate">
+                        {post.title}
+                      </h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="flex items-center gap-1 text-[11px] text-gray-400">
+                          <Clock className="h-3 w-3" />
+                          {post.days_stale}d ago
+                        </span>
+                        <span className="text-[11px] text-gray-400">
+                          &middot; {post.vote_count || 0} votes
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-300 shrink-0" />
+                  </div>
+                </PostDetailDialog>
+              ))}
             </div>
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {stalePosts.length === 0 && (
