@@ -12,10 +12,17 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient()
 
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
+    const protocol = request.headers.get('x-forwarded-proto') || 'https'
+    const baseUrl = host ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+
     // Generate password reset link
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email,
+      options: {
+        redirectTo: `${baseUrl}/api/auth/callback?next=/auth/reset-password`,
+      },
     })
 
     if (error) {

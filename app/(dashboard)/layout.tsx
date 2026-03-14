@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/dashboard/sidebar'
 
 export default async function DashboardLayout({
@@ -23,11 +23,46 @@ export default async function DashboardLayout({
   const isOnboarding = pathname.includes('/onboarding')
 
   // Check for organization membership with error handling
-  const { data: memberships, error } = await supabase
+  let { data: memberships, error } = await supabase
     .from('org_members')
     .select('org_id, role, organizations(onboarding_completed)')
     .eq('user_id', user.id)
     .limit(1)
+
+  // If no memberships, auto-accept any pending invitations for this user's email
+  if (!error && (!memberships || memberships.length === 0) && user.email) {
+    try {
+      const adminClient = createAdminClient()
+      const { data: invitations } = await adminClient
+        .from('invitations')
+        .select('*')
+        .ilike('email', user.email)
+        .is('accepted_at', null)
+        .gt('expires_at', new Date().toISOString())
+
+      if (invitations && invitations.length > 0) {
+        for (const invitation of invitations) {
+          await adminClient
+            .from('org_members')
+            .insert({ org_id: invitation.org_id, user_id: user.id, role: invitation.role })
+          await adminClient
+            .from('invitations')
+            .update({ accepted_at: new Date().toISOString() })
+            .eq('id', invitation.id)
+        }
+        // Re-fetch memberships after auto-accept
+        const refreshed = await supabase
+          .from('org_members')
+          .select('org_id, role, organizations(onboarding_completed)')
+          .eq('user_id', user.id)
+          .limit(1)
+        memberships = refreshed.data
+        error = refreshed.error
+      }
+    } catch (e) {
+      console.error('Auto-accept invitation failed:', e)
+    }
+  }
 
   // If there's an error (e.g., RLS policy issue) or no memberships, redirect to onboarding
   // Skip redirect if already on onboarding to prevent infinite loop
