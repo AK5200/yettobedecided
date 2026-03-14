@@ -1,23 +1,22 @@
  'use client'
- 
+
  import { Button } from '@/components/ui/button'
- import { Github } from 'lucide-react'
- 
+
  interface SocialButtonsProps {
    orgSlug: string
    returnUrl: string
-   onClick?: (provider: 'google' | 'github') => void
+   onClick?: (provider: 'google') => void
  }
- 
+
  export function SocialButtons({ orgSlug, returnUrl, onClick }: SocialButtonsProps) {
-   const handleRedirect = (provider: 'google' | 'github') => {
+   const handleRedirect = (provider: 'google') => {
      if (onClick) {
        onClick(provider)
        return
      }
      window.location.href = `/api/auth/widget/${provider}?org_slug=${encodeURIComponent(orgSlug)}&return_url=${encodeURIComponent(returnUrl)}`
    }
- 
+
   return (
     <div className="space-y-4">
       <Button
@@ -29,13 +28,6 @@
           G
         </span>
         Continue with Google
-      </Button>
-      <Button
-        className="w-full justify-start gap-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white hover:from-gray-800 hover:to-gray-700 font-bold text-base py-6 shadow-lg hover:shadow-xl transition-all cursor-pointer"
-        onClick={() => handleRedirect('github')}
-      >
-        <Github className="h-5 w-5" />
-        Continue with GitHub
       </Button>
     </div>
   )

@@ -24,7 +24,7 @@ const METHODS = [
     badgeCls: 'bg-amber-50 text-amber-600 border-amber-200',
     short: 'We handle authentication. Zero work on your end.',
     details: [
-      { icon: Shield, text: 'Users sign in via Google or GitHub OAuth' },
+      { icon: Shield, text: 'Users sign in via Google OAuth' },
       { icon: UserCheck, text: 'User identity is verified and stored automatically' },
       { icon: Mail, text: 'Email and name are captured from the OAuth provider' },
     ],

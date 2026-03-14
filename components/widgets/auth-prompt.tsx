@@ -8,7 +8,7 @@ import { SocialButtons } from './social-buttons'
 interface AuthPromptProps {
   orgSlug: string
   onGuestSubmit: (email: string, name: string) => void
-  onSocialClick?: (provider: 'google' | 'github') => void
+  onSocialClick?: (provider: 'google') => void
 }
  
  interface WidgetConfig {

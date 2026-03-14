@@ -1049,13 +1049,12 @@ if (window.Kelo) {
             <h3 className="text-xl font-semibold mt-8 mb-3">Supported methods</h3>
             <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4 mb-6">
               <li><strong>Google OAuth</strong> — Users click &quot;Sign in with Google&quot; in the widget</li>
-              <li><strong>GitHub OAuth</strong> — Users click &quot;Sign in with GitHub&quot; in the widget</li>
               <li><strong>Magic Link (OTP)</strong> — Users enter their email and receive a one-time login link</li>
             </ul>
 
             <h3 className="text-xl font-semibold mt-8 mb-3">How the popup flow works</h3>
             <p className="text-muted-foreground mb-4">
-              Since the widget runs inside an iframe, third-party OAuth providers (Google, GitHub) block direct login within iframes due to security restrictions. Kelo solves this with a popup-based flow:
+              Since the widget runs inside an iframe, third-party OAuth providers (Google) block direct login within iframes due to security restrictions. Kelo solves this with a popup-based flow:
             </p>
             <ol className="list-decimal list-inside space-y-2 text-muted-foreground ml-4 mb-6">
               <li>User clicks a login button inside the widget iframe</li>
@@ -1087,7 +1086,7 @@ if (window.Kelo) {
                     <td className="p-3 text-muted-foreground">No</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="p-3 font-medium">Widget Auth (Google/GitHub)</td>
+                    <td className="p-3 font-medium">Widget Auth (Google)</td>
                     <td className="p-3 text-muted-foreground">Users not logged into your app, public boards</td>
                     <td className="p-3 text-muted-foreground">Yes (social)</td>
                   </tr>

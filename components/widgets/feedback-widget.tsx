@@ -160,7 +160,7 @@ export function FeedbackWidget({
     }
   }
 
-  const handleSocialClick = (provider: 'google' | 'github') => {
+  const handleSocialClick = (provider: 'google') => {
     setOauthError('')
     const url = `/api/auth/widget/${provider}?org_slug=${encodeURIComponent(orgSlug)}&popup=1`
     const popup = window.open(url, 'kelo_oauth', 'width=500,height=600,scrollbars=yes')
@@ -479,17 +479,10 @@ export function FeedbackWidget({
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
-                      className="flex-1"
+                      className="w-full"
                       onClick={() => handleSocialClick('google')}
                     >
                       Google
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => handleSocialClick('github')}
-                    >
-                      GitHub
                     </Button>
                   </div>
                 </>
@@ -586,17 +579,10 @@ export function FeedbackWidget({
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
-                          className="flex-1"
+                          className="w-full"
                           onClick={() => handleSocialClick('google')}
                         >
                           Google
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => handleSocialClick('github')}
-                        >
-                          GitHub
                         </Button>
                       </div>
                     </>
