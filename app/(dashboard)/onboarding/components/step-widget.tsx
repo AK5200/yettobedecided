@@ -21,10 +21,9 @@ export function StepWidget({ orgSlug, onComplete, onBack }: StepWidgetProps) {
   const feedbackUrl = `${baseUrl}/${orgSlug}/features`
 
   const embedCode = `<script
-  src="${baseUrl}/embed.js"
+  src="${baseUrl}/widget.js"
   data-org="${orgSlug}"
-  data-widget="all-in-one"
-  data-trigger="popup"
+  data-type="all-in-one-popup"
   async
 ></script>`
 
