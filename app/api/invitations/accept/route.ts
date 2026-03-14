@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -13,7 +13,11 @@ export async function POST(request: Request) {
   }
   const user_id = user.id
 
-  const { data: invitation, error: findError } = await supabase
+  // Use admin client to bypass RLS — the invited user isn't an org member yet,
+  // so RLS would block reads on invitations and inserts on org_members
+  const adminClient = createAdminClient()
+
+  const { data: invitation, error: findError } = await adminClient
     .from('invitations')
     .select('*')
     .eq('token', token)
@@ -25,10 +29,32 @@ export async function POST(request: Request) {
   if (new Date(invitation.expires_at) < new Date()) {
     return NextResponse.json({ error: 'Invitation expired' }, { status: 400 })
   }
-  const { error: memberError } = await supabase
+
+  // Check if user is already a member
+  const { data: existing } = await adminClient
+    .from('org_members')
+    .select('id')
+    .eq('org_id', invitation.org_id)
+    .eq('user_id', user_id)
+    .single()
+  if (existing) {
+    // Mark invitation as accepted even if already a member
+    await adminClient.from('invitations').update({ accepted_at: new Date().toISOString() }).eq('id', invitation.id)
+    return NextResponse.json({ success: true, org_id: invitation.org_id })
+  }
+
+  const { error: memberError } = await adminClient
     .from('org_members')
     .insert({ org_id: invitation.org_id, user_id, role: invitation.role })
   if (memberError) return NextResponse.json({ error: memberError.message }, { status: 500 })
-  await supabase.from('invitations').update({ accepted_at: new Date().toISOString() }).eq('id', invitation.id)
+
+  const { error: updateError } = await adminClient
+    .from('invitations')
+    .update({ accepted_at: new Date().toISOString() })
+    .eq('id', invitation.id)
+  if (updateError) {
+    console.error('Failed to mark invitation as accepted:', updateError)
+  }
+
   return NextResponse.json({ success: true, org_id: invitation.org_id })
 }
