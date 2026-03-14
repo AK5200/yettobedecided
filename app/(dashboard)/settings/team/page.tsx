@@ -16,12 +16,13 @@ export default async function TeamSettingsPage() {
 
   const { data: membership } = await supabase
     .from('org_members')
-    .select('org_id')
+    .select('org_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .single()
 
   const orgId = membership?.org_id
+  const currentUserRole = membership?.role as string
 
   const { data: members } = await supabase.from('org_members').select('*').eq('org_id', orgId)
 
@@ -64,8 +65,10 @@ export default async function TeamSettingsPage() {
           </div>
         </div>
         <div className="space-y-6">
-          <InviteMemberForm orgId={orgId} />
-          <TeamMembersList members={enrichedMembers} invitations={invitations || []} orgId={orgId} />
+          {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
+            <InviteMemberForm orgId={orgId} />
+          )}
+          <TeamMembersList members={enrichedMembers} invitations={invitations || []} orgId={orgId} currentUserRole={currentUserRole} />
         </div>
       </div>
     </div>

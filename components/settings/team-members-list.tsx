@@ -12,9 +12,10 @@ interface TeamMembersListProps {
   members: any[]
   invitations: any[]
   orgId: string
+  currentUserRole: string
 }
 
-export function TeamMembersList({ members, invitations, orgId }: TeamMembersListProps) {
+export function TeamMembersList({ members, invitations, orgId, currentUserRole }: TeamMembersListProps) {
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const router = useRouter()
 
@@ -147,7 +148,7 @@ export function TeamMembersList({ members, invitations, orgId }: TeamMembersList
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {role !== 'owner' && (
+                    {role !== 'owner' && currentUserRole === 'owner' && (
                       <>
                         <Select
                           value={role}
