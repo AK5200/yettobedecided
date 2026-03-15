@@ -714,7 +714,10 @@ export function AllInOneWidget({
                       </span>
                     </div>
                     <div className="font-bold text-lg text-gray-900 mb-2">{entry.title}</div>
-                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">{entry.content?.replace(/<[^>]*>/g, '') || ''}</p>
+                    <div
+                      className="text-sm text-gray-600 line-clamp-3 leading-relaxed prose prose-sm max-w-none [&_img]:hidden [&_video]:hidden [&_audio]:hidden [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-400"
+                      dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+                    />
                   </div>
                 )
               })
