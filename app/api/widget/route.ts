@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     const boardIds = boards.map((b: any) => b.id)
     const { data: posts } = await adminClient
       .from('posts')
-      .select('id, title, content, vote_count, status, created_at, tags, author_name, guest_name, is_pinned, board_id, user_source')
+      .select('id, title, content, vote_count, status, created_at, author_name, guest_name, is_pinned, board_id, user_source')
       .in('board_id', boardIds)
       .is('merged_into_id', null)
       .eq('is_approved', true)
