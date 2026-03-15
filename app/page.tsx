@@ -138,7 +138,6 @@ export default function WaitlistPage() {
               className="text-6xl font-bold text-white inline-block"
               style={{
                 fontFamily: 'var(--font-raleway), sans-serif',
-                animation: mounted ? 'pulseGlow 3s ease-in-out infinite' : 'none',
               }}
             >
               <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 bg-clip-text text-transparent">
