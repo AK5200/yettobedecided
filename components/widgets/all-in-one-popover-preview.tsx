@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Search, ChevronUp, Zap } from 'lucide-react'
+import { X, Search, ChevronUp, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -348,7 +348,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                         boxShadow: styleVariant === '2' ? `0 0 20px ${hexToRgba(settings.accentColor, 0.2)}` : undefined
                       }}
                     >
-                      <Zap className={`${styleVariant === '2' ? 'h-6 w-6' : 'h-4 w-4'}`} style={{ color: styleVariant === '2' ? 'white' : settings.accentColor }} />
+                      <MessageSquare className={`${styleVariant === '2' ? 'h-6 w-6' : 'h-4 w-4'}`} style={{ color: styleVariant === '2' ? 'white' : settings.accentColor }} />
                     </div>
                     <div>
                       <h3 className={`${styleVariant === '2' ? 'text-2xl font-extrabold' : 'font-semibold text-sm'} text-gray-900 ${textStyleClass} ${textItalicClass}`}>
@@ -669,7 +669,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
         >
           {settings.showBranding ? (
             <span className="text-[10px] text-gray-400 flex items-center gap-1">
-              <Zap className="h-2.5 w-2.5" style={{ color: settings.accentColor }} />
+              <MessageSquare className="h-2.5 w-2.5" style={{ color: settings.accentColor }} />
               Powered by Kelo
             </span>
           ) : (

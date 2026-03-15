@@ -153,9 +153,10 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
                         {entry.title}
                       </h2>
 
-                      <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                        {entry.content}
-                      </div>
+                      <div
+                        className="prose prose-sm max-w-none text-gray-600 leading-relaxed [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-400 hover:[&_a]:decoration-gray-600 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg"
+                        dangerouslySetInnerHTML={{ __html: entry.content }}
+                      />
                     </div>
                   </div>
                 )

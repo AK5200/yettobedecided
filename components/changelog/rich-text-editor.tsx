@@ -557,9 +557,36 @@ export function RichTextEditor({ content, onChange, onPreview }: RichTextEditorP
           size="sm"
           className="h-8 w-8 p-0"
           onClick={() => {
+            saveSelection()
+            const selection = window.getSelection()
+            const selectedText = selection?.toString() || ''
             const url = prompt('Enter URL:')
             if (url) {
-              insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #f59e0b; text-decoration: underline;">${url}</a>`)
+              const linkText = selectedText || url
+              if (selectedText && lastSelectionRef.current) {
+                // Replace selected text with link
+                restoreSelection()
+                const range = lastSelectionRef.current
+                range.deleteContents()
+                const a = document.createElement('a')
+                a.href = url
+                a.target = '_blank'
+                a.rel = 'noopener noreferrer'
+                a.style.cssText = 'text-decoration: underline; text-decoration-color: #9ca3af; color: inherit;'
+                a.textContent = linkText
+                range.insertNode(a)
+                // Move cursor after link
+                range.setStartAfter(a)
+                range.collapse(true)
+                selection?.removeAllRanges()
+                selection?.addRange(range)
+                lastSelectionRef.current = range.cloneRange()
+                if (editorRef.current) {
+                  onChange(editorRef.current.innerHTML)
+                }
+              } else {
+                insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; text-decoration-color: #9ca3af; color: inherit;">${linkText}</a>`)
+              }
             }
           }}
           title="Insert Link"

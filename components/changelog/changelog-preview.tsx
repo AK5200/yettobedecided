@@ -1,8 +1,6 @@
 'use client'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 interface ChangelogPreviewProps {
   title: string
@@ -26,12 +24,7 @@ export function ChangelogPreview({ title, content, category, open, onClose }: Ch
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold">Preview</DialogTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-2xl font-bold">Preview</DialogTitle>
         </DialogHeader>
         <div className="mt-4 space-y-4">
           <div>

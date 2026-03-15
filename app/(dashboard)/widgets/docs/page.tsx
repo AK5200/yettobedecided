@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Copy, Check, BookOpen, Code, Users, Zap, Shield, MessageSquare, Megaphone } from 'lucide-react'
+import { Copy, Check, BookOpen, Code, Users, Plug, Shield, MessageSquare, Megaphone } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function WidgetDocsPage() {
@@ -329,7 +329,7 @@ if (window.Kelo) {
               </Card>
               <Card>
                 <CardContent className="p-6">
-                  <Zap className="h-7 w-7 text-primary mb-3" />
+                  <Plug className="h-7 w-7 text-primary mb-3" />
                   <h3 className="font-semibold mb-2">Easy Integration</h3>
                   <p className="text-sm text-muted-foreground">Add to any website with a simple code snippet.</p>
                 </CardContent>

@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, ChevronUp, Zap } from 'lucide-react'
+import { Search, ChevronUp, MessageSquare } from 'lucide-react'
 import { PostDetailView } from './post-detail-view'
 
 interface ChangelogEntry {
@@ -328,7 +328,7 @@ export function AllInOneWidget({
         />
         {showBranding && (
           <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">
-            <Zap className="h-3 w-3" style={{ color: accentColor }} />
+            <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
             Powered by Kelo
           </div>
         )}
@@ -361,7 +361,7 @@ export function AllInOneWidget({
             boxShadow: styleVariant === '2' ? `0 0 20px ${hexToRgba(accentColor, 0.2)}` : undefined
           }}
         >
-          <Zap className="h-5 w-5" style={{ color: styleVariant === '2' ? 'white' : accentColor }} />
+          <MessageSquare className="h-5 w-5" style={{ color: styleVariant === '2' ? 'white' : accentColor }} />
         </div>
         <h2 className={`${styleVariant === '2' ? 'text-3xl font-extrabold' : 'text-lg font-semibold'} text-gray-900 ${
           textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
@@ -714,7 +714,7 @@ export function AllInOneWidget({
                       </span>
                     </div>
                     <div className="font-bold text-lg text-gray-900 mb-2">{entry.title}</div>
-                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">{entry.content}</p>
+                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">{entry.content?.replace(/<[^>]*>/g, '') || ''}</p>
                   </div>
                 )
               })
@@ -728,7 +728,7 @@ export function AllInOneWidget({
         <div className="px-6 py-3 border-t flex items-center justify-between">
           {showBranding ? (
             <span className="text-xs text-gray-400 flex items-center gap-1">
-              <Zap className="h-3 w-3" style={{ color: accentColor }} />
+              <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
               Powered by Kelo
             </span>
           ) : (
@@ -746,7 +746,7 @@ export function AllInOneWidget({
         </div>
       ) : showBranding ? (
         <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">
-          <Zap className="h-3 w-3" style={{ color: accentColor }} />
+          <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
           Powered by Kelo
         </div>
       ) : null}
