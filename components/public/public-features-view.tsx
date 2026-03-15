@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PostDetailDialog } from '@/components/boards/post-detail-dialog'
-import { GuestPostForm } from '@/components/posts/guest-post-form'
+import { FeedbackWidget } from '@/components/widgets/feedback-widget'
 import { PublicHubNav } from '@/components/public/public-hub-nav'
 import {
   Dialog,
@@ -110,11 +110,6 @@ export function PublicFeaturesView({
   const [votedPostIds, setVotedPostIds] = useState<string[]>([])
   const [votingIds, setVotingIds] = useState<string[]>([])
   const [createPostOpen, setCreatePostOpen] = useState(false)
-  const [selectedBoardForPost, setSelectedBoardForPost] = useState<string>(
-    currentBoard
-      ? boards.find((b) => b.slug === currentBoard)?.id || boards[0]?.id || ''
-      : boards[0]?.id || ''
-  )
 
   const buildUrl = (overrides: { board?: string | null; status?: string; q?: string }) => {
     const params = new URLSearchParams()
@@ -226,25 +221,13 @@ export function PublicFeaturesView({
                 <p className="text-sm text-gray-500 mt-1">Share your idea or report an issue</p>
               </DialogHeader>
               {boards.length > 0 && (
-                <div className="p-6 space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Board</label>
-                    <Select value={selectedBoardForPost} onValueChange={setSelectedBoardForPost}>
-                      <SelectTrigger className="h-10 rounded-lg border-gray-200 text-sm cursor-pointer">
-                        <SelectValue placeholder="Select a board" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {boards.map((board) => (
-                          <SelectItem key={board.id} value={board.id} className="cursor-pointer">
-                            {board.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {selectedBoardForPost && (
-                    <GuestPostForm boardId={selectedBoardForPost} onPostCreated={handlePostCreated} />
-                  )}
+                <div className="p-6">
+                  <FeedbackWidget
+                    boards={boards}
+                    orgSlug={orgSlug}
+                    onSubmit={() => handlePostCreated()}
+                    showBranding={false}
+                  />
                 </div>
               )}
             </DialogContent>
