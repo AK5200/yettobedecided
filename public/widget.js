@@ -465,13 +465,17 @@
     // Inject CSS reset to isolate widget from parent page styles
     // This prevents parent transforms/filters from breaking position:fixed
     var styleTag = document.createElement('style');
-    styleTag.textContent = '#kelo-allinone-overlay, #kelo-allinone-container { position: fixed !important; transform: none !important; will-change: auto !important; contain: none !important; filter: none !important; }';
+    styleTag.textContent = '#kelo-allinone-overlay, #kelo-allinone-container { position: fixed !important; will-change: auto !important; contain: none !important; filter: none !important; }' +
+      '#kelo-allinone-overlay { opacity: 0; transition: opacity 0.3s ease; }' +
+      '#kelo-allinone-overlay.kelo-visible { opacity: 1; }' +
+      '#kelo-allinone-container { transform: translateX(' + (isLeft ? '-100%' : '100%') + ') !important; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important; }' +
+      '#kelo-allinone-container.kelo-visible { transform: translateX(0) !important; }';
     document.head.appendChild(styleTag);
 
     // Create overlay - use top/left/right/bottom instead of width/height for reliability
     const overlay = document.createElement('div');
     overlay.id = 'kelo-allinone-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:2147483646;display:none;';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:2147483646;display:none;pointer-events:none;';
     document.body.appendChild(overlay);
 
     // Create iframe container - use top:0;bottom:0 instead of height:100vh for robustness
@@ -497,7 +501,12 @@
 
     function openPopup() {
       overlay.style.display = 'block';
+      overlay.style.pointerEvents = 'auto';
       container.style.display = 'block';
+      // Trigger reflow before adding class so transition plays
+      container.offsetHeight;
+      overlay.classList.add('kelo-visible');
+      container.classList.add('kelo-visible');
       const button = document.getElementById('kelo-allinone-trigger');
       if (button) button.style.display = 'none';
       isOpen = true;
@@ -506,7 +515,7 @@
         iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
       }
     }
-    
+
     // Send identity when iframe loads
     iframe.addEventListener('load', function() {
       if (_user) {
@@ -515,8 +524,14 @@
     });
 
     function closePopup() {
-      overlay.style.display = 'none';
-      container.style.display = 'none';
+      overlay.classList.remove('kelo-visible');
+      container.classList.remove('kelo-visible');
+      overlay.style.pointerEvents = 'none';
+      // Wait for transition to finish before hiding
+      setTimeout(function() {
+        overlay.style.display = 'none';
+        container.style.display = 'none';
+      }, 350);
       const button = document.getElementById('kelo-allinone-trigger');
       if (button) button.style.display = 'flex';
       isOpen = false;
@@ -533,10 +548,11 @@
       });
       // Don't create default button if custom triggers exist
     } else {
-      // Create floating trigger button
+      // Create floating trigger button - position based on popup placement
       const button = document.createElement('button');
       button.innerHTML = '💬';
-      button.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9997;width:56px;height:56px;background:' + (settings.accent_color || '#7c3aed') + ';color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;';
+      const buttonHPos = isLeft ? 'left:20px;' : 'right:20px;';
+      button.style.cssText = 'position:fixed;bottom:20px;' + buttonHPos + 'z-index:9997;width:56px;height:56px;background:' + (settings.accent_color || '#7c3aed') + ';color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;transition:transform 0.2s ease,box-shadow 0.2s ease;';
       button.id = 'kelo-allinone-trigger';
       document.body.appendChild(button);
       button.addEventListener('click', openPopup);
@@ -568,9 +584,13 @@
 
     // Inject CSS reset to isolate widget from parent page styles
     if (!document.getElementById('kelo-widget-styles')) {
+      // Determine slide origin based on placement
+      var slideX = isRight ? '20px' : '-20px';
+      var slideY = isBottom ? '20px' : '-20px';
       var styleTag = document.createElement('style');
       styleTag.id = 'kelo-widget-styles';
-      styleTag.textContent = '#kelo-allinone-overlay, #kelo-allinone-container, #kelo-allinone-popover { position: fixed !important; transform: none !important; will-change: auto !important; contain: none !important; filter: none !important; }';
+      styleTag.textContent = '#kelo-allinone-popover { position: fixed !important; will-change: auto !important; contain: none !important; filter: none !important; opacity: 0; transform: translate(' + slideX + ', ' + slideY + ') scale(0.95) !important; transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; pointer-events: none; }' +
+        '#kelo-allinone-popover.kelo-visible { opacity: 1; transform: translate(0, 0) scale(1) !important; pointer-events: auto; }';
       document.head.appendChild(styleTag);
     }
 
@@ -620,6 +640,9 @@
 
     function openPopover() {
       popover.style.display = 'block';
+      // Trigger reflow before adding class so transition plays
+      popover.offsetHeight;
+      popover.classList.add('kelo-visible');
       const button = document.getElementById('kelo-allinone-trigger');
       if (button) button.innerHTML = '✕';
       isOpen = true;
@@ -628,7 +651,7 @@
         iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
       }
     }
-    
+
     // Send identity when iframe loads
     iframe.addEventListener('load', function() {
       if (_user) {
@@ -637,7 +660,11 @@
     });
 
     function closePopover() {
-      popover.style.display = 'none';
+      popover.classList.remove('kelo-visible');
+      // Wait for transition to finish before hiding
+      setTimeout(function() {
+        popover.style.display = 'none';
+      }, 300);
       const button = document.getElementById('kelo-allinone-trigger');
       if (button) button.innerHTML = '💬';
       isOpen = false;

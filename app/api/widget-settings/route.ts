@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { handleOptions, withCors } from '@/lib/cors'
 
@@ -19,7 +19,9 @@ const defaultSettings = {
 
 export async function GET(request: Request) {
   const origin = request.headers.get('origin')
-  const supabase = await createClient()
+  // Use admin client for GET — this is a public-facing endpoint called from
+  // the widget script where visitors are unauthenticated.
+  const adminClient = createAdminClient()
   const { searchParams } = new URL(request.url)
   const orgId = searchParams.get('org_id')
   const orgSlug = searchParams.get('org')
@@ -29,7 +31,7 @@ export async function GET(request: Request) {
 
   if (!orgId && orgSlug) {
     // Look up org_id from slug
-    const { data: org } = await supabase
+    const { data: org } = await adminClient
       .from('organizations')
       .select('id')
       .eq('slug', orgSlug)
@@ -44,7 +46,7 @@ export async function GET(request: Request) {
     return withCors(NextResponse.json({ error: 'org_id or org (slug) is required' }, { status: 400 }), origin)
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('widget_settings')
     .select('*')
     .eq('org_id', resolvedOrgId)
