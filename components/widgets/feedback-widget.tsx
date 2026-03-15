@@ -620,51 +620,61 @@ export function FeedbackWidget({
 
       {showForm && (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {boards.length > 1 && (
-            <Select value={selectedBoard} onValueChange={setSelectedBoard}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a board" />
-              </SelectTrigger>
-              <SelectContent>
-                {boards.map((board) => (
-                  <SelectItem key={board.id} value={board.id}>
-                    {board.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
           {(identifiedUser || guestEmail) && (
-            <div className="text-sm text-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 rounded-xl border-2 border-gray-200 shadow-sm">
+            <div className="text-sm text-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 rounded-xl border border-gray-200">
               Posting as <span className="font-bold">{identifiedUser?.name || identifiedUser?.email || guestName || guestEmail}</span>
             </div>
           )}
-          <Input
-            placeholder="Feedback title"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            className="border-2 border-gray-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200 h-12 text-base font-medium shadow-sm"
-            required
-          />
-          <Textarea
-            placeholder="Describe your feedback..."
-            value={content}
-            onChange={(event) => setContent(event.target.value)}
-            className="resize-none overflow-y-auto border-2 border-gray-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200 shadow-sm"
-            style={{
-              maxHeight: '200px',
-            }}
-          />
+          {boards.length > 1 && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700">Board</label>
+              <Select value={selectedBoard} onValueChange={setSelectedBoard}>
+                <SelectTrigger className="h-10 rounded-lg border-gray-200 text-sm cursor-pointer">
+                  <SelectValue placeholder="Select a board" />
+                </SelectTrigger>
+                <SelectContent>
+                  {boards.map((board) => (
+                    <SelectItem key={board.id} value={board.id} className="cursor-pointer">
+                      {board.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Title</label>
+            <Input
+              placeholder="Short, descriptive title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              className="h-10 rounded-lg border-gray-200 text-sm placeholder:text-gray-400"
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">
+              Description
+              <span className="text-gray-400 font-normal ml-1">(optional)</span>
+            </label>
+            <Textarea
+              placeholder="Tell us more about your idea..."
+              value={content}
+              onChange={(event) => setContent(event.target.value)}
+              rows={3}
+              className="rounded-lg border-gray-200 text-sm placeholder:text-gray-400 resize-none"
+            />
+          </div>
           <Button
             type="submit"
             disabled={loading || !title.trim()}
-            style={{ 
+            style={{
               backgroundColor: accentColor,
-              boxShadow: `0 6px 20px -4px ${accentColor}60`
+              boxShadow: `0 4px 12px -2px ${accentColor}40`
             }}
-            className="text-white font-bold text-base py-6 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-10 text-white rounded-lg text-sm font-semibold shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Submitting...' : 'Submit Feedback'}
+            {loading ? 'Submitting...' : 'Submit'}
           </Button>
           {success && (
             <p className="text-sm text-green-600 flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
