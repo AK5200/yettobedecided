@@ -693,8 +693,8 @@ export function AllInOneWidget({
         </TabsContent>
 
         {/* Changelog Tab */}
-        <TabsContent value="changelog" className="pt-4 transition-all">
-          <div className={`${isEmbedded ? 'px-6' : 'max-h-80'} overflow-y-auto space-y-1`}>
+        <TabsContent value="changelog" className={`pt-4 transition-all ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
+          <div className={`${isEmbedded ? 'flex-1 px-6' : 'max-h-80'} overflow-y-auto space-y-1`}>
             {changelog.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
                 No changelog entries yet.
