@@ -142,14 +142,21 @@ export function FeedbackWidget({
     setGuestEmail(email)
     setGuestName(name)
     setIsIdentified(true)
+    // Store in sessionStorage so vote flow can read the email
+    const userData = { id: email, email, name }
+    setIdentifiedUser(userData)
+    try {
+      sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(userData))
+    } catch {
+      // Ignore storage errors
+    }
     // Also try to identify in parent if possible
     try {
       if (window.parent && window.parent !== window) {
         try {
           const parentHub = (window.parent as any)?.Kelo
           if (parentHub?.identify) {
-            parentHub.identify({ id: email, email, name })
-            setIdentifiedUser(parentHub.getUser ? parentHub.getUser() : null)
+            parentHub.identify(userData)
           }
         } catch (e) {
           // Cross-origin error - ignore
@@ -625,7 +632,7 @@ export function FeedbackWidget({
               Posting as <span className="font-bold">{identifiedUser?.name || identifiedUser?.email || guestName || guestEmail}</span>
             </div>
           )}
-          {boards.length > 1 && (
+          {boards.length > 0 && (
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700">Board</label>
               <Select value={selectedBoard} onValueChange={setSelectedBoard}>

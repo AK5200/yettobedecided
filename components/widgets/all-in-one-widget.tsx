@@ -172,6 +172,7 @@ export function AllInOneWidget({
   const [searchQuery, setSearchQuery] = useState('')
   const [posts, setPosts] = useState(initialPosts)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
+  const [expandedChangelogId, setExpandedChangelogId] = useState<string | null>(null)
 
   // Sync when parent passes updated posts (e.g. after new post creation)
   useEffect(() => {
@@ -693,17 +694,22 @@ export function AllInOneWidget({
 
         {/* Changelog Tab */}
         <TabsContent value="changelog" className="pt-4 transition-all">
-          <div className={`${isEmbedded ? 'px-6' : 'max-h-80'} overflow-y-auto space-y-4`}>
+          <div className={`${isEmbedded ? 'px-6' : 'max-h-80'} overflow-y-auto space-y-1`}>
             {changelog.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
                 No changelog entries yet.
               </div>
             ) : (
-              changelog.map((entry) => {
+              changelog.map((entry, index) => {
                 const categoryStyle = getCategoryStyle(entry.category)
+                const isExpanded = expandedChangelogId === entry.id || (expandedChangelogId === null && index === 0)
                 return (
-                  <div key={entry.id} className="border-b border-gray-200 pb-6 last:border-b-0 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent -mx-3 px-4 py-3 rounded-xl transition-all hover:shadow-sm">
-                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                  <div
+                    key={entry.id}
+                    className="border-b border-gray-200 last:border-b-0 cursor-pointer -mx-3 px-4 py-3 rounded-xl transition-all hover:bg-gray-50"
+                    onClick={() => setExpandedChangelogId(isExpanded && index !== 0 ? '__none__' : entry.id)}
+                  >
+                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
                       <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 shadow-md font-bold px-2.5 py-0.5`}>
                         {entry.category}
                       </Badge>
@@ -713,11 +719,18 @@ export function AllInOneWidget({
                           : 'Recently'}
                       </span>
                     </div>
-                    <div className="font-bold text-lg text-gray-900 mb-2">{entry.title}</div>
-                    <div
-                      className="text-sm text-gray-600 line-clamp-3 leading-relaxed prose prose-sm max-w-none [&_img]:hidden [&_video]:hidden [&_audio]:hidden [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-400"
-                      dangerouslySetInnerHTML={{ __html: entry.content || '' }}
-                    />
+                    <div className="font-bold text-lg text-gray-900 mb-1">{entry.title}</div>
+                    {isExpanded ? (
+                      <div
+                        className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3 [&_video]:max-w-full [&_video]:h-auto [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-400"
+                        dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+                      />
+                    ) : (
+                      <div
+                        className="text-sm text-gray-600 line-clamp-2 leading-relaxed prose prose-sm max-w-none [&_img]:hidden [&_video]:hidden [&_audio]:hidden [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-400"
+                        dangerouslySetInnerHTML={{ __html: entry.content || '' }}
+                      />
+                    )}
                   </div>
                 )
               })
