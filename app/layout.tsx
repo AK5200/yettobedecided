@@ -31,14 +31,24 @@ export const metadata: Metadata = {
   },
   description: "Collect customer feedback, prioritize feature requests, and share your product roadmap. The feedback tool that grows with you.",
   openGraph: {
-    title: "Kelo - Collect & Prioritize Customer Feedback",
-    description: "Collect customer feedback, prioritize feature requests, and share your product roadmap.",
+    title: "Kelo - Transparent Feedback for SaaS",
+    description: "Ship what users want, not what hype says.",
+    url: "https://www.kelohq.com/",
     type: "website",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1344,
+        height: 768,
+        alt: "Kelo - A transparent feedback tool for SaaS products",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kelo - Collect & Prioritize Customer Feedback",
-    description: "Collect customer feedback, prioritize feature requests, and share your product roadmap.",
+    title: "Kelo - Transparent Feedback for SaaS",
+    description: "Ship what users want, not what hype says.",
+    images: ["/og-image.jpg"],
   },
 };
 
