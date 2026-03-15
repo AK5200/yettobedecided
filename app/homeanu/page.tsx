@@ -8,6 +8,9 @@ export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
+    // Set cookie so /login, /signup, /pricing are accessible
+    document.cookie = 'kelo_home=1;path=/;max-age=3600'
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10)
     }
