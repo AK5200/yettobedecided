@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     .single()
 
   if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
   }
 
   const token = crypto.randomUUID()

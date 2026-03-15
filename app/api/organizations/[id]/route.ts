@@ -64,7 +64,7 @@ export async function PATCH(
             .single()
 
         if (!membership || !['owner', 'admin'].includes(membership.role)) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+            return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
         }
 
         const body = await request.json()

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       .single()
 
     if (membershipError || !membership || (membership.role !== 'admin' && membership.role !== 'owner')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 
     // Generate API key

@@ -35,7 +35,7 @@ export async function DELETE(
       .single()
 
     if (membershipError || !membership || (membership.role !== 'admin' && membership.role !== 'owner')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 
     const { error: deleteError } = await supabase
