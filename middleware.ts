@@ -6,11 +6,6 @@ export async function middleware(request: NextRequest) {
   const origin = request.headers.get('origin')
   const pathname = request.nextUrl.pathname
 
-  // Redirect public-facing pages to waitlist (login/signup/pricing hidden)
-  if (pathname === '/login' || pathname === '/signup' || pathname === '/pricing') {
-    return NextResponse.redirect(new URL('/', request.url))
-  }
-
   // Handle CORS preflight requests for widget API routes and health check
   if (request.method === 'OPTIONS' && 
       (pathname.startsWith('/api/widget') || 
