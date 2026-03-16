@@ -114,7 +114,7 @@ export default function WaitlistPage() {
         }
       `}</style>
 
-      <main className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden bg-gray-950">
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 py-16 relative overflow-hidden bg-gray-950">
         {/* Gradient mesh background */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-yellow-500/10 rounded-full blur-[120px]" />
@@ -177,19 +177,19 @@ export default function WaitlistPage() {
               <p className="text-xs text-yellow-400/70 mb-4 font-semibold uppercase tracking-widest">
                 Join the waitlist for early access
               </p>
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <input
                   type="email"
                   placeholder="you@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="flex-1 h-14 px-5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 placeholder:text-gray-500 backdrop-blur-sm transition-all"
+                  className="w-full h-14 px-5 rounded-xl bg-white/5 border border-white/10 text-white text-base focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 placeholder:text-gray-500 backdrop-blur-sm transition-all"
                 />
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="h-14 px-8 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-400 hover:from-yellow-300 hover:to-amber-300 text-gray-900 font-bold text-sm transition-all disabled:opacity-60 cursor-pointer whitespace-nowrap hover:shadow-[0_0_30px_rgba(250,204,21,0.3)] active:scale-[0.98]"
+                  className="w-full h-14 px-8 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-400 hover:from-yellow-300 hover:to-amber-300 text-gray-900 font-bold text-sm transition-all disabled:opacity-60 cursor-pointer whitespace-nowrap hover:shadow-[0_0_30px_rgba(250,204,21,0.3)] active:scale-[0.98]"
                 >
                   {status === 'loading' ? 'Joining...' : 'Notify me when Kelo goes live'}
                 </button>
@@ -203,7 +203,7 @@ export default function WaitlistPage() {
         </div>
 
         {/* Footer */}
-        <footer className="absolute bottom-6 text-xs text-gray-600">
+        <footer className="relative z-10 mt-12 text-xs text-gray-600">
           &copy; {new Date().getFullYear()} Kelo. All rights reserved.
         </footer>
       </main>
