@@ -144,14 +144,7 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
 
   const handleSkip = () => {
     if (unscoredQueue.length <= 1) return
-    setUnscoredQueue((prev) => {
-      const current = prev[unscoredIndex]
-      const newQueue = [...prev]
-      newQueue.splice(unscoredIndex, 1)
-      newQueue.push(current)
-      return newQueue
-    })
-    setUnscoredIndex((prev) => Math.min(prev, unscoredQueue.length - 2))
+    setUnscoredIndex((prev) => (prev + 1) % unscoredQueue.length)
   }
 
   const handlePrevious = () => {
