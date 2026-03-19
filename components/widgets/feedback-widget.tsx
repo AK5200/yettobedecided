@@ -372,7 +372,7 @@ export function FeedbackWidget({
 
   if (configLoading) {
     return (
-      <div className="text-sm text-gray-500 text-center py-4">Loading...</div>
+      <div className="text-sm text-muted-foreground text-center py-4">Loading...</div>
     )
   }
 
@@ -391,13 +391,13 @@ export function FeedbackWidget({
                   placeholder="Email"
                   value={guestEmail}
                   onChange={(event) => setGuestEmail(event.target.value)}
-                  className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+                  className="border-border focus:border-border focus:ring-2 focus:ring-muted"
                 />
                 <Input
                   placeholder="Name (optional)"
                   value={guestName}
                   onChange={(event) => setGuestName(event.target.value)}
-                  className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+                  className="border-border focus:border-border focus:ring-2 focus:ring-muted"
                 />
                 <Button
                   className="w-full font-semibold shadow-sm hover:shadow-md transition-all cursor-pointer"
@@ -415,22 +415,22 @@ export function FeedbackWidget({
               {/* Show login options below if login handler is configured */}
               {loginHandler === 'kelo' && (
                 <>
-                  <div className="text-xs text-gray-500 text-center font-medium relative">
-                    <span className="bg-white px-2 relative z-10">or verify your email</span>
+                  <div className="text-xs text-muted-foreground text-center font-medium relative">
+                    <span className="bg-background px-2 relative z-10">or verify your email</span>
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-200"></div>
+                      <div className="w-full border-t border-border"></div>
                     </div>
                   </div>
                   {magicLinkStep === 'code' ? (
                     <div className="space-y-3">
-                      <p className="text-xs text-gray-500 text-center">
+                      <p className="text-xs text-muted-foreground text-center">
                         Enter the 6-digit code sent to <strong>{magicLinkEmail}</strong>
                       </p>
                       <Input
                         placeholder="000000"
                         value={otpCode}
                         onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="text-center text-2xl tracking-widest font-mono border-gray-200"
+                        className="text-center text-2xl tracking-widest font-mono border-border"
                         maxLength={6}
                         autoFocus
                       />
@@ -446,7 +446,7 @@ export function FeedbackWidget({
                         {otpLoading ? 'Verifying...' : 'Verify Code'}
                       </Button>
                       <button
-                        className="text-xs text-gray-400 hover:text-gray-600 w-full text-center cursor-pointer"
+                        className="text-xs text-muted-foreground/60 hover:text-muted-foreground w-full text-center cursor-pointer"
                         onClick={() => { setMagicLinkStep('email'); setOtpCode(''); setOtpError('') }}
                       >
                         Use a different email
@@ -459,7 +459,7 @@ export function FeedbackWidget({
                         type="email"
                         value={magicLinkEmail}
                         onChange={(event) => setMagicLinkEmail(event.target.value)}
-                        className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+                        className="border-border focus:border-border focus:ring-2 focus:ring-muted"
                       />
                       {otpError && (
                         <p className="text-xs text-red-500 text-center">{otpError}</p>
@@ -474,10 +474,10 @@ export function FeedbackWidget({
                       </Button>
                     </div>
                   )}
-                  <div className="text-xs text-gray-500 text-center font-medium relative">
-                    <span className="bg-white px-2 relative z-10">or</span>
+                  <div className="text-xs text-muted-foreground text-center font-medium relative">
+                    <span className="bg-background px-2 relative z-10">or</span>
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-200"></div>
+                      <div className="w-full border-t border-border"></div>
                     </div>
                   </div>
                   {oauthError && (
@@ -496,10 +496,10 @@ export function FeedbackWidget({
               )}
               {loginHandler === 'customer' && (
                 <>
-                  <div className="text-xs text-gray-500 text-center font-medium relative">
-                    <span className="bg-white px-2 relative z-10">or</span>
+                  <div className="text-xs text-muted-foreground text-center font-medium relative">
+                    <span className="bg-background px-2 relative z-10">or</span>
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-200"></div>
+                      <div className="w-full border-t border-border"></div>
                     </div>
                   </div>
                   <Button
@@ -517,19 +517,19 @@ export function FeedbackWidget({
             <>
               {loginHandler === 'kelo' ? (
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600 text-center">
+                  <p className="text-sm text-muted-foreground text-center">
                     Please login to submit feedback
                   </p>
                   {magicLinkStep === 'code' ? (
                     <>
-                      <p className="text-xs text-gray-500 text-center">
+                      <p className="text-xs text-muted-foreground text-center">
                         Enter the 6-digit code sent to <strong>{magicLinkEmail}</strong>
                       </p>
                       <Input
                         placeholder="000000"
                         value={otpCode}
                         onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="text-center text-2xl tracking-widest font-mono border-gray-200"
+                        className="text-center text-2xl tracking-widest font-mono border-border"
                         maxLength={6}
                         autoFocus
                       />
@@ -545,7 +545,7 @@ export function FeedbackWidget({
                         {otpLoading ? 'Verifying...' : 'Verify Code'}
                       </Button>
                       <button
-                        className="text-xs text-gray-400 hover:text-gray-600 w-full text-center cursor-pointer"
+                        className="text-xs text-muted-foreground/60 hover:text-muted-foreground w-full text-center cursor-pointer"
                         onClick={() => { setMagicLinkStep('email'); setOtpCode(''); setOtpError('') }}
                       >
                         Use a different email
@@ -558,7 +558,7 @@ export function FeedbackWidget({
                         type="email"
                         value={magicLinkEmail}
                         onChange={(event) => setMagicLinkEmail(event.target.value)}
-                        className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+                        className="border-border focus:border-border focus:ring-2 focus:ring-muted"
                       />
                       {otpError && (
                         <p className="text-xs text-red-500 text-center">{otpError}</p>
@@ -574,10 +574,10 @@ export function FeedbackWidget({
                       >
                         {otpLoading ? 'Sending...' : 'Continue with Email'}
                       </Button>
-                      <div className="text-xs text-gray-500 text-center font-medium relative">
-                        <span className="bg-white px-2 relative z-10">or</span>
+                      <div className="text-xs text-muted-foreground text-center font-medium relative">
+                        <span className="bg-background px-2 relative z-10">or</span>
                         <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-gray-200"></div>
+                          <div className="w-full border-t border-border"></div>
                         </div>
                       </div>
                       {oauthError && (
@@ -598,7 +598,7 @@ export function FeedbackWidget({
               ) : loginHandler === 'customer' ? (
                 // Show "Login" button → redirect to ssoRedirectUrl
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600 text-center">
+                  <p className="text-sm text-muted-foreground text-center">
                     Please login to submit feedback
                   </p>
                   <Button
@@ -615,7 +615,7 @@ export function FeedbackWidget({
               ) : (
                 // No login handler configured
                 <div className="text-center py-4">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Please login to your account first
                   </p>
                 </div>
@@ -628,15 +628,15 @@ export function FeedbackWidget({
       {showForm && (
         <form onSubmit={handleSubmit} className="space-y-4">
           {(identifiedUser || guestEmail) && (
-            <div className="text-sm text-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 rounded-xl border border-gray-200">
+            <div className="text-sm text-foreground/80 bg-linear-to-r from-muted/50 to-muted px-4 py-3 rounded-xl border border-border">
               Posting as <span className="font-bold">{identifiedUser?.name || identifiedUser?.email || guestName || guestEmail}</span>
             </div>
           )}
           {boards.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">Board</label>
+              <label className="text-sm font-medium text-foreground/80">Board</label>
               <Select value={selectedBoard} onValueChange={setSelectedBoard}>
-                <SelectTrigger className="h-10 rounded-lg border-gray-200 text-sm cursor-pointer">
+                <SelectTrigger className="h-10 rounded-lg border-border text-sm cursor-pointer">
                   <SelectValue placeholder="Select a board" />
                 </SelectTrigger>
                 <SelectContent>
@@ -650,26 +650,26 @@ export function FeedbackWidget({
             </div>
           )}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Title</label>
+            <label className="text-sm font-medium text-foreground/80">Title</label>
             <Input
               placeholder="Short, descriptive title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              className="h-10 rounded-lg border-gray-200 text-sm placeholder:text-gray-400"
+              className="h-10 rounded-lg border-border text-sm placeholder:text-muted-foreground/60"
               required
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground/80">
               Description
-              <span className="text-gray-400 font-normal ml-1">(optional)</span>
+              <span className="text-muted-foreground/60 font-normal ml-1">(optional)</span>
             </label>
             <Textarea
               placeholder="Tell us more about your idea..."
               value={content}
               onChange={(event) => setContent(event.target.value)}
               rows={3}
-              className="rounded-lg border-gray-200 text-sm placeholder:text-gray-400 resize-none"
+              className="rounded-lg border-border text-sm placeholder:text-muted-foreground/60 resize-none"
             />
           </div>
           <Button
@@ -698,7 +698,7 @@ export function FeedbackWidget({
       )}
 
       {showBranding && (
-        <div className="text-xs text-gray-500 text-center">Powered by Kelo</div>
+        <div className="text-xs text-muted-foreground text-center">Powered by Kelo</div>
       )}
     </div>
   )

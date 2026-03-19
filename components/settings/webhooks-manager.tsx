@@ -171,9 +171,9 @@ export function WebhooksManager({ orgId, initialWebhooks, availableEvents }: Web
                   {availableEvents.map((event) => (
                     <div
                       key={event}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50"
                     >
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-foreground/80">
                         {EVENT_LABELS[event] || event}
                       </span>
                       <Switch
@@ -206,9 +206,9 @@ export function WebhooksManager({ orgId, initialWebhooks, availableEvents }: Web
       <div className="space-y-3">
         {webhooks.length === 0 ? (
           <Card className="p-8 text-center">
-            <Webhook className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No webhooks yet</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <Webhook className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-muted-foreground">No webhooks yet</p>
+            <p className="text-sm text-muted-foreground/60 mt-1">
               Create your first webhook to receive real-time notifications
             </p>
           </Card>
@@ -218,26 +218,26 @@ export function WebhooksManager({ orgId, initialWebhooks, availableEvents }: Web
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                    webhook.is_active ? 'bg-green-100' : 'bg-gray-100'
+                    webhook.is_active ? 'bg-green-100' : 'bg-muted'
                   }`}>
                     <Globe className={`h-5 w-5 ${
-                      webhook.is_active ? 'text-green-600' : 'text-gray-400'
+                      webhook.is_active ? 'text-green-600' : 'text-muted-foreground/60'
                     }`} />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-gray-900">{webhook.name}</h3>
+                      <h3 className="font-medium text-foreground">{webhook.name}</h3>
                       {webhook.is_active ? (
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
                           Active
                         </span>
                       ) : (
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                        <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
                           Disabled
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 truncate max-w-md">{webhook.url}</p>
+                    <p className="text-sm text-muted-foreground truncate max-w-md">{webhook.url}</p>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {webhook.events?.map((event) => (
                         <Badge

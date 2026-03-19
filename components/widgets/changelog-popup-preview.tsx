@@ -43,7 +43,7 @@ function getCategoryStyle(category: string): { bg: string; text: string } {
     case 'announcement':
       return { bg: 'bg-purple-100', text: 'text-purple-700' }
     default:
-      return { bg: 'bg-gray-100', text: 'text-gray-700' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground/80' }
   }
 }
 
@@ -157,9 +157,9 @@ export function ChangelogPopupPreview({ orgId, orgSlug, onClose, settings }: Cha
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
+          className="absolute top-4 right-4 p-1 hover:bg-muted rounded-full transition-colors z-10"
         >
-          <X className="h-5 w-5 text-gray-500" />
+          <X className="h-5 w-5 text-muted-foreground" />
         </button>
 
         {/* Scrollable Content */}
@@ -167,19 +167,19 @@ export function ChangelogPopupPreview({ orgId, orgSlug, onClose, settings }: Cha
           {/* Header */}
           <div className="pt-6 pb-4">
             <h2 className="text-2xl font-semibold">{settings.heading}</h2>
-            <p className="text-gray-500 mt-1">{settings.subheading}</p>
+            <p className="text-muted-foreground mt-1">{settings.subheading}</p>
           </div>
 
           {/* Entries */}
           <div className="space-y-6 pb-4">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
               </div>
             ) : entries.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">No changelog entries yet.</p>
-                <p className="text-sm text-gray-400 mt-2">Create your first changelog entry to see it here.</p>
+                <p className="text-muted-foreground">No changelog entries yet.</p>
+                <p className="text-sm text-muted-foreground/60 mt-2">Create your first changelog entry to see it here.</p>
               </div>
             ) : (
               entries.map((entry) => {
@@ -192,8 +192,8 @@ export function ChangelogPopupPreview({ orgId, orgSlug, onClose, settings }: Cha
                         className="w-full h-72 object-cover rounded-2xl mb-4"
                       />
                     )}
-                    <h3 className="font-semibold text-gray-900 text-xl mb-2">{entry.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{entry.content}</p>
+                    <h3 className="font-semibold text-foreground text-xl mb-2">{entry.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{entry.content}</p>
                   </div>
                 )
               })
@@ -207,7 +207,7 @@ export function ChangelogPopupPreview({ orgId, orgSlug, onClose, settings }: Cha
           style={{ borderBottomLeftRadius: borderRadius, borderBottomRightRadius: borderRadius }}
         >
           {settings.showBranding ? (
-            <span className="text-xs text-gray-400">Powered by Kelo</span>
+            <span className="text-xs text-muted-foreground/60">Powered by Kelo</span>
           ) : (
             <span />
           )}

@@ -76,10 +76,10 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
 
   if (loading || !settings) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-white" style={{ pointerEvents: 'auto' }}>
+      <div className="w-full min-h-screen flex items-center justify-center bg-background" style={{ pointerEvents: 'auto' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
-          <p className="text-sm text-gray-500">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-2"></div>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
@@ -93,7 +93,7 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
   }
 
   return (
-    <div className="w-full min-h-screen bg-white" style={{ pointerEvents: 'auto' }}>
+    <div className="w-full min-h-screen bg-background" style={{ pointerEvents: 'auto' }}>
       {!isOpen && (
         <FloatingButton
           position={settings.position}
@@ -104,11 +104,11 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
       )}
 
       {settings.widget_type === 'feedback' && isOpen && (
-        <div className="w-full min-h-screen bg-white p-6" style={{ pointerEvents: 'auto' }}>
+        <div className="w-full min-h-screen bg-background p-6" style={{ pointerEvents: 'auto' }}>
           <div className="max-w-2xl mx-auto relative">
             <button
               onClick={handleClose}
-              className="absolute top-0 right-0 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+              className="absolute top-0 right-0 p-2 hover:bg-muted rounded-full transition-colors z-10"
               aria-label="Close"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

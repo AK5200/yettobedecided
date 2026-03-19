@@ -23,21 +23,21 @@ export default function HomePage() {
       <header 
         className={`sticky top-4 z-50 flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-6 py-4 mx-4 mt-4 rounded-3xl border-2 transition-all duration-300 ${
           isScrolled 
-            ? 'bg-white/70 backdrop-blur-sm border-gray-200/50 shadow-[0_10px_40px_rgba(250,204,21,0.2)]' 
-            : 'bg-white border-gray-200 shadow-[0_10px_40px_rgba(250,204,21,0.15)]'
+            ? 'bg-background/70 backdrop-blur-sm border-border/50 shadow-[0_10px_40px_rgba(250,204,21,0.2)]'
+            : 'bg-background border-border shadow-[0_10px_40px_rgba(250,204,21,0.15)]'
         }`}
       >
         <div className="text-xl font-bold" style={{ fontFamily: 'var(--font-raleway), sans-serif', fontWeight: 700 }}>Kelo</div>
         <nav className="flex items-center gap-6 text-sm font-semibold" style={{ fontFamily: 'var(--font-raleway), sans-serif' }}>
-          <Link href="#features" className="text-gray-700 hover:text-gray-900 font-semibold">Features</Link>
-          <Link href="/pricing" className="text-gray-700 hover:text-gray-900 font-semibold">Pricing</Link>
+          <Link href="#features" className="text-foreground/80 hover:text-foreground font-semibold">Features</Link>
+          <Link href="/pricing" className="text-foreground/80 hover:text-foreground font-semibold">Pricing</Link>
         </nav>
         <div className="flex gap-3">
           <Button variant="ghost" asChild>
             <Link href="/login">Login</Link>
           </Button>
           <Button 
-            className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 font-semibold"
+            className="bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 font-semibold"
             asChild
           >
             <Link href="/signup">Sign up for free</Link>
@@ -45,24 +45,24 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="relative px-8 py-8 md:py-12 text-center bg-gradient-to-b from-white to-yellow-50/30 overflow-hidden">
+      <section className="relative px-8 py-8 md:py-12 text-center bg-linear-to-b from-background to-yellow-50/30 overflow-hidden">
         {/* Subtle yellow background elements */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-100/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-100/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
 
         <div className="relative z-10 max-w-2xl mx-auto">
           {/* Eyebrow Badge */}
-          <div className="inline-flex items-center px-4 py-2 rounded-full border border-yellow-200 bg-white mb-4 mt-4">
-            <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+          <div className="inline-flex items-center px-4 py-2 rounded-full border border-yellow-200 bg-background mb-4 mt-4">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
               FEEDBACK · ROADMAP · CHANGELOG
             </span>
           </div>
 
           {/* Headline with yellow light effect */}
-          <h1 className="mb-4 text-gray-900 leading-tight max-w-xl mx-auto" style={{ fontFamily: 'Inter, sans-serif', fontSize: '56px', fontWeight: 400 }}>
+          <h1 className="mb-4 text-foreground leading-tight max-w-xl mx-auto" style={{ fontFamily: 'Inter, sans-serif', fontSize: '56px', fontWeight: 400 }}>
             <span className="relative inline-block">
               <span className="relative z-10">
-                The <span className="italic font-normal text-gray-500" style={{ fontFamily: 'var(--font-libre-baskerville), serif' }}>simplest</span> way to collect feedback and ship what users want
+                The <span className="italic font-normal text-muted-foreground" style={{ fontFamily: 'var(--font-libre-baskerville), serif' }}>simplest</span> way to collect feedback and ship what users want
               </span>
               {/* Yellow light ray effect - like light falling on text */}
               <span
@@ -77,7 +77,7 @@ export default function HomePage() {
           </h1>
 
           {/* Subtext */}
-          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto mb-4 font-medium leading-relaxed">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-4 font-medium leading-relaxed">
             From user request to shipped feature, track it all. No complexity, no per-seat pricing, no nonsense.
           </p>
 
@@ -94,7 +94,7 @@ export default function HomePage() {
             <Button
               size="lg"
               variant="outline"
-              className="bg-white border-2 border-gray-300 hover:bg-gray-50 text-gray-900 font-semibold px-12 py-8 text-xl rounded-lg"
+              className="bg-background border-2 border-border hover:bg-muted/50 text-foreground font-semibold px-12 py-8 text-xl rounded-lg"
               style={{ fontFamily: 'Inter, sans-serif' }}
               asChild
             >

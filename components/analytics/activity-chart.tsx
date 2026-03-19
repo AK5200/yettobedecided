@@ -13,16 +13,16 @@ interface ActivityChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-        <p className="text-sm font-semibold text-gray-900 mb-2">{label}</p>
+      <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+        <p className="text-sm font-semibold text-foreground mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <div key={index} className="flex items-center gap-2 mb-1">
             <div
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-sm text-gray-600">{entry.name}:</span>
-            <span className="text-sm font-semibold text-gray-900">{entry.value}</span>
+            <span className="text-sm text-muted-foreground">{entry.name}:</span>
+            <span className="text-sm font-semibold text-foreground">{entry.value}</span>
           </div>
         ))}
       </div>
@@ -61,18 +61,18 @@ export function ActivityChart({ orgId, days = 30, boardId }: ActivityChartProps)
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
-        <div className="h-80 bg-gray-100 animate-pulse rounded-xl" />
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-border p-6">
+        <div className="h-80 bg-muted animate-pulse rounded-xl" />
       </div>
     )
   }
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-border p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-1">Activity Over Time</h3>
-          <p className="text-sm text-gray-500">Track posts, votes, and comments</p>
+          <h3 className="text-xl font-bold text-foreground mb-1">Activity Over Time</h3>
+          <p className="text-sm text-muted-foreground">Track posts, votes, and comments</p>
         </div>
         <div className="p-3 bg-indigo-100 rounded-xl">
           <TrendingUp className="h-6 w-6 text-indigo-600" />
@@ -118,7 +118,7 @@ export function ActivityChart({ orgId, days = 30, boardId }: ActivityChartProps)
             wrapperStyle={{ paddingTop: '20px' }}
             iconType="circle"
             formatter={(value) => (
-              <span className="text-sm font-medium text-gray-700">{value}</span>
+              <span className="text-sm font-medium text-foreground/80">{value}</span>
             )}
           />
           <Area

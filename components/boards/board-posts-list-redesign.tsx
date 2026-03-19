@@ -64,13 +64,13 @@ export function BoardPostsListRedesign({
   if (totalPosts === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <MessageSquare className="h-8 w-8 text-gray-400" />
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+          <MessageSquare className="h-8 w-8 text-muted-foreground/60" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-semibold text-foreground mb-2">
           No feedback yet
         </h3>
-        <p className="text-gray-600 text-sm">
+        <p className="text-muted-foreground text-sm">
           Be the first to add feedback to this board
         </p>
       </div>
@@ -113,10 +113,10 @@ export function BoardPostsListRedesign({
       {approved.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-sm font-semibold text-gray-700">
+            <h2 className="text-sm font-semibold text-foreground/80">
               All Feedback
             </h2>
-            <span className="text-xs text-gray-500 font-medium">
+            <span className="text-xs text-muted-foreground font-medium">
               {approved.length}
             </span>
           </div>

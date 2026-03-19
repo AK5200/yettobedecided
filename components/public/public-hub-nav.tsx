@@ -19,7 +19,7 @@ export function PublicHubNav({ org, orgSlug }: PublicHubNavProps) {
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center justify-between h-14">
           {/* Org branding */}
@@ -37,7 +37,7 @@ export function PublicHubNav({ org, orgSlug }: PublicHubNavProps) {
                 </span>
               </div>
             )}
-            <span className="text-sm font-semibold text-gray-900 tracking-tight">
+            <span className="text-sm font-semibold text-foreground tracking-tight">
               {org.name}
             </span>
           </div>
@@ -52,8 +52,8 @@ export function PublicHubNav({ org, orgSlug }: PublicHubNavProps) {
                   href={link.href}
                   className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                     isActive
-                      ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'text-foreground'
+                      : 'text-muted-foreground hover:text-foreground/80'
                   }`}
                 >
                   {link.label}

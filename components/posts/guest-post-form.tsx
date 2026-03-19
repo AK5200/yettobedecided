@@ -64,13 +64,13 @@ export function GuestPostForm({ boardId, onPostCreated }: GuestPostFormProps) {
         <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3">
           <CheckCircle2 className="h-5 w-5 text-emerald-600" />
         </div>
-        <h3 className="text-base font-semibold text-gray-900 mb-1">Submitted!</h3>
-        <p className="text-sm text-gray-500 mb-4">
+        <h3 className="text-base font-semibold text-foreground mb-1">Submitted!</h3>
+        <p className="text-sm text-muted-foreground mb-4">
           Thanks for your feedback. We&apos;ll keep you posted.
         </p>
         <button
           onClick={() => setSuccess(false)}
-          className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Submit another
         </button>
@@ -81,7 +81,7 @@ export function GuestPostForm({ boardId, onPostCreated }: GuestPostFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <label htmlFor="guest-title" className="text-sm font-medium text-gray-700">
+        <label htmlFor="guest-title" className="text-sm font-medium text-foreground/80">
           Title
         </label>
         <Input
@@ -90,14 +90,14 @@ export function GuestPostForm({ boardId, onPostCreated }: GuestPostFormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="h-10 rounded-lg border-gray-200 text-sm placeholder:text-gray-400"
+          className="h-10 rounded-lg border-border text-sm placeholder:text-muted-foreground/60"
         />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="guest-desc" className="text-sm font-medium text-gray-700">
+        <label htmlFor="guest-desc" className="text-sm font-medium text-foreground/80">
           Description
-          <span className="text-gray-400 font-normal ml-1">(optional)</span>
+          <span className="text-muted-foreground/60 font-normal ml-1">(optional)</span>
         </label>
         <Textarea
           id="guest-desc"
@@ -105,13 +105,13 @@ export function GuestPostForm({ boardId, onPostCreated }: GuestPostFormProps) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className="rounded-lg border-gray-200 text-sm placeholder:text-gray-400 resize-none"
+          className="rounded-lg border-border text-sm placeholder:text-muted-foreground/60 resize-none"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <label htmlFor="guest-email" className="text-sm font-medium text-gray-700">
+          <label htmlFor="guest-email" className="text-sm font-medium text-foreground/80">
             Email
           </label>
           <Input
@@ -121,20 +121,20 @@ export function GuestPostForm({ boardId, onPostCreated }: GuestPostFormProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="h-10 rounded-lg border-gray-200 text-sm placeholder:text-gray-400"
+            className="h-10 rounded-lg border-border text-sm placeholder:text-muted-foreground/60"
           />
         </div>
         <div className="space-y-1.5">
-          <label htmlFor="guest-name" className="text-sm font-medium text-gray-700">
+          <label htmlFor="guest-name" className="text-sm font-medium text-foreground/80">
             Name
-            <span className="text-gray-400 font-normal ml-1">(optional)</span>
+            <span className="text-muted-foreground/60 font-normal ml-1">(optional)</span>
           </label>
           <Input
             id="guest-name"
             placeholder="Your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="h-10 rounded-lg border-gray-200 text-sm placeholder:text-gray-400"
+            className="h-10 rounded-lg border-border text-sm placeholder:text-muted-foreground/60"
           />
         </div>
       </div>

@@ -75,7 +75,7 @@ function SubscribeForm({ orgId }: { orgId: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="h-10 rounded-lg border-gray-200 bg-white text-sm flex-1 max-w-xs placeholder:text-gray-400"
+          className="h-10 rounded-lg border-border bg-background text-sm flex-1 max-w-xs placeholder:text-muted-foreground/60"
         />
         <Button
           type="submit"
@@ -95,14 +95,14 @@ function SubscribeForm({ orgId }: { orgId: string }) {
 
 export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogViewProps) {
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-muted/50">
       <PublicHubNav org={org} orgSlug={orgSlug} />
 
       <div className="max-w-2xl mx-auto px-6 py-8">
         {/* Page header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Changelog</h1>
-          <p className="text-sm text-gray-500 mt-1 mb-5">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Changelog</h1>
+          <p className="text-sm text-muted-foreground mt-1 mb-5">
             Stay up to date with the latest updates
           </p>
           <SubscribeForm orgId={org.id} />
@@ -114,13 +114,13 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
             <div className="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center mx-auto mb-4">
               <BookOpen className="h-5 w-5 text-yellow-500" />
             </div>
-            <p className="text-sm font-medium text-gray-900">No updates yet</p>
-            <p className="text-sm text-gray-500 mt-1">Subscribe to get notified when we ship</p>
+            <p className="text-sm font-medium text-foreground">No updates yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Subscribe to get notified when we ship</p>
           </div>
         ) : (
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-[7px] top-2 bottom-0 w-px bg-linear-to-b from-yellow-300 via-gray-200 to-gray-200" />
+            <div className="absolute left-[7px] top-2 bottom-0 w-px bg-linear-to-b from-yellow-300 via-border to-border" />
 
             <div className="space-y-10">
               {entries.map((entry, index) => {
@@ -131,17 +131,17 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
                   <div key={entry.id} className="relative pl-8">
                     {/* Timeline dot */}
                     <div
-                      className="absolute left-0 top-1.5 w-[15px] h-[15px] rounded-full bg-white border-2 z-10"
+                      className="absolute left-0 top-1.5 w-[15px] h-[15px] rounded-full bg-background border-2 z-10"
                       style={{ borderColor: index === 0 ? '#FACC15' : '#D1D5DB' }}
                     />
 
                     {/* Date */}
-                    <time className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                    <time className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wide">
                       {formatDate(entry.published_at)}
                     </time>
 
                     {/* Card */}
-                    <div className="mt-2 bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-sm transition-all">
+                    <div className="mt-2 bg-card border border-border rounded-xl p-5 hover:border-border hover:shadow-sm transition-all">
                       <div className="flex items-center gap-2 mb-3">
                         <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md ${config.bg} ${config.color}`}>
                           <Icon className="h-3 w-3" />
@@ -149,12 +149,12 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
                         </span>
                       </div>
 
-                      <h2 className="text-base font-semibold text-gray-900 leading-snug mb-2">
+                      <h2 className="text-base font-semibold text-foreground leading-snug mb-2">
                         {entry.title}
                       </h2>
 
                       <div
-                        className="prose prose-sm max-w-none text-gray-600 leading-relaxed [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-400 hover:[&_a]:decoration-gray-600 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg"
+                        className="prose prose-sm max-w-none text-muted-foreground leading-relaxed [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40 hover:[&_a]:decoration-muted-foreground [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg"
                         dangerouslySetInnerHTML={{ __html: entry.content }}
                       />
                     </div>
@@ -168,13 +168,13 @@ export function PublicChangelogView({ org, orgSlug, entries }: PublicChangelogVi
         {/* Branding footer */}
         {org.show_branding && (
           <div className="mt-16 pb-8 text-center">
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground/60">
               Powered by{' '}
               <a
                 href="https://kelohq.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                className="font-medium text-muted-foreground hover:text-foreground/80 transition-colors"
               >
                 Kelo
               </a>

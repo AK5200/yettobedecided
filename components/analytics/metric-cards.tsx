@@ -42,7 +42,7 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-2xl" />
+          <div key={i} className="h-32 bg-muted animate-pulse rounded-2xl" />
         ))}
       </div>
     )
@@ -117,7 +117,7 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
         return (
           <div
             key={metric.label}
-            className={`bg-gradient-to-br ${metric.bgGradient} rounded-2xl shadow-lg border border-gray-200 p-5 hover:shadow-xl transition-all duration-200 group`}
+            className={`bg-gradient-to-br ${metric.bgGradient} rounded-2xl shadow-lg border border-border p-5 hover:shadow-xl transition-all duration-200 group`}
           >
             <div className="flex items-start justify-between mb-4">
               <div className={`p-2.5 ${metric.iconBg} rounded-xl group-hover:scale-110 transition-transform`}>
@@ -128,7 +128,7 @@ export function MetricCards({ orgId, days = 30, boardId }: MetricCardsProps) {
               <div className={`text-3xl font-bold bg-gradient-to-r ${metric.gradient} bg-clip-text text-transparent`}>
                 {metric.value.toLocaleString()}
               </div>
-              <div className="text-sm font-semibold text-gray-700 mt-1">{metric.label}</div>
+              <div className="text-sm font-semibold text-foreground/80 mt-1">{metric.label}</div>
             </div>
             <ComparisonBadge current={metric.current} previous={metric.previous} />
           </div>

@@ -115,14 +115,14 @@ export function Sidebar() {
     `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
       isActive(href)
         ? 'bg-amber-100 text-amber-900 font-medium'
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
     }`
 
   const subNavItemClass = (href: string) =>
     `flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors ${
       pathname === href
         ? 'bg-amber-50 text-amber-800 font-medium'
-        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+        : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground/80'
     }`
 
   const settingsItems = [
@@ -138,13 +138,13 @@ export function Sidebar() {
   const sidebarContent = (
     <>
       {/* Organization Header */}
-      <div className="p-4 border-b shrink-0">
+      <div className="p-4 border-b border-sidebar-border shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white font-semibold text-sm">
               {org?.name?.charAt(0) || 'F'}
             </div>
-            <span className="font-semibold text-gray-900 truncate max-w-[140px]">
+            <span className="font-semibold text-sidebar-foreground truncate max-w-[140px]">
               {org?.name || 'Kelo'}
             </span>
           </div>
@@ -153,18 +153,18 @@ export function Sidebar() {
               <Link
                 href={`/${org.slug}/features`}
                 target="_blank"
-                className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+                className="p-1.5 hover:bg-sidebar-accent rounded-md transition-colors"
                 title="View public hub"
               >
-                <ExternalLink className="h-4 w-4 text-gray-500" />
+                <ExternalLink className="h-4 w-4 text-sidebar-foreground/60" />
               </Link>
             )}
             {/* Close button for mobile */}
             <button
               onClick={() => setMobileOpen(false)}
-              className="p-1.5 hover:bg-gray-100 rounded-md transition-colors md:hidden"
+              className="p-1.5 hover:bg-sidebar-accent rounded-md transition-colors md:hidden"
             >
-              <X className="h-4 w-4 text-gray-500" />
+              <X className="h-4 w-4 text-sidebar-foreground/60" />
             </button>
           </div>
         </div>
@@ -202,7 +202,7 @@ export function Sidebar() {
                   <Plus className="h-4 w-4" />
                   Create New
                 </span>
-                <ChevronDown className="h-4 w-4 text-gray-400" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
@@ -228,7 +228,7 @@ export function Sidebar() {
           <Link
             href={org?.slug ? `/${org.slug}/features` : '#'}
             target="_blank"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
           >
             <Globe className="h-4 w-4" />
             Public hub
@@ -244,7 +244,7 @@ export function Sidebar() {
 
         {/* Modules Section */}
         <div className="px-4 mt-6">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">
+          <div className="text-xs font-semibold text-sidebar-foreground/40 uppercase tracking-wider px-3 mb-2">
             Modules
           </div>
           <nav className="space-y-1">
@@ -265,7 +265,7 @@ export function Sidebar() {
 
         {/* Insights Section */}
         <div className="px-4 mt-6">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">
+          <div className="text-xs font-semibold text-sidebar-foreground/40 uppercase tracking-wider px-3 mb-2">
             Insights
           </div>
           <nav className="space-y-1">
@@ -282,19 +282,19 @@ export function Sidebar() {
 
         {/* Workspace Section */}
         <div className="px-4 mt-6 pb-4">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">
+          <div className="text-xs font-semibold text-sidebar-foreground/40 uppercase tracking-wider px-3 mb-2">
             Workspace
           </div>
           <nav className="space-y-1">
             {/* Collapsible Settings */}
             <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
-              <CollapsibleTrigger className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors w-full">
+              <CollapsibleTrigger className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors w-full">
                 <Settings className="h-4 w-4" />
                 <span className="flex-1 text-left">Settings</span>
                 {settingsOpen ? (
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                  <ChevronDown className="h-4 w-4 text-sidebar-foreground/40" />
                 ) : (
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                  <ChevronRight className="h-4 w-4 text-sidebar-foreground/40" />
                 )}
               </CollapsibleTrigger>
               <CollapsibleContent className="pl-4 mt-1 space-y-0.5">
@@ -323,10 +323,10 @@ export function Sidebar() {
       </div>
 
       {/* Bottom Links */}
-      <div className="px-4 py-4 border-t space-y-1 shrink-0">
+      <div className="px-4 py-4 border-t border-sidebar-border space-y-1 shrink-0">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors w-full text-left"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors w-full text-left"
         >
           <LogOut className="h-4 w-4" />
           Logout
@@ -338,18 +338,18 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="fixed top-0 left-0 right-0 z-30 md:hidden bg-white border-b h-14 px-4 flex items-center gap-3">
+      <div className="fixed top-0 left-0 right-0 z-30 md:hidden bg-background border-b h-14 px-4 flex items-center gap-3">
         <button
           onClick={() => setMobileOpen(true)}
-          className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 -ml-2 hover:bg-muted rounded-lg transition-colors"
         >
-          <Menu className="h-5 w-5 text-gray-700" />
+          <Menu className="h-5 w-5 text-foreground/80" />
         </button>
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center text-white font-semibold text-xs shrink-0">
             {org?.name?.charAt(0) || 'F'}
           </div>
-          <span className="font-semibold text-gray-900 truncate">
+          <span className="font-semibold text-foreground truncate">
             {org?.name || 'Kelo'}
           </span>
         </div>
@@ -365,7 +365,7 @@ export function Sidebar() {
 
       {/* Mobile sidebar drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r flex flex-col transform transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transform transition-transform duration-300 ease-in-out md:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -373,7 +373,7 @@ export function Sidebar() {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden md:flex w-64 border-r bg-white h-screen flex-col sticky top-0">
+      <div className="hidden md:flex w-64 border-r border-sidebar-border bg-sidebar h-screen flex-col sticky top-0">
         {sidebarContent}
       </div>
     </>

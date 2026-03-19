@@ -75,7 +75,7 @@ const COLOR_OPTIONS = [
 // Helper to get background color class from hex color
 const getColorClasses = (hexColor: string) => {
   const colorMap: Record<string, { bg: string; border: string; headerBg: string }> = {
-    '#6B7280': { bg: 'bg-gray-50', border: 'border-gray-200', headerBg: 'bg-gray-100' },
+    '#6B7280': { bg: 'bg-muted/50', border: 'border-border', headerBg: 'bg-muted' },
     '#3B82F6': { bg: 'bg-blue-50', border: 'border-blue-200', headerBg: 'bg-blue-100' },
     '#F59E0B': { bg: 'bg-amber-50', border: 'border-amber-200', headerBg: 'bg-amber-100' },
     '#10B981': { bg: 'bg-emerald-50', border: 'border-emerald-200', headerBg: 'bg-emerald-100' },
@@ -86,7 +86,7 @@ const getColorClasses = (hexColor: string) => {
     '#06B6D4': { bg: 'bg-cyan-50', border: 'border-cyan-200', headerBg: 'bg-cyan-100' },
     '#14B8A6': { bg: 'bg-teal-50', border: 'border-teal-200', headerBg: 'bg-teal-100' },
   }
-  return colorMap[hexColor] || { bg: 'bg-gray-50', border: 'border-gray-200', headerBg: 'bg-gray-100' }
+  return colorMap[hexColor] || { bg: 'bg-muted/50', border: 'border-border', headerBg: 'bg-muted' }
 }
 
 export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
@@ -296,13 +296,13 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
   }
 
   return (
-    <div className="flex-1 bg-white">
+    <div className="flex-1 bg-background">
       {/* Header */}
-      <div className="border-b bg-white">
+      <div className="border-b bg-background">
         <div className="px-8 py-6 flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Roadmap</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-foreground">Roadmap</h1>
+            <p className="text-sm text-muted-foreground mt-1">
               Track the progress of features and manage statuses
             </p>
           </div>
@@ -335,7 +335,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
           <TabsList className="bg-transparent h-auto p-0 gap-0">
             <TabsTrigger
               value="roadmap"
-              className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-gray-600 data-[state=active]:text-gray-900"
+              className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground data-[state=active]:text-foreground"
             >
               <span className="flex items-center gap-2">
                 <Map className="h-4 w-4" />
@@ -344,7 +344,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
             </TabsTrigger>
             <TabsTrigger
               value="statuses"
-              className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-gray-600 data-[state=active]:text-gray-900"
+              className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground data-[state=active]:text-foreground"
             >
               <span className="flex items-center gap-2">
                 <ListChecks className="h-4 w-4" />
@@ -364,15 +364,15 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                 </div>
               )}
               {loadingStatuses ? (
-                <div className="text-gray-500">Loading roadmap...</div>
+                <div className="text-muted-foreground">Loading roadmap...</div>
               ) : displayStatuses.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-gray-500">
+                  <p className="text-muted-foreground">
                     {viewMode === 'public'
                       ? 'No statuses are set to show on the public roadmap.'
                       : 'No statuses found.'}
                   </p>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-muted-foreground/60 mt-1">
                     Go to the Statuses tab to configure which statuses appear here.
                   </p>
                 </div>
@@ -400,7 +400,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                                 className="h-4 w-4"
                                 style={{ color: status.color, fill: status.color }}
                               />
-                              <span className="font-semibold text-gray-900 text-sm">{status.name}</span>
+                              <span className="font-semibold text-foreground text-sm">{status.name}</span>
                             </div>
                             <Badge variant="secondary" className="text-xs">
                               {columnPosts.length}
@@ -412,7 +412,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                         <div className="p-3 min-h-[350px]">
                           {columnPosts.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
-                              <p className="text-xs text-gray-400">No items</p>
+                              <p className="text-xs text-muted-foreground/60">No items</p>
                             </div>
                           ) : (
                             <div className="space-y-2">
@@ -423,12 +423,12 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                                   isAdmin={isAdmin}
                                   adminEmail={adminEmail}
                                 >
-                                  <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md hover:border-gray-300 cursor-pointer transition-all">
-                                    <h4 className="text-sm font-medium text-gray-900 line-clamp-2 mb-2">
+                                  <div className="bg-card rounded-lg border border-border p-3 shadow-sm hover:shadow-md hover:border-border cursor-pointer transition-all">
+                                    <h4 className="text-sm font-medium text-foreground line-clamp-2 mb-2">
                                       {post.title}
                                     </h4>
                                     <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-1 text-gray-500">
+                                      <div className="flex items-center gap-1 text-muted-foreground">
                                         <ChevronUp className="h-3 w-3" />
                                         <span className="text-xs font-medium">{post.vote_count || 0}</span>
                                       </div>
@@ -438,7 +438,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                                         </Badge>
                                       )}
                                     </div>
-                                    <p className="text-[10px] text-gray-400 mt-2 truncate">
+                                    <p className="text-[10px] text-muted-foreground/60 mt-2 truncate">
                                       {getAuthorName(post)}
                                     </p>
                                   </div>
@@ -460,14 +460,14 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
             <div className="p-6 max-w-3xl">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Manage Statuses</h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h2 className="text-lg font-semibold text-foreground">Manage Statuses</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
                     Customize the statuses for your feedback posts
                   </p>
                 </div>
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-gray-900 hover:bg-gray-800">
+                    <Button className="bg-foreground hover:bg-foreground/90 text-background">
                       <Plus className="h-4 w-4 mr-2" />
                       Add Status
                     </Button>
@@ -514,7 +514,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                           onChange={(e) =>
                             setNewStatus({ ...newStatus, show_on_roadmap: e.target.checked })
                           }
-                          className="rounded border-gray-300"
+                          className="rounded border-border"
                         />
                         <Label htmlFor="showOnRoadmap" className="text-sm font-normal">
                           Show on public roadmap
@@ -536,7 +536,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
 
               {/* Statuses List */}
               {loadingStatuses ? (
-                <div className="text-gray-500">Loading statuses...</div>
+                <div className="text-muted-foreground">Loading statuses...</div>
               ) : (
                 <div className="space-y-2">
                   {statuses.map((status, index) => (
@@ -551,7 +551,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                             onClick={() => handleReorder(status.id, 'up')}
                             disabled={index === 0}
                           >
-                            <ArrowUp className={`h-3 w-3 ${index === 0 ? 'text-gray-200' : 'text-gray-400'}`} />
+                            <ArrowUp className={`h-3 w-3 ${index === 0 ? 'text-muted-foreground/30' : 'text-muted-foreground/60'}`} />
                           </Button>
                           <Button
                             variant="ghost"
@@ -560,7 +560,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                             onClick={() => handleReorder(status.id, 'down')}
                             disabled={index === statuses.length - 1}
                           >
-                            <ArrowDown className={`h-3 w-3 ${index === statuses.length - 1 ? 'text-gray-200' : 'text-gray-400'}`} />
+                            <ArrowDown className={`h-3 w-3 ${index === statuses.length - 1 ? 'text-muted-foreground/30' : 'text-muted-foreground/60'}`} />
                           </Button>
                         </div>
 
@@ -570,8 +570,8 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-900">{status.name}</span>
-                            <span className="text-xs text-gray-400 font-mono">{status.key}</span>
+                            <span className="font-medium text-foreground">{status.name}</span>
+                            <span className="text-xs text-muted-foreground/60 font-mono">{status.key}</span>
                             {status.show_on_roadmap && (
                               <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
                                 Roadmap
@@ -629,9 +629,9 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                           <Input
                             value={editingStatus.key}
                             disabled
-                            className="font-mono text-sm bg-gray-50"
+                            className="font-mono text-sm bg-muted/50"
                           />
-                          <span className="text-xs text-gray-400">(cannot be changed)</span>
+                          <span className="text-xs text-muted-foreground/60">(cannot be changed)</span>
                         </div>
                       </div>
 
@@ -664,7 +664,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                           onChange={(e) =>
                             setEditingStatus({ ...editingStatus, show_on_roadmap: e.target.checked })
                           }
-                          className="rounded border-gray-300"
+                          className="rounded border-border"
                         />
                         <Label htmlFor="editShowOnRoadmap" className="text-sm font-normal">
                           Show on public roadmap
@@ -707,7 +707,7 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                         <p className="text-sm text-amber-800">
                           <strong>{postCount} post{postCount !== 1 ? 's' : ''}</strong> currently use the
-                          <span className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 bg-white rounded border">
+                          <span className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 bg-background rounded border">
                             <Circle className="h-3 w-3" style={{ color: statusToDelete.color, fill: statusToDelete.color }} />
                             {statusToDelete.name}
                           </span>

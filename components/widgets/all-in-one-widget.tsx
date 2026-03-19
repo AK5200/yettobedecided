@@ -59,14 +59,14 @@ function getCategoryStyle(category: string): { bg: string; text: string } {
     case 'fix':
       return { bg: 'bg-orange-100', text: 'text-orange-700' }
     default:
-      return { bg: 'bg-gray-100', text: 'text-gray-700' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground/80' }
   }
 }
 
 function getStatusStyle(status: string): { bg: string; text: string } {
   switch (status?.toLowerCase()) {
     case 'open':
-      return { bg: 'bg-gray-100', text: 'text-gray-700' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground' }
     case 'planned':
       return { bg: 'bg-blue-100', text: 'text-blue-700' }
     case 'in_progress':
@@ -74,9 +74,9 @@ function getStatusStyle(status: string): { bg: string; text: string } {
     case 'shipped':
       return { bg: 'bg-green-100', text: 'text-green-700' }
     case 'closed':
-      return { bg: 'bg-gray-200', text: 'text-gray-600' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground' }
     default:
-      return { bg: 'bg-gray-100', text: 'text-gray-700' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground' }
   }
 }
 
@@ -274,7 +274,7 @@ export function AllInOneWidget({
           cardBorder: 'border',
           buttonStyle: 'solid',
           borderRadius: '40px',
-          voteButtonClass: 'bg-white border border-gray-200',
+          voteButtonClass: 'bg-background border border-border',
         }
       case '3':
         // Clean Supahub-style (horizontal tabs, vote on right, divider lines)
@@ -294,7 +294,7 @@ export function AllInOneWidget({
           cardBorder: 'border-b',
           buttonStyle: 'solid',
           borderRadius: borderRadiusClass,
-          voteButtonClass: 'bg-white border border-gray-200',
+          voteButtonClass: 'bg-background border border-border',
           hasSidebar: false,
         }
       default: // variant 1 - Standard
@@ -328,7 +328,7 @@ export function AllInOneWidget({
           identifiedUser={identifiedUser}
         />
         {showBranding && (
-          <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">
+          <div className="pt-2 text-xs text-muted-foreground/60 text-center flex items-center justify-center gap-1">
             <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
             Powered by Kelo
           </div>
@@ -364,14 +364,14 @@ export function AllInOneWidget({
         >
           <MessageSquare className="h-5 w-5" style={{ color: styleVariant === '2' ? 'white' : accentColor }} />
         </div>
-        <h2 className={`${styleVariant === '2' ? 'text-3xl font-extrabold' : 'text-lg font-semibold'} text-gray-900 ${
+        <h2 className={`${styleVariant === '2' ? 'text-3xl font-extrabold' : 'text-lg font-semibold'} text-foreground ${
           textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
         } ${
           textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
         }`}>
           {heading}
         </h2>
-        <p className={`text-sm ${styleVariant === '2' ? 'font-medium' : ''} text-gray-500 mt-1 ${
+        <p className={`text-sm ${styleVariant === '2' ? 'font-medium' : ''} text-muted-foreground mt-1 ${
           textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
         } ${
           textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
@@ -431,7 +431,7 @@ export function AllInOneWidget({
           {/* Search and Create */}
           <div className={`flex ${styleVariant === '2' ? 'gap-3' : 'gap-2'} items-center ${isEmbedded ? 'px-6' : ''} ${styleVariant === '2' ? 'py-2' : ''}`}>
             <div className="relative flex-1">
-              <Search className={`absolute ${styleVariant === '2' ? 'left-4' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400`} />
+              <Search className={`absolute ${styleVariant === '2' ? 'left-4' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60`} />
               <Input
                 placeholder={styleVariant === '2' ? "Explore ideas..." : "Search posts..."}
                 value={searchQuery}
@@ -440,7 +440,7 @@ export function AllInOneWidget({
               />
             </div>
             {styleVariant === '2' && (
-              <button className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-600 hover:bg-gray-100 transition-colors">
+              <button className="px-5 py-4 bg-muted/50 border border-border rounded-2xl text-muted-foreground hover:bg-muted transition-colors">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 6h18M7 12h10M5 18h14" />
                 </svg>
@@ -473,11 +473,11 @@ export function AllInOneWidget({
           {/* Posts List - 3 distinct branches matching preview exactly */}
           <div className={`${isEmbedded ? 'flex-1 px-6' : 'max-h-80'} overflow-y-auto`}>
             {filteredPosts.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 text-sm">
+              <div className="text-center py-8 text-muted-foreground text-sm">
                 {searchQuery ? 'No posts found matching your search.' : 'No posts yet. Be the first to create one!'}
               </div>
             ) : (
-              <div className={`${styleVariant === '3' ? 'divide-y divide-gray-200' : styleVariant === '2' ? 'space-y-4' : 'space-y-3'} pb-4`}>
+              <div className={`${styleVariant === '3' ? 'divide-y divide-border' : styleVariant === '2' ? 'space-y-4' : 'space-y-3'} pb-4`}>
                 {filteredPosts.map((post) => {
                   const statusStyle = post.status ? getStatusStyle(post.status) : null
 
@@ -487,14 +487,14 @@ export function AllInOneWidget({
                       <div
                         key={post.id}
                         onClick={() => handlePostClick(post)}
-                        className="py-4 first:pt-2 last:pb-2 hover:bg-gray-50 transition-colors cursor-pointer px-1"
+                        className="py-4 first:pt-2 last:pb-2 hover:bg-muted/50 transition-colors cursor-pointer px-1"
                       >
                         <div className="flex items-start gap-4">
                           {/* Content first = appears LEFT */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 text-sm">{post.title}</h4>
+                            <h4 className="font-semibold text-foreground text-sm">{post.title}</h4>
                             {post.content && (
-                              <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{post.content}</p>
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{post.content}</p>
                             )}
                             <div className="flex items-center gap-2 mt-2.5">
                               {post.author_name && (
@@ -505,7 +505,7 @@ export function AllInOneWidget({
                                   >
                                     {post.author_name.charAt(0).toUpperCase()}
                                   </div>
-                                  <span className="text-xs text-gray-500">{post.author_name}</span>
+                                  <span className="text-xs text-muted-foreground">{post.author_name}</span>
                                 </div>
                               )}
                               {post.tags?.map((tag) => (
@@ -525,7 +525,7 @@ export function AllInOneWidget({
                             className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg border transition-colors shrink-0 ${
                               post.hasVoted
                                 ? 'border-transparent text-white'
-                                : 'border-gray-200 hover:border-gray-300 text-gray-500'
+                                : 'border-border hover:border-border text-muted-foreground'
                             }`}
                             style={
                               post.hasVoted
@@ -547,7 +547,7 @@ export function AllInOneWidget({
                       <div
                         key={post.id}
                         onClick={() => handlePostClick(post)}
-                        className={`p-6 ${variantStyles.cardBorder} ${borderRadiusClass} hover:border-gray-300 transition-all cursor-pointer hover:translate-y-[-2px] hover:shadow-md`}
+                        className={`p-6 ${variantStyles.cardBorder} ${borderRadiusClass} hover:border-border transition-all cursor-pointer hover:translate-y-[-2px] hover:shadow-md`}
                         style={{
                           ...variantStyles.cardStyle,
                           ...(post.hasVoted && {
@@ -566,7 +566,7 @@ export function AllInOneWidget({
                             className={`flex flex-col items-center justify-center px-3 py-3 min-w-[64px] ${borderRadiusClass} border transition-colors shrink-0 ${
                               post.hasVoted
                                 ? 'border-transparent text-white'
-                                : 'bg-white hover:border-gray-300'
+                                : 'bg-background hover:border-border'
                             }`}
                             style={
                               post.hasVoted
@@ -575,7 +575,7 @@ export function AllInOneWidget({
                             }
                           >
                             <ChevronUp className="h-4 w-4" style={post.hasVoted ? {} : { color: '#6b7280' }} />
-                            <span className={`text-lg font-extrabold ${post.hasVoted ? 'text-white' : 'text-gray-900'}`}>
+                            <span className={`text-lg font-extrabold ${post.hasVoted ? 'text-white' : 'text-foreground'}`}>
                               {post.votes}
                             </span>
                           </button>
@@ -583,7 +583,7 @@ export function AllInOneWidget({
                           {/* Content RIGHT - larger text for style 2 */}
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start mb-2">
-                              <h4 className="text-xl font-bold text-gray-900 line-clamp-1" style={post.hasVoted ? { color: accentColor } : {}}>
+                              <h4 className="text-xl font-bold text-foreground line-clamp-1" style={post.hasVoted ? { color: accentColor } : {}}>
                                 {post.title}
                               </h4>
                               {post.status && statusStyle && (
@@ -593,7 +593,7 @@ export function AllInOneWidget({
                               )}
                             </div>
                             {post.content && (
-                              <p className="text-sm text-gray-500 mb-4 leading-relaxed font-medium line-clamp-3">{post.content}</p>
+                              <p className="text-sm text-muted-foreground mb-4 leading-relaxed font-medium line-clamp-3">{post.content}</p>
                             )}
                             <div className="flex items-center gap-4">
                               {post.author_name && (
@@ -604,7 +604,7 @@ export function AllInOneWidget({
                                   >
                                     {post.author_name.charAt(0).toUpperCase()}
                                   </div>
-                                  <span className="text-xs font-bold text-gray-700">{post.author_name}</span>
+                                  <span className="text-xs font-bold text-foreground/80">{post.author_name}</span>
                                 </div>
                               )}
                               {post.tags?.map((tag) => (
@@ -624,7 +624,7 @@ export function AllInOneWidget({
                     <div
                       key={post.id}
                       onClick={() => handlePostClick(post)}
-                      className={`p-5 ${variantStyles.cardBorder} border-gray-200 ${borderRadiusClass} hover:border-gray-300 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br from-white to-gray-50/50 hover:from-white hover:to-gray-100 shadow-sm`}
+                      className={`p-5 ${variantStyles.cardBorder} border-border ${borderRadiusClass} hover:border-border hover:shadow-lg transition-all cursor-pointer bg-linear-to-br from-background to-muted/30 hover:from-background hover:to-muted/50 shadow-sm`}
                     >
                       <div className="flex gap-3">
                         {/* Vote button LEFT */}
@@ -636,7 +636,7 @@ export function AllInOneWidget({
                           className={`flex flex-col items-center justify-center px-3 py-2.5 ${borderRadiusClass} border transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 ${
                             post.hasVoted
                               ? 'border-transparent text-white shadow-md'
-                              : 'border-gray-200 hover:border-gray-300 hover:shadow-sm text-gray-600 bg-gray-50 hover:bg-white'
+                              : 'border-border hover:border-border hover:shadow-sm text-muted-foreground bg-muted/50 hover:bg-background'
                           }`}
                           style={
                             post.hasVoted
@@ -654,7 +654,7 @@ export function AllInOneWidget({
                         {/* Content RIGHT */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-bold text-gray-900 text-base flex-1 hover:text-gray-700 transition-colors">{post.title}</h4>
+                            <h4 className="font-bold text-foreground text-base flex-1 hover:text-foreground/80 transition-colors">{post.title}</h4>
                             {post.status && statusStyle && (
                               <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 ${borderRadiusClass} text-xs`}>
                                 {getStatusLabel(post.status)}
@@ -662,7 +662,7 @@ export function AllInOneWidget({
                             )}
                           </div>
                           {post.content && (
-                            <p className="text-sm text-gray-600 mt-2 line-clamp-2 leading-relaxed">{post.content}</p>
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">{post.content}</p>
                           )}
                           <div className="flex items-center gap-3 mt-3">
                             {post.author_name && (
@@ -673,7 +673,7 @@ export function AllInOneWidget({
                                 >
                                   {post.author_name.charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-xs font-medium text-gray-600">{post.author_name}</span>
+                                <span className="text-xs font-medium text-muted-foreground">{post.author_name}</span>
                               </div>
                             )}
                             {post.tags?.map((tag) => (
@@ -696,7 +696,7 @@ export function AllInOneWidget({
         <TabsContent value="changelog" className={`pt-4 transition-all ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
           <div className={`${isEmbedded ? 'flex-1 px-6' : 'max-h-80'} overflow-y-auto space-y-1`}>
             {changelog.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 text-sm">
+              <div className="text-center py-8 text-muted-foreground text-sm">
                 No changelog entries yet.
               </div>
             ) : (
@@ -706,10 +706,10 @@ export function AllInOneWidget({
                 return (
                   <div
                     key={entry.id}
-                    className="border-b border-gray-200 last:border-b-0 cursor-pointer -mx-3 px-4 py-3 rounded-xl transition-all hover:bg-gray-50"
+                    className="border-b border-border last:border-b-0 cursor-pointer -mx-3 px-4 py-3 rounded-xl transition-all hover:bg-muted/50"
                     onClick={() => setExpandedChangelogId(isExpanded && index !== 0 ? '__none__' : entry.id)}
                   >
-                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
                       <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 shadow-md font-bold px-2.5 py-0.5`}>
                         {entry.category}
                       </Badge>
@@ -719,15 +719,15 @@ export function AllInOneWidget({
                           : 'Recently'}
                       </span>
                     </div>
-                    <div className="font-bold text-lg text-gray-900 mb-1">{entry.title}</div>
+                    <div className="font-bold text-lg text-foreground mb-1">{entry.title}</div>
                     {isExpanded ? (
                       <div
-                        className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3 [&_video]:max-w-full [&_video]:h-auto [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-400"
+                        className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3 [&_video]:max-w-full [&_video]:h-auto [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40"
                         dangerouslySetInnerHTML={{ __html: entry.content || '' }}
                       />
                     ) : (
                       <div
-                        className="text-sm text-gray-600 line-clamp-2 leading-relaxed prose prose-sm max-w-none [&_img]:hidden [&_video]:hidden [&_audio]:hidden [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-400"
+                        className="text-sm text-muted-foreground line-clamp-2 leading-relaxed prose prose-sm max-w-none [&_img]:hidden [&_video]:hidden [&_audio]:hidden [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40"
                         dangerouslySetInnerHTML={{ __html: entry.content || '' }}
                       />
                     )}
@@ -743,7 +743,7 @@ export function AllInOneWidget({
       {isEmbedded ? (
         <div className="px-6 py-3 border-t flex items-center justify-between">
           {showBranding ? (
-            <span className="text-xs text-gray-400 flex items-center gap-1">
+            <span className="text-xs text-muted-foreground/60 flex items-center gap-1">
               <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
               Powered by Kelo
             </span>
@@ -761,7 +761,7 @@ export function AllInOneWidget({
           </a>
         </div>
       ) : showBranding ? (
-        <div className="pt-2 text-xs text-gray-400 text-center flex items-center justify-center gap-1">
+        <div className="pt-2 text-xs text-muted-foreground/60 text-center flex items-center justify-center gap-1">
           <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
           Powered by Kelo
         </div>

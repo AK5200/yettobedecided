@@ -36,7 +36,7 @@ interface KanbanBoardRedesignProps {
 
 const getColorClasses = (hexColor: string) => {
   const colorMap: Record<string, { bg: string; border: string; text: string; headerBg: string }> = {
-    '#6B7280': { bg: 'bg-gray-50/50', border: 'border-gray-200', text: 'text-gray-700', headerBg: 'bg-gray-50' },
+    '#6B7280': { bg: 'bg-muted/30', border: 'border-border', text: 'text-foreground/80', headerBg: 'bg-muted/50' },
     '#3B82F6': { bg: 'bg-blue-50/30', border: 'border-blue-200', text: 'text-blue-700', headerBg: 'bg-blue-50' },
     '#F59E0B': { bg: 'bg-amber-50/30', border: 'border-amber-200', text: 'text-amber-700', headerBg: 'bg-amber-50' },
     '#10B981': { bg: 'bg-emerald-50/30', border: 'border-emerald-200', text: 'text-emerald-700', headerBg: 'bg-emerald-50' },
@@ -47,7 +47,7 @@ const getColorClasses = (hexColor: string) => {
     '#06B6D4': { bg: 'bg-cyan-50/30', border: 'border-cyan-200', text: 'text-cyan-700', headerBg: 'bg-cyan-50' },
     '#14B8A6': { bg: 'bg-teal-50/30', border: 'border-teal-200', text: 'text-teal-700', headerBg: 'bg-teal-50' },
   }
-  return colorMap[hexColor] || { bg: 'bg-gray-50/50', border: 'border-gray-200', text: 'text-gray-700', headerBg: 'bg-gray-50' }
+  return colorMap[hexColor] || { bg: 'bg-muted/30', border: 'border-border', text: 'text-foreground/80', headerBg: 'bg-muted/50' }
 }
 
 export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statuses }: KanbanBoardRedesignProps) {
@@ -124,7 +124,7 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
             variant={viewMode === 'public' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setViewMode(viewMode === 'admin' ? 'public' : 'admin')}
-            className={`gap-2 ${viewMode === 'public' ? 'bg-amber-500 hover:bg-amber-600' : 'border-gray-200 hover:bg-gray-50'}`}
+            className={`gap-2 ${viewMode === 'public' ? 'bg-amber-500 hover:bg-amber-600' : 'border-border hover:bg-muted/50'}`}
           >
             {viewMode === 'public' ? (
               <>
@@ -144,7 +144,7 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
       {/* Kanban Board */}
       {displayStatuses.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             {viewMode === 'public'
               ? 'No statuses are set to show on the public roadmap.'
               : 'No statuses found.'}
@@ -163,7 +163,7 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
                 className="flex-shrink-0 w-[340px]"
               >
                 {/* Column */}
-                <div className={`rounded-xl border ${colors.border} bg-white overflow-hidden h-full flex flex-col`}>
+                <div className={`rounded-xl border ${colors.border} bg-card overflow-hidden h-full flex flex-col`}>
                   {/* Header */}
                   <div className={`px-4 py-3 ${colors.headerBg} border-b ${colors.border}`}>
                     <div className="flex items-center justify-between mb-1">
@@ -181,12 +181,12 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
                       </Badge>
                     </div>
                     {!status.show_on_roadmap && viewMode === 'admin' && (
-                      <Badge variant="secondary" className="text-[10px] bg-gray-200 text-gray-600">
+                      <Badge variant="secondary" className="text-[10px] bg-muted text-muted-foreground">
                         Private
                       </Badge>
                     )}
                     {columnPosts.length > 0 && (
-                      <div className="text-[11px] text-gray-500 mt-1">
+                      <div className="text-[11px] text-muted-foreground mt-1">
                         {totalVotes} total votes
                       </div>
                     )}
@@ -196,10 +196,10 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
                   <div className={`p-3 space-y-3 flex-1 overflow-y-auto ${colors.bg}`} style={{ maxHeight: 'calc(100vh - 400px)', minHeight: '400px' }}>
                     {columnPosts.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center mb-2">
-                          <Circle className="h-6 w-6 text-gray-300" style={{ color: status.color, opacity: 0.4 }} />
+                        <div className="w-12 h-12 rounded-full bg-card/80 flex items-center justify-center mb-2">
+                          <Circle className="h-6 w-6 text-muted-foreground/40" style={{ color: status.color, opacity: 0.4 }} />
                         </div>
-                        <p className="text-xs text-gray-400">No items</p>
+                        <p className="text-xs text-muted-foreground/60">No items</p>
                       </div>
                     ) : (
                       columnPosts.map((post) => (
@@ -209,11 +209,11 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
                           isAdmin={isAdmin}
                           adminEmail={adminEmail}
                         >
-                          <Card className="group cursor-pointer hover:shadow-md hover:border-gray-300 transition-all duration-200 border-gray-200 bg-white">
+                          <Card className="group cursor-pointer hover:shadow-md hover:border-border transition-all duration-200 border-border bg-card">
                             <div className="p-3">
                               {/* Top: Title & Pin */}
                               <div className="flex items-start gap-2 mb-2">
-                                <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 flex-1 group-hover:text-gray-700 transition-colors">
+                                <h4 className="text-sm font-semibold text-foreground line-clamp-2 flex-1 group-hover:text-foreground/80 transition-colors">
                                   {post.title}
                                 </h4>
                                 {post.is_pinned && (
@@ -223,21 +223,21 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
 
                               {/* Description */}
                               {post.content && (
-                                <p className="text-xs text-gray-500 line-clamp-2 mb-3">
+                                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                                   {post.content}
                                 </p>
                               )}
 
                               {/* Footer */}
-                              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                              <div className="flex items-center justify-between pt-2 border-t border-border/50">
                                 {/* Left: Votes & Comments */}
                                 <div className="flex items-center gap-3">
-                                  <div className="flex items-center gap-1 text-gray-500">
+                                  <div className="flex items-center gap-1 text-muted-foreground">
                                     <ChevronUp className="h-3.5 w-3.5" />
                                     <span className="text-xs font-semibold">{post.vote_count || 0}</span>
                                   </div>
                                   {(post as any).comment_count !== undefined && (post as any).comment_count > 0 && (
-                                    <div className="flex items-center gap-1 text-gray-500">
+                                    <div className="flex items-center gap-1 text-muted-foreground">
                                       <MessageSquare className="h-3.5 w-3.5" />
                                       <span className="text-xs font-medium">{(post as any).comment_count}</span>
                                     </div>
@@ -253,7 +253,7 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
                                     }}
                                   >
                                     <SelectTrigger
-                                      className="h-6 w-auto text-[10px] px-2 py-0 border-0 bg-transparent hover:bg-gray-100 rounded"
+                                      className="h-6 w-auto text-[10px] px-2 py-0 border-0 bg-transparent hover:bg-muted rounded"
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       <Circle
@@ -282,22 +282,22 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
                               </div>
 
                               {/* Author & Date */}
-                              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-gray-100">
+                              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/50">
                                 {post.identified_user_avatar ? (
                                   <img
                                     src={post.identified_user_avatar}
                                     alt=""
-                                    className="w-4 h-4 rounded-full border border-gray-200"
+                                    className="w-4 h-4 rounded-full border border-border"
                                   />
                                 ) : (
-                                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-[9px] font-medium text-gray-600">
+                                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-muted to-muted flex items-center justify-center text-[9px] font-medium text-muted-foreground">
                                     {getAuthorInitial(post)}
                                   </div>
                                 )}
-                                <span className="text-[10px] text-gray-500 font-medium truncate flex-1">
+                                <span className="text-[10px] text-muted-foreground font-medium truncate flex-1">
                                   {getAuthorName(post)}
                                 </span>
-                                <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                                <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
                                   <Calendar className="h-2.5 w-2.5" />
                                   {formatDate(post.created_at)}
                                 </div>

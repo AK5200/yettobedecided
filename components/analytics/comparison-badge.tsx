@@ -24,7 +24,7 @@ export function ComparisonBadge({
         isPositive
           ? 'bg-emerald-50 text-emerald-700'
           : isNeutral
-            ? 'bg-gray-50 text-gray-600'
+            ? 'bg-muted/50 text-muted-foreground'
             : 'bg-red-50 text-red-700'
       }`}
     >

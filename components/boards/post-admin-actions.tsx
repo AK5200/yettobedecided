@@ -259,7 +259,7 @@ export function PostAdminActions({
           <DialogHeader>
             <DialogTitle>Delete Post</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             Are you sure you want to delete this post? This will also delete all comments and votes. This action cannot be undone.
           </p>
           <div className="flex gap-2 justify-end">
@@ -283,7 +283,7 @@ export function PostAdminActions({
               {showResetDialog === 'all' && 'Reset Comments & Votes'}
             </DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             {showResetDialog === 'comments' && 'Are you sure you want to delete all comments on this post?'}
             {showResetDialog === 'votes' && 'Are you sure you want to reset all votes to 0 on this post?'}
             {showResetDialog === 'all' && 'Are you sure you want to delete all comments and reset votes to 0?'}

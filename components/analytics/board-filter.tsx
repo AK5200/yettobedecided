@@ -54,7 +54,7 @@ export function BoardFilter({ orgId }: BoardFilterProps) {
 
   if (loading) {
     return (
-      <select className="px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white shadow-sm cursor-wait">
+      <select className="px-4 py-2.5 text-sm border border-border rounded-xl bg-background shadow-sm cursor-wait">
         <option>Loading...</option>
       </select>
     )
@@ -62,11 +62,11 @@ export function BoardFilter({ orgId }: BoardFilterProps) {
 
   return (
     <div className="relative">
-      <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+      <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
       <select
         value={currentBoardId}
         onChange={handleChange}
-        className="pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent shadow-sm appearance-none cursor-pointer"
+        className="pl-10 pr-4 py-2.5 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent shadow-sm appearance-none cursor-pointer"
       >
         <option value="">All Boards</option>
         {boards.map((board) => (

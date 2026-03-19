@@ -31,7 +31,7 @@ export function WidgetPreview({ orgSlug, refreshTrigger }: WidgetPreviewProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           This is how your widget will appear on your website
         </p>
         <Button variant="outline" size="sm" onClick={handleRefresh}>

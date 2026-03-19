@@ -53,20 +53,20 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Information */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+      <div className="bg-linear-to-br from-background to-muted/50 rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-200">
         <div className="flex items-start gap-4 mb-6">
           <div className="p-2.5 bg-amber-100 rounded-xl group-hover:scale-110 transition-transform">
             <Building2 className="h-5 w-5 text-amber-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Basic Information</h3>
-            <p className="text-sm text-gray-500">Your organization&apos;s public profile details.</p>
+            <h3 className="font-semibold text-foreground">Basic Information</h3>
+            <p className="text-sm text-muted-foreground">Your organization&apos;s public profile details.</p>
           </div>
         </div>
 
         <div className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+            <Label htmlFor="name" className="text-sm font-medium text-foreground/80">
               Organization Name
             </Label>
             <Input
@@ -80,11 +80,11 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="slug" className="text-sm font-medium text-gray-700">
+            <Label htmlFor="slug" className="text-sm font-medium text-foreground/80">
               URL Slug
             </Label>
             <div className="flex items-center gap-0">
-              <span className="inline-flex items-center h-11 px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-sm text-gray-500 select-none">
+              <span className="inline-flex items-center h-11 px-3 rounded-l-lg border border-r-0 border-border bg-muted/50 text-sm text-muted-foreground select-none">
                 kelo.com/
               </span>
               <Input
@@ -96,20 +96,20 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
                 required
               />
             </div>
-            <p className="text-xs text-gray-400">This is used in your public feedback hub URL.</p>
+            <p className="text-xs text-muted-foreground/60">This is used in your public feedback hub URL.</p>
           </div>
         </div>
       </div>
 
       {/* Description */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+      <div className="bg-linear-to-br from-background to-muted/50 rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-200">
         <div className="flex items-start gap-4 mb-6">
           <div className="p-2.5 bg-blue-100 rounded-xl">
             <FileText className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Description</h3>
-            <p className="text-sm text-gray-500">Tell users what your organization does.</p>
+            <h3 className="font-semibold text-foreground">Description</h3>
+            <p className="text-sm text-muted-foreground">Tell users what your organization does.</p>
           </div>
         </div>
 
@@ -124,21 +124,21 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
       </div>
 
       {/* Website & Branding */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+      <div className="bg-linear-to-br from-background to-muted/50 rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-200">
         <div className="flex items-start gap-4 mb-6">
           <div className="p-2.5 bg-green-100 rounded-xl">
             <Globe className="h-5 w-5 text-green-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Website & Branding</h3>
-            <p className="text-sm text-gray-500">Links and visual identity for your organization.</p>
+            <h3 className="font-semibold text-foreground">Website & Branding</h3>
+            <p className="text-sm text-muted-foreground">Links and visual identity for your organization.</p>
           </div>
         </div>
 
         <div className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="website" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <Link2 className="h-4 w-4 text-gray-400" />
+            <Label htmlFor="website" className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+              <Link2 className="h-4 w-4 text-muted-foreground/60" />
               Website URL
             </Label>
             <Input
@@ -151,8 +151,8 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="logoUrl" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <Image className="h-4 w-4 text-gray-400" />
+            <Label htmlFor="logoUrl" className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+              <Image className="h-4 w-4 text-muted-foreground/60" />
               Logo URL
             </Label>
             <Input
@@ -163,7 +163,7 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
               className="h-11"
             />
             {logoUrl && (
-              <div className="mt-3 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center">
+              <div className="mt-3 p-6 bg-linear-to-br from-muted/50 to-muted rounded-xl border border-dashed border-border flex items-center justify-center">
                 <img
                   src={logoUrl}
                   alt="Logo preview"

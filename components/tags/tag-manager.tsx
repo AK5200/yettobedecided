@@ -97,7 +97,7 @@ export function TagManager({ orgId }: TagManagerProps) {
 
   if (loading) {
     return (
-      <div className="text-gray-500">Loading...</div>
+      <div className="text-muted-foreground">Loading...</div>
     )
   }
 
@@ -168,9 +168,9 @@ export function TagManager({ orgId }: TagManagerProps) {
       <div className="space-y-2">
         {tags.length === 0 ? (
           <Card className="p-8 text-center">
-            <Tag className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No tags yet</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <Tag className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-muted-foreground">No tags yet</p>
+            <p className="text-sm text-muted-foreground/60 mt-1">
               Create your first tag to categorize feedback
             </p>
           </Card>
@@ -178,13 +178,13 @@ export function TagManager({ orgId }: TagManagerProps) {
           tags.map((tag) => (
             <Card key={tag.id} className="p-4">
               <div className="flex items-center gap-4">
-                <GripVertical className="h-5 w-5 text-gray-300 cursor-grab" />
+                <GripVertical className="h-5 w-5 text-muted-foreground/40 cursor-grab" />
                 <div
                   className="w-4 h-4 rounded-full shrink-0"
                   style={{ backgroundColor: tag.color }}
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="font-medium text-gray-900">{tag.name}</span>
+                  <span className="font-medium text-foreground">{tag.name}</span>
                 </div>
                 <Button
                   variant="ghost"

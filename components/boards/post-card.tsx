@@ -54,8 +54,8 @@ export function PostCard({ post, orgId, onUpdate, isAdmin, adminEmail }: PostCar
                 {post.is_pinned && <Badge>Featured</Badge>}
               </div>
               <div className="text-lg font-semibold">{post.title}</div>
-              {post.content && <div className="text-sm text-gray-600">{post.content}</div>}
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              {post.content && <div className="text-sm text-muted-foreground">{post.content}</div>}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   {post.identified_user_avatar ? (
                     <img
@@ -64,7 +64,7 @@ export function PostCard({ post, orgId, onUpdate, isAdmin, adminEmail }: PostCar
                       className="w-6 h-6 rounded-full"
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                    <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs">
                       {(post.is_guest ? (post.guest_name || post.guest_email || 'G') : (post.author_name || 'A'))[0].toUpperCase()}
                     </div>
                   )}

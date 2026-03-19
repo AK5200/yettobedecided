@@ -116,7 +116,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground/80"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -124,7 +124,7 @@ export default function LoginPage() {
               </div>
               {capsLock && <p className="text-xs text-amber-600">Caps Lock is on</p>}
             </div>
-            <Link href="/forgot-password" className="text-sm text-gray-600 hover:underline">
+            <Link href="/forgot-password" className="text-sm text-muted-foreground hover:underline">
               Forgot password?
             </Link>
             {message && <p className="text-sm text-red-600">{message}</p>}

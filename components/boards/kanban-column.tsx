@@ -29,7 +29,7 @@ interface KanbanColumnProps {
 // Helper to get background color classes from hex color
 const getColorClasses = (hexColor: string) => {
   const colorMap: Record<string, { bg: string; border: string; headerBg: string }> = {
-    '#6B7280': { bg: 'bg-gray-50', border: 'border-gray-200', headerBg: 'bg-gray-100' },
+    '#6B7280': { bg: 'bg-muted/50', border: 'border-border', headerBg: 'bg-muted' },
     '#3B82F6': { bg: 'bg-blue-50', border: 'border-blue-200', headerBg: 'bg-blue-100' },
     '#F59E0B': { bg: 'bg-amber-50', border: 'border-amber-200', headerBg: 'bg-amber-100' },
     '#10B981': { bg: 'bg-emerald-50', border: 'border-emerald-200', headerBg: 'bg-emerald-100' },
@@ -40,7 +40,7 @@ const getColorClasses = (hexColor: string) => {
     '#06B6D4': { bg: 'bg-cyan-50', border: 'border-cyan-200', headerBg: 'bg-cyan-100' },
     '#14B8A6': { bg: 'bg-teal-50', border: 'border-teal-200', headerBg: 'bg-teal-100' },
   }
-  return colorMap[hexColor] || { bg: 'bg-gray-50', border: 'border-gray-200', headerBg: 'bg-gray-100' }
+  return colorMap[hexColor] || { bg: 'bg-muted/50', border: 'border-border', headerBg: 'bg-muted' }
 }
 
 export function KanbanColumn({
@@ -70,7 +70,7 @@ export function KanbanColumn({
               className="h-4 w-4"
               style={{ color: color, fill: color }}
             />
-            <span className="font-semibold text-gray-900 text-sm">{title}</span>
+            <span className="font-semibold text-foreground text-sm">{title}</span>
           </div>
           <Badge variant="secondary" className="text-xs">
             {posts.length}
@@ -82,22 +82,22 @@ export function KanbanColumn({
       <div className="p-3 min-h-[350px]">
         {posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="text-xs text-gray-400">No items</p>
+            <p className="text-xs text-muted-foreground/60">No items</p>
           </div>
         ) : (
           <div className="space-y-2">
             {posts.map((post) => (
-              <Card key={post.id} className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md hover:border-gray-300 cursor-pointer transition-all">
-                <h4 className="text-sm font-medium text-gray-900 line-clamp-2 mb-2">
+              <Card key={post.id} className="bg-card rounded-lg border border-border p-3 shadow-sm hover:shadow-md hover:border-border cursor-pointer transition-all">
+                <h4 className="text-sm font-medium text-foreground line-clamp-2 mb-2">
                   {post.title}
                 </h4>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-gray-500">
+                  <div className="flex items-center gap-1 text-muted-foreground">
                     <ChevronUp className="h-3 w-3" />
                     <span className="text-xs font-medium">{post.vote_count || 0}</span>
                   </div>
                   <DropdownMenu>
-                    <DropdownMenuTrigger className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700">
+                    <DropdownMenuTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground/80">
                       <Circle
                         className="h-2.5 w-2.5"
                         style={{
@@ -127,7 +127,7 @@ export function KanbanColumn({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-2 truncate">
+                <p className="text-[10px] text-muted-foreground/60 mt-2 truncate">
                   {getAuthorName(post)}
                 </p>
               </Card>

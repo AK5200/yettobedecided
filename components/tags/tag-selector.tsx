@@ -97,14 +97,14 @@ export function TagSelector({ postId, orgId }: TagSelectorProps) {
             />
             <div className="absolute left-0 top-full mt-1 z-50 w-48 rounded-md border bg-background p-2 shadow-md">
               {availableTags.length === 0 ? (
-                <p className="text-sm text-gray-500">No more tags</p>
+                <p className="text-sm text-muted-foreground">No more tags</p>
               ) : (
                 <div className="flex flex-col gap-1">
                   {availableTags.map(tag => (
                     <button
                       key={tag.id}
                       onClick={() => { addTag(tag); setOpen(false) }}
-                      className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded text-left"
+                      className="flex items-center gap-2 p-2 hover:bg-muted rounded text-left"
                     >
                       <div
                         className="w-3 h-3 rounded-full"

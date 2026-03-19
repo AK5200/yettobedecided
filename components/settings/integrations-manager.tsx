@@ -139,7 +139,7 @@ const TelegramLogo = () => (
 
 // Webhook Logo
 const WebhookLogo = () => (
-  <div className="w-8 h-8 rounded bg-gray-800 flex items-center justify-center">
+  <div className="w-8 h-8 rounded bg-foreground flex items-center justify-center">
     <Link2 className="w-5 h-5 text-white" />
   </div>
 )
@@ -185,7 +185,7 @@ const WEBHOOK_CONFIGS: IntegrationConfig[] = [
     helpUrl: 'https://core.telegram.org/bots#how-do-i-create-a-bot',
     helpText: 'Learn how to create a Telegram bot',
     helperNote: (
-      <p className="text-xs text-gray-500 mt-1">
+      <p className="text-xs text-muted-foreground mt-1">
         Format: https://api.telegram.org/bot&lt;TOKEN&gt;/sendMessage?chat_id=&lt;CHAT_ID&gt;
       </p>
     ),
@@ -385,11 +385,11 @@ export function IntegrationsManager({
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-white border flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-background border flex items-center justify-center">
               <SlackLogo />
             </div>
             <div>
-              <h3 className="font-medium text-gray-900 flex items-center gap-2">
+              <h3 className="font-medium text-foreground flex items-center gap-2">
                 Slack
                 {slackOAuthConnected && (
                   <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
@@ -397,7 +397,7 @@ export function IntegrationsManager({
                   </span>
                 )}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {slackOAuthConnected
                   ? `Connected to ${slackIntegration?.team_name || 'Slack'}`
                   : 'Get notified about new feedback and updates in Slack'}
@@ -445,7 +445,7 @@ export function IntegrationsManager({
                 </SelectTrigger>
                 <SelectContent>
                   {loadingChannels ? (
-                    <div className="flex items-center justify-center py-4 text-sm text-gray-500">
+                    <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Loading channels...
                     </div>
@@ -454,9 +454,9 @@ export function IntegrationsManager({
                       <SelectItem key={channel.id} value={channel.id}>
                         <span className="flex items-center gap-1.5">
                           {channel.is_private ? (
-                            <Lock className="h-3 w-3 text-gray-400" />
+                            <Lock className="h-3 w-3 text-muted-foreground/60" />
                           ) : (
-                            <Hash className="h-3 w-3 text-gray-400" />
+                            <Hash className="h-3 w-3 text-muted-foreground/60" />
                           )}
                           {channel.name}
                         </span>
@@ -473,8 +473,8 @@ export function IntegrationsManager({
 
               <div className="flex items-center justify-between py-1.5">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">New Feedback</p>
-                  <p className="text-xs text-gray-500">When someone submits new feedback</p>
+                  <p className="text-sm font-medium text-foreground">New Feedback</p>
+                  <p className="text-xs text-muted-foreground">When someone submits new feedback</p>
                 </div>
                 <Switch
                   checked={slackNotify.notify_on_new_feedback}
@@ -486,8 +486,8 @@ export function IntegrationsManager({
 
               <div className="flex items-center justify-between py-1.5">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Status Changes</p>
-                  <p className="text-xs text-gray-500">When feedback status is updated</p>
+                  <p className="text-sm font-medium text-foreground">Status Changes</p>
+                  <p className="text-xs text-muted-foreground">When feedback status is updated</p>
                 </div>
                 <Switch
                   checked={slackNotify.notify_on_status_change}
@@ -499,8 +499,8 @@ export function IntegrationsManager({
 
               <div className="flex items-center justify-between py-1.5">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">New Comments</p>
-                  <p className="text-xs text-gray-500">When someone comments on feedback</p>
+                  <p className="text-sm font-medium text-foreground">New Comments</p>
+                  <p className="text-xs text-muted-foreground">When someone comments on feedback</p>
                 </div>
                 <Switch
                   checked={slackNotify.notify_on_new_comment}
@@ -528,11 +528,11 @@ export function IntegrationsManager({
         <Card key={config.type} className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-white border flex items-center justify-center">
+              <div className="w-12 h-12 rounded-lg bg-background border flex items-center justify-center">
                 {config.logo}
               </div>
               <div>
-                <h3 className="font-medium text-gray-900 flex items-center gap-2">
+                <h3 className="font-medium text-foreground flex items-center gap-2">
                   {config.name}
                   {isConnected(config.type) && (
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
@@ -540,7 +540,7 @@ export function IntegrationsManager({
                     </span>
                   )}
                 </h3>
-                <p className="text-sm text-gray-500">{config.description}</p>
+                <p className="text-sm text-muted-foreground">{config.description}</p>
               </div>
             </div>
             <Button
@@ -609,8 +609,8 @@ export function IntegrationsManager({
 
                   <div className="flex items-center justify-between py-2">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">New Feedback</p>
-                      <p className="text-xs text-gray-500">When someone submits new feedback</p>
+                      <p className="text-sm font-medium text-foreground">New Feedback</p>
+                      <p className="text-xs text-muted-foreground">When someone submits new feedback</p>
                     </div>
                     <Switch
                       checked={states[activeConfig.type].notify_on_new_feedback}
@@ -622,8 +622,8 @@ export function IntegrationsManager({
 
                   <div className="flex items-center justify-between py-2">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">Status Changes</p>
-                      <p className="text-xs text-gray-500">When feedback status is updated</p>
+                      <p className="text-sm font-medium text-foreground">Status Changes</p>
+                      <p className="text-xs text-muted-foreground">When feedback status is updated</p>
                     </div>
                     <Switch
                       checked={states[activeConfig.type].notify_on_status_change}
@@ -635,8 +635,8 @@ export function IntegrationsManager({
 
                   <div className="flex items-center justify-between py-2">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">New Comments</p>
-                      <p className="text-xs text-gray-500">When someone comments on feedback</p>
+                      <p className="text-sm font-medium text-foreground">New Comments</p>
+                      <p className="text-xs text-muted-foreground">When someone comments on feedback</p>
                     </div>
                     <Switch
                       checked={states[activeConfig.type].notify_on_new_comment}
@@ -669,11 +669,11 @@ export function IntegrationsManager({
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-white border flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-background border flex items-center justify-center">
               <LinearLogo />
             </div>
             <div>
-              <h3 className="font-medium text-gray-900 flex items-center gap-2">
+              <h3 className="font-medium text-foreground flex items-center gap-2">
                 Linear
                 {linearIntegration && (
                   <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
@@ -681,7 +681,7 @@ export function IntegrationsManager({
                   </span>
                 )}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {linearIntegration
                   ? `Connected to ${linearIntegration.team_name || 'Linear'}`
                   : 'Sync feedback with Linear issues for seamless tracking'}
@@ -733,8 +733,8 @@ export function IntegrationsManager({
 
               <div className="flex items-center justify-between py-1.5">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Auto-sync New Feedback</p>
-                  <p className="text-xs text-gray-500">Automatically create Linear issues for new feedback posts</p>
+                  <p className="text-sm font-medium text-foreground">Auto-sync New Feedback</p>
+                  <p className="text-xs text-muted-foreground">Automatically create Linear issues for new feedback posts</p>
                 </div>
                 <Switch
                   checked={linearAutoSync}

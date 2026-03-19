@@ -131,28 +131,28 @@ export function BoardDetailRedesign({
   }, [allPosts, pendingPosts, approvedPosts])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Sticky Header */}
-      <div className="border-b border-gray-200 bg-white sticky top-0 z-20">
+      <div className="border-b border-border bg-background sticky top-0 z-20">
         <div className="max-w-[1600px] mx-auto px-8 py-4">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
-            <Link href="/boards" className="hover:text-gray-700 transition-colors">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground/60 mb-3">
+            <Link href="/boards" className="hover:text-foreground/80 transition-colors">
               Boards
             </Link>
             <span>/</span>
-            <span className="text-gray-900 font-medium">{boardName}</span>
+            <span className="text-foreground font-medium">{boardName}</span>
           </div>
 
           {/* Header Content */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
                   {boardName}
                 </h1>
                 <div className="flex items-center gap-2">
-                  <Badge className="px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-100">
+                  <Badge className="px-2 py-0.5 text-xs font-semibold bg-muted text-foreground/80 border border-border hover:bg-muted">
                     {stats.total} posts
                   </Badge>
                   {stats.pending > 0 && (
@@ -163,7 +163,7 @@ export function BoardDetailRedesign({
                 </div>
               </div>
               {boardDescription && (
-                <p className="text-gray-500 text-sm max-w-2xl">
+                <p className="text-muted-foreground text-sm max-w-2xl">
                   {boardDescription}
                 </p>
               )}
@@ -177,7 +177,7 @@ export function BoardDetailRedesign({
                 </Button>
               </Link>
               <Link href={`/boards/${boardId}/settings`}>
-                <Button variant="outline" size="icon" className="border-gray-200 hover:bg-gray-50">
+                <Button variant="outline" size="icon" className="border-border hover:bg-muted/50">
                   <Settings className="h-4 w-4" />
                 </Button>
               </Link>
@@ -188,19 +188,19 @@ export function BoardDetailRedesign({
           <div className="flex items-center gap-3">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
               <Input
                 placeholder="Search feedback..."
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10 pr-8 bg-white border-gray-200 focus:border-amber-400 focus:ring-amber-200/50 h-9 shadow-sm"
+                className="pl-10 pr-8 bg-background border-border focus:border-amber-400 focus:ring-amber-200/50 h-9 shadow-sm"
               />
               {searchQuery && (
                 <button
                   onClick={() => handleSearchChange('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded"
                 >
-                  <X className="h-3.5 w-3.5 text-gray-400" />
+                  <X className="h-3.5 w-3.5 text-muted-foreground/60" />
                 </button>
               )}
             </div>
@@ -211,7 +211,7 @@ export function BoardDetailRedesign({
                 <Button
                   variant="outline"
                   size="sm"
-                  className={`gap-2 h-9 shadow-sm ${statusFilter !== 'all' ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-gray-200 hover:bg-gray-50'}`}
+                  className={`gap-2 h-9 shadow-sm ${statusFilter !== 'all' ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-border hover:bg-muted/50'}`}
                 >
                   <Filter className="h-3.5 w-3.5" />
                   Status
@@ -260,7 +260,7 @@ export function BoardDetailRedesign({
             {/* Sort */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 h-9 border-gray-200 shadow-sm hover:bg-gray-50">
+                <Button variant="outline" size="sm" className="gap-2 h-9 border-border shadow-sm hover:bg-muted/50">
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   Sort
                   <ChevronDown className="h-3.5 w-3.5" />
@@ -292,19 +292,19 @@ export function BoardDetailRedesign({
 
             {/* Clear Filters */}
             {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 h-9 text-gray-500 hover:bg-gray-50">
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 h-9 text-muted-foreground hover:bg-muted/50">
                 <X className="h-3.5 w-3.5" />
                 Clear
               </Button>
             )}
 
             {/* View Toggle */}
-            <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-1 bg-white ml-auto shadow-sm">
+            <div className="flex items-center gap-1 border border-border rounded-lg p-1 bg-background ml-auto shadow-sm">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleViewChange('list')}
-                className={`gap-2 h-7 px-3 ${viewMode === 'list' ? 'bg-gray-100 text-gray-900 hover:bg-gray-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+                className={`gap-2 h-7 px-3 ${viewMode === 'list' ? 'bg-muted text-foreground hover:bg-muted' : 'text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50'}`}
               >
                 <LayoutList className="h-3.5 w-3.5" />
                 List
@@ -313,7 +313,7 @@ export function BoardDetailRedesign({
                 variant="ghost"
                 size="sm"
                 onClick={() => handleViewChange('kanban')}
-                className={`gap-2 h-7 px-3 ${viewMode === 'kanban' ? 'bg-gray-100 text-gray-900 hover:bg-gray-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+                className={`gap-2 h-7 px-3 ${viewMode === 'kanban' ? 'bg-muted text-foreground hover:bg-muted' : 'text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50'}`}
               >
                 <LayoutGrid className="h-3.5 w-3.5" />
                 Kanban

@@ -301,7 +301,7 @@ export function RichTextEditor({ content, onChange, onPreview }: RichTextEditorP
   }
 
   return (
-    <div className="border border-amber-200 rounded-lg bg-white">
+    <div className="border border-amber-200 rounded-lg bg-background">
       {/* Toolbar */}
       <div className="border-b border-amber-200 bg-amber-50/50 p-2 flex flex-wrap items-center gap-1">
         {/* Font Controls */}

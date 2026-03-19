@@ -49,7 +49,7 @@ export function ChangelogSubscribeForm({ orgId }: ChangelogSubscribeFormProps) {
           {loading ? 'Subscribing...' : 'Subscribe'}
         </Button>
       </div>
-      {message && <p className="text-sm text-gray-600">{message}</p>}
+      {message && <p className="text-sm text-muted-foreground">{message}</p>}
     </form>
   )
 }

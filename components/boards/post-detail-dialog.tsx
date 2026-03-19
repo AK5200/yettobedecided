@@ -140,27 +140,27 @@ function PostDetailContent({
       {/* Left — Content + Comments */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         <DialogHeader className="mb-5 shrink-0 pr-6">
-          <DialogTitle className="text-xl font-bold text-gray-900 leading-tight tracking-tight">
+          <DialogTitle className="text-xl font-bold text-foreground leading-tight tracking-tight">
             {post.title}
           </DialogTitle>
           <div className="flex items-center gap-3 mt-2">
             <div className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
-                <User className="h-3 w-3 text-gray-500" />
+              <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
+                <User className="h-3 w-3 text-muted-foreground" />
               </div>
-              <span className="text-xs font-medium text-gray-600">
+              <span className="text-xs font-medium text-muted-foreground">
                 {post.is_guest ? post.guest_name || 'Guest' : post.author_name || 'Anonymous'}
               </span>
             </div>
-            <span className="text-xs text-gray-300">·</span>
-            <span className="text-xs text-gray-400">{formatDate(post.created_at)}</span>
+            <span className="text-xs text-muted-foreground/40">·</span>
+            <span className="text-xs text-muted-foreground/60">{formatDate(post.created_at)}</span>
           </div>
         </DialogHeader>
 
         {/* Scrollable area */}
         <div className="flex-1 overflow-y-auto min-h-0 pr-6 lg:pr-8">
           {post.content && (
-            <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
+            <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap mb-6">
               {post.content}
             </div>
           )}
@@ -174,10 +174,10 @@ function PostDetailContent({
           )}
 
           {/* Comments */}
-          <div className="border-t border-gray-100 pt-5">
+          <div className="border-t border-border/50 pt-5">
             <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="h-4 w-4 text-gray-400" />
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <MessageSquare className="h-4 w-4 text-muted-foreground/60" />
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Comments
               </h3>
             </div>
@@ -191,7 +191,7 @@ function PostDetailContent({
         </div>
 
         {/* Fixed comment form */}
-        <div className="shrink-0 pt-4 pr-6 lg:pr-8 border-t border-gray-100">
+        <div className="shrink-0 pt-4 pr-6 lg:pr-8 border-t border-border/50">
           <CommentForm
             postId={post.id}
             isAdmin={isAdmin}
@@ -203,11 +203,11 @@ function PostDetailContent({
       </div>
 
       {/* Right — Sidebar */}
-      <div className="w-full lg:w-[280px] shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-gray-100 overflow-y-auto lg:pl-6">
+      <div className="w-full lg:w-[280px] shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-border/50 overflow-y-auto lg:pl-6">
         <div className="space-y-5">
           {/* Status */}
           <div>
-            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+            <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 block">
               Status
             </label>
             {isAdmin && statuses.length > 0 ? (
@@ -216,7 +216,7 @@ function PostDetailContent({
                 onValueChange={handleStatusChange}
                 disabled={updatingStatus}
               >
-                <SelectTrigger className="w-full h-9 text-sm border-gray-200 rounded-lg">
+                <SelectTrigger className="w-full h-9 text-sm border-border rounded-lg">
                   <SelectValue>
                     <span className="flex items-center gap-2">
                       {currentStatusObj && (
@@ -251,7 +251,7 @@ function PostDetailContent({
                     style={{ color: currentStatusObj.color, fill: currentStatusObj.color }}
                   />
                 )}
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-foreground/80">
                   {currentStatusObj?.name || post.status}
                 </span>
               </div>
@@ -260,29 +260,29 @@ function PostDetailContent({
 
           {/* Votes */}
           <div>
-            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+            <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 block">
               Votes
             </label>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
-              <ChevronUp className="h-4 w-4 text-gray-500" />
-              <span className="text-base font-bold text-gray-900">{post.vote_count}</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 border border-border">
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              <span className="text-base font-bold text-foreground">{post.vote_count}</span>
             </div>
           </div>
 
           {/* Author */}
           <div>
-            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+            <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 block">
               Author
             </label>
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
-                <User className="h-3.5 w-3.5 text-gray-500" />
+              <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center">
+                <User className="h-3.5 w-3.5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-foreground">
                   {post.is_guest ? post.guest_name || 'Guest' : post.author_name || 'Anonymous'}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-muted-foreground/60">
                   {post.is_guest ? post.guest_email : post.author_email}
                 </p>
               </div>
@@ -291,11 +291,11 @@ function PostDetailContent({
 
           {/* Date */}
           <div>
-            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+            <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 block">
               Created
             </label>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Calendar className="h-3.5 w-3.5 text-gray-400" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground/60" />
               {formatDate(post.created_at)}
             </div>
           </div>
@@ -303,7 +303,7 @@ function PostDetailContent({
           {/* Tags (Admin) */}
           {isAdmin && orgId && (
             <div>
-              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Tag className="h-3 w-3" />
                 Tags
               </label>
@@ -313,15 +313,15 @@ function PostDetailContent({
 
           {/* Actions (Admin) */}
           {isAdmin && (
-            <div className="pt-4 border-t border-gray-100 space-y-2">
-              <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+            <div className="pt-4 border-t border-border/50 space-y-2">
+              <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 block">
                 Actions
               </label>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setMergeOpen(true)}
-                className="w-full justify-start gap-2 h-9 text-sm border-gray-200 rounded-lg hover:bg-gray-50"
+                className="w-full justify-start gap-2 h-9 text-sm border-border rounded-lg hover:bg-muted/50"
               >
                 <GitMerge className="h-3.5 w-3.5" />
                 Merge Duplicate
@@ -367,7 +367,7 @@ export function PostDetailDialog({ post, isAdmin, adminEmail, children }: PostDe
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] overflow-hidden p-6 lg:p-8 rounded-xl border-gray-200">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] overflow-hidden p-6 lg:p-8 rounded-xl border-border">
         {open && (
           <PostDetailContent post={post} isAdmin={isAdmin} adminEmail={adminEmail} />
         )}

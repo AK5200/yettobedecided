@@ -147,15 +147,15 @@ export function PostCardRedesign({
   const statusColor = currentStatus?.color || statusColors[post.status] || '#6B7280'
 
   return (
-    <Card className="group relative overflow-hidden border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 bg-white">
+    <Card className="group relative overflow-hidden border-border hover:border-border hover:shadow-md transition-all duration-200 bg-card">
       <PostDetailDialog post={post} isAdmin={isAdmin} adminEmail={adminEmail}>
         <div className="p-4 cursor-pointer">
           <div className="flex items-start gap-4">
             {/* Vote Button */}
             <div className="flex flex-col items-center gap-1 pt-1">
-              <button className="flex flex-col items-center justify-center w-12 h-12 rounded-lg border-2 border-gray-200 hover:border-amber-400 hover:bg-amber-50 transition-all group/vote">
-                <ChevronUp className="h-4 w-4 text-gray-500 group-hover/vote:text-amber-600 transition-colors" />
-                <span className="text-sm font-semibold text-gray-700 group-hover/vote:text-amber-600 transition-colors">
+              <button className="flex flex-col items-center justify-center w-12 h-12 rounded-lg border-2 border-border hover:border-amber-400 hover:bg-amber-50 transition-all group/vote">
+                <ChevronUp className="h-4 w-4 text-muted-foreground group-hover/vote:text-amber-600 transition-colors" />
+                <span className="text-sm font-semibold text-foreground/80 group-hover/vote:text-amber-600 transition-colors">
                   {post.vote_count || 0}
                 </span>
               </button>
@@ -165,7 +165,7 @@ export function PostCardRedesign({
             <div className="flex-1 min-w-0">
               {/* Title & Badges */}
               <div className="flex items-start gap-2 mb-2">
-                <h3 className="text-base font-semibold text-gray-900 group-hover:text-amber-600 transition-colors flex-1">
+                <h3 className="text-base font-semibold text-foreground group-hover:text-amber-600 transition-colors flex-1">
                   {post.title}
                 </h3>
                 {post.is_pinned && (
@@ -178,27 +178,27 @@ export function PostCardRedesign({
 
               {/* Description */}
               {post.content && (
-                <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                   {post.content}
                 </p>
               )}
 
               {/* Meta Info */}
-              <div className="flex items-center flex-wrap gap-3 text-xs text-gray-500">
+              <div className="flex items-center flex-wrap gap-3 text-xs text-muted-foreground">
                 {/* Author */}
                 <div className="flex items-center gap-1.5">
                   {post.identified_user_avatar ? (
                     <img
                       src={post.identified_user_avatar}
                       alt=""
-                      className="w-5 h-5 rounded-full border border-gray-200"
+                      className="w-5 h-5 rounded-full border border-border"
                     />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-[10px] font-medium text-gray-600">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-muted to-muted flex items-center justify-center text-[10px] font-medium text-muted-foreground">
                       {getAuthorInitial()}
                     </div>
                   )}
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-foreground/80">
                     {getAuthorName()}
                   </span>
                   {post.user_source === 'verified_sso' && (
@@ -256,7 +256,7 @@ export function PostCardRedesign({
                     onValueChange={handleStatusChange}
                     disabled={isUpdating}
                   >
-                    <SelectTrigger className="w-[140px] h-8 text-xs border-gray-200 hover:border-gray-300">
+                    <SelectTrigger className="w-[140px] h-8 text-xs border-border hover:border-border">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

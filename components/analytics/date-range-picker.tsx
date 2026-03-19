@@ -26,8 +26,8 @@ export function DateRangePicker({ defaultDays = 30 }: DateRangePickerProps) {
   ]
 
   return (
-    <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
-      <Calendar className="h-4 w-4 text-gray-500 ml-2" />
+    <div className="flex items-center gap-2 bg-background border border-border rounded-xl p-1 shadow-sm">
+      <Calendar className="h-4 w-4 text-muted-foreground ml-2" />
       {options.map((option) => (
         <button
           key={option.value}
@@ -35,7 +35,7 @@ export function DateRangePicker({ defaultDays = 30 }: DateRangePickerProps) {
           className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
             days === option.value
               ? 'bg-amber-100 text-amber-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           }`}
         >
           {option.label}

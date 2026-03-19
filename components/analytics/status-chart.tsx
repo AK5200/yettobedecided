@@ -33,12 +33,12 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0]
     return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-        <p className="text-sm font-semibold text-gray-900 mb-1">{data.name}</p>
+      <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+        <p className="text-sm font-semibold text-foreground mb-1">{data.name}</p>
         <p className="text-lg font-bold" style={{ color: data.payload.fill }}>
           {data.value} posts
         </p>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           {((data.value / data.payload.total) * 100).toFixed(1)}% of total
         </p>
       </div>
@@ -56,8 +56,8 @@ const CustomLegend = ({ payload }: any) => {
             className="w-4 h-4 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-sm font-medium text-gray-700">{entry.value}</span>
-          <span className="text-sm text-gray-500">({entry.payload.value})</span>
+          <span className="text-sm font-medium text-foreground/80">{entry.value}</span>
+          <span className="text-sm text-muted-foreground">({entry.payload.value})</span>
         </div>
       ))}
     </div>
@@ -98,8 +98,8 @@ export function StatusChart({ orgId, days = 30 }: StatusChartProps) {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
-        <div className="h-80 bg-gray-100 animate-pulse rounded-xl" />
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-border p-6">
+        <div className="h-80 bg-muted animate-pulse rounded-xl" />
       </div>
     )
   }
@@ -107,11 +107,11 @@ export function StatusChart({ orgId, days = 30 }: StatusChartProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0)
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-border p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-1">Status Distribution</h3>
-          <p className="text-sm text-gray-500">Breakdown by status</p>
+          <h3 className="text-xl font-bold text-foreground mb-1">Status Distribution</h3>
+          <p className="text-sm text-muted-foreground">Breakdown by status</p>
         </div>
         <div className="p-3 bg-violet-100 rounded-xl">
           <PieChartIcon className="h-6 w-6 text-violet-600" />
@@ -144,9 +144,9 @@ export function StatusChart({ orgId, days = 30 }: StatusChartProps) {
         </PieChart>
       </ResponsiveContainer>
       {total > 0 && (
-        <div className="text-center mt-4 pt-4 border-t border-gray-200">
-          <div className="text-3xl font-bold text-gray-900">{total}</div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mt-1">
+        <div className="text-center mt-4 pt-4 border-t border-border">
+          <div className="text-3xl font-bold text-foreground">{total}</div>
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mt-1">
             Total Posts
           </div>
         </div>

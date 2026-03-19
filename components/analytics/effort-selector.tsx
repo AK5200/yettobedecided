@@ -66,7 +66,7 @@ export function EffortSelector({
     <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-2'}`}>
       {dimensions.map((dim) => (
         <div key={dim.key} className="flex items-center gap-2">
-          <span className={`${compact ? 'text-[10px] w-10' : 'text-xs w-12'} font-medium text-gray-500`}>
+          <span className={`${compact ? 'text-[10px] w-10' : 'text-xs w-12'} font-medium text-muted-foreground`}>
             {dim.label}:
           </span>
           <div className="flex gap-1">
@@ -81,7 +81,7 @@ export function EffortSelector({
                   className={`${compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-xs'} font-medium rounded border transition-colors cursor-pointer ${
                     isSelected
                       ? config.color
-                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                      : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
                   } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {config.label}

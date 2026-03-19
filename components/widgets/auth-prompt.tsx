@@ -42,7 +42,7 @@ interface AuthPromptProps {
    }, [orgSlug])
  
    if (loading) {
-     return <div className="text-sm text-gray-500">Loading...</div>
+     return <div className="text-sm text-muted-foreground">Loading...</div>
    }
  
    const guestEnabled = config?.auth?.guestPostingEnabled ?? true
@@ -57,10 +57,10 @@ interface AuthPromptProps {
        )}
 
        {socialEnabled && guestEnabled && (
-         <div className="text-xs text-gray-500 text-center font-medium relative">
-           <span className="bg-white px-2 relative z-10">or</span>
+         <div className="text-xs text-muted-foreground text-center font-medium relative">
+           <span className="bg-background px-2 relative z-10">or</span>
            <div className="absolute inset-0 flex items-center">
-             <div className="w-full border-t border-gray-200"></div>
+             <div className="w-full border-t border-border"></div>
            </div>
          </div>
        )}
@@ -71,13 +71,13 @@ interface AuthPromptProps {
              placeholder="Email"
              value={email}
              onChange={(event) => setEmail(event.target.value)}
-             className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+             className="border-border focus:border-border focus:ring-2 focus:ring-muted"
            />
            <Input
              placeholder="Name (optional)"
              value={name}
              onChange={(event) => setName(event.target.value)}
-             className="border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
+             className="border-border focus:border-border focus:ring-2 focus:ring-muted"
            />
            <Button
              className="w-full font-semibold shadow-sm hover:shadow-md transition-all cursor-pointer"

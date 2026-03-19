@@ -37,7 +37,7 @@ export function MiniMetricCards({ orgId }: MiniMetricCardsProps) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-xl" />
+          <div key={i} className="h-24 bg-muted animate-pulse rounded-xl" />
         ))}
       </div>
     )
@@ -70,7 +70,7 @@ export function MiniMetricCards({ orgId }: MiniMetricCardsProps) {
       current: 0,
       previous: 0,
       icon: MessageSquare,
-      color: 'text-gray-600',
+      color: 'text-muted-foreground',
     },
     {
       label: 'Users',
@@ -93,7 +93,7 @@ export function MiniMetricCards({ orgId }: MiniMetricCardsProps) {
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">This Week</h2>
+        <h2 className="text-lg font-semibold text-foreground">This Week</h2>
         <Link
           href="/analytics"
           className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
@@ -107,13 +107,13 @@ export function MiniMetricCards({ orgId }: MiniMetricCardsProps) {
           return (
             <div
               key={metric.label}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
+              className="bg-card rounded-xl shadow-sm border border-border/50 p-4"
             >
               <div className="flex items-center justify-between mb-2">
                 <Icon className={`h-5 w-5 ${metric.color}`} />
               </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">{metric.value}</div>
-              <div className="text-xs font-medium text-gray-500 mb-1">{metric.label}</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{metric.value}</div>
+              <div className="text-xs font-medium text-muted-foreground mb-1">{metric.label}</div>
               <ComparisonBadge current={metric.current} previous={metric.previous} />
             </div>
           )

@@ -65,7 +65,7 @@ function getStatusStyle(status: Post['status']): { bg: string; text: string } {
     case 'under_review':
       return { bg: 'bg-purple-100', text: 'text-purple-700' }
     default:
-      return { bg: 'bg-gray-100', text: 'text-gray-700' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground/80' }
   }
 }
 
@@ -136,7 +136,7 @@ function getCategoryStyle(category: string): { bg: string; text: string } {
     case 'fix':
       return { bg: 'bg-orange-100', text: 'text-orange-700' }
     default:
-      return { bg: 'bg-gray-100', text: 'text-gray-700' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground/80' }
   }
 }
 
@@ -252,7 +252,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
           cardBorder: 'border',
           buttonStyle: 'solid',
           borderRadius: borderRadius,
-          voteButtonClass: 'bg-white border border-gray-200',
+          voteButtonClass: 'bg-background border border-border',
         }
       case '3':
         // Clean Supahub-style (horizontal tabs, vote on right, divider lines)
@@ -272,7 +272,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
           cardBorder: 'border-b',
           buttonStyle: 'solid',
           borderRadius: borderRadius,
-          voteButtonClass: 'bg-white border border-gray-200',
+          voteButtonClass: 'bg-background border border-border',
           hasSidebar: false,
         }
       default: // variant 1 - Standard
@@ -351,19 +351,19 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                       <MessageSquare className={`${styleVariant === '2' ? 'h-6 w-6' : 'h-4 w-4'}`} style={{ color: styleVariant === '2' ? 'white' : settings.accentColor }} />
                     </div>
                     <div>
-                      <h3 className={`${styleVariant === '2' ? 'text-2xl font-extrabold' : 'font-semibold text-sm'} text-gray-900 ${textStyleClass} ${textItalicClass}`}>
+                      <h3 className={`${styleVariant === '2' ? 'text-2xl font-extrabold' : 'font-semibold text-sm'} text-foreground ${textStyleClass} ${textItalicClass}`}>
                         {settings.heading || 'Have something to say?'}
                       </h3>
-                      <p className={`text-xs ${styleVariant === '2' ? 'font-medium' : ''} text-gray-500 mt-0.5 line-clamp-2 ${textStyleClass} ${textItalicClass}`}>
+                      <p className={`text-xs ${styleVariant === '2' ? 'font-medium' : ''} text-muted-foreground mt-0.5 line-clamp-2 ${textStyleClass} ${textItalicClass}`}>
                         {settings.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={onClose}
-                    className="p-1 hover:bg-gray-100 rounded transition-colors shrink-0"
+                    className="p-1 hover:bg-muted rounded transition-colors shrink-0"
                   >
-                    <X className="h-4 w-4 text-gray-500" />
+                    <X className="h-4 w-4 text-muted-foreground" />
                   </button>
                 </div>
               </div>
@@ -419,16 +419,16 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
             {/* Search and Create */}
             <div className={`p-3 ${styleVariant === '2' ? 'py-6' : 'p-3'} flex gap-2 items-center`}>
               <div className="relative flex-1">
-                <Search className={`absolute ${styleVariant === '2' ? 'left-4' : 'left-2.5'} top-1/2 -translate-y-1/2 ${styleVariant === '2' ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-gray-400`} />
+                <Search className={`absolute ${styleVariant === '2' ? 'left-4' : 'left-2.5'} top-1/2 -translate-y-1/2 ${styleVariant === '2' ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground/60`} />
                 <Input
                   placeholder={styleVariant === '2' ? "Explore ideas..." : "Search posts..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`${styleVariant === '2' ? 'pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary/40' : 'pl-8 h-9 text-sm'}`}
+                  className={`${styleVariant === '2' ? 'pl-12 pr-4 py-4 bg-muted/50 border border-border rounded-2xl focus:ring-2 focus:ring-primary/40' : 'pl-8 h-9 text-sm'}`}
                 />
               </div>
               {styleVariant === '2' && (
-                <button className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-600 hover:bg-gray-100 transition-colors">
+                <button className="px-5 py-4 bg-muted/50 border border-border rounded-2xl text-muted-foreground hover:bg-muted transition-colors">
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M3 6h18M7 12h10M5 18h14" />
                   </svg>
@@ -464,16 +464,16 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
             <div className="flex-1 overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
                 </div>
               ) : filteredPosts.length === 0 ? (
                 <div className="text-center py-12 px-3">
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {searchQuery ? 'No posts match your search.' : 'No posts yet.'}
                   </p>
                 </div>
               ) : (
-                <div className={`${styleVariant === '3' ? 'px-3 pb-3 divide-y divide-gray-200' : styleVariant === '2' ? 'px-6 pb-4 space-y-4' : 'px-3 pb-3 space-y-2'}`}>
+                <div className={`${styleVariant === '3' ? 'px-3 pb-3 divide-y divide-border' : styleVariant === '2' ? 'px-6 pb-4 space-y-4' : 'px-3 pb-3 space-y-2'}`}>
                   {filteredPosts.map((post) => {
                   const statusStyle = post.status ? getStatusStyle(post.status) : null
 
@@ -482,13 +482,13 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                     return (
                       <div
                         key={post.id}
-                        className="py-3 first:pt-1 last:pb-1 hover:bg-gray-50 transition-colors cursor-pointer px-1 group"
+                        className="py-3 first:pt-1 last:pb-1 hover:bg-muted/50 transition-colors cursor-pointer px-1 group"
                       >
                         <div className="flex items-start gap-3">
                           {/* Content */}
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 text-sm">{post.title}</h3>
-                            <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{post.content}</p>
+                            <h3 className="font-semibold text-foreground text-sm">{post.title}</h3>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{post.content}</p>
                             <div className="flex items-center gap-2 mt-2">
                               <div className="flex items-center gap-1.5">
                                 <div
@@ -497,7 +497,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                                 >
                                   {post.author.charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-[10px] text-gray-500">{post.author}</span>
+                                <span className="text-[10px] text-muted-foreground">{post.author}</span>
                               </div>
                               <Badge className="bg-red-50 text-red-600 border-0 text-[10px] font-medium px-1.5 py-0 rounded">
                                 {post.category}
@@ -511,7 +511,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                             className={`flex flex-col items-center justify-center px-2 py-1.5 rounded-lg border transition-colors shrink-0 ${
                               post.hasVoted
                                 ? 'border-transparent text-white'
-                                : 'border-gray-200 hover:border-gray-300 text-gray-500'
+                                : 'border-border hover:border-border text-muted-foreground'
                             }`}
                             style={
                               post.hasVoted
@@ -531,7 +531,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                   return (
                   <div
                     key={post.id}
-                    className={`${styleVariant === '2' ? 'p-6' : 'p-3'} ${variantStyles.cardClass} ${variantStyles.cardBorder} ${styleVariant === '2' ? 'rounded-[32px]' : 'rounded-lg'} hover:border-gray-300 transition-all cursor-pointer group ${
+                    className={`${styleVariant === '2' ? 'p-6' : 'p-3'} ${variantStyles.cardClass} ${variantStyles.cardBorder} ${styleVariant === '2' ? 'rounded-[32px]' : 'rounded-lg'} hover:border-border transition-all cursor-pointer group ${
                       styleVariant === '2'
                         ? 'hover:translate-y-[-2px] hover:translate-x-1 hover:shadow-md'
                         : ''
@@ -551,7 +551,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                         className={`flex flex-col items-center justify-center ${styleVariant === '2' ? 'px-3 py-3 min-w-[64px]' : 'px-2 py-1.5'} ${borderRadiusClass} border transition-colors shrink-0 ${
                           post.hasVoted
                             ? 'border-transparent text-white'
-                            : variantStyles.voteButtonClass || 'border-gray-200 hover:border-gray-300 text-gray-600'
+                            : variantStyles.voteButtonClass || 'border-border hover:border-border text-muted-foreground'
                         }`}
                         style={
                           post.hasVoted
@@ -565,7 +565,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                         }
                       >
                         <ChevronUp className={`${styleVariant === '2' ? 'h-4 w-4 group-hover:text-primary' : 'h-3 w-3'}`} style={post.hasVoted ? {} : (styleVariant === '2' ? { color: '#6b7280' } : {})} />
-                        <span className={`${styleVariant === '2' ? 'text-lg font-extrabold' : 'text-xs font-medium'} ${post.hasVoted ? 'text-white' : styleVariant === '2' ? 'text-gray-900' : 'text-gray-600'}`}>
+                        <span className={`${styleVariant === '2' ? 'text-lg font-extrabold' : 'text-xs font-medium'} ${post.hasVoted ? 'text-white' : styleVariant === '2' ? 'text-foreground' : 'text-muted-foreground'}`}>
                           {post.votes}
                         </span>
                       </button>
@@ -573,7 +573,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-2">
-                          <h3 className={`${styleVariant === '2' ? 'text-xl font-bold' : 'font-medium text-sm'} text-gray-900 group-hover:text-primary transition-colors line-clamp-1`} style={styleVariant === '2' ? { color: post.hasVoted ? settings.accentColor : undefined } : {}}>
+                          <h3 className={`${styleVariant === '2' ? 'text-xl font-bold' : 'font-medium text-sm'} text-foreground group-hover:text-primary transition-colors line-clamp-1`} style={styleVariant === '2' ? { color: post.hasVoted ? settings.accentColor : undefined } : {}}>
                             {post.title}
                           </h3>
                           {post.status && statusStyle && (
@@ -587,7 +587,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                             </Badge>
                           )}
                         </div>
-                        <p className={`${styleVariant === '2' ? 'text-sm mb-4 leading-relaxed font-medium line-clamp-3' : 'text-xs mt-0.5 line-clamp-1'} text-gray-500`}>
+                        <p className={`${styleVariant === '2' ? 'text-sm mb-4 leading-relaxed font-medium line-clamp-3' : 'text-xs mt-0.5 line-clamp-1'} text-muted-foreground`}>
                           {post.content}
                         </p>
                         <div className={`flex items-center ${styleVariant === '2' ? 'gap-4' : 'gap-1.5'} ${styleVariant === '2' ? 'mt-0' : 'mt-1.5'}`}>
@@ -598,13 +598,13 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                             >
                               {post.author.charAt(0).toUpperCase()}
                             </div>
-                            <span className={`${styleVariant === '2' ? 'text-xs font-bold text-gray-700' : 'text-[10px]'} text-gray-500`}>
+                            <span className={`${styleVariant === '2' ? 'text-xs font-bold text-foreground/80' : 'text-[10px]'} text-muted-foreground`}>
                               {post.author}
                             </span>
                           </div>
-                          <span className="text-xs text-gray-400">• {styleVariant === '2' ? '2 hours ago' : post.category}</span>
+                          <span className="text-xs text-muted-foreground/60">• {styleVariant === '2' ? '2 hours ago' : post.category}</span>
                           {styleVariant === '2' && (
-                            <div className="flex items-center gap-1 text-gray-400 ml-auto">
+                            <div className="flex items-center gap-1 text-muted-foreground/60 ml-auto">
                               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                               </svg>
@@ -626,11 +626,11 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
           <TabsContent value="changelog" className="flex-1 overflow-y-auto mt-0">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
               </div>
             ) : changelog.length === 0 ? (
               <div className="text-center py-12 px-3">
-                <p className="text-gray-500 text-sm">No changelog entries yet.</p>
+                <p className="text-muted-foreground text-sm">No changelog entries yet.</p>
               </div>
             ) : (
               <div className="p-3 space-y-3">
@@ -638,7 +638,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                   const categoryStyle = getCategoryStyle(entry.category)
                   return (
                     <div key={entry.id} className="border-b pb-3 last:border-b-0">
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-1.5">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
                         <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-[10px] px-1.5 py-0`}>
                           {entry.category}
                         </Badge>
@@ -648,8 +648,8 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                             : 'Recently'}
                         </span>
                       </div>
-                      <div className="font-medium text-gray-900 text-sm">{entry.title}</div>
-                      <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{entry.content}</p>
+                      <div className="font-medium text-foreground text-sm">{entry.title}</div>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{entry.content}</p>
                     </div>
                   )
                 })}
@@ -668,7 +668,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
           }}
         >
           {settings.showBranding ? (
-            <span className="text-[10px] text-gray-400 flex items-center gap-1">
+            <span className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
               <MessageSquare className="h-2.5 w-2.5" style={{ color: settings.accentColor }} />
               Powered by Kelo
             </span>

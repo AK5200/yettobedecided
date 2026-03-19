@@ -132,7 +132,7 @@ export function ApiKeysManager({ orgId, initialApiKeys }: ApiKeysManagerProps) {
                 <div className="space-y-2">
                   <Label>Your API Key</Label>
                   <div className="flex gap-2">
-                    <code className="flex-1 p-3 bg-gray-100 rounded-lg text-sm font-mono break-all">
+                    <code className="flex-1 p-3 bg-muted rounded-lg text-sm font-mono break-all">
                       {rawKey}
                     </code>
                     <Button
@@ -166,7 +166,7 @@ export function ApiKeysManager({ orgId, initialApiKeys }: ApiKeysManagerProps) {
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
                   />
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Give your key a descriptive name to remember its purpose.
                   </p>
                 </div>
@@ -193,9 +193,9 @@ export function ApiKeysManager({ orgId, initialApiKeys }: ApiKeysManagerProps) {
       <div className="space-y-3">
         {apiKeys.length === 0 ? (
           <Card className="p-8 text-center">
-            <Key className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No API keys yet</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <Key className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-muted-foreground">No API keys yet</p>
+            <p className="text-sm text-muted-foreground/60 mt-1">
               Create your first API key to access the API programmatically
             </p>
           </Card>
@@ -208,9 +208,9 @@ export function ApiKeysManager({ orgId, initialApiKeys }: ApiKeysManagerProps) {
                     <Key className="h-5 w-5 text-amber-600" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-medium text-gray-900">{key.name}</h3>
-                    <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <code className="bg-gray-100 px-2 py-0.5 rounded text-xs">
+                    <h3 className="font-medium text-foreground">{key.name}</h3>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <code className="bg-muted px-2 py-0.5 rounded text-xs">
                         {key.key_prefix}...
                       </code>
                       <span>Created {formatDate(key.created_at)}</span>

@@ -43,22 +43,22 @@ export function InviteMemberForm({ orgId }: InviteMemberFormProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+    <div className="bg-linear-to-br from-background to-muted/50 rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-200">
       <div className="flex items-start gap-4 mb-6">
         <div className="p-2.5 bg-amber-100 rounded-xl">
           <UserPlus className="h-5 w-5 text-amber-600" />
         </div>
         <div>
-          <h3 className="font-semibold text-gray-900">Invite Team Member</h3>
-          <p className="text-sm text-gray-500">Send an invitation to add someone to your team.</p>
+          <h3 className="font-semibold text-foreground">Invite Team Member</h3>
+          <p className="text-sm text-muted-foreground">Send an invitation to add someone to your team.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="invite-email" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <Mail className="h-4 w-4 text-gray-400" />
+            <Label htmlFor="invite-email" className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+              <Mail className="h-4 w-4 text-muted-foreground/60" />
               Email Address
             </Label>
             <Input
@@ -72,8 +72,8 @@ export function InviteMemberForm({ orgId }: InviteMemberFormProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="invite-role" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <Shield className="h-4 w-4 text-gray-400" />
+            <Label htmlFor="invite-role" className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+              <Shield className="h-4 w-4 text-muted-foreground/60" />
               Role
             </Label>
             <Select value={role} onValueChange={(value) => setRole(value as 'admin' | 'member')}>

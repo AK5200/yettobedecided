@@ -45,7 +45,7 @@ interface PublicFeaturesViewProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  all: { label: 'All', color: 'text-gray-700', bg: 'bg-gray-100' },
+  all: { label: 'All', color: 'text-muted-foreground', bg: 'bg-muted' },
   open: { label: 'Open', color: 'text-blue-700', bg: 'bg-blue-50' },
   planned: { label: 'Planned', color: 'text-violet-700', bg: 'bg-violet-50' },
   in_progress: { label: 'In Progress', color: 'text-amber-700', bg: 'bg-amber-50' },
@@ -198,15 +198,15 @@ export function PublicFeaturesView({
   })
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-muted/50">
       <PublicHubNav org={org} orgSlug={orgSlug} />
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Page header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Feature Requests</h1>
-            <p className="text-sm text-gray-500 mt-1">Browse, vote, and submit ideas</p>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Feature Requests</h1>
+            <p className="text-sm text-muted-foreground mt-1">Browse, vote, and submit ideas</p>
           </div>
           <Dialog open={createPostOpen} onOpenChange={setCreatePostOpen}>
             <DialogTrigger asChild>
@@ -215,10 +215,10 @@ export function PublicFeaturesView({
                 New Post
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg p-0 gap-0 rounded-xl overflow-hidden border-gray-200">
+            <DialogContent className="max-w-lg p-0 gap-0 rounded-xl overflow-hidden border-border">
               <DialogHeader className="px-6 pt-6 pb-0">
-                <DialogTitle className="text-lg font-semibold text-gray-900">Submit feedback</DialogTitle>
-                <p className="text-sm text-gray-500 mt-1">Share your idea or report an issue</p>
+                <DialogTitle className="text-lg font-semibold text-foreground">Submit feedback</DialogTitle>
+                <p className="text-sm text-muted-foreground mt-1">Share your idea or report an issue</p>
               </DialogHeader>
               {boards.length > 0 && (
                 <div className="p-6">
@@ -238,7 +238,7 @@ export function PublicFeaturesView({
           {/* Left sidebar — Boards */}
           <aside className="w-56 shrink-0 hidden md:block">
             <div className="sticky top-20">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">
+              <h2 className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider mb-3 px-3">
                 Boards
               </h2>
               <nav className="space-y-1">
@@ -247,13 +247,13 @@ export function PublicFeaturesView({
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                     !currentBoard
                       ? 'bg-yellow-50 text-yellow-800 border border-yellow-200'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
                   <Layers className="h-4 w-4" />
                   All Boards
                   <span className={`ml-auto text-xs font-semibold rounded-full px-2 py-0.5 ${
-                    !currentBoard ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'
+                    !currentBoard ? 'bg-yellow-100 text-yellow-700' : 'bg-muted text-muted-foreground'
                   }`}>
                     {posts.length}
                   </span>
@@ -272,7 +272,7 @@ export function PublicFeaturesView({
                       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                         isActive
                           ? `${boardColor.bg} ${boardColor.text} border ${boardColor.border}`
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       }`}
                     >
                       <div
@@ -283,7 +283,7 @@ export function PublicFeaturesView({
                       />
                       {board.name}
                       <span className={`ml-auto text-xs font-semibold rounded-full px-2 py-0.5 ${
-                        isActive ? `${boardColor.bg} ${boardColor.text}` : 'bg-gray-100 text-gray-500'
+                        isActive ? `${boardColor.bg} ${boardColor.text}` : 'bg-muted text-muted-foreground'
                       }`}>
                         {boardPosts.length}
                       </span>
@@ -299,18 +299,18 @@ export function PublicFeaturesView({
             {/* Search + filters row */}
             <div className="flex items-center gap-3 mb-5">
               <form onSubmit={handleSearch} className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <Input
                   type="text"
                   placeholder="Search posts..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 rounded-lg border-gray-200 bg-white text-sm placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-yellow-300 focus-visible:border-yellow-300"
+                  className="pl-9 h-10 rounded-lg border-border bg-background text-sm placeholder:text-muted-foreground/60 focus-visible:ring-1 focus-visible:ring-yellow-300 focus-visible:border-yellow-300"
                 />
               </form>
 
               {/* Status filter */}
-              <div className="flex items-center bg-white border border-gray-200 rounded-lg p-0.5">
+              <div className="flex items-center bg-background border border-border rounded-lg p-0.5">
                 {Object.entries(STATUS_CONFIG).map(([key, config]) => (
                   <button
                     key={key}
@@ -318,7 +318,7 @@ export function PublicFeaturesView({
                     className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
                       currentStatus === key
                         ? `${config.bg} ${config.color}`
-                        : 'text-gray-500 hover:text-gray-700'
+                        : 'text-muted-foreground hover:text-foreground/80'
                     }`}
                   >
                     {config.label}
@@ -327,11 +327,11 @@ export function PublicFeaturesView({
               </div>
 
               {/* Sort toggle */}
-              <div className="flex items-center bg-white border border-gray-200 rounded-lg p-0.5">
+              <div className="flex items-center bg-background border border-border rounded-lg p-0.5">
                 <button
                   onClick={() => setSortBy('latest')}
                   className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                    sortBy === 'latest' ? 'bg-gray-100 text-gray-700' : 'text-gray-500 hover:text-gray-700'
+                    sortBy === 'latest' ? 'bg-muted text-foreground/80' : 'text-muted-foreground hover:text-foreground/80'
                   }`}
                 >
                   Latest
@@ -339,7 +339,7 @@ export function PublicFeaturesView({
                 <button
                   onClick={() => setSortBy('most_votes')}
                   className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                    sortBy === 'most_votes' ? 'bg-gray-100 text-gray-700' : 'text-gray-500 hover:text-gray-700'
+                    sortBy === 'most_votes' ? 'bg-muted text-foreground/80' : 'text-muted-foreground hover:text-foreground/80'
                   }`}
                 >
                   Top
@@ -349,9 +349,9 @@ export function PublicFeaturesView({
 
             {/* Voter email bar */}
             {voterEmail && (
-              <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-2.5 mb-5">
-                <p className="text-sm text-gray-600">
-                  Voting as <span className="font-medium text-gray-900">{voterEmail}</span>
+              <div className="flex items-center justify-between bg-background border border-border rounded-lg px-4 py-2.5 mb-5">
+                <p className="text-sm text-muted-foreground">
+                  Voting as <span className="font-medium text-foreground">{voterEmail}</span>
                 </p>
                 <button
                   onClick={() => {
@@ -359,7 +359,7 @@ export function PublicFeaturesView({
                     setVotedPostIds([])
                     toast.success('Email cleared')
                   }}
-                  className="text-xs text-gray-500 hover:text-gray-700 font-medium cursor-pointer"
+                  className="text-xs text-muted-foreground hover:text-foreground/80 font-medium cursor-pointer"
                 >
                   Clear
                 </button>
@@ -374,7 +374,7 @@ export function PublicFeaturesView({
                   window.location.href = buildUrl({ board: v === '__all__' ? null : v })
                 }}
               >
-                <SelectTrigger className="h-10 rounded-lg border-gray-200 text-sm cursor-pointer">
+                <SelectTrigger className="h-10 rounded-lg border-border text-sm cursor-pointer">
                   <SelectValue placeholder="All Boards" />
                 </SelectTrigger>
                 <SelectContent>
@@ -395,8 +395,8 @@ export function PublicFeaturesView({
                   <div className="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center mx-auto mb-4">
                     <MessageSquare className="h-5 w-5 text-yellow-500" />
                   </div>
-                  <p className="text-sm font-medium text-gray-900">No posts yet</p>
-                  <p className="text-sm text-gray-500 mt-1">Be the first to share an idea</p>
+                  <p className="text-sm font-medium text-foreground">No posts yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">Be the first to share an idea</p>
                 </div>
               ) : (
                 sortedPosts.map((post) => {
@@ -413,7 +413,7 @@ export function PublicFeaturesView({
 
                   return (
                     <PostDetailDialog key={post.id} post={post}>
-                      <article className="bg-white rounded-xl p-4 shadow-sm flex gap-4 hover:shadow-md transition-all cursor-pointer">
+                      <article className="bg-card rounded-xl p-4 shadow-sm flex gap-4 hover:shadow-md transition-all cursor-pointer">
                         {/* Upvote box */}
                         <button
                           onClick={(e) => handleVote(post.id, e)}
@@ -421,13 +421,13 @@ export function PublicFeaturesView({
                           className={`w-[60px] h-[64px] shrink-0 border rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer ${
                             isVoted
                               ? 'bg-yellow-50 border-yellow-300 text-yellow-600'
-                              : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-50 hover:border-yellow-300'
+                              : 'bg-background border-border text-foreground/90 hover:bg-muted/50 hover:border-yellow-300'
                           } ${isVoting ? 'opacity-50 cursor-not-allowed!' : ''}`}
                         >
                           <span className="text-2xl font-bold leading-none mb-1">
                             {post.vote_count || 0}
                           </span>
-                          <span className={`text-[10px] ${isVoted ? 'text-yellow-500' : 'text-gray-500'}`}>
+                          <span className={`text-[10px] ${isVoted ? 'text-yellow-500' : 'text-muted-foreground'}`}>
                             Upvote
                           </span>
                         </button>
@@ -463,12 +463,12 @@ export function PublicFeaturesView({
                             ))}
                           </div>
 
-                          <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">
+                          <h3 className="text-lg font-bold text-foreground leading-tight mb-1">
                             {post.title}
                           </h3>
 
                           {post.content && (
-                            <p className="text-sm text-gray-500 mb-3 line-clamp-1">
+                            <p className="text-sm text-muted-foreground mb-3 line-clamp-1">
                               {post.content}
                             </p>
                           )}
@@ -476,7 +476,7 @@ export function PublicFeaturesView({
                           {!post.content && <div className="mb-3" />}
 
                           {/* Author + date */}
-                          <div className="flex items-center text-xs text-gray-500 gap-2">
+                          <div className="flex items-center text-xs text-muted-foreground gap-2">
                             <div
                               className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
                               style={{ backgroundColor: authorStyle.bg }}
@@ -484,7 +484,7 @@ export function PublicFeaturesView({
                               {authorName.charAt(0).toUpperCase()}
                             </div>
                             <span className={`font-medium ${authorStyle.text}`}>{authorName}</span>
-                            <span className="text-gray-300">•</span>
+                            <span className="text-muted-foreground/40">•</span>
                             <span>
                               {new Date(post.created_at).toLocaleDateString('en-US', {
                                 month: 'short',
@@ -505,13 +505,13 @@ export function PublicFeaturesView({
         {/* Branding footer */}
         {org.show_branding && (
           <div className="mt-16 pb-8 text-center">
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground/60">
               Powered by{' '}
               <a
                 href="https://kelohq.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                className="font-medium text-muted-foreground hover:text-foreground/80 transition-colors"
               >
                 Kelo
               </a>

@@ -33,7 +33,7 @@ export function SearchInput() {
 
     return (
         <div className='relative w-full max-w-sm'>
-            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60' />
             <Input
                 placeholder='Search posts...'
                 value={query}
@@ -45,7 +45,7 @@ export function SearchInput() {
                     onClick={() => setQuery('')}
                     className='absolute right-3 top-1/2 -translate-y-1/2'
                 >
-                    <X className='w-4 h-4 text-gray-400 hover:text-gray-600' />
+                    <X className='w-4 h-4 text-muted-foreground/60 hover:text-muted-foreground' />
                 </button>
             )}
         </div>

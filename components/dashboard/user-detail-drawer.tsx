@@ -221,7 +221,7 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
     'in-progress': 'bg-yellow-100 text-yellow-800',
     planned: 'bg-purple-100 text-purple-800',
     completed: 'bg-green-100 text-green-800',
-    closed: 'bg-gray-100 text-gray-800',
+    closed: 'bg-muted text-foreground/90',
   }
 
   // Inline post detail view
@@ -233,7 +233,7 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
             <DialogTitle className="flex items-center gap-2">
               <button
                 onClick={() => setSelectedPost(null)}
-                className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+                className="p-1 hover:bg-muted rounded cursor-pointer"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -242,31 +242,31 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
           </DialogHeader>
 
           {loadingPost ? (
-            <div className="text-sm text-gray-500 py-8 text-center">Loading post...</div>
+            <div className="text-sm text-muted-foreground py-8 text-center">Loading post...</div>
           ) : selectedPost ? (
             <div className="space-y-4">
               <div>
                 <h3 className="text-lg font-semibold">{selectedPost.title}</h3>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge className={statusColors[selectedPost.status] || 'bg-gray-100 text-gray-800'}>
+                  <Badge className={statusColors[selectedPost.status] || 'bg-muted text-foreground/90'}>
                     {selectedPost.status}
                   </Badge>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     {(selectedPost.boards as any)?.name || 'Board'}
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     · {new Date(selectedPost.created_at).toLocaleDateString()}
                   </span>
                 </div>
               </div>
 
               {selectedPost.content && (
-                <div className="text-sm text-gray-700 whitespace-pre-wrap border rounded-lg p-4 bg-gray-50">
+                <div className="text-sm text-foreground/80 whitespace-pre-wrap border rounded-lg p-4 bg-muted/50">
                   {selectedPost.content}
                 </div>
               )}
 
-              <div className="flex gap-4 text-sm text-gray-500">
+              <div className="flex gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <ThumbsUp className="h-4 w-4" /> {selectedPost.vote_count} votes
                 </span>
@@ -282,14 +282,14 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
                     {selectedPost.comments.map((c) => (
                       <div key={c.id} className="text-sm border rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-foreground">
                             {c.author_name || c.author_email || 'Anonymous'}
                           </span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-muted-foreground/60">
                             {new Date(c.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="text-gray-700">{c.content}</div>
+                        <div className="text-foreground/80">{c.content}</div>
                       </div>
                     ))}
                   </div>
@@ -317,13 +317,13 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
               className="w-14 h-14 rounded-full object-cover"
             />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-lg font-medium text-gray-600">
+            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-lg font-medium text-muted-foreground">
               {(user.name || user.email || '?')[0].toUpperCase()}
             </div>
           )}
           <div>
             <div className="text-lg font-semibold">{user.name || user.email}</div>
-            <div className="text-sm text-gray-500">{user.email}</div>
+            <div className="text-sm text-muted-foreground">{user.email}</div>
             <div className="mt-1">
               <Badge variant={user.is_banned ? 'destructive' : 'secondary'}>
                 {user.is_banned ? 'Banned' : user.user_source}
@@ -334,11 +334,11 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <div className="text-gray-500">First seen</div>
+            <div className="text-muted-foreground">First seen</div>
             <div className="font-medium">{new Date(user.first_seen_at).toLocaleString()}</div>
           </div>
           <div>
-            <div className="text-gray-500">Last seen</div>
+            <div className="text-muted-foreground">Last seen</div>
             <div className="font-medium">{new Date(user.last_seen_at).toLocaleString()}</div>
           </div>
         </div>
@@ -346,15 +346,15 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
         {user.company_name && (
           <div className="rounded-lg border p-3 text-sm">
             <div className="font-medium">{user.company_name}</div>
-            {user.company_plan && <div className="text-gray-500">Plan: {user.company_plan}</div>}
+            {user.company_plan && <div className="text-muted-foreground">Plan: {user.company_plan}</div>}
             {user.company_monthly_spend != null && (
-              <div className="text-gray-500">Spend: ${user.company_monthly_spend}</div>
+              <div className="text-muted-foreground">Spend: ${user.company_monthly_spend}</div>
             )}
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex gap-1 bg-muted p-1 rounded-lg">
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
@@ -363,13 +363,13 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${
                   activeTab === tab.id
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground/80'
                 }`}
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}
-                <span className="text-xs text-gray-400">({tab.count})</span>
+                <span className="text-xs text-muted-foreground/60">({tab.count})</span>
               </button>
             )
           })}
@@ -380,21 +380,21 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
           {activeTab === 'posts' && (
             <div className="space-y-2">
               {loadingPosts ? (
-                <div className="text-sm text-gray-500">Loading posts...</div>
+                <div className="text-sm text-muted-foreground">Loading posts...</div>
               ) : recentPosts.length === 0 ? (
-                <div className="text-sm text-gray-500 text-center py-6">No posts yet.</div>
+                <div className="text-sm text-muted-foreground text-center py-6">No posts yet.</div>
               ) : (
                 recentPosts.map((post) => (
                   <button
                     key={post.id}
                     onClick={() => openPost(post.id)}
-                    className="w-full text-left text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer group"
+                    className="w-full text-left text-sm p-3 rounded-lg border border-border/50 hover:bg-muted/50 cursor-pointer group"
                   >
                     <div className="font-medium flex items-center justify-between">
                       <span>{post.title}</span>
-                      <Eye className="h-3.5 w-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Eye className="h-3.5 w-3.5 text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <div className="text-gray-500">
+                    <div className="text-muted-foreground">
                       {post.boards?.[0]?.name || 'Board'} · {new Date(post.created_at).toLocaleDateString()}
                     </div>
                   </button>
@@ -406,9 +406,9 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
           {activeTab === 'votes' && (
             <div className="space-y-2">
               {loadingVotes ? (
-                <div className="text-sm text-gray-500">Loading votes...</div>
+                <div className="text-sm text-muted-foreground">Loading votes...</div>
               ) : votes.length === 0 ? (
-                <div className="text-sm text-gray-500 text-center py-6">No votes yet.</div>
+                <div className="text-sm text-muted-foreground text-center py-6">No votes yet.</div>
               ) : (
                 votes.map((vote) => {
                   const post = Array.isArray(vote.posts) ? (vote.posts as any)[0] : vote.posts
@@ -417,13 +417,13 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
                     <button
                       key={vote.id}
                       onClick={() => openPost(vote.post_id)}
-                      className="w-full text-left text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer group"
+                      className="w-full text-left text-sm p-3 rounded-lg border border-border/50 hover:bg-muted/50 cursor-pointer group"
                     >
                       <div className="font-medium flex items-center justify-between">
                         <span>{postTitle || 'Unknown post'}</span>
-                        <Eye className="h-3.5 w-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
-                      <div className="text-gray-500">
+                      <div className="text-muted-foreground">
                         Voted on {new Date(vote.created_at).toLocaleDateString()}
                       </div>
                     </button>
@@ -436,9 +436,9 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
           {activeTab === 'comments' && (
             <div className="space-y-2">
               {loadingComments ? (
-                <div className="text-sm text-gray-500">Loading comments...</div>
+                <div className="text-sm text-muted-foreground">Loading comments...</div>
               ) : comments.length === 0 ? (
-                <div className="text-sm text-gray-500 text-center py-6">No comments yet.</div>
+                <div className="text-sm text-muted-foreground text-center py-6">No comments yet.</div>
               ) : (
                 comments.map((comment) => {
                   const post = Array.isArray(comment.posts) ? (comment.posts as any)[0] : comment.posts
@@ -447,13 +447,13 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
                     <button
                       key={comment.id}
                       onClick={() => openPost(comment.post_id)}
-                      className="w-full text-left text-sm p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer group"
+                      className="w-full text-left text-sm p-3 rounded-lg border border-border/50 hover:bg-muted/50 cursor-pointer group"
                     >
-                      <div className="text-gray-500 text-xs mb-1 flex items-center justify-between">
+                      <div className="text-muted-foreground text-xs mb-1 flex items-center justify-between">
                         <span>On: {postTitle || 'Unknown post'} · {new Date(comment.created_at).toLocaleDateString()}</span>
-                        <Eye className="h-3.5 w-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
-                      <div className="text-gray-900 line-clamp-2">{comment.content}</div>
+                      <div className="text-foreground line-clamp-2">{comment.content}</div>
                     </button>
                   )
                 })

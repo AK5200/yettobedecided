@@ -196,13 +196,13 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
       <div className="mb-6">
         <Link
           href={`/boards/${board.id}`}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
         >
           <ChevronLeft className="h-4 w-4" />
           Back to {board.name}
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Board Settings</h1>
-        <p className="text-gray-500 mt-1">Configure settings for {board.name}</p>
+        <h1 className="text-2xl font-bold text-foreground">Board Settings</h1>
+        <p className="text-muted-foreground mt-1">Configure settings for {board.name}</p>
       </div>
 
       {board.is_archived && (
@@ -224,7 +224,7 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
         <TabsList className="bg-transparent h-auto p-0 gap-0 border-b mb-6 w-full justify-start">
           <TabsTrigger
             value="general"
-            className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-gray-600 data-[state=active]:text-gray-900"
+            className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground data-[state=active]:text-foreground"
           >
             <span className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -233,7 +233,7 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
           </TabsTrigger>
           <TabsTrigger
             value="moderation"
-            className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-gray-600 data-[state=active]:text-gray-900"
+            className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-muted-foreground data-[state=active]:text-foreground"
           >
             <span className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
@@ -246,7 +246,7 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
         <TabsContent value="general" className="space-y-6">
           {/* Board Info */}
           <Card className="p-6">
-            <h3 className="font-medium text-gray-900 mb-4">Board Information</h3>
+            <h3 className="font-medium text-foreground mb-4">Board Information</h3>
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
@@ -265,7 +265,7 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                   onChange={(e) => setSlug(e.target.value)}
                   placeholder="feature-requests"
                 />
-                <p className="text-xs text-gray-500">Used in URLs: /boards/{slug || 'your-slug'}</p>
+                <p className="text-xs text-muted-foreground">Used in URLs: /boards/{slug || 'your-slug'}</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -282,7 +282,7 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
 
           {/* Visibility & Features */}
           <Card className="p-6">
-            <h3 className="font-medium text-gray-900 mb-4">Visibility & Features</h3>
+            <h3 className="font-medium text-foreground mb-4">Visibility & Features</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b">
                 <div className="flex items-start gap-3">
@@ -294,8 +294,8 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                     )}
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Public Board</h4>
-                    <p className="text-sm text-gray-500">
+                    <h4 className="font-medium text-foreground">Public Board</h4>
+                    <p className="text-sm text-muted-foreground">
                       Make this board visible to anyone with the link
                     </p>
                   </div>
@@ -309,8 +309,8 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                     <MessageCircle className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Allow Comments</h4>
-                    <p className="text-sm text-gray-500">Users can comment on posts in this board</p>
+                    <h4 className="font-medium text-foreground">Allow Comments</h4>
+                    <p className="text-sm text-muted-foreground">Users can comment on posts in this board</p>
                   </div>
                 </div>
                 <Switch checked={allowComments} onCheckedChange={setAllowComments} />
@@ -324,8 +324,8 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                     </svg>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Allow Voting</h4>
-                    <p className="text-sm text-gray-500">Users can upvote posts in this board</p>
+                    <h4 className="font-medium text-foreground">Allow Voting</h4>
+                    <p className="text-sm text-muted-foreground">Users can upvote posts in this board</p>
                   </div>
                 </div>
                 <Switch checked={allowVoting} onCheckedChange={setAllowVoting} />
@@ -360,7 +360,7 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
 
         {/* Moderation & Permissions Tab */}
         <TabsContent value="moderation" className="space-y-6">
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             These settings apply to all boards in your organization.
           </p>
 
@@ -372,8 +372,8 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                   <Shield className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Post Moderation</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="font-medium text-foreground">Post Moderation</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
                     When enabled, all new posts will require admin approval before being visible to other users.
                   </p>
                 </div>
@@ -390,8 +390,8 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                   <MessageCircle className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Comment Moderation</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="font-medium text-foreground">Comment Moderation</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
                     When enabled, all new comments will require admin approval before being visible.
                   </p>
                 </div>
@@ -404,12 +404,12 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
           <Card className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                  <UserX className="h-5 w-5 text-gray-600" />
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <UserX className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Anonymous Posts</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h3 className="font-medium text-foreground">Anonymous Posts</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
                     Allow users to submit feedback anonymously. Their identity won't be shown publicly.
                   </p>
                 </div>
@@ -425,8 +425,8 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                 <Users className="h-5 w-5 text-amber-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-gray-900">Guest Posts & Votes</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <h3 className="font-medium text-foreground">Guest Posts & Votes</h3>
+                <p className="text-sm text-muted-foreground mt-1">
                   Allow users to submit feedback and vote without creating an account.
                 </p>
                 <div className="flex items-center gap-6 mt-4">
@@ -435,7 +435,7 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                       type="checkbox"
                       checked={allowGuestPosts}
                       onChange={(e) => setAllowGuestPosts(e.target.checked)}
-                      className="rounded border-gray-300"
+                      className="rounded border-border"
                     />
                     Allow guest posts
                   </label>
@@ -444,7 +444,7 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                       type="checkbox"
                       checked={allowGuestVotes}
                       onChange={(e) => setAllowGuestVotes(e.target.checked)}
-                      className="rounded border-gray-300"
+                      className="rounded border-border"
                     />
                     Allow guest votes
                   </label>

@@ -32,7 +32,7 @@ export function ChangelogPreview({ title, content, category, open, onClose }: Ch
               {category}
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{title}</h1>
           <div
             className="prose prose-lg max-w-none break-words overflow-wrap-anywhere [&_img]:max-w-full [&_img]:h-auto [&_video]:max-w-full [&_video]:h-auto [&_*]:max-w-full"
             dangerouslySetInnerHTML={{ __html: content }}

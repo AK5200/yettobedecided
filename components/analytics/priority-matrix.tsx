@@ -38,12 +38,12 @@ const QUADRANTS = [
     title: 'Fill-ins',
     subtitle: 'Low effort, moderate value',
     bgGradient: 'from-gray-50 to-gray-100',
-    borderColor: 'border-gray-300',
+    borderColor: 'border-border',
     icon: HelpCircle,
-    iconColor: 'text-gray-600',
-    iconBg: 'bg-gray-100',
-    textColor: 'text-gray-900',
-    btnBg: 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300',
+    iconColor: 'text-muted-foreground',
+    iconBg: 'bg-muted',
+    textColor: 'text-foreground',
+    btnBg: 'bg-muted hover:bg-muted text-foreground/80 border-border',
   },
   {
     id: 'time_sinks',
@@ -155,8 +155,8 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
-        <div className="h-96 bg-gray-100 animate-pulse rounded-xl" />
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-border p-6">
+        <div className="h-96 bg-muted animate-pulse rounded-xl" />
       </div>
     )
   }
@@ -169,15 +169,15 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
   const dropPosts = data.drop || []
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6">
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-border p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-purple-100 rounded-xl">
             <Grid3x3 className="h-6 w-6 text-purple-600" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Prioritization Matrix</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="text-xl font-bold text-foreground">Prioritization Matrix</h3>
+            <p className="text-sm text-muted-foreground">
               Categorize posts by selecting a priority bucket.
             </p>
           </div>
@@ -223,18 +223,18 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
                   {posts.map((post: any) => (
                     <div
                       key={post.id}
-                      className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 shadow-sm hover:shadow-md transition-shadow group"
+                      className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-border/50 shadow-sm hover:shadow-md transition-shadow group"
                     >
-                      <div className="font-semibold text-gray-900 text-sm truncate">
+                      <div className="font-semibold text-foreground text-sm truncate">
                         {post.title}
                       </div>
                       <div className="flex items-center justify-between mt-1.5">
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           {post.vote_count || 0} votes
                         </div>
                         <button
                           onClick={() => handleReassignCategory(post.id, null)}
-                          className="text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                          className="text-xs text-muted-foreground/60 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                           title="Move back to unscored"
                         >
                           Remove
@@ -243,7 +243,7 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
                     </div>
                   ))}
                   {posts.length === 0 && (
-                    <div className="text-center py-4 text-sm text-gray-500">
+                    <div className="text-center py-4 text-sm text-muted-foreground">
                       No posts in this category
                     </div>
                   )}
@@ -274,18 +274,18 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
               {dropPosts.map((post: any) => (
                 <div
                   key={post.id}
-                  className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 shadow-sm hover:shadow-md transition-shadow group"
+                  className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border border-border/50 shadow-sm hover:shadow-md transition-shadow group"
                 >
-                  <div className="font-semibold text-gray-900 text-sm truncate">
+                  <div className="font-semibold text-foreground text-sm truncate">
                     {post.title}
                   </div>
                   <div className="flex items-center justify-between mt-1.5">
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       {post.vote_count || 0} votes
                     </div>
                     <button
                       onClick={() => handleReassignCategory(post.id, null)}
-                      className="text-xs text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      className="text-xs text-muted-foreground/60 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                       title="Move back to unscored"
                     >
                       Remove
@@ -300,35 +300,35 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
 
       {/* Unscored Posts — Card Wizard */}
       {unscoredQueue.length > 0 && currentUnscoredPost && (
-        <div className="mt-6 pt-6 border-t border-gray-200">
+        <div className="mt-6 pt-6 border-t border-border">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-semibold">
                 {unscoredQueue.length}
               </span>
               Unscored Posts
             </h4>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-muted-foreground">
               {unscoredIndex + 1} of {unscoredQueue.length}
             </span>
           </div>
 
-          <div className="bg-white rounded-2xl border-2 border-amber-200 shadow-md p-6">
-            <h5 className="text-lg font-bold text-gray-900 mb-2">
+          <div className="bg-card rounded-2xl border-2 border-amber-200 shadow-md p-6">
+            <h5 className="text-lg font-bold text-foreground mb-2">
               {currentUnscoredPost.title}
             </h5>
             {currentUnscoredPost.content && (
-              <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                 {currentUnscoredPost.content}
               </p>
             )}
-            <div className="text-xs text-gray-500 mb-5">
+            <div className="text-xs text-muted-foreground mb-5">
               {currentUnscoredPost.vote_count || 0} votes
             </div>
 
             {/* Category selection buttons */}
             <div className="space-y-3">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Assign to category
               </div>
               <div className="flex flex-wrap gap-2">
@@ -345,11 +345,11 @@ export function PriorityMatrix({ orgId, boardId }: PriorityMatrixProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/50">
               <button
                 onClick={handlePrevious}
                 disabled={unscoredIndex === 0}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous

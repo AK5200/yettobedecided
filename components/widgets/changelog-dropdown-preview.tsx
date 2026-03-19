@@ -43,7 +43,7 @@ function getCategoryStyle(category: string): { bg: string; text: string; dot: st
     case 'announcement':
       return { bg: 'bg-purple-100', text: 'text-purple-700', dot: 'bg-purple-500' }
     default:
-      return { bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-500' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground/80', dot: 'bg-muted-foreground' }
   }
 }
 
@@ -142,7 +142,7 @@ export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: 
         {/* Header */}
         <div className="p-4 border-b flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-900">{settings.heading || "What's New"}</h3>
+            <h3 className="font-semibold text-foreground">{settings.heading || "What's New"}</h3>
             {entries.length > 0 && (
               <span
                 className="h-2 w-2 rounded-full animate-pulse"
@@ -152,9 +152,9 @@ export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: 
           </div>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
-            <X className="h-4 w-4 text-gray-500" />
+            <X className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
 
@@ -162,26 +162,26 @@ export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
             </div>
           ) : entries.length === 0 ? (
             <div className="text-center py-12 px-4">
-              <p className="text-gray-500 text-sm">No changelog entries yet.</p>
-              <p className="text-xs text-gray-400 mt-2">Create your first changelog entry to see it here.</p>
+              <p className="text-muted-foreground text-sm">No changelog entries yet.</p>
+              <p className="text-xs text-muted-foreground/60 mt-2">Create your first changelog entry to see it here.</p>
             </div>
           ) : (
             <div className="divide-y">
               {entries.map((entry) => {
                 const categoryStyle = getCategoryStyle(entry.category)
                 return (
-                  <div key={entry.id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <div key={entry.id} className="p-4 hover:bg-muted/50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div
                         className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${categoryStyle.dot}`}
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-900 text-sm">{entry.title}</h4>
-                        <p className="text-xs text-gray-500 mt-1">{entry.content}</p>
+                        <h4 className="font-medium text-foreground text-sm">{entry.title}</h4>
+                        <p className="text-xs text-muted-foreground mt-1">{entry.content}</p>
                         {entry.image_url && (
                           <img
                             src={entry.image_url}
@@ -189,7 +189,7 @@ export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: 
                             className="mt-2 w-full h-20 object-cover rounded"
                           />
                         )}
-                        <span className="text-xs text-gray-400 mt-2 block">
+                        <span className="text-xs text-muted-foreground/60 mt-2 block">
                           {formatDate(entry.published_at)}
                         </span>
                       </div>
@@ -211,7 +211,7 @@ export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: 
           }}
         >
           {settings.showBranding ? (
-            <span className="text-xs text-gray-400">Powered by Kelo</span>
+            <span className="text-xs text-muted-foreground/60">Powered by Kelo</span>
           ) : (
             <span />
           )}

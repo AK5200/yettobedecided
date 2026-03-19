@@ -89,11 +89,11 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
   }
 
   if (loading) {
-    return <p className="text-sm text-gray-600">Loading comments...</p>
+    return <p className="text-sm text-muted-foreground">Loading comments...</p>
   }
 
   if (comments.length === 0) {
-    return <p className="text-sm text-gray-600">No comments yet</p>
+    return <p className="text-sm text-muted-foreground">No comments yet</p>
   }
 
   return (
@@ -106,7 +106,7 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
               key={comment.id}
               className={`p-3 rounded border-l-2 ${comment.is_internal
                   ? 'bg-yellow-50 border-yellow-200 border-l-yellow-600'
-                  : 'border-gray-200 bg-gray-50/50'
+                  : 'border-border bg-muted/50'
                 }`}
             >
               <div className="flex items-center justify-between gap-2 mb-1">
@@ -118,7 +118,7 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
                       className="w-5 h-5 rounded-full"
                     />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                    <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-xs">
                       {(comment.widget_users?.name || comment.author_name || comment.author_email || 'G')[0].toUpperCase()}
                     </div>
                   )}
@@ -177,8 +177,8 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
                   })()}
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mb-1">{comment.content}</p>
-              <small className="text-[10px] text-gray-500">
+              <p className="text-sm text-muted-foreground mb-1">{comment.content}</p>
+              <small className="text-[10px] text-muted-foreground">
                 {new Date(comment.created_at).toLocaleDateString()}
               </small>
             </div>
@@ -214,7 +214,7 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
           <DialogHeader>
             <DialogTitle>Delete Comment</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             Are you sure you want to delete this comment? This action cannot be undone.
           </p>
           <div className="flex gap-2 justify-end">

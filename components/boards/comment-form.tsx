@@ -111,7 +111,7 @@ export function CommentForm({
               {isInternal ? (
                 <><Lock className='w-4 h-4 text-yellow-600' /> Internal</>
               ) : (
-                <><Globe className='w-4 h-4 text-gray-500' /> Public</>
+                <><Globe className='w-4 h-4 text-muted-foreground' /> Public</>
               )}
             </span>
           </div>

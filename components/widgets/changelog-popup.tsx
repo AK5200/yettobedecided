@@ -80,7 +80,7 @@ export function ChangelogPopup({
           <DialogTitle className='flex items-center gap-2'>
             {heading}
           </DialogTitle>
-          <p className='text-sm text-gray-500'>{subheading}</p>
+          <p className='text-sm text-muted-foreground'>{subheading}</p>
         </DialogHeader>
 
         <div className='space-y-4 max-h-80 overflow-y-auto'>
@@ -92,14 +92,14 @@ export function ChangelogPopup({
                 </span>
               )}
               <h3 className='font-medium mt-2'>{entry.title}</h3>
-              <p className='text-sm text-gray-600 mt-1'>{entry.description}</p>
+              <p className='text-sm text-muted-foreground mt-1'>{entry.description}</p>
             </div>
           ))}
         </div>
 
         <div className='flex justify-between items-center pt-4'>
           {showBranding ? (
-            <span className='text-xs text-gray-400'>Powered by Kelo</span>
+            <span className='text-xs text-muted-foreground/60'>Powered by Kelo</span>
           ) : (
             <span />
           )}

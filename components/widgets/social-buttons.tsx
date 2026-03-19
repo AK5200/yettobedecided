@@ -21,10 +21,10 @@
     <div className="space-y-4">
       <Button
         variant="outline"
-        className="w-full justify-start gap-3 border-2 border-gray-300 hover:border-gray-400 hover:bg-gradient-to-r hover:from-gray-50 hover:to-white font-bold text-base py-6 shadow-md hover:shadow-lg transition-all cursor-pointer"
+        className="w-full justify-start gap-3 border-2 border-border hover:border-border hover:bg-linear-to-r hover:from-muted/50 hover:to-background font-bold text-base py-6 shadow-md hover:shadow-lg transition-all cursor-pointer"
         onClick={() => handleRedirect('google')}
       >
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white border-2 border-gray-300 text-sm font-extrabold text-gray-800 shadow-sm">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-background border-2 border-border text-sm font-extrabold text-foreground/90 shadow-sm">
           G
         </span>
         Continue with Google

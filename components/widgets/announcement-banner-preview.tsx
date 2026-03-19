@@ -72,7 +72,7 @@ export function AnnouncementBannerPreview({ onClose, settings, orgSlug, onOpenPo
       />
 
       {/* Preview Container - simulated hero section */}
-      <div className="relative w-full max-w-2xl mx-4 p-12 rounded-xl bg-gray-50">
+      <div className="relative w-full max-w-2xl mx-4 p-12 rounded-xl bg-muted/50">
         {/* Simulated hero section */}
         <div className="text-center space-y-6">
           {/* Announcement Banner */}
@@ -97,10 +97,10 @@ export function AnnouncementBannerPreview({ onClose, settings, orgSlug, onOpenPo
                 >
                   {settings.tag || 'New'}
                 </span>
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-foreground/80">
                   {settings.text || 'Capture feedback automatically with AI'} ✨
                 </span>
-                <ArrowRight className="h-4 w-4 text-gray-400" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground/60" />
               </a>
             ) : (
               <span
@@ -120,7 +120,7 @@ export function AnnouncementBannerPreview({ onClose, settings, orgSlug, onOpenPo
                 >
                   {settings.tag || 'New'}
                 </span>
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-foreground/80">
                   {settings.text || 'Capture feedback automatically with AI'} ✨
                 </span>
               </span>
@@ -128,22 +128,22 @@ export function AnnouncementBannerPreview({ onClose, settings, orgSlug, onOpenPo
           </div>
 
           {/* Link type indicator */}
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted-foreground/60">
             {getLinkLabel(settings.linkType)}
           </p>
 
           {/* Placeholder title */}
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-4xl font-bold text-foreground">
             Build better products with<br />customer feedback
           </h1>
 
-          <p className="text-gray-500 max-w-md mx-auto">
+          <p className="text-muted-foreground max-w-md mx-auto">
             This is a preview of how the announcement banner will look in your hero section.
           </p>
         </div>
 
         {/* Close hint */}
-        <p className="text-center text-xs text-gray-400 mt-8">
+        <p className="text-center text-xs text-muted-foreground/60 mt-8">
           Click outside to close preview
         </p>
       </div>

@@ -108,21 +108,21 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
   const totalVotes = activeBoards.reduce((acc, board) => acc + (board.total_votes || 0), 0)
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
+      <div className="border-b border-border bg-background sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-8 py-6">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
                   Feedback Boards
                 </h1>
                 <Badge className="px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-50">
                   {activeBoards.length} Active
                 </Badge>
               </div>
-              <p className="text-gray-500 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Organize and prioritize feedback from your customers
               </p>
             </div>
@@ -143,7 +143,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                 </div>
                 <span className="text-xs font-semibold uppercase tracking-wide">Boards</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900">{activeBoards.length}</div>
+              <div className="text-2xl font-bold text-foreground">{activeBoards.length}</div>
             </div>
             <div className="rounded-xl p-4 border border-blue-100 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50/60">
               <div className="flex items-center gap-2 text-blue-700 mb-1">
@@ -152,7 +152,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                 </div>
                 <span className="text-xs font-semibold uppercase tracking-wide">Feedback</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900">{totalPosts}</div>
+              <div className="text-2xl font-bold text-foreground">{totalPosts}</div>
             </div>
             <div className="rounded-xl p-4 border border-emerald-100 shadow-sm bg-gradient-to-br from-emerald-50 to-teal-50/60">
               <div className="flex items-center gap-2 text-emerald-700 mb-1">
@@ -161,7 +161,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                 </div>
                 <span className="text-xs font-semibold uppercase tracking-wide">Votes</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900">{totalVotes}</div>
+              <div className="text-2xl font-bold text-foreground">{totalVotes}</div>
             </div>
           </div>
         </div>
@@ -172,25 +172,25 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
         {/* Filters Bar */}
         <div className="flex items-center gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
               placeholder="Search boards..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white border-gray-200 focus:border-amber-400 focus:ring-amber-200/50 shadow-sm"
+              className="pl-10 bg-background border-border focus:border-amber-400 focus:ring-amber-200/50 shadow-sm"
             />
           </div>
 
-          <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-1 bg-white shadow-sm">
+          <div className="flex items-center gap-1 border border-border rounded-lg p-1 bg-background shadow-sm">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowArchived(false)}
-              className={`gap-2 ${!showArchived ? 'bg-amber-500 text-white hover:bg-amber-500' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+              className={`gap-2 ${!showArchived ? 'bg-amber-500 text-white hover:bg-amber-500' : 'text-muted-foreground hover:text-foreground/80 hover:bg-muted/50'}`}
             >
               <Sparkles className="h-3.5 w-3.5" />
               Active
-              <span className={`ml-0.5 text-[10px] font-bold px-1.5 py-0 rounded-full ${!showArchived ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'}`}>
+              <span className={`ml-0.5 text-[10px] font-bold px-1.5 py-0 rounded-full ${!showArchived ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'}`}>
                 {activeBoards.length}
               </span>
             </Button>
@@ -198,22 +198,22 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
               variant="ghost"
               size="sm"
               onClick={() => setShowArchived(true)}
-              className={`gap-2 ${showArchived ? 'bg-amber-500 text-white hover:bg-amber-500' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+              className={`gap-2 ${showArchived ? 'bg-amber-500 text-white hover:bg-amber-500' : 'text-muted-foreground hover:text-foreground/80 hover:bg-muted/50'}`}
             >
               <Archive className="h-3.5 w-3.5" />
               Archived
-              <span className={`ml-0.5 text-[10px] font-bold px-1.5 py-0 rounded-full ${showArchived ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'}`}>
+              <span className={`ml-0.5 text-[10px] font-bold px-1.5 py-0 rounded-full ${showArchived ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'}`}>
                 {archivedBoards.length}
               </span>
             </Button>
           </div>
 
-          <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-1 bg-white shadow-sm">
+          <div className="flex items-center gap-1 border border-border rounded-lg p-1 bg-background shadow-sm">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('grid')}
-              className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900 hover:bg-gray-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+              className={`p-2 ${viewMode === 'grid' ? 'bg-muted text-foreground hover:bg-muted' : 'text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50'}`}
             >
               <LayoutGrid className="h-4 w-4" />
             </Button>
@@ -221,7 +221,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('list')}
-              className={`p-2 ${viewMode === 'list' ? 'bg-gray-100 text-gray-900 hover:bg-gray-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+              className={`p-2 ${viewMode === 'list' ? 'bg-muted text-foreground hover:bg-muted' : 'text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50'}`}
             >
               <LayoutList className="h-4 w-4" />
             </Button>
@@ -231,13 +231,13 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
         {/* Boards Grid/List */}
         {filteredBoards.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-              <Search className="h-7 w-7 text-gray-400" />
+            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+              <Search className="h-7 w-7 text-muted-foreground/60" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               {searchQuery ? 'No boards found' : showArchived ? 'No archived boards' : 'No boards yet'}
             </h3>
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-muted-foreground text-sm mb-6">
               {searchQuery
                 ? 'Try adjusting your search query'
                 : showArchived
@@ -259,7 +259,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
             {filteredBoards.map((board) => (
               <Card
                 key={board.id}
-                className="group relative overflow-hidden border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 bg-white"
+                className="group relative overflow-hidden border-border hover:border-border hover:shadow-lg transition-all duration-200 bg-card"
               >
                 {/* Always-visible subtle accent strip at top */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-300 to-amber-200 opacity-40 group-hover:opacity-100 transition-opacity" />
@@ -268,38 +268,38 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                   <div className="p-6 pt-5">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-lg text-gray-900 mb-1 group-hover:text-amber-600 transition-colors">
+                        <h3 className="font-semibold text-lg text-foreground mb-1 group-hover:text-amber-600 transition-colors">
                           {board.name}
                         </h3>
-                        <p className="text-sm text-gray-500 line-clamp-2 min-h-[40px]">
+                        <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
                           {board.description || 'No description'}
                         </p>
                       </div>
-                      <ArrowUpRight className="h-4 w-4 text-gray-300 group-hover:text-amber-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-amber-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </div>
 
                     {/* Stats with colored icons */}
-                    <div className="flex items-center gap-4 pt-4 border-t border-gray-100 bg-gradient-to-r from-gray-50/80 to-transparent -mx-6 px-6 -mb-6 pb-4 rounded-b-lg">
+                    <div className="flex items-center gap-4 pt-4 border-t border-border/50 bg-gradient-to-r from-muted/50 to-transparent -mx-6 px-6 -mb-6 pb-4 rounded-b-lg">
                       <div className="flex items-center gap-1.5">
                         <div className="p-1 rounded bg-blue-50">
                           <MessageSquare className="h-3 w-3 text-blue-500" />
                         </div>
-                        <span className="text-sm font-semibold text-gray-800">{board.total_posts || 0}</span>
-                        <span className="text-xs text-gray-400">posts</span>
+                        <span className="text-sm font-semibold text-foreground/90">{board.total_posts || 0}</span>
+                        <span className="text-xs text-muted-foreground/60">posts</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="p-1 rounded bg-emerald-50">
                           <TrendingUp className="h-3 w-3 text-emerald-500" />
                         </div>
-                        <span className="text-sm font-semibold text-gray-800">{board.total_votes || 0}</span>
-                        <span className="text-xs text-gray-400">votes</span>
+                        <span className="text-sm font-semibold text-foreground/90">{board.total_votes || 0}</span>
+                        <span className="text-xs text-muted-foreground/60">votes</span>
                       </div>
                       {board.created_at && (
                         <div className="flex items-center gap-1.5 ml-auto">
                           <div className="p-1 rounded bg-violet-50">
                             <Calendar className="h-3 w-3 text-violet-400" />
                           </div>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-muted-foreground">
                             {new Date(board.created_at).toLocaleDateString('en-US', {
                               month: 'short',
                               day: 'numeric',
@@ -319,7 +319,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100"
+                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
                       >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
@@ -355,7 +355,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
             {filteredBoards.map((board) => (
               <Card
                 key={board.id}
-                className="group relative overflow-hidden border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 bg-white"
+                className="group relative overflow-hidden border-border hover:border-border hover:shadow-md transition-all duration-200 bg-card"
               >
                 {/* Subtle left accent */}
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-300 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -364,12 +364,12 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                   <div className="p-4 flex items-center gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-semibold text-base text-gray-900 group-hover:text-amber-600 transition-colors">
+                        <h3 className="font-semibold text-base text-foreground group-hover:text-amber-600 transition-colors">
                           {board.name}
                         </h3>
-                        <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover:text-amber-500 opacity-0 group-hover:opacity-100 transition-all" />
+                        <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-amber-500 opacity-0 group-hover:opacity-100 transition-all" />
                       </div>
-                      <p className="text-sm text-gray-500 line-clamp-1">
+                      <p className="text-sm text-muted-foreground line-clamp-1">
                         {board.description || 'No description'}
                       </p>
                     </div>
@@ -378,16 +378,16 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                         <div className="p-1 rounded bg-blue-50">
                           <MessageSquare className="h-3 w-3 text-blue-500" />
                         </div>
-                        <span className="text-sm font-semibold text-gray-800">{board.total_posts || 0}</span>
+                        <span className="text-sm font-semibold text-foreground/90">{board.total_posts || 0}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="p-1 rounded bg-emerald-50">
                           <TrendingUp className="h-3 w-3 text-emerald-500" />
                         </div>
-                        <span className="text-sm font-semibold text-gray-800">{board.total_votes || 0}</span>
+                        <span className="text-sm font-semibold text-foreground/90">{board.total_votes || 0}</span>
                       </div>
                       {board.created_at && (
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 min-w-[100px]">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-[100px]">
                           <div className="p-1 rounded bg-violet-50">
                             <Calendar className="h-3 w-3 text-violet-400" />
                           </div>
@@ -404,7 +404,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100"
+                          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>

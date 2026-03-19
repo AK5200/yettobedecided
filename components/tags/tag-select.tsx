@@ -43,7 +43,7 @@ export function TagSelect({ orgId, value, onChange }: TagSelectProps) {
           {tag.name}
         </label>
       ))}
-      {tags.length === 0 && <p className="text-sm text-gray-600">No tags available.</p>}
+      {tags.length === 0 && <p className="text-sm text-muted-foreground">No tags available.</p>}
     </div>
   )
 }

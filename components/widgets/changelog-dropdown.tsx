@@ -90,13 +90,13 @@ export function ChangelogDropdown({
                 )}
               </div>
               <h4 className='font-medium text-sm mt-1'>{entry.title}</h4>
-              <p className='text-xs text-gray-500 line-clamp-2'>{entry.description}</p>
+              <p className='text-xs text-muted-foreground line-clamp-2'>{entry.description}</p>
             </div>
           ))}
         </div>
         {showBranding && (
           <div className='pt-2 text-center'>
-            <span className='text-xs text-gray-400'>Powered by Kelo</span>
+            <span className='text-xs text-muted-foreground/60'>Powered by Kelo</span>
           </div>
         )}
       </PopoverContent>

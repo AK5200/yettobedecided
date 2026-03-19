@@ -50,18 +50,18 @@ export function WidgetCodeGenerator({ orgSlug, baseUrl }: WidgetCodeGeneratorPro
         <TabsTrigger value="iframe">iFrame</TabsTrigger>
       </TabsList>
       <TabsContent value="script" className="space-y-2">
-        <pre className="text-xs bg-gray-50 p-3 rounded border">{scriptCode}</pre>
+        <pre className="text-xs bg-muted/50 p-3 rounded border">{scriptCode}</pre>
         <Button onClick={() => copyToClipboard(scriptCode, 'script')} variant="outline">
           {copied === 'script' ? 'Copied' : 'Copy'}
         </Button>
       </TabsContent>
       <TabsContent value="iframe" className="space-y-2">
-        <pre className="text-xs bg-gray-50 p-3 rounded border">{iframeCode}</pre>
+        <pre className="text-xs bg-muted/50 p-3 rounded border">{iframeCode}</pre>
         <Button onClick={() => copyToClipboard(iframeCode, 'iframe')} variant="outline">
           {copied === 'iframe' ? 'Copied' : 'Copy'}
         </Button>
       </TabsContent>
-      <p className="text-xs text-gray-500 mt-3">
+      <p className="text-xs text-muted-foreground mt-3">
         Use the script tag for the full widget, or the iframe if you need manual sizing.
       </p>
     </Tabs>

@@ -71,13 +71,13 @@ export function NeedsAttention({ orgId }: NeedsAttentionProps) {
             <ChevronRight className="h-5 w-5 text-amber-500 ml-auto" />
           </button>
         </DialogTrigger>
-        <DialogContent className="max-w-lg p-0 gap-0 rounded-xl overflow-hidden border-gray-200">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
-            <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+        <DialogContent className="max-w-lg p-0 gap-0 rounded-xl overflow-hidden border-border">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/50">
+            <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Posts needing attention
             </DialogTitle>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               These posts haven&apos;t been updated in over 30 days
             </p>
           </DialogHeader>
@@ -86,25 +86,25 @@ export function NeedsAttention({ orgId }: NeedsAttentionProps) {
               const statusConfig = STATUS_CONFIG[post.status] || STATUS_CONFIG.open
               return (
                 <PostDetailDialog key={post.id} post={post} isAdmin>
-                  <div className="flex items-center gap-3 px-6 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100 last:border-b-0">
+                  <div className="flex items-center gap-3 px-6 py-3.5 hover:bg-muted/50 transition-colors cursor-pointer border-b border-border/50 last:border-b-0">
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-gray-900 truncate">
+                      <h4 className="text-sm font-semibold text-foreground truncate">
                         {post.title}
                       </h4>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.color}`}>
                           {statusConfig.label}
                         </span>
-                        <span className="flex items-center gap-1 text-[11px] text-gray-400">
+                        <span className="flex items-center gap-1 text-[11px] text-muted-foreground/60">
                           <Clock className="h-3 w-3" />
                           {post.days_stale}d ago
                         </span>
-                        <span className="text-[11px] text-gray-400">
+                        <span className="text-[11px] text-muted-foreground/60">
                           &middot; {post.vote_count || 0} votes
                         </span>
                       </div>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-gray-300 shrink-0" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
                   </div>
                 </PostDetailDialog>
               )

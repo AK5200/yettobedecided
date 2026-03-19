@@ -157,7 +157,7 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
                         <div className="p-3 bg-blue-50 border border-blue-200 rounded">
                             <p className="text-sm font-medium text-blue-800">Merging into this post:</p>
                             <p className="font-semibold">{sourcePost.title}</p>
-                            <p className="text-sm text-gray-600">{sourcePost.vote_count || 0} votes</p>
+                            <p className="text-sm text-muted-foreground">{sourcePost.vote_count || 0} votes</p>
                         </div>
 
                         {/* Selected Posts */}
@@ -171,7 +171,7 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
                                     >
                                         <div className="flex-1">
                                             <p className="font-medium">{post.title}</p>
-                                            <p className="text-sm text-gray-500">{post.vote_count || 0} votes</p>
+                                            <p className="text-sm text-muted-foreground">{post.vote_count || 0} votes</p>
                                         </div>
                                         <button
                                             type="button"
@@ -182,7 +182,7 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
                                         </button>
                                     </div>
                                 ))}
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                     Total votes after merge: <strong>{totalVotes}</strong>
                                 </p>
                             </div>
@@ -204,12 +204,12 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
                             {posts.map((post) => (
                                 <div
                                     key={post.id}
-                                    className="p-3 border rounded cursor-pointer hover:border-gray-400 hover:bg-gray-50 flex items-center justify-between"
+                                    className="p-3 border rounded cursor-pointer hover:border-border hover:bg-muted/50 flex items-center justify-between"
                                     onClick={() => addPost(post)}
                                 >
                                     <div>
                                         <p className="font-medium">{post.title}</p>
-                                        <p className="text-sm text-gray-500">{post.vote_count || 0} votes</p>
+                                        <p className="text-sm text-muted-foreground">{post.vote_count || 0} votes</p>
                                     </div>
                                     <Button size="sm" variant="ghost">
                                         <Check className="h-4 w-4" />
@@ -217,7 +217,7 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
                                 </div>
                             ))}
                             {search.length >= 2 && posts.length === 0 && (
-                                <p className="text-sm text-center text-gray-500 py-4">No posts found</p>
+                                <p className="text-sm text-center text-muted-foreground py-4">No posts found</p>
                             )}
                         </div>
 
@@ -232,11 +232,11 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
                 ) : (
                     <>
                         {/* Merge Preview */}
-                        <div className="p-3 bg-gray-50 border rounded">
-                            <p className="text-sm text-gray-600">
+                        <div className="p-3 bg-muted/50 border rounded">
+                            <p className="text-sm text-muted-foreground">
                                 Merging {selectedPosts.length} post{selectedPosts.length > 1 ? 's' : ''} into "{sourcePost.title}"
                             </p>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                                 Combined votes: <strong>{totalVotes}</strong>
                             </p>
                         </div>
@@ -247,18 +247,18 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
 
                             <RadioGroup value={mergeOption} onValueChange={(v) => setMergeOption(v as any)}>
                                 {/* Option 1: Keep current post's title */}
-                                <div className="flex items-start space-x-3 p-3 border rounded hover:bg-gray-50">
+                                <div className="flex items-start space-x-3 p-3 border rounded hover:bg-muted/50">
                                     <RadioGroupItem value="target" id="target" className="mt-1" />
                                     <div className="flex-1">
                                         <Label htmlFor="target" className="font-medium cursor-pointer">
                                             Keep current post's title & description
                                         </Label>
-                                        <p className="text-sm text-gray-600 mt-1">"{sourcePost.title}"</p>
+                                        <p className="text-sm text-muted-foreground mt-1">"{sourcePost.title}"</p>
                                     </div>
                                 </div>
 
                                 {/* Option 2: Use selected post's title */}
-                                <div className="flex items-start space-x-3 p-3 border rounded hover:bg-gray-50">
+                                <div className="flex items-start space-x-3 p-3 border rounded hover:bg-muted/50">
                                     <RadioGroupItem value="source" id="source" className="mt-1" />
                                     <div className="flex-1">
                                         <Label htmlFor="source" className="font-medium cursor-pointer">
@@ -272,7 +272,7 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
                                                         className={`p-2 border rounded cursor-pointer text-sm ${
                                                             selectedSourceForTitle === post.id
                                                                 ? 'border-blue-500 bg-blue-50'
-                                                                : 'hover:border-gray-400'
+                                                                : 'hover:border-border'
                                                         }`}
                                                         onClick={() => setSelectedSourceForTitle(post.id)}
                                                     >
@@ -285,7 +285,7 @@ export function MergeModal({ open, onClose, sourcePost, boardId, onMerged }: Mer
                                 </div>
 
                                 {/* Option 3: Custom title */}
-                                <div className="flex items-start space-x-3 p-3 border rounded hover:bg-gray-50">
+                                <div className="flex items-start space-x-3 p-3 border rounded hover:bg-muted/50">
                                     <RadioGroupItem value="custom" id="custom" className="mt-1" />
                                     <div className="flex-1">
                                         <Label htmlFor="custom" className="font-medium cursor-pointer">
