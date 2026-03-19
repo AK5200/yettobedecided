@@ -44,6 +44,31 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Kelo homepage theme */
+  --color-kelo-yellow: #F5C518;
+  --color-kelo-yellow-light: #FFF9E0;
+  --color-kelo-yellow-mid: #FFF3B0;
+  --color-kelo-yellow-dark: #D4A800;
+  --color-kelo-yellow-glow: rgba(245,197,24,0.18);
+  --color-kelo-ink: #0A0A0A;
+  --color-kelo-ink-soft: #1A1A1A;
+  --color-kelo-muted: #6B7280;
+  --color-kelo-border: #E5E7EB;
+  --color-kelo-border-dark: #D1D5DB;
+  --color-kelo-surface: #FAFAFA;
+  --color-kelo-surface-2: #F3F4F6;
+  --color-kelo-green: #22C55E;
+  --color-kelo-green-soft: #DCFCE7;
+
+  --font-display: 'Manrope', sans-serif;
+  --font-kelo-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-kelo-mono: 'JetBrains Mono', monospace;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delayed: float 8s ease-in-out infinite 2s;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-shimmer: shimmer 2.5s linear infinite;
 }
 
 :root {
@@ -138,6 +163,16 @@ textarea,
 
 .animate-slide-in-right {
   animation: slide-in-right 0.6s ease-out forwards;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .dark {
