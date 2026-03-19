@@ -3,6 +3,8 @@ import { Raleway, Libre_Baskerville, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const raleway = Raleway({
   weight: ["400", "500", "600", "700"],
@@ -58,11 +60,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${raleway.variable} ${libreBaskerville.variable} ${nunito.variable} antialiased`}>
-        {children}
-        <Toaster />
-        <SpeedInsights />
+        <ThemeProvider>
+          {children}
+          <ThemeToggle />
+          <Toaster />
+          <SpeedInsights />
+        </ThemeProvider>
       </body>
     </html>
   );
