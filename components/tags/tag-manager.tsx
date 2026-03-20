@@ -1,11 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -13,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Plus, GripVertical, Trash2, Tag } from 'lucide-react'
 
 interface TagData {
   id: string
@@ -39,6 +35,9 @@ const COLOR_OPTIONS = [
 ]
 
 export function TagManager({ orgId }: TagManagerProps) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   const [tags, setTags] = useState<TagData[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -97,39 +96,77 @@ export function TagManager({ orgId }: TagManagerProps) {
 
   if (loading) {
     return (
-      <div className="text-muted-foreground">Loading...</div>
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 rounded-full border-2 border-kelo-yellow border-t-transparent animate-spin" />
+      </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      {/* Add Tag Button */}
+      {/* Header with Add Tag button */}
       <div className="flex justify-end">
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-amber-500 hover:bg-amber-600 text-white">
-              <Plus className="h-4 w-4 mr-2" />
+            <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-kelo-yellow text-kelo-ink font-semibold text-sm hover:bg-kelo-yellow-dark transition-colors">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
               Add Tag
-            </Button>
+            </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent
+            className={`sm:max-w-lg rounded-2xl ${
+              isDark
+                ? 'bg-[#111111] border-white/[0.07]'
+                : 'bg-white border-kelo-border'
+            }`}
+          >
             <DialogHeader>
-              <DialogTitle>Create New Tag</DialogTitle>
+              <DialogTitle className={`font-display font-extrabold text-lg ${
+                isDark ? 'text-white' : 'text-kelo-ink'
+              }`}>
+                Create New Tag
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
+            <div className="space-y-5 pt-2">
+              {/* Tag Name Input */}
               <div className="space-y-2">
-                <Label htmlFor="tagName">Tag Name</Label>
-                <Input
+                <label
+                  htmlFor="tagName"
+                  className={`block text-sm font-semibold ${
+                    isDark ? 'text-white' : 'text-kelo-ink'
+                  }`}
+                >
+                  Tag Name
+                </label>
+                <input
                   id="tagName"
+                  type="text"
                   placeholder="e.g., Bug, Enhancement, Question"
                   value={newTag.name}
                   onChange={(e) => setNewTag({ ...newTag, name: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newTag.name.trim()) handleCreateTag()
+                  }}
+                  className={`w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors border ${
+                    isDark
+                      ? 'bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/30 focus:border-white/20'
+                      : 'bg-kelo-surface border-kelo-border text-kelo-ink placeholder:text-kelo-muted focus:border-kelo-ink/20'
+                  }`}
                 />
               </div>
 
+              {/* Color Picker */}
               <div className="space-y-2">
-                <Label>Color</Label>
-                <div className="flex flex-wrap gap-2">
+                <span
+                  className={`block text-sm font-semibold ${
+                    isDark ? 'text-white' : 'text-kelo-ink'
+                  }`}
+                >
+                  Color
+                </span>
+                <div className="flex flex-wrap gap-2.5">
                   {COLOR_OPTIONS.map((color) => (
                     <button
                       key={color.value}
@@ -137,9 +174,9 @@ export function TagManager({ orgId }: TagManagerProps) {
                       onClick={() => setNewTag({ ...newTag, color: color.value })}
                       className={`w-8 h-8 rounded-full transition-all ${
                         newTag.color === color.value
-                          ? 'ring-2 ring-offset-2 ring-amber-500'
+                          ? 'ring-2 ring-offset-2 ring-kelo-yellow'
                           : 'hover:scale-110'
-                      }`}
+                      } ${isDark && newTag.color === color.value ? 'ring-offset-[#111111]' : ''}`}
                       style={{ backgroundColor: color.value }}
                       title={color.name}
                     />
@@ -147,17 +184,32 @@ export function TagManager({ orgId }: TagManagerProps) {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-3">
+                <button
+                  onClick={() => setIsCreateDialogOpen(false)}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    isDark
+                      ? 'text-white/60 hover:text-white hover:bg-white/[0.06]'
+                      : 'text-kelo-muted hover:text-kelo-ink hover:bg-kelo-surface'
+                  }`}
+                >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={handleCreateTag}
                   disabled={saving || !newTag.name.trim()}
-                  className="bg-amber-500 hover:bg-amber-600 text-white"
+                  className="px-4 py-2 rounded-lg bg-kelo-yellow text-kelo-ink font-semibold text-sm hover:bg-kelo-yellow-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {saving ? 'Creating...' : 'Create Tag'}
-                </Button>
+                  {saving ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-4 w-4 rounded-full border-2 border-kelo-ink border-t-transparent animate-spin" />
+                      Creating...
+                    </span>
+                  ) : (
+                    'Create Tag'
+                  )}
+                </button>
               </div>
             </div>
           </DialogContent>
@@ -165,40 +217,88 @@ export function TagManager({ orgId }: TagManagerProps) {
       </div>
 
       {/* Tags List */}
-      <div className="space-y-2">
-        {tags.length === 0 ? (
-          <Card className="p-8 text-center">
-            <Tag className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-muted-foreground">No tags yet</p>
-            <p className="text-sm text-muted-foreground/60 mt-1">
-              Create your first tag to categorize feedback
-            </p>
-          </Card>
-        ) : (
-          tags.map((tag) => (
-            <Card key={tag.id} className="p-4">
-              <div className="flex items-center gap-4">
-                <GripVertical className="h-5 w-5 text-muted-foreground/40 cursor-grab" />
-                <div
-                  className="w-4 h-4 rounded-full shrink-0"
-                  style={{ backgroundColor: tag.color }}
-                />
-                <div className="flex-1 min-w-0">
-                  <span className="font-medium text-foreground">{tag.name}</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteTag(tag.id)}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
+      {tags.length === 0 ? (
+        <div
+          className={`rounded-2xl border p-10 text-center ${
+            isDark
+              ? 'bg-[#111111] border-white/[0.07]'
+              : 'bg-white border-kelo-border'
+          }`}
+        >
+          {/* Tag icon */}
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={`mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-kelo-muted/40'}`}
+          >
+            <path
+              d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8 8a2 2 0 0 0 2.828 0l7.172-7.172a2 2 0 0 0 0-2.828l-8-8Z"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" />
+          </svg>
+          <p className={`font-semibold ${isDark ? 'text-white/60' : 'text-kelo-muted'}`}>
+            No tags yet
+          </p>
+          <p className={`text-sm mt-1 ${isDark ? 'text-white/30' : 'text-kelo-muted/60'}`}>
+            Create your first tag to categorize feedback
+          </p>
+        </div>
+      ) : (
+        <div
+          className={`rounded-2xl border overflow-hidden divide-y ${
+            isDark
+              ? 'bg-[#111111] border-white/[0.07] divide-white/[0.07]'
+              : 'bg-white border-kelo-border divide-kelo-border'
+          }`}
+        >
+          {tags.map((tag) => (
+            <div
+              key={tag.id}
+              className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-kelo-surface/50'
+              }`}
+            >
+              <div
+                className="w-3.5 h-3.5 rounded-full shrink-0"
+                style={{ backgroundColor: tag.color }}
+              />
+              <span
+                className={`flex-1 min-w-0 text-sm font-semibold truncate ${
+                  isDark ? 'text-white' : 'text-kelo-ink'
+                }`}
+              >
+                {tag.name}
+              </span>
+              <button
+                onClick={() => handleDeleteTag(tag.id)}
+                className={`shrink-0 p-1.5 rounded-lg transition-colors ${
+                  isDark
+                    ? 'text-white/30 hover:text-red-400 hover:bg-white/[0.06]'
+                    : 'text-kelo-muted/50 hover:text-red-500 hover:bg-red-50'
+                }`}
+                title="Delete tag"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M2.5 4h11M5.5 4V2.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V4m1.5 0v9a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V4h8ZM6.5 7v4M9.5 7v4"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

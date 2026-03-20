@@ -2,10 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
+import { useTheme } from 'next-themes'
 import {
   Dialog,
   DialogContent,
@@ -13,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Plus, Key, Trash2, Copy, Check, AlertTriangle } from 'lucide-react'
 
 interface ApiKey {
   id: string
@@ -30,6 +26,9 @@ interface ApiKeysManagerProps {
 }
 
 export function ApiKeysManager({ orgId, initialApiKeys }: ApiKeysManagerProps) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   const [apiKeys, setApiKeys] = useState<ApiKey[]>(initialApiKeys)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -99,89 +98,115 @@ export function ApiKeysManager({ orgId, initialApiKeys }: ApiKeysManagerProps) {
 
   return (
     <div className="space-y-6">
-      {/* Add API Key Button */}
+      {/* Header with Create Button */}
       <div className="flex justify-end">
         <Dialog open={isCreateDialogOpen} onOpenChange={(open) => open ? setIsCreateDialogOpen(true) : handleCloseDialog()}>
           <DialogTrigger asChild>
-            <Button className="bg-amber-500 hover:bg-amber-600 text-white">
-              <Plus className="h-4 w-4 mr-2" />
+            <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-kelo-yellow text-kelo-ink font-semibold text-sm hover:bg-kelo-yellow-dark transition-colors">
+              {/* Plus icon */}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
               Create API Key
-            </Button>
+            </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className={`max-w-md rounded-2xl border ${isDark ? 'bg-[#111111] border-white/[0.07]' : 'bg-white border-kelo-border'}`}>
             <DialogHeader>
-              <DialogTitle>{rawKey ? 'API Key Created' : 'Create New API Key'}</DialogTitle>
+              <DialogTitle className={`font-display font-extrabold text-lg ${isDark ? 'text-white' : 'text-kelo-ink'}`}>
+                {rawKey ? 'API Key Created' : 'Create New API Key'}
+              </DialogTitle>
             </DialogHeader>
 
             {rawKey ? (
               <div className="space-y-4 pt-4">
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                {/* Warning box in kelo-yellow tones */}
+                <div className={`p-4 rounded-xl border ${isDark ? 'bg-kelo-yellow/10 border-kelo-yellow/20' : 'bg-kelo-yellow/10 border-kelo-yellow/30'}`}>
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                    {/* Alert triangle icon */}
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 mt-0.5">
+                      <path d="M8.57 3.22 1.5 15.5a1.67 1.67 0 0 0 1.43 2.5h14.14a1.67 1.67 0 0 0 1.43-2.5L11.43 3.22a1.67 1.67 0 0 0-2.86 0ZM10 7.5v3.33M10 14.17h.008" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-kelo-yellow-dark"/>
+                    </svg>
                     <div>
-                      <p className="text-sm font-medium text-amber-800">
+                      <p className={`text-sm font-semibold ${isDark ? 'text-kelo-yellow' : 'text-kelo-ink'}`}>
                         Copy your API key now
                       </p>
-                      <p className="text-sm text-amber-700 mt-1">
-                        This is the only time you'll be able to see this key. Store it securely.
+                      <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>
+                        This is the only time you&#39;ll be able to see this key. Store it securely.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Your API Key</Label>
+                  <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>
+                    Your API Key
+                  </span>
                   <div className="flex gap-2">
-                    <code className="flex-1 p-3 bg-muted rounded-lg text-sm font-mono break-all">
+                    <code className={`flex-1 p-3 rounded-xl text-sm font-mono break-all ${isDark ? 'bg-white/[0.04] border border-white/[0.08] text-white' : 'bg-kelo-surface border border-kelo-border text-kelo-ink'}`}>
                       {rawKey}
                     </code>
-                    <Button
-                      variant="outline"
-                      size="icon"
+                    <button
                       onClick={handleCopy}
-                      className="shrink-0"
+                      className={`shrink-0 w-10 h-10 rounded-xl border flex items-center justify-center transition-colors ${isDark ? 'border-white/[0.08] hover:bg-white/[0.06] text-white' : 'border-kelo-border hover:bg-kelo-surface text-kelo-ink'}`}
                     >
                       {copied ? (
-                        <Check className="h-4 w-4 text-green-600" />
+                        /* Check icon */
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3.5 8.5 6 11l6.5-6.5" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                       ) : (
-                        <Copy className="h-4 w-4" />
+                        /* Copy icon */
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                          <path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2" stroke="currentColor" strokeWidth="1.5"/>
+                        </svg>
                       )}
-                    </Button>
+                    </button>
                   </div>
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button onClick={handleCloseDialog} className="bg-amber-500 hover:bg-amber-600 text-white">
+                  <button
+                    onClick={handleCloseDialog}
+                    className="px-4 py-2.5 rounded-xl bg-kelo-yellow text-kelo-ink font-semibold text-sm hover:bg-kelo-yellow-dark transition-colors"
+                  >
                     Done
-                  </Button>
+                  </button>
                 </div>
               </div>
             ) : (
               <div className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="keyName">Key Name</Label>
-                  <Input
+                  <label htmlFor="keyName" className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>
+                    Key Name
+                  </label>
+                  <input
                     id="keyName"
+                    type="text"
                     placeholder="e.g., Production API Key"
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
+                    className={`w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-colors ${isDark ? 'bg-white/[0.04] border border-white/[0.08] text-white placeholder:text-white/30 focus:border-white/20' : 'bg-kelo-surface border border-kelo-border text-kelo-ink placeholder:text-kelo-muted focus:border-kelo-ink/30'}`}
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className={`text-xs ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>
                     Give your key a descriptive name to remember its purpose.
                   </p>
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={handleCloseDialog}>
+                  <button
+                    onClick={handleCloseDialog}
+                    className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${isDark ? 'border-white/[0.08] text-white hover:bg-white/[0.06]' : 'border-kelo-border text-kelo-ink hover:bg-kelo-surface'}`}
+                  >
                     Cancel
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     onClick={handleCreate}
                     disabled={saving || !newKeyName.trim()}
-                    className="bg-amber-500 hover:bg-amber-600 text-white"
+                    className="px-4 py-2.5 rounded-xl bg-kelo-yellow text-kelo-ink font-semibold text-sm hover:bg-kelo-yellow-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? 'Creating...' : 'Create Key'}
-                  </Button>
+                  </button>
                 </div>
               </div>
             )}
@@ -192,25 +217,36 @@ export function ApiKeysManager({ orgId, initialApiKeys }: ApiKeysManagerProps) {
       {/* API Keys List */}
       <div className="space-y-3">
         {apiKeys.length === 0 ? (
-          <Card className="p-8 text-center">
-            <Key className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-muted-foreground">No API keys yet</p>
-            <p className="text-sm text-muted-foreground/60 mt-1">
+          <div className={`rounded-2xl border p-10 text-center ${isDark ? 'bg-[#111111] border-white/[0.07]' : 'bg-white border-kelo-border'}`}>
+            {/* Key icon - empty state */}
+            <div className={`mx-auto mb-4 w-14 h-14 rounded-2xl flex items-center justify-center ${isDark ? 'bg-white/[0.04]' : 'bg-kelo-surface'}`}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78Zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={isDark ? 'text-white/20' : 'text-kelo-muted/40'}/>
+              </svg>
+            </div>
+            <p className={`font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>No API keys yet</p>
+            <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>
               Create your first API key to access the API programmatically
             </p>
-          </Card>
+          </div>
         ) : (
           apiKeys.map((key) => (
-            <Card key={key.id} className="p-4">
+            <div
+              key={key.id}
+              className={`rounded-2xl border p-4 ${isDark ? 'bg-[#111111] border-white/[0.07]' : 'bg-white border-kelo-border'}`}
+            >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-                    <Key className="h-5 w-5 text-amber-600" />
+                  {/* Key icon with yellow accent */}
+                  <div className="w-10 h-10 rounded-xl bg-kelo-yellow/15 flex items-center justify-center shrink-0">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78Zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-kelo-yellow-dark"/>
+                    </svg>
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-medium text-foreground">{key.name}</h3>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <code className="bg-muted px-2 py-0.5 rounded text-xs">
+                    <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>{key.name}</h3>
+                    <div className={`flex items-center gap-3 text-sm ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>
+                      <code className={`px-2 py-0.5 rounded-md text-xs font-mono ${isDark ? 'bg-white/[0.04] text-white/60' : 'bg-kelo-surface text-kelo-ink/60'}`}>
                         {key.key_prefix}...
                       </code>
                       <span>Created {formatDate(key.created_at)}</span>
@@ -220,16 +256,18 @@ export function ApiKeysManager({ orgId, initialApiKeys }: ApiKeysManagerProps) {
                     </div>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={() => handleDelete(key.id)}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                  {/* Trash icon */}
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.5 4.5h11M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5m1.5 0v8a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 4 12.5v-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M6.5 7v4M9.5 7v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </button>
               </div>
-            </Card>
+            </div>
           ))
         )}
       </div>

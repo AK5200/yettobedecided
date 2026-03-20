@@ -2,11 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
@@ -185,7 +182,7 @@ const WEBHOOK_CONFIGS: IntegrationConfig[] = [
     helpUrl: 'https://core.telegram.org/bots#how-do-i-create-a-bot',
     helpText: 'Learn how to create a Telegram bot',
     helperNote: (
-      <p className="text-xs text-muted-foreground mt-1">
+      <p className="text-xs text-kelo-muted dark:text-white/40 mt-1">
         Format: https://api.telegram.org/bot&lt;TOKEN&gt;/sendMessage?chat_id=&lt;CHAT_ID&gt;
       </p>
     ),
@@ -211,6 +208,8 @@ export function IntegrationsManager({
 }: IntegrationsManagerProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
 
   // Slack OAuth state
   const slackIntegration = initialIntegrations.find((i) => i.type === 'slack')
@@ -379,25 +378,33 @@ export function IntegrationsManager({
     ? WEBHOOK_CONFIGS.find((c) => c.type === configuring)
     : null
 
+  // Kelo card class
+  const cardClass = isDark
+    ? 'rounded-2xl bg-[#111111] border border-white/[0.07] p-6'
+    : 'rounded-2xl bg-white border border-kelo-border p-6'
+
+  // Kelo section divider
+  const dividerClass = isDark ? 'border-white/[0.07]' : 'border-kelo-border'
+
   return (
     <div className="space-y-4">
       {/* Slack OAuth Card */}
-      <Card className="p-6">
+      <div className={cardClass}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-background border flex items-center justify-center">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isDark ? 'bg-white/[0.04] border border-white/[0.08]' : 'bg-kelo-surface border border-kelo-border'}`}>
               <SlackLogo />
             </div>
             <div>
-              <h3 className="font-medium text-foreground flex items-center gap-2">
+              <h3 className="font-semibold text-kelo-ink dark:text-white flex items-center gap-2">
                 Slack
                 {slackOAuthConnected && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                  <span className="text-xs font-bold bg-kelo-green-soft dark:bg-kelo-green/20 text-kelo-green px-2 py-0.5 rounded-lg">
                     Connected
                   </span>
                 )}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-kelo-muted dark:text-white/40">
                 {slackOAuthConnected
                   ? `Connected to ${slackIntegration?.team_name || 'Slack'}`
                   : 'Get notified about new feedback and updates in Slack'}
@@ -405,32 +412,31 @@ export function IntegrationsManager({
             </div>
           </div>
           {slackOAuthConnected ? (
-            <Button
-              variant="outline"
-              className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border text-red-500 dark:text-red-400 border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors disabled:opacity-50"
               onClick={handleSlackDisconnect}
               disabled={disconnectingSlack}
             >
               <Unlink className="h-4 w-4" />
               {disconnectingSlack ? 'Disconnecting...' : 'Disconnect'}
-            </Button>
+            </button>
           ) : (
-            <Button
-              className="gap-2 bg-[#4A154B] hover:bg-[#3a1139] text-white"
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark transition-colors"
               onClick={handleSlackConnect}
             >
               <SlackLogo />
               Add to Slack
-            </Button>
+            </button>
           )}
         </div>
 
         {/* Slack Connected Settings */}
         {slackOAuthConnected && (
-          <div className="mt-6 pt-6 border-t space-y-5">
+          <div className={`mt-6 pt-6 border-t ${dividerClass} space-y-5`}>
             {/* Channel Selector */}
             <div className="space-y-2">
-              <Label>Channel</Label>
+              <label className="text-sm font-semibold text-kelo-ink dark:text-white">Channel</label>
               <Select
                 value={slackChannel}
                 onValueChange={handleChannelChange}
@@ -445,7 +451,7 @@ export function IntegrationsManager({
                 </SelectTrigger>
                 <SelectContent>
                   {loadingChannels ? (
-                    <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
+                    <div className="flex items-center justify-center py-4 text-sm text-kelo-muted dark:text-white/40">
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Loading channels...
                     </div>
@@ -454,9 +460,9 @@ export function IntegrationsManager({
                       <SelectItem key={channel.id} value={channel.id}>
                         <span className="flex items-center gap-1.5">
                           {channel.is_private ? (
-                            <Lock className="h-3 w-3 text-muted-foreground/60" />
+                            <Lock className="h-3 w-3 text-kelo-muted/60 dark:text-white/30" />
                           ) : (
-                            <Hash className="h-3 w-3 text-muted-foreground/60" />
+                            <Hash className="h-3 w-3 text-kelo-muted/60 dark:text-white/30" />
                           )}
                           {channel.name}
                         </span>
@@ -469,12 +475,12 @@ export function IntegrationsManager({
 
             {/* Notification Toggles */}
             <div className="space-y-3">
-              <Label>Notification Events</Label>
+              <label className="text-sm font-semibold text-kelo-ink dark:text-white">Notification Events</label>
 
               <div className="flex items-center justify-between py-1.5">
                 <div>
-                  <p className="text-sm font-medium text-foreground">New Feedback</p>
-                  <p className="text-xs text-muted-foreground">When someone submits new feedback</p>
+                  <p className="text-sm font-semibold text-kelo-ink dark:text-white">New Feedback</p>
+                  <p className="text-xs text-kelo-muted dark:text-white/40">When someone submits new feedback</p>
                 </div>
                 <Switch
                   checked={slackNotify.notify_on_new_feedback}
@@ -486,8 +492,8 @@ export function IntegrationsManager({
 
               <div className="flex items-center justify-between py-1.5">
                 <div>
-                  <p className="text-sm font-medium text-foreground">Status Changes</p>
-                  <p className="text-xs text-muted-foreground">When feedback status is updated</p>
+                  <p className="text-sm font-semibold text-kelo-ink dark:text-white">Status Changes</p>
+                  <p className="text-xs text-kelo-muted dark:text-white/40">When feedback status is updated</p>
                 </div>
                 <Switch
                   checked={slackNotify.notify_on_status_change}
@@ -499,8 +505,8 @@ export function IntegrationsManager({
 
               <div className="flex items-center justify-between py-1.5">
                 <div>
-                  <p className="text-sm font-medium text-foreground">New Comments</p>
-                  <p className="text-xs text-muted-foreground">When someone comments on feedback</p>
+                  <p className="text-sm font-semibold text-kelo-ink dark:text-white">New Comments</p>
+                  <p className="text-xs text-kelo-muted dark:text-white/40">When someone comments on feedback</p>
                 </div>
                 <Switch
                   checked={slackNotify.notify_on_new_comment}
@@ -511,47 +517,46 @@ export function IntegrationsManager({
               </div>
             </div>
 
-            <Button
+            <button
               onClick={saveSlackNotifications}
               disabled={savingSlack}
-              className="bg-amber-500 hover:bg-amber-600 text-white"
-              size="sm"
+              className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark transition-colors disabled:opacity-50"
             >
               {savingSlack ? 'Saving...' : 'Save Settings'}
-            </Button>
+            </button>
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Webhook-based integration cards */}
       {WEBHOOK_CONFIGS.map((config) => (
-        <Card key={config.type} className="p-6">
+        <div key={config.type} className={cardClass}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-background border flex items-center justify-center">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isDark ? 'bg-white/[0.04] border border-white/[0.08]' : 'bg-kelo-surface border border-kelo-border'}`}>
                 {config.logo}
               </div>
               <div>
-                <h3 className="font-medium text-foreground flex items-center gap-2">
+                <h3 className="font-semibold text-kelo-ink dark:text-white flex items-center gap-2">
                   {config.name}
                   {isConnected(config.type) && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                    <span className="text-xs font-bold bg-kelo-green-soft dark:bg-kelo-green/20 text-kelo-green px-2 py-0.5 rounded-lg">
                       Connected
                     </span>
                   )}
                 </h3>
-                <p className="text-sm text-muted-foreground">{config.description}</p>
+                <p className="text-sm text-kelo-muted dark:text-white/40">{config.description}</p>
               </div>
             </div>
-            <Button
-              className="gap-2 bg-amber-500 hover:bg-amber-600 text-white"
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark transition-colors"
               onClick={() => setConfiguring(config.type)}
             >
               <Settings className="h-4 w-4" />
               Configure
-            </Button>
+            </button>
           </div>
-        </Card>
+        </div>
       ))}
 
       {/* Webhook Configuration Dialog */}
@@ -563,26 +568,34 @@ export function IntegrationsManager({
           {activeConfig && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-3">
+                <DialogTitle className="flex items-center gap-3 font-display font-extrabold text-kelo-ink dark:text-white">
                   {activeConfig.logo}
                   Configure {activeConfig.name}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-6 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`${activeConfig.type}-webhook`}>Webhook URL</Label>
-                  <Input
+                  <label htmlFor={`${activeConfig.type}-webhook`} className="text-sm font-semibold text-kelo-ink dark:text-white">
+                    Webhook URL
+                  </label>
+                  <input
                     id={`${activeConfig.type}-webhook`}
+                    type="text"
                     placeholder={activeConfig.placeholder}
                     value={states[activeConfig.type].webhook_url}
                     onChange={(e) => updateState(activeConfig.type, { webhook_url: e.target.value })}
+                    className={`w-full px-3 py-2 text-sm rounded-xl border outline-none transition-colors placeholder:text-kelo-muted/50 dark:placeholder:text-white/20 ${
+                      isDark
+                        ? 'bg-white/[0.04] border-white/[0.08] text-white focus:border-white/20'
+                        : 'bg-kelo-surface border-kelo-border text-kelo-ink focus:border-kelo-border-dark'
+                    }`}
                   />
                   {activeConfig.helpUrl && (
                     <a
                       href={activeConfig.helpUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-amber-600 hover:text-amber-700 flex items-center gap-1"
+                      className="text-xs text-kelo-yellow-dark hover:text-kelo-yellow flex items-center gap-1"
                     >
                       {activeConfig.helpText} <ExternalLink className="h-3 w-3" />
                     </a>
@@ -592,25 +605,33 @@ export function IntegrationsManager({
 
                 {activeConfig.showChannelField && (
                   <div className="space-y-2">
-                    <Label htmlFor={`${activeConfig.type}-channel`}>Channel Name (optional)</Label>
-                    <Input
+                    <label htmlFor={`${activeConfig.type}-channel`} className="text-sm font-semibold text-kelo-ink dark:text-white">
+                      Channel Name (optional)
+                    </label>
+                    <input
                       id={`${activeConfig.type}-channel`}
+                      type="text"
                       placeholder="#feedback"
                       value={states[activeConfig.type].channel_name}
                       onChange={(e) =>
                         updateState(activeConfig.type, { channel_name: e.target.value })
                       }
+                      className={`w-full px-3 py-2 text-sm rounded-xl border outline-none transition-colors placeholder:text-kelo-muted/50 dark:placeholder:text-white/20 ${
+                        isDark
+                          ? 'bg-white/[0.04] border-white/[0.08] text-white focus:border-white/20'
+                          : 'bg-kelo-surface border-kelo-border text-kelo-ink focus:border-kelo-border-dark'
+                      }`}
                     />
                   </div>
                 )}
 
                 <div className="space-y-4">
-                  <Label>Notification Events</Label>
+                  <label className="text-sm font-semibold text-kelo-ink dark:text-white">Notification Events</label>
 
                   <div className="flex items-center justify-between py-2">
                     <div>
-                      <p className="text-sm font-medium text-foreground">New Feedback</p>
-                      <p className="text-xs text-muted-foreground">When someone submits new feedback</p>
+                      <p className="text-sm font-semibold text-kelo-ink dark:text-white">New Feedback</p>
+                      <p className="text-xs text-kelo-muted dark:text-white/40">When someone submits new feedback</p>
                     </div>
                     <Switch
                       checked={states[activeConfig.type].notify_on_new_feedback}
@@ -622,8 +643,8 @@ export function IntegrationsManager({
 
                   <div className="flex items-center justify-between py-2">
                     <div>
-                      <p className="text-sm font-medium text-foreground">Status Changes</p>
-                      <p className="text-xs text-muted-foreground">When feedback status is updated</p>
+                      <p className="text-sm font-semibold text-kelo-ink dark:text-white">Status Changes</p>
+                      <p className="text-xs text-kelo-muted dark:text-white/40">When feedback status is updated</p>
                     </div>
                     <Switch
                       checked={states[activeConfig.type].notify_on_status_change}
@@ -635,8 +656,8 @@ export function IntegrationsManager({
 
                   <div className="flex items-center justify-between py-2">
                     <div>
-                      <p className="text-sm font-medium text-foreground">New Comments</p>
-                      <p className="text-xs text-muted-foreground">When someone comments on feedback</p>
+                      <p className="text-sm font-semibold text-kelo-ink dark:text-white">New Comments</p>
+                      <p className="text-xs text-kelo-muted dark:text-white/40">When someone comments on feedback</p>
                     </div>
                     <Switch
                       checked={states[activeConfig.type].notify_on_new_comment}
@@ -648,16 +669,23 @@ export function IntegrationsManager({
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setConfiguring(null)}>
+                  <button
+                    onClick={() => setConfiguring(null)}
+                    className={`px-4 py-2 text-sm font-semibold rounded-xl border transition-colors ${
+                      isDark
+                        ? 'border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.04]'
+                        : 'border-kelo-border text-kelo-muted hover:text-kelo-ink hover:bg-kelo-surface'
+                    }`}
+                  >
                     Cancel
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     onClick={() => saveIntegration(activeConfig.type)}
                     disabled={saving}
-                    className="bg-amber-500 hover:bg-amber-600 text-white"
+                    className="px-4 py-2 text-sm font-semibold rounded-xl bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark transition-colors disabled:opacity-50"
                   >
                     {saving ? 'Saving...' : 'Save Changes'}
-                  </Button>
+                  </button>
                 </div>
               </div>
             </>
@@ -666,22 +694,22 @@ export function IntegrationsManager({
       </Dialog>
 
       {/* Linear Card */}
-      <Card className="p-6">
+      <div className={cardClass}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-background border flex items-center justify-center">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isDark ? 'bg-white/[0.04] border border-white/[0.08]' : 'bg-kelo-surface border border-kelo-border'}`}>
               <LinearLogo />
             </div>
             <div>
-              <h3 className="font-medium text-foreground flex items-center gap-2">
+              <h3 className="font-semibold text-kelo-ink dark:text-white flex items-center gap-2">
                 Linear
                 {linearIntegration && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                  <span className="text-xs font-bold bg-kelo-green-soft dark:bg-kelo-green/20 text-kelo-green px-2 py-0.5 rounded-lg">
                     Connected
                   </span>
                 )}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-kelo-muted dark:text-white/40">
                 {linearIntegration
                   ? `Connected to ${linearIntegration.team_name || 'Linear'}`
                   : 'Sync feedback with Linear issues for seamless tracking'}
@@ -689,9 +717,8 @@ export function IntegrationsManager({
             </div>
           </div>
           {linearIntegration ? (
-            <Button
-              variant="outline"
-              className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border text-red-500 dark:text-red-400 border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors"
               onClick={async () => {
                 const response = await fetch(`/api/linear/disconnect`, {
                   method: 'POST',
@@ -708,33 +735,36 @@ export function IntegrationsManager({
             >
               <Unlink className="h-4 w-4" />
               Disconnect
-            </Button>
+            </button>
           ) : linearAuthUrl ? (
-            <Button
-              className="gap-2 bg-amber-500 hover:bg-amber-600 text-white"
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark transition-colors"
               onClick={() => window.location.href = linearAuthUrl}
             >
               <ExternalLink className="h-4 w-4" />
               Connect
-            </Button>
+            </button>
           ) : (
-            <Button disabled className="gap-2">
+            <button
+              disabled
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-kelo-surface dark:bg-white/[0.04] text-kelo-muted dark:text-white/20 cursor-not-allowed"
+            >
               <ExternalLink className="h-4 w-4" />
               Connect
-            </Button>
+            </button>
           )}
         </div>
 
         {/* Linear Connected Settings */}
         {linearIntegration && (
-          <div className="mt-6 pt-6 border-t space-y-5">
+          <div className={`mt-6 pt-6 border-t ${dividerClass} space-y-5`}>
             <div className="space-y-3">
-              <Label>Sync Settings</Label>
+              <label className="text-sm font-semibold text-kelo-ink dark:text-white">Sync Settings</label>
 
               <div className="flex items-center justify-between py-1.5">
                 <div>
-                  <p className="text-sm font-medium text-foreground">Auto-sync New Feedback</p>
-                  <p className="text-xs text-muted-foreground">Automatically create Linear issues for new feedback posts</p>
+                  <p className="text-sm font-semibold text-kelo-ink dark:text-white">Auto-sync New Feedback</p>
+                  <p className="text-xs text-kelo-muted dark:text-white/40">Automatically create Linear issues for new feedback posts</p>
                 </div>
                 <Switch
                   checked={linearAutoSync}
@@ -743,17 +773,16 @@ export function IntegrationsManager({
               </div>
             </div>
 
-            <Button
+            <button
               onClick={saveLinearSettings}
               disabled={savingLinear}
-              className="bg-amber-500 hover:bg-amber-600 text-white"
-              size="sm"
+              className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark transition-colors disabled:opacity-50"
             >
               {savingLinear ? 'Saving...' : 'Save Settings'}
-            </Button>
+            </button>
           </div>
         )}
-      </Card>
+      </div>
     </div>
   )
 }
