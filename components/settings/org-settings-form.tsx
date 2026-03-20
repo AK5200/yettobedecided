@@ -2,32 +2,42 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Building2, Globe, Link2, FileText, Image, Loader2 } from 'lucide-react'
 
 interface OrgSettingsFormProps {
   orgId: string
+  userRole: string
   initialValues: {
     name: string
     slug: string
     description: string
     website: string
     logoUrl: string
+    plan: string
+    createdAt: string
   }
 }
 
-export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) {
+export function OrgSettingsForm({ orgId, userRole, initialValues }: OrgSettingsFormProps) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  const router = useRouter()
+
   const [name, setName] = useState(initialValues.name)
   const [slug, setSlug] = useState(initialValues.slug)
   const [description, setDescription] = useState(initialValues.description)
   const [website, setWebsite] = useState(initialValues.website)
   const [logoUrl, setLogoUrl] = useState(initialValues.logoUrl)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [logoError, setLogoError] = useState(false)
+
+  const hasChanges =
+    name !== initialValues.name ||
+    slug !== initialValues.slug ||
+    description !== initialValues.description ||
+    website !== initialValues.website ||
+    logoUrl !== initialValues.logoUrl
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,151 +60,279 @@ export function OrgSettingsForm({ orgId, initialValues }: OrgSettingsFormProps) 
     setLoading(false)
   }
 
+  const planConfig: Record<string, { label: string; color: string; bg: string; darkBg: string; darkText: string }> = {
+    free: { label: 'Free', color: 'text-kelo-muted', bg: 'bg-gray-100', darkBg: 'bg-white/[0.06]', darkText: 'text-white/40' },
+    pro: { label: 'Pro', color: 'text-kelo-yellow-dark', bg: 'bg-kelo-yellow-light', darkBg: 'bg-kelo-yellow/10', darkText: 'text-kelo-yellow' },
+    team: { label: 'Team', color: 'text-indigo-600', bg: 'bg-indigo-50', darkBg: 'bg-indigo-500/10', darkText: 'text-indigo-400' },
+  }
+  const plan = planConfig[initialValues.plan] || planConfig.free
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Basic Information */}
-      <div className="bg-linear-to-br from-background to-muted/50 rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-200">
-        <div className="flex items-start gap-4 mb-6">
-          <div className="p-2.5 bg-amber-100 rounded-xl group-hover:scale-110 transition-transform">
-            <Building2 className="h-5 w-5 text-amber-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Basic Information</h3>
-            <p className="text-sm text-muted-foreground">Your organization&apos;s public profile details.</p>
-          </div>
+    <div className="p-6 md:p-8 max-w-3xl mx-auto font-sans">
+      {/* Header */}
+      <div className="mb-8">
+        <div className={`inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border text-xs font-mono font-semibold tracking-widest uppercase ${
+          isDark ? 'border-white/10 bg-white/5 text-white/40' : 'border-kelo-border bg-kelo-surface text-kelo-muted'
+        }`}>
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+          </svg>
+          Organization
         </div>
+        <h1 className={`text-3xl md:text-4xl font-display font-extrabold tracking-tight leading-tight mb-2 ${isDark ? 'text-white' : 'text-kelo-ink'}`}>
+          Organization settings
+        </h1>
+        <p className={`text-base ${isDark ? 'text-white/50' : 'text-kelo-muted'}`}>
+          Manage your organization&apos;s profile and public identity.
+        </p>
+      </div>
 
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium text-foreground/80">
-              Organization Name
-            </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Acme Inc."
-              required
-              className="h-11"
+      {/* Overview card */}
+      <div className={`rounded-2xl border p-5 mb-6 ${isDark ? 'bg-[#111111] border-white/[0.07]' : 'bg-white border-kelo-border'}`}>
+        <div className="flex items-center gap-4">
+          {/* Logo or fallback */}
+          {logoUrl && !logoError ? (
+            <img
+              src={logoUrl}
+              alt={name}
+              className="w-14 h-14 rounded-2xl object-contain ring-1 ring-kelo-border dark:ring-white/10 bg-kelo-surface dark:bg-white/[0.04] p-1"
+              onError={() => setLogoError(true)}
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="slug" className="text-sm font-medium text-foreground/80">
-              URL Slug
-            </Label>
-            <div className="flex items-center gap-0">
-              <span className="inline-flex items-center h-11 px-3 rounded-l-lg border border-r-0 border-border bg-muted/50 text-sm text-muted-foreground select-none">
-                kelo.com/
-              </span>
-              <Input
-                id="slug"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                placeholder="acme"
-                className="flex-1 rounded-l-none h-11"
-                required
-              />
+          ) : (
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-display font-extrabold ${isDark ? 'bg-kelo-yellow/10 text-kelo-yellow' : 'bg-kelo-yellow-light text-kelo-yellow-dark'}`}>
+              {(name || 'O')[0].toUpperCase()}
             </div>
-            <p className="text-xs text-muted-foreground/60">This is used in your public feedback hub URL.</p>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className={`text-lg font-display font-bold truncate ${isDark ? 'text-white' : 'text-kelo-ink'}`}>{name || 'Your Organization'}</div>
+            <div className={`text-sm ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
+              kelohq.com/{slug || '...'}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${isDark ? `${plan.darkBg} ${plan.darkText}` : `${plan.bg} ${plan.color}`}`}>
+              {plan.label} plan
+            </span>
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${isDark ? 'bg-white/[0.06] text-white/40' : 'bg-kelo-surface text-kelo-muted'}`}>
+              {userRole}
+            </span>
           </div>
         </div>
+        {initialValues.createdAt && (
+          <div className={`mt-3 pt-3 border-t text-xs ${isDark ? 'border-white/[0.05] text-white/20' : 'border-kelo-border text-kelo-muted/60'}`}>
+            Created {new Date(initialValues.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </div>
+        )}
       </div>
 
-      {/* Description */}
-      <div className="bg-linear-to-br from-background to-muted/50 rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-200">
-        <div className="flex items-start gap-4 mb-6">
-          <div className="p-2.5 bg-blue-100 rounded-xl">
-            <FileText className="h-5 w-5 text-blue-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Description</h3>
-            <p className="text-sm text-muted-foreground">Tell users what your organization does.</p>
-          </div>
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Basic Information */}
+        <SettingsCard
+          isDark={isDark}
+          icon={
+            <svg className="w-4 h-4" style={{ color: '#F5C518' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+            </svg>
+          }
+          iconAccent="#F5C518"
+          title="Basic Information"
+          description="Your organization's public profile details."
+        >
+          <div className="space-y-4">
+            <FormField label="Organization Name" isDark={isDark}>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Acme Inc."
+                required
+                className={inputClasses(isDark)}
+              />
+            </FormField>
 
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="A brief description of your organization..."
-          rows={4}
-          className="resize-none"
-        />
-      </div>
-
-      {/* Website & Branding */}
-      <div className="bg-linear-to-br from-background to-muted/50 rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-200">
-        <div className="flex items-start gap-4 mb-6">
-          <div className="p-2.5 bg-green-100 rounded-xl">
-            <Globe className="h-5 w-5 text-green-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Website & Branding</h3>
-            <p className="text-sm text-muted-foreground">Links and visual identity for your organization.</p>
-          </div>
-        </div>
-
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="website" className="flex items-center gap-2 text-sm font-medium text-foreground/80">
-              <Link2 className="h-4 w-4 text-muted-foreground/60" />
-              Website URL
-            </Label>
-            <Input
-              id="website"
-              value={website}
-              onChange={(e) => setWebsite(e.target.value)}
-              placeholder="https://acme.com"
-              className="h-11"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="logoUrl" className="flex items-center gap-2 text-sm font-medium text-foreground/80">
-              <Image className="h-4 w-4 text-muted-foreground/60" />
-              Logo URL
-            </Label>
-            <Input
-              id="logoUrl"
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              placeholder="https://acme.com/logo.png"
-              className="h-11"
-            />
-            {logoUrl && (
-              <div className="mt-3 p-6 bg-linear-to-br from-muted/50 to-muted rounded-xl border border-dashed border-border flex items-center justify-center">
-                <img
-                  src={logoUrl}
-                  alt="Logo preview"
-                  className="h-16 w-auto object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
+            <FormField label="URL Slug" hint="This is used in your public feedback hub URL." isDark={isDark}>
+              <div className="flex items-center">
+                <span className={`inline-flex items-center h-11 px-3.5 rounded-l-xl border border-r-0 text-sm font-medium select-none ${
+                  isDark ? 'bg-white/[0.04] border-white/[0.08] text-white/30' : 'bg-kelo-surface border-kelo-border text-kelo-muted'
+                }`}>
+                  kelohq.com/
+                </span>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="acme"
+                  required
+                  className={`${inputClasses(isDark)} rounded-l-none border-l-0`}
                 />
+              </div>
+            </FormField>
+          </div>
+        </SettingsCard>
+
+        {/* Description */}
+        <SettingsCard
+          isDark={isDark}
+          icon={
+            <svg className="w-4 h-4" style={{ color: '#6366F1' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          }
+          iconAccent="#6366F1"
+          title="Description"
+          description="Tell users what your organization does."
+        >
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="A brief description of your organization..."
+            rows={4}
+            className={`${inputClasses(isDark)} resize-none min-h-[100px]`}
+          />
+        </SettingsCard>
+
+        {/* Website & Branding */}
+        <SettingsCard
+          isDark={isDark}
+          icon={
+            <svg className="w-4 h-4" style={{ color: '#22C55E' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+            </svg>
+          }
+          iconAccent="#22C55E"
+          title="Website & Branding"
+          description="Links and visual identity for your organization."
+        >
+          <div className="space-y-4">
+            <FormField label="Website URL" isDark={isDark}>
+              <div className="relative">
+                <svg className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-white/20' : 'text-kelo-muted/50'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-6.364-6.364L4.5 8.25a4.5 4.5 0 006.364 6.364l4.5-4.5z" />
+                </svg>
+                <input
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="https://acme.com"
+                  className={`${inputClasses(isDark)} pl-10`}
+                />
+              </div>
+            </FormField>
+
+            <FormField label="Logo URL" isDark={isDark}>
+              <div className="relative">
+                <svg className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-white/20' : 'text-kelo-muted/50'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M2.25 18V6a2.25 2.25 0 012.25-2.25h15A2.25 2.25 0 0121.75 6v12A2.25 2.25 0 0119.5 20.25h-15A2.25 2.25 0 012.25 18z" />
+                </svg>
+                <input
+                  type="url"
+                  value={logoUrl}
+                  onChange={(e) => { setLogoUrl(e.target.value); setLogoError(false) }}
+                  placeholder="https://acme.com/logo.png"
+                  className={`${inputClasses(isDark)} pl-10`}
+                />
+              </div>
+            </FormField>
+
+            {/* Logo preview */}
+            {logoUrl && (
+              <div className={`rounded-xl border-2 border-dashed p-6 flex items-center justify-center ${
+                isDark ? 'border-white/[0.08] bg-white/[0.02]' : 'border-kelo-border bg-kelo-surface/30'
+              }`}>
+                {logoError ? (
+                  <div className={`text-xs font-medium ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
+                    Could not load logo preview
+                  </div>
+                ) : (
+                  <img
+                    src={logoUrl}
+                    alt="Logo preview"
+                    className="h-16 w-auto object-contain"
+                    onError={() => setLogoError(true)}
+                  />
+                )}
               </div>
             )}
           </div>
+        </SettingsCard>
+
+        {/* Submit */}
+        <div className="flex items-center justify-between pt-2">
+          {hasChanges && (
+            <span className={`text-xs font-medium flex items-center gap-1.5 ${isDark ? 'text-kelo-yellow' : 'text-kelo-yellow-dark'}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-kelo-yellow animate-pulse" />
+              Unsaved changes
+            </span>
+          )}
+          <div className="ml-auto">
+            <button
+              type="submit"
+              disabled={loading || !hasChanges}
+              className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${
+                hasChanges
+                  ? 'bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark shadow-sm hover:shadow-[0_0_20px_rgba(245,197,24,0.4)]'
+                  : (isDark ? 'bg-white/[0.06] text-white/30' : 'bg-kelo-surface text-kelo-muted')
+              }`}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full border-2 border-kelo-ink border-t-transparent animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                'Save changes'
+              )}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+// ── Sub-components ──────────────────────────────────────────────────────────
+
+function SettingsCard({ isDark, icon, iconAccent, title, description, children }: {
+  isDark: boolean; icon: React.ReactNode; iconAccent: string; title: string; description: string; children: React.ReactNode
+}) {
+  return (
+    <div className={`rounded-2xl border p-6 transition-all duration-200 ${
+      isDark ? 'bg-[#111111] border-white/[0.07] hover:border-white/[0.12]' : 'bg-white border-kelo-border hover:border-kelo-border-dark hover:shadow-[0_4px_20px_rgba(0,0,0,0.04)]'
+    }`}>
+      <div className="flex items-start gap-3 mb-5">
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${iconAccent}18` }}>
+          {icon}
+        </div>
+        <div>
+          <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>{title}</h3>
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>{description}</p>
         </div>
       </div>
-
-      {/* Submit */}
-      <div className="flex justify-end pt-2">
-        <Button
-          type="submit"
-          disabled={loading}
-          className="bg-amber-500 hover:bg-amber-600 text-white h-11 px-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            'Save Changes'
-          )}
-        </Button>
-      </div>
-    </form>
+      {children}
+    </div>
   )
+}
+
+function FormField({ label, hint, isDark, children }: {
+  label: string; hint?: string; isDark: boolean; children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className={`text-xs font-semibold tracking-wide ${isDark ? 'text-white/60' : 'text-kelo-ink'}`}>
+        {label}
+      </label>
+      {children}
+      {hint && (
+        <p className={`text-[11px] ${isDark ? 'text-white/20' : 'text-kelo-muted/60'}`}>{hint}</p>
+      )}
+    </div>
+  )
+}
+
+function inputClasses(isDark: boolean): string {
+  return `w-full h-11 px-4 rounded-xl text-sm font-medium border outline-none transition-all duration-200 ${
+    isDark
+      ? 'bg-white/[0.04] border-white/[0.08] text-white placeholder-white/20 focus:border-kelo-yellow/40 focus:bg-white/[0.06]'
+      : 'bg-kelo-surface border-kelo-border text-kelo-ink placeholder-kelo-muted/50 focus:border-kelo-yellow/50 focus:bg-white focus:shadow-[0_0_0_3px_rgba(245,197,24,0.1)]'
+  }`
 }
