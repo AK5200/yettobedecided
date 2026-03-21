@@ -3,16 +3,19 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { IntegrationsManager } from '@/components/settings/integrations-manager'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export default async function IntegrationsSettingsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: membership } = await supabase
-    .from('org_members').select('org_id').eq('user_id', user.id).limit(1).single()
+  const orgContext = await getCurrentOrg(supabase)
+  if (!orgContext) {
+    redirect('/onboarding')
+  }
 
-  const orgId = membership?.org_id
+  const orgId = orgContext.orgId
 
   const { data: integrations } = await supabase.from('integrations').select('*').eq('org_id', orgId)
 

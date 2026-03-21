@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
@@ -326,51 +327,48 @@ export default function WidgetsPage() {
 
   useEffect(() => {
     const fetchOrg = async () => {
+      const orgId = await getClientOrgId()
+      if (!orgId) return
+
+      setOrgId(orgId)
+
+      // Fetch org slug
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data: membership } = await supabase
-        .from('org_members')
-        .select('org_id, organizations(id, name, slug)')
-        .eq('user_id', user.id)
-        .limit(1)
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('slug')
+        .eq('id', orgId)
         .single()
+      setOrgSlug(org?.slug || '')
 
-      if (membership) {
-        setOrgId(membership.org_id)
-        const org = membership.organizations as any
-        setOrgSlug(org?.slug || '')
-
-        // Load existing settings from database
-        try {
-          const res = await fetch(`/api/widget-settings?org_id=${membership.org_id}`)
-          if (res.ok) {
-            const data = await res.json()
-            if (data.settings) {
-              setSettings(prev => ({
-                ...prev,
-                accentColor: data.settings.accent_color || prev.accentColor,
-                backgroundColor: data.settings.background_color || prev.backgroundColor,
-                headerBackgroundColor: data.settings.header_background_color || data.settings.background_color || prev.headerBackgroundColor || prev.backgroundColor,
-                showBranding: data.settings.show_branding ?? prev.showBranding,
-                size: data.settings.size || prev.size,
-                borderRadius: data.settings.border_radius || prev.borderRadius,
-                shadow: data.settings.shadow || prev.shadow,
-                heading: data.settings.heading || prev.heading,
-                subheading: data.settings.subheading || prev.subheading,
-                homepageUrl: data.settings.homepage_url || prev.homepageUrl,
-                autoTriggerEnabled: data.settings.auto_trigger_enabled ?? prev.autoTriggerEnabled,
-                allInOneTextStyle: data.settings.all_in_one_text_style || prev.allInOneTextStyle,
-                allInOnePopoverPlacement: data.settings.all_in_one_popover_placement || prev.allInOnePopoverPlacement,
-                allInOnePopupPlacement: data.settings.all_in_one_popup_placement || prev.allInOnePopupPlacement,
-                allInOneStyleVariant: data.settings.all_in_one_style_variant || prev.allInOneStyleVariant,
-              }))
-            }
+      // Load existing settings from database
+      try {
+        const res = await fetch(`/api/widget-settings?org_id=${orgId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.settings) {
+            setSettings(prev => ({
+              ...prev,
+              accentColor: data.settings.accent_color || prev.accentColor,
+              backgroundColor: data.settings.background_color || prev.backgroundColor,
+              headerBackgroundColor: data.settings.header_background_color || data.settings.background_color || prev.headerBackgroundColor || prev.backgroundColor,
+              showBranding: data.settings.show_branding ?? prev.showBranding,
+              size: data.settings.size || prev.size,
+              borderRadius: data.settings.border_radius || prev.borderRadius,
+              shadow: data.settings.shadow || prev.shadow,
+              heading: data.settings.heading || prev.heading,
+              subheading: data.settings.subheading || prev.subheading,
+              homepageUrl: data.settings.homepage_url || prev.homepageUrl,
+              autoTriggerEnabled: data.settings.auto_trigger_enabled ?? prev.autoTriggerEnabled,
+              allInOneTextStyle: data.settings.all_in_one_text_style || prev.allInOneTextStyle,
+              allInOnePopoverPlacement: data.settings.all_in_one_popover_placement || prev.allInOnePopoverPlacement,
+              allInOnePopupPlacement: data.settings.all_in_one_popup_placement || prev.allInOnePopupPlacement,
+              allInOneStyleVariant: data.settings.all_in_one_style_variant || prev.allInOneStyleVariant,
+            }))
           }
-        } catch {
-          console.error('Failed to load widget settings')
         }
+      } catch {
+        console.error('Failed to load widget settings')
       }
       setLoading(false)
     }

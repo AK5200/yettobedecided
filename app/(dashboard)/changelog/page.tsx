@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -52,21 +53,8 @@ export default function ChangelogPage() {
 
   const fetchEntries = async () => {
     setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setLoading(false)
-      return
-    }
-
-    const { data: membership, error: membershipError } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .maybeSingle()
-
-    if (membershipError || !membership) {
-      console.error('Failed to fetch organization membership:', membershipError)
+    const orgId = await getClientOrgId()
+    if (!orgId) {
       setLoading(false)
       return
     }
@@ -74,7 +62,7 @@ export default function ChangelogPage() {
     const { data, error } = await supabase
       .from('changelog_entries')
       .select('*')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .order('created_at', { ascending: false })
 
     if (error) {

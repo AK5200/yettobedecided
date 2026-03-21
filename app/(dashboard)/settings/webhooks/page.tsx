@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { WebhooksManager } from '@/components/settings/webhooks-manager'
+import { getCurrentOrg } from '@/lib/org-context'
 
 const AVAILABLE_EVENTS = [
   'post.created',
@@ -15,10 +16,12 @@ export default async function WebhooksSettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: membership } = await supabase
-    .from('org_members').select('org_id').eq('user_id', user.id).limit(1).single()
+  const orgContext = await getCurrentOrg(supabase)
+  if (!orgContext) {
+    redirect('/onboarding')
+  }
 
-  const orgId = membership?.org_id
+  const orgId = orgContext.orgId
 
   const { data: webhooks } = await supabase
     .from('webhooks').select('*').eq('org_id', orgId).order('created_at', { ascending: false })

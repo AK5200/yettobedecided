@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -57,23 +58,14 @@ export default function ModerationPage() {
   }, [])
 
   const fetchPendingItems = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (!membership) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
     // Fetch pending posts
     const { data: boards } = await supabase
       .from('boards')
       .select('id')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
 
     if (boards && boards.length > 0) {
       const { data: posts } = await supabase

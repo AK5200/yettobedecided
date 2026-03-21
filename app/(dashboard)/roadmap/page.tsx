@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getCurrentOrg } from '@/lib/org-context'
 import { RoadmapView } from '@/components/roadmap/roadmap-view'
 
 export default async function RoadmapPage() {
@@ -12,24 +13,18 @@ export default async function RoadmapPage() {
     redirect('/login')
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id, role')
-    .eq('user_id', user.id)
-    .limit(1)
-    .single()
-
-  if (!membership) {
+  const orgContext = await getCurrentOrg(supabase)
+  if (!orgContext) {
     redirect('/onboarding')
   }
 
-  const isAdmin = membership.role === 'owner' || membership.role === 'admin'
+  const isAdmin = orgContext.role === 'owner' || orgContext.role === 'admin'
 
   // Fetch boards for this org
   const { data: boards } = await supabase
     .from('boards')
     .select('id, name')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', orgContext.orgId)
     .eq('is_archived', false)
 
   let posts: any[] = []

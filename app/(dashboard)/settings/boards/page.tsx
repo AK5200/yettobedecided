@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -72,22 +73,13 @@ export default function BoardsSettingsPage() {
   }, [])
 
   const fetchBoards = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (!membership) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
     const { data } = await supabase
       .from('boards')
       .select('*')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .order('created_at', { ascending: true })
 
     setBoards(data || [])
@@ -95,18 +87,16 @@ export default function BoardsSettingsPage() {
   }
 
   const fetchModerationSettings = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('organizations(*)')
-      .eq('user_id', user.id)
-      .limit(1)
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('*')
+      .eq('id', orgId)
       .single()
 
-    if (membership?.organizations) {
-      const org = membership.organizations as any
+    if (org) {
       setModerationSettings({
         post_moderation: org.post_moderation ?? false,
         comment_moderation: org.comment_moderation ?? false,
@@ -121,24 +111,15 @@ export default function BoardsSettingsPage() {
     if (!newBoardName.trim()) return
     setSaving(true)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (!membership) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
     const slug = newBoardName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 
     const { error } = await supabase
       .from('boards')
       .insert({
-        org_id: membership.org_id,
+        org_id: orgId,
         name: newBoardName,
         slug,
         is_public: true,
@@ -197,22 +178,13 @@ export default function BoardsSettingsPage() {
 
   const handleSaveModerationSettings = async () => {
     setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (!membership) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
     const { error } = await supabase
       .from('organizations')
       .update(moderationSettings)
-      .eq('id', membership.org_id)
+      .eq('id', orgId)
 
     if (error) {
       toast.error('Failed to save moderation settings')

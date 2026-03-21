@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -35,19 +36,17 @@ export default function GeneralSettingsPage() {
   }, [])
 
   const fetchOrg = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('organizations(*)')
-      .eq('user_id', user.id)
-      .limit(1)
+    const { data: orgData } = await supabase
+      .from('organizations')
+      .select('*')
+      .eq('id', orgId)
       .single()
 
-    if (membership?.organizations) {
-      const orgData = membership.organizations as unknown as Organization
-      setOrg(orgData)
+    if (orgData) {
+      setOrg(orgData as Organization)
     }
     setLoading(false)
   }

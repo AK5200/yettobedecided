@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export default async function OnboardingLayout({
   children,
@@ -15,21 +16,13 @@ export default async function OnboardingLayout({
     redirect('/login')
   }
 
-  // Check for organization membership with onboarding status
-  const { data: memberships, error } = await supabase
-    .from('org_members')
-    .select('org_id, organizations(onboarding_completed)')
-    .eq('user_id', user.id)
-    .limit(1)
+  const orgContext = await getCurrentOrg(supabase)
 
   // Only redirect to dashboard if membership exists AND onboarding is completed
-  if (!error && memberships && memberships.length > 0) {
-    const membership = memberships[0] as any
-    if (membership.organizations?.onboarding_completed === true) {
-      redirect('/dashboard')
-    }
-    // Otherwise: membership exists but onboarding incomplete — stay on onboarding
+  if (orgContext && orgContext.org.onboarding_completed === true) {
+    redirect('/dashboard')
   }
+  // Otherwise: no membership or onboarding incomplete — stay on onboarding
 
   return <>{children}</>
 }

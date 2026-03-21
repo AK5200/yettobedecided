@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { BoardSettingsPage } from '@/components/settings/board-settings-page'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export default async function BoardSettingsRoute({
   params,
@@ -9,22 +10,9 @@ export default async function BoardSettingsRoute({
 }) {
   const { id } = await params
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .limit(1)
-    .single()
-
-  if (!membership) {
+  const orgContext = await getCurrentOrg(supabase)
+  if (!orgContext) {
     redirect('/onboarding')
   }
 
@@ -32,7 +20,7 @@ export default async function BoardSettingsRoute({
     .from('boards')
     .select('*')
     .eq('id', id)
-    .eq('org_id', membership.org_id)
+    .eq('org_id', orgContext.orgId)
     .single()
 
   if (!board) {
@@ -43,7 +31,7 @@ export default async function BoardSettingsRoute({
   const { data: org } = await supabase
     .from('organizations')
     .select('*')
-    .eq('id', membership.org_id)
+    .eq('id', orgContext.orgId)
     .single()
 
   return (

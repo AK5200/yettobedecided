@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getCurrentOrg } from '@/lib/org-context'
 import { TagManager } from '@/components/tags/tag-manager'
 
 export default async function TagsSettingsPage() {
@@ -7,8 +8,10 @@ export default async function TagsSettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: membership } = await supabase
-    .from('org_members').select('org_id').eq('user_id', user.id).limit(1).single()
+  const orgContext = await getCurrentOrg(supabase)
+  if (!orgContext) {
+    redirect('/onboarding')
+  }
 
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto font-sans">
@@ -27,7 +30,7 @@ export default async function TagsSettingsPage() {
           Create and manage tags to categorize your feedback posts.
         </p>
       </div>
-      <TagManager orgId={membership?.org_id} />
+      <TagManager orgId={orgContext.orgId} />
     </div>
   )
 }

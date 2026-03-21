@@ -6,6 +6,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +15,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import {
   Collapsible,
   CollapsibleContent,
@@ -42,13 +52,22 @@ import {
   MessageSquare,
   Menu,
   X,
+  Check,
 } from 'lucide-react'
+import { ORG_COOKIE_NAME } from '@/lib/org-constants'
 
 interface Organization {
   id: string
   name: string
   slug: string
   onboarding_completed?: boolean
+  logo_url?: string | null
+}
+
+interface OrgMembership {
+  org_id: string
+  role: string
+  organizations: Organization
 }
 
 export function Sidebar() {
@@ -56,32 +75,49 @@ export function Sidebar() {
   const router = useRouter()
   const supabase = createClient()
   const [org, setOrg] = useState<Organization | null>(null)
+  const [allOrgs, setAllOrgs] = useState<OrgMembership[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [orgSwitcherOpen, setOrgSwitcherOpen] = useState(false)
+  const [createOrgOpen, setCreateOrgOpen] = useState(false)
+  const [newOrgName, setNewOrgName] = useState('')
+  const [createLoading, setCreateLoading] = useState(false)
+  const [createError, setCreateError] = useState('')
 
   useEffect(() => {
-    const fetchOrg = async () => {
+    const fetchOrgs = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: membership, error } = await supabase
+      const { data: memberships, error } = await supabase
         .from('org_members')
-        .select('organizations(id, name, slug, onboarding_completed)')
+        .select('org_id, role, organizations(id, name, slug, onboarding_completed, logo_url)')
         .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle()
 
-      if (error) {
-        console.error('Failed to fetch organization:', error)
-        return
-      }
+      if (error || !memberships || memberships.length === 0) return
 
-      if (membership?.organizations) {
-        const orgData = membership.organizations as unknown as Organization
-        setOrg(orgData)
+      setAllOrgs(memberships as unknown as OrgMembership[])
+
+      // Determine current org from cookie
+      const savedOrgId = document.cookie
+        .split('; ')
+        .find(c => c.startsWith(ORG_COOKIE_NAME + '='))
+        ?.split('=')[1]
+
+      const currentMembership = savedOrgId
+        ? memberships.find((m: any) => m.org_id === savedOrgId)
+        : null
+
+      const active = currentMembership || memberships[0]
+      const orgData = (active as any).organizations as Organization
+      setOrg(orgData)
+
+      // If no cookie was set or it was invalid, set it now
+      if (!currentMembership) {
+        document.cookie = `${ORG_COOKIE_NAME}=${orgData.id}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
       }
     }
-    fetchOrg()
+    fetchOrgs()
   }, [supabase])
 
   // Auto-expand settings when on a settings page
@@ -99,6 +135,90 @@ export function Sidebar() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/login')
+  }
+
+  const handleSwitchOrg = async (targetOrgId: string) => {
+    if (targetOrgId === org?.id) {
+      setOrgSwitcherOpen(false)
+      return
+    }
+
+    try {
+      const res = await fetch('/api/organizations/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgId: targetOrgId }),
+      })
+
+      if (res.ok) {
+        // Update local state
+        const membership = allOrgs.find(m => m.org_id === targetOrgId)
+        if (membership) {
+          setOrg(membership.organizations)
+        }
+        setOrgSwitcherOpen(false)
+        // Refresh the page to reload data for new org
+        router.refresh()
+      }
+    } catch (e) {
+      console.error('Failed to switch org:', e)
+    }
+  }
+
+  const handleCreateOrg = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newOrgName.trim()) return
+
+    setCreateLoading(true)
+    setCreateError('')
+
+    try {
+      const res = await fetch('/api/organizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newOrgName.trim() }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setCreateError(data.error || 'Failed to create organization')
+        setCreateLoading(false)
+        return
+      }
+
+      // Switch to the new org
+      await fetch('/api/organizations/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgId: data.organization.id }),
+      })
+
+      setCreateOrgOpen(false)
+      setNewOrgName('')
+      setCreateLoading(false)
+
+      // Refresh to load new org context
+      router.refresh()
+      // Re-fetch orgs to update the switcher list
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: memberships } = await supabase
+          .from('org_members')
+          .select('org_id, role, organizations(id, name, slug, onboarding_completed, logo_url)')
+          .eq('user_id', user.id)
+        if (memberships) {
+          setAllOrgs(memberships as unknown as OrgMembership[])
+          const newMembership = memberships.find((m: any) => m.org_id === data.organization.id) as any
+          if (newMembership) {
+            setOrg(newMembership.organizations as Organization)
+          }
+        }
+      }
+    } catch {
+      setCreateError('Something went wrong')
+      setCreateLoading(false)
+    }
   }
 
   const isActive = (href: string) => {
@@ -137,17 +257,55 @@ export function Sidebar() {
 
   const sidebarContent = (
     <>
-      {/* Organization Header */}
+      {/* Organization Header — clickable to open org switcher */}
       <div className="p-4 border-b border-sidebar-border shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white font-semibold text-sm">
-              {org?.name?.charAt(0) || 'F'}
-            </div>
-            <span className="font-semibold text-sidebar-foreground truncate max-w-[140px]">
-              {org?.name || 'Kelo'}
-            </span>
-          </div>
+          <DropdownMenu open={orgSwitcherOpen} onOpenChange={setOrgSwitcherOpen}>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 hover:bg-sidebar-accent rounded-lg px-1.5 py-1 -ml-1.5 transition-colors min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                  {org?.name?.charAt(0) || 'K'}
+                </div>
+                <span className="font-semibold text-sidebar-foreground truncate max-w-[120px]">
+                  {org?.name || 'Kelo'}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-sidebar-foreground/40 shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="right" align="start" sideOffset={8} className="w-64">
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                Organizations
+              </div>
+              {allOrgs.map((membership) => {
+                const mOrg = membership.organizations
+                const isCurrent = mOrg.id === org?.id
+                return (
+                  <DropdownMenuItem
+                    key={mOrg.id}
+                    onClick={() => handleSwitchOrg(mOrg.id)}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <div className="w-6 h-6 rounded-md bg-amber-500 flex items-center justify-center text-white font-semibold text-xs shrink-0">
+                      {mOrg.name?.charAt(0) || 'K'}
+                    </div>
+                    <span className="flex-1 truncate">{mOrg.name}</span>
+                    {isCurrent && <Check className="h-4 w-4 text-amber-600 shrink-0" />}
+                  </DropdownMenuItem>
+                )
+              })}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setOrgSwitcherOpen(false)
+                  setCreateOrgOpen(true)
+                }}
+                className="cursor-pointer"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create new organization
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div className="flex items-center gap-1">
             {org?.slug && (
               <Link
@@ -216,8 +374,12 @@ export function Sidebar() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push('/boards/new')}>
-                <Plus className="h-4 w-4 mr-2" />
+                <LayoutGrid className="h-4 w-4 mr-2" />
                 New Board
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCreateOrgOpen(true)}>
+                <Building2 className="h-4 w-4 mr-2" />
+                New Organization
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -347,7 +509,7 @@ export function Sidebar() {
         </button>
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center text-white font-semibold text-xs shrink-0">
-            {org?.name?.charAt(0) || 'F'}
+            {org?.name?.charAt(0) || 'K'}
           </div>
           <span className="font-semibold text-foreground truncate">
             {org?.name || 'Kelo'}
@@ -376,6 +538,49 @@ export function Sidebar() {
       <div className="hidden md:flex w-64 border-r border-sidebar-border bg-sidebar h-screen flex-col sticky top-0">
         {sidebarContent}
       </div>
+
+      {/* Create Organization Dialog */}
+      <Dialog open={createOrgOpen} onOpenChange={setCreateOrgOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create new organization</DialogTitle>
+            <DialogDescription>
+              Create a separate organization for another product or team.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateOrg}>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="org-name">Organization name</Label>
+                <Input
+                  id="org-name"
+                  value={newOrgName}
+                  onChange={(e) => setNewOrgName(e.target.value)}
+                  placeholder="e.g. Acme Inc."
+                  autoFocus
+                  disabled={createLoading}
+                />
+              </div>
+              {createError && (
+                <p className="text-sm text-destructive">{createError}</p>
+              )}
+            </div>
+            <DialogFooter className="mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCreateOrgOpen(false)}
+                disabled={createLoading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createLoading || !newOrgName.trim()}>
+                {createLoading ? 'Creating...' : 'Create organization'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

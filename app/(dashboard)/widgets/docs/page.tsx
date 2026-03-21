@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -17,21 +18,17 @@ export default function WidgetDocsPage() {
 
   useEffect(() => {
     const fetchOrg = async () => {
+      const orgId = await getClientOrgId()
+      if (!orgId) return
+
+      // Fetch org slug
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data: membership } = await supabase
-        .from('org_members')
-        .select('org_id, organizations(id, name, slug)')
-        .eq('user_id', user.id)
-        .limit(1)
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('slug')
+        .eq('id', orgId)
         .single()
-
-      if (membership) {
-        const org = membership.organizations as any
-        setOrgSlug(org?.slug || '')
-      }
+      setOrgSlug(org?.slug || '')
     }
     fetchOrg()
     setBaseUrl(typeof window !== 'undefined' ? window.location.origin : 'https://yettobedecided-8lws.vercel.app')

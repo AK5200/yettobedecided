@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -46,43 +47,30 @@ export default function RoadmapSettingsPage() {
   }, [])
 
   const fetchSettings = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('organizations(*)')
-      .eq('user_id', user.id)
-      .limit(1)
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('*')
+      .eq('id', orgId)
       .single()
 
-    if (membership?.organizations) {
-      const org = membership.organizations as any
-      if (org.roadmap_settings) {
-        setSettings(org.roadmap_settings)
-      }
+    if (org?.roadmap_settings) {
+      setSettings(org.roadmap_settings)
     }
     setLoading(false)
   }
 
   const handleSave = async () => {
     setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (!membership) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
     const { error } = await supabase
       .from('organizations')
       .update({ roadmap_settings: settings })
-      .eq('id', membership.org_id)
+      .eq('id', orgId)
 
     if (error) {
       toast.error('Failed to save settings')

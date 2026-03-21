@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/dashboard/sidebar'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export default async function DashboardLayout({
   children,
@@ -23,14 +24,10 @@ export default async function DashboardLayout({
   const isOnboarding = pathname.includes('/onboarding')
 
   // Check for organization membership with error handling
-  let { data: memberships, error } = await supabase
-    .from('org_members')
-    .select('org_id, role, organizations(onboarding_completed)')
-    .eq('user_id', user.id)
-    .limit(1)
+  let orgContext = await getCurrentOrg(supabase)
 
   // If no memberships, auto-accept any pending invitations for this user's email
-  if (!error && (!memberships || memberships.length === 0) && user.email) {
+  if (!orgContext && user.email) {
     try {
       const adminClient = createAdminClient()
       const { data: invitations } = await adminClient
@@ -50,33 +47,23 @@ export default async function DashboardLayout({
             .update({ accepted_at: new Date().toISOString() })
             .eq('id', invitation.id)
         }
-        // Re-fetch memberships after auto-accept
-        const refreshed = await supabase
-          .from('org_members')
-          .select('org_id, role, organizations(onboarding_completed)')
-          .eq('user_id', user.id)
-          .limit(1)
-        memberships = refreshed.data
-        error = refreshed.error
+        // Re-fetch after auto-accept
+        orgContext = await getCurrentOrg(supabase)
       }
     } catch (e) {
       console.error('Auto-accept invitation failed:', e)
     }
   }
 
-  // If there's an error (e.g., RLS policy issue) or no memberships, redirect to onboarding
-  // Skip redirect if already on onboarding to prevent infinite loop
-  if (!isOnboarding && (error || !memberships || memberships.length === 0)) {
+  // If no memberships, redirect to onboarding (skip if already on onboarding)
+  if (!isOnboarding && !orgContext) {
     redirect('/onboarding')
   }
 
-  // If landing on /dashboard and onboarding not complete, redirect to /onboarding as first page
+  // If landing on /dashboard and onboarding not complete, redirect to /onboarding
   const isDashboard = pathname === '/dashboard' || pathname === ''
-  if (isDashboard && memberships && memberships.length > 0) {
-    const membership = memberships[0] as any
-    if (membership.organizations?.onboarding_completed === false) {
-      redirect('/onboarding')
-    }
+  if (isDashboard && orgContext?.org?.onboarding_completed === false) {
+    redirect('/onboarding')
   }
 
   return (

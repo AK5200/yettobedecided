@@ -58,6 +58,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
+    // Check if user already has orgs (to determine if onboarding should be skipped)
+    const { data: existingMemberships } = await supabase
+      .from('org_members')
+      .select('org_id')
+      .eq('user_id', user.id)
+
+    const isAdditionalOrg = existingMemberships && existingMemberships.length > 0
+
     // Create slug from name
     const slug = name
       .toLowerCase()
@@ -76,10 +84,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Organization name already taken' }, { status: 400 })
     }
 
-    // Create organization
+    // Create organization — skip onboarding for additional orgs
     const { data: org, error: orgError } = await supabase
       .from('organizations')
-      .insert({ name, slug })
+      .insert({
+        name,
+        slug,
+        ...(isAdditionalOrg ? { onboarding_completed: true } : {}),
+      })
       .select()
       .single()
 

@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getCurrentOrg } from '@/lib/org-context'
 import { InviteMemberForm } from '@/components/settings/invite-member-form'
 import { TeamMembersList } from '@/components/settings/team-members-list'
 
@@ -8,11 +9,13 @@ export default async function TeamSettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: membership } = await supabase
-    .from('org_members').select('org_id, role').eq('user_id', user.id).limit(1).single()
+  const orgContext = await getCurrentOrg(supabase)
+  if (!orgContext) {
+    redirect('/onboarding')
+  }
 
-  const orgId = membership?.org_id
-  const currentUserRole = membership?.role as string
+  const orgId = orgContext.orgId
+  const currentUserRole = orgContext.role
 
   const { data: members } = await supabase.from('org_members').select('*').eq('org_id', orgId)
 

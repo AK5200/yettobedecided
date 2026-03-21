@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -64,22 +65,13 @@ export default function StatusesSettingsPage() {
   }, [])
 
   const fetchStatuses = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (!membership) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
     const { data } = await supabase
       .from('statuses')
       .select('*')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .order('order', { ascending: true })
 
     if (data && data.length > 0) {
@@ -95,22 +87,13 @@ export default function StatusesSettingsPage() {
     if (!newStatus.name.trim()) return
     setSaving(true)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
-
-    if (!membership) return
+    const orgId = await getClientOrgId()
+    if (!orgId) return
 
     const { error } = await supabase
       .from('statuses')
       .insert({
-        org_id: membership.org_id,
+        org_id: orgId,
         name: newStatus.name,
         color: newStatus.color,
         order: statuses.length,

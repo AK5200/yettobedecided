@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getCurrentOrg } from '@/lib/org-context'
 import { BoardsListRedesign } from '@/components/boards/boards-list-redesign'
 
 export default async function FeedbackPage() {
@@ -12,28 +13,22 @@ export default async function FeedbackPage() {
     redirect('/login')
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
-
-  if (!membership) {
+  const orgContext = await getCurrentOrg(supabase)
+  if (!orgContext) {
     redirect('/onboarding')
   }
 
   const { data: activeBoards } = await supabase
     .from('boards')
     .select('*')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', orgContext.orgId)
     .eq('is_archived', false)
     .order('created_at', { ascending: false })
 
   const { data: archivedBoards } = await supabase
     .from('boards')
     .select('*')
-    .eq('org_id', membership.org_id)
+    .eq('org_id', orgContext.orgId)
     .eq('is_archived', true)
     .order('created_at', { ascending: false })
 

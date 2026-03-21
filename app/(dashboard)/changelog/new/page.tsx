@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,23 +31,16 @@ export default function NewChangelogPage() {
 
   useEffect(() => {
     const fetchOrgId = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data } = await supabase
-        .from('org_members')
-        .select('org_id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .single()
-
-      setOrgId(data?.org_id ?? null)
+      const orgId = await getClientOrgId()
+      if (!orgId) {
+        router.push('/onboarding')
+        return
+      }
+      setOrgId(orgId)
     }
 
     fetchOrgId()
-  }, [supabase])
+  }, [])
 
   const handleSubmit =
     (publish: boolean) => async (e: React.FormEvent | React.MouseEvent) => {
