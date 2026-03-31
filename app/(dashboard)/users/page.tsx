@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useTheme } from 'next-themes'
 import { createClient } from '@/lib/supabase/client'
+import { getClientOrgId } from '@/lib/org-context-client'
 import { UserDetailDrawer } from '@/components/dashboard/user-detail-drawer'
 
 type UserSource = 'guest' | 'social_google' | 'social_github' | 'identified' | 'verified_jwt' | 'magic_link'
@@ -76,17 +77,11 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(false); return }
-
-    const { data: memberships } = await supabase
-      .from('org_members').select('org_id').eq('user_id', user.id)
-
-    const orgIds = (memberships || []).map((m: { org_id: string }) => m.org_id)
-    if (orgIds.length === 0) { setLoading(false); return }
+    const orgId = await getClientOrgId()
+    if (!orgId) { setLoading(false); return }
 
     const { data: widgetUsers } = await supabase
-      .from('widget_users').select('*').in('org_id', orgIds).order('last_seen_at', { ascending: false })
+      .from('widget_users').select('*').eq('org_id', orgId).order('last_seen_at', { ascending: false })
 
     setUsers(widgetUsers || [])
     setLoading(false)
