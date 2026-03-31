@@ -151,14 +151,9 @@ export function Sidebar() {
       })
 
       if (res.ok) {
-        // Update local state
-        const membership = allOrgs.find(m => m.org_id === targetOrgId)
-        if (membership) {
-          setOrg(membership.organizations)
-        }
         setOrgSwitcherOpen(false)
-        // Refresh the page to reload data for new org
-        router.refresh()
+        // Full page reload so all server components re-fetch with new org cookie
+        window.location.href = window.location.pathname
       }
     } catch (e) {
       console.error('Failed to switch org:', e)
@@ -198,23 +193,8 @@ export function Sidebar() {
       setNewOrgName('')
       setCreateLoading(false)
 
-      // Refresh to load new org context
-      router.refresh()
-      // Re-fetch orgs to update the switcher list
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: memberships } = await supabase
-          .from('org_members')
-          .select('org_id, role, organizations(id, name, slug, onboarding_completed, logo_url)')
-          .eq('user_id', user.id)
-        if (memberships) {
-          setAllOrgs(memberships as unknown as OrgMembership[])
-          const newMembership = memberships.find((m: any) => m.org_id === data.organization.id) as any
-          if (newMembership) {
-            setOrg(newMembership.organizations as Organization)
-          }
-        }
-      }
+      // Full page reload so all server components re-fetch with new org cookie
+      window.location.href = window.location.pathname
     } catch {
       setCreateError('Something went wrong')
       setCreateLoading(false)
@@ -526,13 +506,11 @@ export function Sidebar() {
       )}
 
       {/* Mobile sidebar drawer */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transform transition-transform duration-300 ease-in-out md:hidden ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        {sidebarContent}
-      </div>
+      {mobileOpen && (
+        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col md:hidden">
+          {sidebarContent}
+        </div>
+      )}
 
       {/* Desktop sidebar */}
       <div className="hidden md:flex w-64 border-r border-sidebar-border bg-sidebar h-screen flex-col sticky top-0">
