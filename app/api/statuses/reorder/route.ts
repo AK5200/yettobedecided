@@ -1,24 +1,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId, role } = context
 
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id, role')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+    if (role !== 'owner' && role !== 'admin') {
       return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 
@@ -35,7 +28,7 @@ export async function POST(request: Request) {
         .from('statuses')
         .update({ order: index })
         .eq('id', id)
-        .eq('org_id', membership.org_id)
+        .eq('org_id', orgId)
     )
 
     await Promise.all(updatePromises)
@@ -44,7 +37,7 @@ export async function POST(request: Request) {
     const { data: statuses, error } = await supabase
       .from('statuses')
       .select('*')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .order('order', { ascending: true })
 
     if (error) {

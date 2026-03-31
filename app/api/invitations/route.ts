@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { triggerInvitationEmail } from '@/lib/email/triggers'
+import { getCurrentOrg } from '@/lib/org-context'
 import crypto from 'crypto'
 
 export async function GET(request: Request) {
@@ -9,19 +10,10 @@ export async function GET(request: Request) {
   if (!orgId) return NextResponse.json({ error: 'org_id is required' }, { status: 400 })
 
   const supabase = await createClient()
+  const context = await getCurrentOrg(supabase)
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Verify user is member of org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('org_id', orgId)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership) {
+  if (context.orgId !== orgId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -37,26 +29,18 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const context = await getCurrentOrg(supabase)
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { orgId, role } = context
 
   const body = await request.json()
-  const { org_id, email, role, invited_by } = body
+  const { email, role: inviteRole, invited_by } = body
 
-  if (!org_id || !email) {
-    return NextResponse.json({ error: 'org_id and email are required' }, { status: 400 })
+  if (!email) {
+    return NextResponse.json({ error: 'email is required' }, { status: 400 })
   }
 
-  // Verify user is admin/owner of org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('org_id', org_id)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+  if (role !== 'owner' && role !== 'admin') {
     return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
   }
 
@@ -66,9 +50,9 @@ export async function POST(request: Request) {
   const { data, error } = await supabase
     .from('invitations')
     .insert({
-      org_id,
+      org_id: orgId,
       email,
-      role: role || 'member',
+      role: inviteRole || 'member',
       invited_by,
       token,
       expires_at: expiresAt.toISOString(),

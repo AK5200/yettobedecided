@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
+import { getCurrentOrg } from '@/lib/org-context'
 
 type ChangelogEntryMeta = {
   is_published: boolean
@@ -31,17 +32,16 @@ export async function PATCH(
   try {
     const supabase = await createClient()
     const { id } = await params
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId } = context
 
     const body = await request.json()
     const { title, content, category, is_published } = body
 
-    // Get old entry to check if publishing status changed and verify permissions
+    // Get old entry to check if publishing status changed and verify it belongs to this org
     const { data: oldEntry, error: fetchError } = await withTimeout<ChangelogEntryMeta>(
       supabase
         .from('changelog_entries')
@@ -60,18 +60,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Changelog entry not found' }, { status: 404 })
     }
 
-    // Verify user is member of org
-    const { data: membership, error: membershipError } = await withTimeout(
-      supabase
-        .from('org_members')
-        .select('id')
-        .eq('org_id', oldEntry.org_id)
-        .eq('user_id', user.id)
-        .single(),
-      10000 // 10 second timeout
-    )
-
-    if (membershipError || !membership) {
+    if (oldEntry.org_id !== orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -118,8 +107,8 @@ export async function PATCH(
     return NextResponse.json({ entry })
   } catch (error: any) {
     console.error('PATCH changelog error:', error)
-    return NextResponse.json({ 
-      error: error?.message || 'Internal server error' 
+    return NextResponse.json({
+      error: error?.message || 'Internal server error'
     }, { status: 500 })
   }
 }
@@ -131,14 +120,13 @@ export async function DELETE(
   try {
     const supabase = await createClient()
     const { id } = await params
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId } = context
 
-    // Verify entry exists and user has permission (org membership)
+    // Verify entry exists and belongs to this org
     const { data: entry } = await supabase
       .from('changelog_entries')
       .select('org_id')
@@ -149,14 +137,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Changelog entry not found' }, { status: 404 })
     }
 
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('id')
-      .eq('org_id', entry.org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
+    if (entry.org_id !== orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 

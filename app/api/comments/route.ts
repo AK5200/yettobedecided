@@ -83,13 +83,12 @@ export async function POST(request: Request) {
     let verifiedIsAdmin = false
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (authUser) {
-      const { data: membership } = await supabase
+      const { data: memberships } = await supabase
         .from('org_members')
         .select('role')
         .eq('org_id', boardData.org_id)
         .eq('user_id', authUser.id)
-        .maybeSingle()
-      if (membership && (membership.role === 'admin' || membership.role === 'owner')) {
+      if (memberships && memberships.length > 0 && (memberships[0].role === 'admin' || memberships[0].role === 'owner')) {
         verifiedIsAdmin = true
       }
     }

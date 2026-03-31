@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 // Default statuses that are created when org has no custom statuses
 const DEFAULT_STATUSES = [
@@ -13,36 +14,24 @@ const DEFAULT_STATUSES = [
 export async function GET() {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json({ error: 'No organization found' }, { status: 404 })
-    }
+    const { orgId } = context
 
     // Try to get existing statuses
     const { data: statuses, error } = await supabase
       .from('statuses')
       .select('*')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .order('order', { ascending: true })
 
     if (error) {
       // Table might not exist, return defaults
       console.error('Error fetching statuses:', error)
       return NextResponse.json({
-        statuses: DEFAULT_STATUSES.map((s, i) => ({ ...s, id: `default-${i}`, org_id: membership.org_id }))
+        statuses: DEFAULT_STATUSES.map((s, i) => ({ ...s, id: `default-${i}`, org_id: orgId }))
       })
     }
 
@@ -50,7 +39,7 @@ export async function GET() {
     if (!statuses || statuses.length === 0) {
       const statusesToInsert = DEFAULT_STATUSES.map((s) => ({
         ...s,
-        org_id: membership.org_id,
+        org_id: orgId,
       }))
 
       const { data: insertedStatuses, error: insertError } = await supabase
@@ -61,7 +50,7 @@ export async function GET() {
       if (insertError) {
         // If insert fails, return defaults without persisting
         return NextResponse.json({
-          statuses: DEFAULT_STATUSES.map((s, i) => ({ ...s, id: `default-${i}`, org_id: membership.org_id }))
+          statuses: DEFAULT_STATUSES.map((s, i) => ({ ...s, id: `default-${i}`, org_id: orgId }))
         })
       }
 
@@ -78,21 +67,13 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId, role } = context
 
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id, role')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+    if (role !== 'owner' && role !== 'admin') {
       return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 
@@ -110,7 +91,7 @@ export async function POST(request: Request) {
     const { data: existing } = await supabase
       .from('statuses')
       .select('id')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .eq('key', key)
       .single()
 
@@ -122,7 +103,7 @@ export async function POST(request: Request) {
     const { data: maxOrderResult } = await supabase
       .from('statuses')
       .select('order')
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .order('order', { ascending: false })
       .limit(1)
       .single()
@@ -132,7 +113,7 @@ export async function POST(request: Request) {
     const { data: status, error } = await supabase
       .from('statuses')
       .insert({
-        org_id: membership.org_id,
+        org_id: orgId,
         key,
         name: name.trim(),
         color: color || '#6B7280',

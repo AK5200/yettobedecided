@@ -1,33 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'crypto'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId, role } = context
 
     const body = await request.json()
-    const { org_id, name } = body
+    const { name } = body
 
-    if (!org_id || !name) {
-      return NextResponse.json({ error: 'org_id and name are required' }, { status: 400 })
+    if (!name) {
+      return NextResponse.json({ error: 'name is required' }, { status: 400 })
     }
 
-    // Verify user is admin of org
-    const { data: membership, error: membershipError } = await supabase
-      .from('org_members')
-      .select('role')
-      .eq('org_id', org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (membershipError || !membership || (membership.role !== 'admin' && membership.role !== 'owner')) {
+    if (role !== 'admin' && role !== 'owner') {
       return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 
@@ -39,7 +31,7 @@ export async function POST(request: Request) {
     const { data: apiKey, error: apiKeyError } = await supabase
       .from('api_keys')
       .insert({
-        org_id,
+        org_id: orgId,
         name,
         key_hash: keyHash,
         key_prefix: keyPrefix,
@@ -54,7 +46,7 @@ export async function POST(request: Request) {
     // Return API key without the hash, but include the raw key for display
     const { key_hash: _, ...apiKeyWithoutHash } = apiKey
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       apiKey: apiKeyWithoutHash,
       rawKey // Only time the full key is returned
     }, { status: 201 })

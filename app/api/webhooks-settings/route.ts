@@ -1,21 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId, role } = context
 
     const body = await request.json()
     const { org_id, name, url, events, secret } = body
 
-    if (!org_id || !name || !url || !events || !Array.isArray(events)) {
-      return NextResponse.json({ error: 'org_id, name, url, and events are required' }, { status: 400 })
+    if (!name || !url || !events || !Array.isArray(events)) {
+      return NextResponse.json({ error: 'name, url, and events are required' }, { status: 400 })
     }
 
     // Validate webhook URL format
@@ -28,22 +28,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid webhook URL' }, { status: 400 })
     }
 
-    // Verify user is admin of org
-    const { data: membership, error: membershipError } = await supabase
-      .from('org_members')
-      .select('role')
-      .eq('org_id', org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (membershipError || !membership || (membership.role !== 'admin' && membership.role !== 'owner')) {
+    if (role !== 'admin' && role !== 'owner') {
       return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
+
+    const resolvedOrgId = org_id || orgId
 
     const { data: webhook, error: webhookError } = await supabase
       .from('webhooks')
       .insert({
-        org_id,
+        org_id: resolvedOrgId,
         name,
         url,
         secret: secret || null,

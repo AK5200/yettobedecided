@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -13,29 +14,21 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const context = await getCurrentOrg(supabase)
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { orgId, role } = context
 
   const body = await request.json()
-  const { org_id, name, color } = body
-  if (!org_id || !name) return NextResponse.json({ error: 'org_id and name required' }, { status: 400 })
+  const { name, color } = body
+  if (!name) return NextResponse.json({ error: 'name required' }, { status: 400 })
 
-  // Verify user is admin/owner of org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('org_id', org_id)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+  if (role !== 'owner' && role !== 'admin') {
     return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
   }
 
   const { data, error } = await supabase
     .from('tags')
-    .insert({ org_id, name, color: color || '#6B7280' })
+    .insert({ org_id: orgId, name, color: color || '#6B7280' })
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

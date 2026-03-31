@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { fireWebhooks } from '@/lib/webhooks/fire'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function GET(request: Request) {
   try {
@@ -51,36 +52,23 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId } = context
 
     const body = await request.json()
-    const { org_id, title, content, category, is_published } = body
+    const { title, content, category, is_published } = body
 
-    if (!org_id || !title || !content) {
-      return NextResponse.json({ error: 'org_id, title, and content are required' }, { status: 400 })
-    }
-
-    // Verify user is member of org
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('id')
-      .eq('org_id', org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (!title || !content) {
+      return NextResponse.json({ error: 'title and content are required' }, { status: 400 })
     }
 
     const { data: entry, error } = await supabase
       .from('changelog_entries')
       .insert({
-        org_id,
+        org_id: orgId,
         title,
         content,
         category: category || 'feature',
@@ -97,7 +85,7 @@ export async function POST(request: Request) {
     // Fire webhook for changelog published
     if (is_published) {
       fireWebhooks({
-        orgId: org_id,
+        orgId: orgId,
         event: 'changelog.published',
         payload: entry
       })

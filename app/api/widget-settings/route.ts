@@ -1,6 +1,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { handleOptions, withCors } from '@/lib/cors'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,12 +76,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId } = context
 
     const body = await request.json()
 
@@ -88,15 +88,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'org_id is required' }, { status: 400 })
     }
 
-    // Verify user is member of org
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('id')
-      .eq('org_id', body.org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
+    if (body.org_id !== orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -104,7 +96,7 @@ export async function POST(request: Request) {
     const { data: existing } = await supabase
       .from('widget_settings')
       .select('id')
-      .eq('org_id', body.org_id)
+      .eq('org_id', orgId)
       .single()
 
     const settingsData = {
@@ -119,10 +111,10 @@ export async function POST(request: Request) {
       const { data: updated, error: updateError } = await supabase
         .from('widget_settings')
         .update(settingsData)
-        .eq('org_id', body.org_id)
+        .eq('org_id', orgId)
         .select('*')
         .single()
-      
+
       data = updated
       error = updateError
     } else {
@@ -135,7 +127,7 @@ export async function POST(request: Request) {
         })
         .select('*')
         .single()
-      
+
       data = inserted
       error = insertError
     }

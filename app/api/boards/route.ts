@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function GET(request: Request) {
   try {
@@ -30,30 +31,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId } = context
 
     const body = await request.json()
-    const { org_id, name, description } = body
+    const { name, description } = body
 
-    if (!org_id || !name) {
-      return NextResponse.json({ error: 'org_id and name are required' }, { status: 400 })
-    }
-
-    // Verify user is member of org
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('id')
-      .eq('org_id', org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (!name) {
+      return NextResponse.json({ error: 'name is required' }, { status: 400 })
     }
 
     // Create slug from name
@@ -67,7 +55,7 @@ export async function POST(request: Request) {
     const { data: existing } = await supabase
       .from('boards')
       .select('id')
-      .eq('org_id', org_id)
+      .eq('org_id', orgId)
       .eq('slug', slug)
       .single()
 
@@ -78,7 +66,7 @@ export async function POST(request: Request) {
     const { data: board, error: boardError } = await supabase
       .from('boards')
       .insert({
-        org_id,
+        org_id: orgId,
         name,
         slug,
         description: description || null

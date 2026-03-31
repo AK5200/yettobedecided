@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 const VALID_CATEGORIES = ['quick_wins', 'big_bets', 'fill_ins', 'time_sinks', 'drop']
 
@@ -13,21 +14,12 @@ export async function GET(request: Request) {
   }
 
   const supabase = await createClient()
-
-  // Auth check
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const context = await getCurrentOrg(supabase)
+  if (!context) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('id')
-    .eq('org_id', orgId)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership) {
+  if (context.orgId !== orgId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
@@ -100,14 +92,13 @@ export async function PATCH(request: Request) {
   }
 
   const supabase = await createClient()
-
-  // Auth check
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const context = await getCurrentOrg(supabase)
+  if (!context) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  const { orgId } = context
 
-  // Verify user owns the post's org via board membership
+  // Verify post belongs to this org via board
   const { data: post } = await supabase
     .from('posts')
     .select('board_id, boards(org_id)')
@@ -119,17 +110,8 @@ export async function PATCH(request: Request) {
   }
 
   const postOrgId = (post.boards as any)?.org_id
-  if (postOrgId) {
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('id')
-      .eq('org_id', postOrgId)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-    }
+  if (postOrgId && postOrgId !== orgId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
   const { error } = await supabase

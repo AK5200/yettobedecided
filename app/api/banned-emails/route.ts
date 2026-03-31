@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -10,19 +11,10 @@ export async function GET(request: Request) {
   }
 
   const supabase = await createClient()
+  const context = await getCurrentOrg(supabase)
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Verify user is member of org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('org_id', orgId)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership) {
+  if (context.orgId !== orgId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -45,10 +37,8 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient()
-
-  // Get current user
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
+  const context = await getCurrentOrg(supabase)
+  if (!context) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -64,13 +54,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Email is already banned' }, { status: 400 })
   }
 
+  const { data: { user } } = await supabase.auth.getUser()
+
   const { data, error } = await supabase
     .from('banned_emails')
     .insert({
       org_id,
       email: email.toLowerCase(),
       reason,
-      banned_by: user.id,
+      banned_by: user?.id,
     })
     .select()
     .single()
@@ -89,19 +81,10 @@ export async function DELETE(request: Request) {
   }
 
   const supabase = await createClient()
+  const context = await getCurrentOrg(supabase)
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Verify user is admin/owner of org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('org_id', orgId)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+  if (context.orgId !== orgId || (context.role !== 'owner' && context.role !== 'admin')) {
     return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
   }
 

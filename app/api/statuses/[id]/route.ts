@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function PATCH(
   request: Request,
@@ -8,21 +9,13 @@ export async function PATCH(
   try {
     const { id } = await params
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId, role } = context
 
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id, role')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+    if (role !== 'owner' && role !== 'admin') {
       return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 
@@ -31,7 +24,7 @@ export async function PATCH(
       .from('statuses')
       .select('*')
       .eq('id', id)
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .single()
 
     if (fetchError || !status) {
@@ -73,21 +66,13 @@ export async function DELETE(
   try {
     const { id } = await params
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId, role } = context
 
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id, role')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+    if (role !== 'owner' && role !== 'admin') {
       return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 
@@ -96,7 +81,7 @@ export async function DELETE(
       .from('statuses')
       .select('*')
       .eq('id', id)
-      .eq('org_id', membership.org_id)
+      .eq('org_id', orgId)
       .single()
 
     if (fetchError || !status) {
@@ -133,7 +118,7 @@ export async function DELETE(
       const { data: targetStatus } = await supabase
         .from('statuses')
         .select('key')
-        .eq('org_id', membership.org_id)
+        .eq('org_id', orgId)
         .eq('key', reassignTo)
         .single()
 

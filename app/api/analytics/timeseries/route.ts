@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -13,21 +14,12 @@ export async function GET(request: Request) {
   }
 
   const supabase = await createClient()
-
-  // Auth check
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const context = await getCurrentOrg(supabase)
+  if (!context) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('id')
-    .eq('org_id', orgId)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership) {
+  if (context.orgId !== orgId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
@@ -56,7 +48,7 @@ export async function GET(request: Request) {
   // Get comments - get post IDs first, then query comments
   const { data: allPosts } = await supabase.from('posts').select('id').in('board_id', boardIds)
   const postIds = allPosts?.map((p) => p.id) || []
-  
+
   let comments: any[] = []
   if (postIds.length > 0) {
     const { data: commentsData } = await supabase

@@ -1,35 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function GET() {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const context = await getCurrentOrg(supabase)
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
+    if (!context) {
       return NextResponse.json({ onboarding_step: 0, onboarding_completed: false })
     }
+    const { orgId } = context
 
     const { data: org } = await supabase
       .from('organizations')
       .select('onboarding_step, onboarding_completed, slug')
-      .eq('id', membership.org_id)
+      .eq('id', orgId)
       .single()
 
     return NextResponse.json({
-      org_id: membership.org_id,
+      org_id: orgId,
       onboarding_step: org?.onboarding_step ?? 0,
       onboarding_completed: org?.onboarding_completed ?? false,
       org_slug: org?.slug ?? null,
@@ -42,23 +32,11 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('org_id, role')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
-      return NextResponse.json({ error: 'No organization found' }, { status: 404 })
-    }
+    const { orgId } = context
 
     const body = await request.json()
     const { step, completed } = body
@@ -74,7 +52,7 @@ export async function POST(request: Request) {
     const { error } = await supabase
       .from('organizations')
       .update(updates)
-      .eq('id', membership.org_id)
+      .eq('id', orgId)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

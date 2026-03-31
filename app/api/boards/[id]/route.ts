@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function GET(
   request: Request,
@@ -36,12 +37,11 @@ export async function PATCH(
   try {
     const supabase = await createClient()
     const { id } = await params
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId } = context
 
     // Get board to verify ownership
     const { data: board, error: boardFetchError } = await supabase
@@ -54,15 +54,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Board not found' }, { status: 404 })
     }
 
-    // Verify user is member of org
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('id')
-      .eq('org_id', board.org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
+    if (board.org_id !== orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -85,7 +77,7 @@ export async function PATCH(
       const { data: existing } = await supabase
         .from('boards')
         .select('id')
-        .eq('org_id', board.org_id)
+        .eq('org_id', orgId)
         .eq('slug', slug)
         .neq('id', id)
         .single()
@@ -119,12 +111,11 @@ export async function DELETE(
   try {
     const supabase = await createClient()
     const { id } = await params
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId } = context
 
     // Get board to verify ownership
     const { data: board, error: boardFetchError } = await supabase
@@ -137,15 +128,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Board not found' }, { status: 404 })
     }
 
-    // Verify user is member of org
-    const { data: membership } = await supabase
-      .from('org_members')
-      .select('id')
-      .eq('org_id', board.org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (!membership) {
+    if (board.org_id !== orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 

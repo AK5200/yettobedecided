@@ -1,24 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const context = await getCurrentOrg(supabase)
 
-  if (!user) {
+  if (!context) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-
-  const { data: member } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!member?.org_id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const { orgId } = context
 
   const { reason } = await request.json()
   const admin = createAdminClient()
@@ -33,7 +25,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
-  if (widgetUser.org_id !== member.org_id) {
+  if (widgetUser.org_id !== orgId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -56,21 +48,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const context = await getCurrentOrg(supabase)
 
-  if (!user) {
+  if (!context) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-
-  const { data: member } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!member?.org_id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const { orgId } = context
 
   const admin = createAdminClient()
 
@@ -84,7 +67,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
-  if (widgetUser.org_id !== member.org_id) {
+  if (widgetUser.org_id !== orgId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

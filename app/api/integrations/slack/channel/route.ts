@@ -1,30 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function PUT(request: NextRequest) {
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
+  const context = await getCurrentOrg(supabase)
+  if (!context) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  const { orgId } = context
 
   const body = await request.json()
   const { org_id, channel_id, channel_name } = body
 
-  if (!org_id || !channel_id) {
-    return NextResponse.json({ error: 'org_id and channel_id required' }, { status: 400 })
+  if (!channel_id) {
+    return NextResponse.json({ error: 'channel_id required' }, { status: 400 })
   }
 
-  // Verify user is member of org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('org_id', org_id)
-    .eq('user_id', user.id)
-    .single()
+  const resolvedOrgId = org_id || orgId
 
-  if (!membership) {
+  if (resolvedOrgId !== orgId) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 })
   }
 
@@ -32,7 +27,7 @@ export async function PUT(request: NextRequest) {
   const { error } = await supabase
     .from('integrations')
     .update({ channel_id, channel_name })
-    .eq('org_id', org_id)
+    .eq('org_id', resolvedOrgId)
     .eq('type', 'slack')
 
   if (error) {

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function DELETE(
   request: Request,
@@ -8,12 +9,11 @@ export async function DELETE(
   try {
     const { id } = await params
     const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId, role } = context
 
     // Get webhook to verify org ownership
     const { data: webhook, error: webhookError } = await supabase
@@ -26,15 +26,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Webhook not found' }, { status: 404 })
     }
 
-    // Verify user is admin of org
-    const { data: membership, error: membershipError } = await supabase
-      .from('org_members')
-      .select('role')
-      .eq('org_id', webhook.org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (membershipError || !membership || (membership.role !== 'admin' && membership.role !== 'owner')) {
+    if (webhook.org_id !== orgId || (role !== 'admin' && role !== 'owner')) {
       return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 
@@ -60,12 +52,11 @@ export async function PATCH(
   try {
     const { id } = await params
     const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const context = await getCurrentOrg(supabase)
+    if (!context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { orgId, role } = context
 
     const body = await request.json()
 
@@ -80,15 +71,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Webhook not found' }, { status: 404 })
     }
 
-    // Verify user is admin of org
-    const { data: membership, error: membershipError } = await supabase
-      .from('org_members')
-      .select('role')
-      .eq('org_id', webhook.org_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (membershipError || !membership || (membership.role !== 'admin' && membership.role !== 'owner')) {
+    if (webhook.org_id !== orgId || (role !== 'admin' && role !== 'owner')) {
       return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
     }
 

@@ -1,26 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCurrentOrg } from '@/lib/org-context'
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+  const context = await getCurrentOrg(supabase)
+  if (!context) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { role } = context
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Get the tag to find its org_id
-  const { data: tag } = await supabase.from('tags').select('org_id').eq('id', id).single()
-  if (!tag) return NextResponse.json({ error: 'Tag not found' }, { status: 404 })
-
-  // Verify user is admin/owner of the tag's org
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('org_id', tag.org_id)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
+  if (role !== 'owner' && role !== 'admin') {
     return NextResponse.json({ error: 'You don\'t have permission to perform this action. Admin role required.' }, { status: 403 })
   }
 
