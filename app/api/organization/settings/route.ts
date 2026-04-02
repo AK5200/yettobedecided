@@ -23,8 +23,6 @@ export async function PATCH(request: Request) {
         post_moderation: body.post_moderation,
         comment_moderation: body.comment_moderation,
         allow_anonymous_posts: body.allow_anonymous_posts,
-        allow_guest_posts: body.allow_guest_posts,
-        allow_guest_votes: body.allow_guest_votes,
       })
       .eq('id', orgId)
 

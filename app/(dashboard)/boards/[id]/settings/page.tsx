@@ -41,8 +41,6 @@ export default async function BoardSettingsRoute({
         post_moderation: org?.post_moderation ?? false,
         comment_moderation: org?.comment_moderation ?? false,
         allow_anonymous_posts: org?.allow_anonymous_posts ?? false,
-        allow_guest_posts: org?.allow_guest_posts ?? false,
-        allow_guest_votes: org?.allow_guest_votes ?? false,
       }}
     />
   )

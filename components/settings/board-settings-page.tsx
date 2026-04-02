@@ -17,7 +17,6 @@ import {
   Shield,
   MessageCircle,
   UserX,
-  Users,
   Eye,
   EyeOff,
   Trash2,
@@ -41,8 +40,6 @@ interface OrgSettings {
   post_moderation: boolean
   comment_moderation: boolean
   allow_anonymous_posts: boolean
-  allow_guest_posts: boolean
-  allow_guest_votes: boolean
 }
 
 interface BoardSettingsPageProps {
@@ -67,8 +64,6 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
   const [postModeration, setPostModeration] = useState(orgSettings.post_moderation)
   const [commentModeration, setCommentModeration] = useState(orgSettings.comment_moderation)
   const [allowAnonymousPosts, setAllowAnonymousPosts] = useState(orgSettings.allow_anonymous_posts)
-  const [allowGuestPosts, setAllowGuestPosts] = useState(orgSettings.allow_guest_posts)
-  const [allowGuestVotes, setAllowGuestVotes] = useState(orgSettings.allow_guest_votes)
 
   const handleSaveBoardSettings = async () => {
     setSaving(true)
@@ -111,8 +106,6 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
           post_moderation: postModeration,
           comment_moderation: commentModeration,
           allow_anonymous_posts: allowAnonymousPosts,
-          allow_guest_posts: allowGuestPosts,
-          allow_guest_votes: allowGuestVotes,
         }),
       })
 
@@ -415,41 +408,6 @@ export function BoardSettingsPage({ board, orgSettings }: BoardSettingsPageProps
                 </div>
               </div>
               <Switch checked={allowAnonymousPosts} onCheckedChange={setAllowAnonymousPosts} />
-            </div>
-          </Card>
-
-          {/* Guest Posts & Votes */}
-          <Card className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-                <Users className="h-5 w-5 text-amber-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-foreground">Guest Posts & Votes</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Allow users to submit feedback and vote without creating an account.
-                </p>
-                <div className="flex items-center gap-6 mt-4">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={allowGuestPosts}
-                      onChange={(e) => setAllowGuestPosts(e.target.checked)}
-                      className="rounded border-border"
-                    />
-                    Allow guest posts
-                  </label>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={allowGuestVotes}
-                      onChange={(e) => setAllowGuestVotes(e.target.checked)}
-                      className="rounded border-border"
-                    />
-                    Allow guest votes
-                  </label>
-                </div>
-              </div>
             </div>
           </Card>
 
