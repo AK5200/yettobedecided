@@ -84,13 +84,22 @@ export async function POST(request: Request) {
     // Check if board exists and get require_approval setting
     const { data: board } = await supabase
       .from('boards')
-      .select('id, require_approval, org_id, organizations(post_moderation)')
+      .select('id, require_approval, org_id')
       .eq('id', board_id)
       .single()
 
     if (!board) {
       return NextResponse.json({ error: 'Board not found' }, { status: 404 })
     }
+
+    // Check org-level moderation setting
+    const { data: orgModeration } = await supabase
+      .from('organizations')
+      .select('post_moderation')
+      .eq('id', board.org_id)
+      .single()
+
+    const orgPostModeration = orgModeration?.post_moderation === true
 
     // Process identified user for guest posts
     type PostSsoResult = {
@@ -177,7 +186,7 @@ export async function POST(request: Request) {
       identified_user_avatar: is_guest ? (ssoResult.user?.avatar || null) : null,
       user_source: is_guest ? sourceForRow : 'guest',
       is_guest: is_guest || false,
-      is_approved: !board.require_approval && !(board as any).organizations?.post_moderation,
+      is_approved: !board.require_approval && !orgPostModeration,
       status: 'open',
       widget_user_id: widgetUser?.id || null,
     }
