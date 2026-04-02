@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
   const { data: board } = await supabase
     .from('boards')
-    .select('id, require_approval, org_id')
+    .select('id, require_approval, org_id, organizations(post_moderation)')
     .eq('id', board_id)
     .eq('org_id', org.id)
     .single()
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     identified_user_id: ssoResult.user?.id || null,
     identified_user_avatar: ssoResult.user?.avatar || null,
     user_source: sourceForRow,
-    is_approved: !board.require_approval,
+    is_approved: !board.require_approval && !(board as any).organizations?.post_moderation,
     status: 'open',
   }
 

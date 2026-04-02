@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     // Check if board exists and get require_approval setting
     const { data: board } = await supabase
       .from('boards')
-      .select('id, require_approval, org_id')
+      .select('id, require_approval, org_id, organizations(post_moderation)')
       .eq('id', board_id)
       .single()
 
@@ -177,7 +177,7 @@ export async function POST(request: Request) {
       identified_user_avatar: is_guest ? (ssoResult.user?.avatar || null) : null,
       user_source: is_guest ? sourceForRow : 'guest',
       is_guest: is_guest || false,
-      is_approved: !board.require_approval,
+      is_approved: !board.require_approval && !(board as any).organizations?.post_moderation,
       status: 'open',
       widget_user_id: widgetUser?.id || null,
     }
