@@ -107,6 +107,14 @@ export default function ModerationPage() {
     setLoading(false)
   }
 
+  const notifyModerationChange = () => {
+    try {
+      const bc = new BroadcastChannel('kelo_moderation')
+      bc.postMessage('updated')
+      bc.close()
+    } catch {}
+  }
+
   const approvePost = async (postId: string) => {
     setProcessingId(postId)
     const { error } = await supabase
@@ -119,6 +127,7 @@ export default function ModerationPage() {
     } else {
       toast.success('Post approved!')
       setPendingPosts(pendingPosts.filter(p => p.id !== postId))
+      notifyModerationChange()
     }
     setProcessingId(null)
   }
@@ -137,6 +146,7 @@ export default function ModerationPage() {
     } else {
       toast.success('Post rejected and deleted')
       setPendingPosts(pendingPosts.filter(p => p.id !== postId))
+      notifyModerationChange()
     }
     setProcessingId(null)
   }
@@ -153,6 +163,7 @@ export default function ModerationPage() {
     } else {
       toast.success('Comment approved!')
       setPendingComments(pendingComments.filter(c => c.id !== commentId))
+      notifyModerationChange()
     }
     setProcessingId(null)
   }
@@ -171,6 +182,7 @@ export default function ModerationPage() {
     } else {
       toast.success('Comment rejected and deleted')
       setPendingComments(pendingComments.filter(c => c.id !== commentId))
+      notifyModerationChange()
     }
     setProcessingId(null)
   }

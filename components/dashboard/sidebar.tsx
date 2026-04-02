@@ -158,7 +158,16 @@ export function Sidebar() {
     fetchPendingCount()
     // Poll every 30 seconds
     const interval = setInterval(fetchPendingCount, 30000)
-    return () => clearInterval(interval)
+    // Listen for instant updates from moderation page
+    let bc: BroadcastChannel | null = null
+    try {
+      bc = new BroadcastChannel('kelo_moderation')
+      bc.onmessage = () => fetchPendingCount()
+    } catch {}
+    return () => {
+      clearInterval(interval)
+      bc?.close()
+    }
   }, [org?.id, supabase])
 
   // Auto-expand settings when on a settings page
