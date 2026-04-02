@@ -4,30 +4,31 @@ import Link from 'next/link';
 
 const plans = [
   {
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
+    name: 'Lite',
+    price: '$9',
+    period: '/month',
     description: 'For indie hackers and early-stage products.',
-    cta: 'Start free',
+    cta: 'Start 7-day free trial',
     highlight: false,
     features: [
-      '1 feedback board',
-      'Up to 100 feedback items',
+      '3 feedback boards',
+      'Unlimited feedback items',
       'Public roadmap',
-      'Basic changelog',
-      'Community support',
+      'Full changelog',
+      'Email notifications',
+      'Kelo branding',
     ],
-    notIncluded: ['Custom domain', 'Unlimited boards', 'Priority support', 'Analytics'],
+    notIncluded: ['Custom domain', 'Priority support', 'Analytics'],
   },
   {
     name: 'Starter',
     price: '$19',
     period: '/month',
     description: 'For growing products with real user bases.',
-    cta: 'Get Starter',
+    cta: 'Start 7-day free trial',
     highlight: false,
     features: [
-      '3 feedback boards',
+      '5 feedback boards',
       'Unlimited feedback items',
       'Public roadmap',
       'Full changelog',
@@ -41,7 +42,7 @@ const plans = [
     price: '$39',
     period: '/month',
     description: 'For product teams who ship fast and often.',
-    cta: 'Get Pro',
+    cta: 'Start 7-day free trial',
     highlight: true,
     badge: 'Most popular',
     features: [
@@ -60,7 +61,7 @@ const plans = [
     price: '$99',
     period: '/month',
     description: 'For scaling teams with enterprise needs.',
-    cta: 'Get Business',
+    cta: 'Start 7-day free trial',
     highlight: false,
     features: [
       'Everything in Pro',
@@ -91,7 +92,7 @@ export default function Pricing() {
             <span className="text-kelo-muted dark:text-white/40 font-semibold text-3xl md:text-4xl">Just flat, honest pricing.</span>
           </h2>
           <p className="text-base text-kelo-muted dark:text-white/50 mb-8">
-            Start free. Upgrade when you need to. Downgrade anytime.
+            Start with a 7-day free trial. Upgrade anytime. Cancel anytime.
           </p>
 
           <div className="inline-flex items-center gap-1 p-1 bg-white dark:bg-white/5 border border-kelo-border dark:border-white/10 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
