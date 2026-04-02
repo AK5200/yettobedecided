@@ -16,7 +16,6 @@ import {
   X,
   Clock,
   User,
-  AlertCircle,
   BadgeCheck,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -417,21 +416,6 @@ export default function ModerationPage() {
           </Tabs>
         )}
 
-        {/* Info Card */}
-        <Card className="mt-8 p-4 bg-blue-50 border-blue-200">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-900">Moderation Settings</h4>
-              <p className="text-sm text-blue-700 mt-1">
-                Enable or disable post and comment moderation in{' '}
-                <a href="/settings/boards" className="underline font-medium">
-                  Settings → Boards → Moderation & Permissions
-                </a>
-              </p>
-            </div>
-          </div>
-        </Card>
       </div>
     </div>
   )

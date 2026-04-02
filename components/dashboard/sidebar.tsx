@@ -83,6 +83,7 @@ export function Sidebar() {
   const [newOrgName, setNewOrgName] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
   const [createError, setCreateError] = useState('')
+  const [pendingModerationCount, setPendingModerationCount] = useState(0)
 
   useEffect(() => {
     const fetchOrgs = async () => {
@@ -119,6 +120,46 @@ export function Sidebar() {
     }
     fetchOrgs()
   }, [supabase])
+
+  // Fetch pending moderation count
+  useEffect(() => {
+    if (!org?.id) return
+    const fetchPendingCount = async () => {
+      const { data: boards } = await supabase
+        .from('boards')
+        .select('id')
+        .eq('org_id', org.id)
+      if (!boards || boards.length === 0) return
+
+      const boardIds = boards.map((b: { id: string }) => b.id)
+      const { count: postCount } = await supabase
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_approved', false)
+        .in('board_id', boardIds)
+
+      const { data: postIds } = await supabase
+        .from('posts')
+        .select('id')
+        .in('board_id', boardIds)
+
+      let commentCount = 0
+      if (postIds && postIds.length > 0) {
+        const { count } = await supabase
+          .from('comments')
+          .select('id', { count: 'exact', head: true })
+          .eq('is_approved', false)
+          .in('post_id', postIds.map((p: { id: string }) => p.id))
+        commentCount = count || 0
+      }
+
+      setPendingModerationCount((postCount || 0) + commentCount)
+    }
+    fetchPendingCount()
+    // Poll every 30 seconds
+    const interval = setInterval(fetchPendingCount, 30000)
+    return () => clearInterval(interval)
+  }, [org?.id, supabase])
 
   // Auto-expand settings when on a settings page
   useEffect(() => {
@@ -380,7 +421,13 @@ export function Sidebar() {
             className={navItemClass('/moderation')}
           >
             <Shield className="h-4 w-4" />
-            Moderation
+            <span className="flex-1">Moderation</span>
+            {pendingModerationCount > 0 && (
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
+              </span>
+            )}
           </Link>
         </div>
 

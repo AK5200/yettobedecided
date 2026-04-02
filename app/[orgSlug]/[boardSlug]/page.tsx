@@ -68,6 +68,7 @@ export default function PublicBoardPage({
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [pendingPost, setPendingPost] = useState<{ title: string } | null>(null)
   const [commentRefresh, setCommentRefresh] = useState(0)
   const [votingIds, setVotingIds] = useState<string[]>([])
   const [votedPostIds, setVotedPostIds] = useState<string[]>([])
@@ -191,7 +192,7 @@ export default function PublicBoardPage({
     }
     setSubmitLoading(true)
 
-    await fetch('/api/posts', {
+    const res = await fetch('/api/posts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -204,8 +205,19 @@ export default function PublicBoardPage({
       }),
     })
 
+    const savedTitle = newTitle
     setNewTitle('')
     setNewContent('')
+
+    if (res.ok) {
+      const data = await res.json()
+      if (data.post?.is_approved === false) {
+        setPendingPost({ title: savedTitle })
+      } else {
+        setPendingPost(null)
+      }
+    }
+
     await fetchPosts(board.id)
     setSubmitLoading(false)
   }
@@ -271,6 +283,18 @@ export default function PublicBoardPage({
       </div>
 
       <div className="space-y-4">
+        {pendingPost && (
+          <Card className="p-4 flex items-start gap-4 opacity-60 border-amber-200 bg-amber-50/50">
+            <Button variant="outline" disabled>0</Button>
+            <div className="flex-1">
+              <div className="font-medium">{pendingPost.title}</div>
+              <p className="text-xs text-amber-700 mt-2 flex items-center gap-1.5">
+                <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
+                Waiting for admin approval
+              </p>
+            </div>
+          </Card>
+        )}
         {posts.map((post) => (
           <Dialog key={post.id}>
             <DialogTrigger asChild>

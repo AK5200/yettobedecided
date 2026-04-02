@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Check } from 'lucide-react'
+import { Check, Clock } from 'lucide-react'
 
 interface FeedbackBoard {
   id: string
@@ -37,7 +37,7 @@ export function FeedbackWidget({
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess] = useState<boolean | 'pending'>(false)
   const [submitError, setSubmitError] = useState('')
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
   const [isIdentified, setIsIdentified] = useState(false)
@@ -357,7 +357,7 @@ export function FeedbackWidget({
         const data = await response.json()
         setTitle('')
         setContent('')
-        setSuccess(true)
+        setSuccess(data.post?.is_approved === false ? 'pending' : true)
         onSubmit?.(data.post)
       } else {
         const data = await response.json().catch(() => ({}))
@@ -683,7 +683,13 @@ export function FeedbackWidget({
           >
             {loading ? 'Submitting...' : 'Submit'}
           </Button>
-          {success && (
+          {success === 'pending' && (
+            <p className="text-sm text-amber-700 flex items-center gap-2 bg-amber-50/80 px-3 py-2 rounded-lg border border-amber-200">
+              <Clock className="h-4 w-4" />
+              Your post has been submitted and is waiting for admin approval.
+            </p>
+          )}
+          {success === true && (
             <p className="text-sm text-green-600 flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
               <Check className="h-4 w-4" />
               Thanks for the feedback!
