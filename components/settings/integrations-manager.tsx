@@ -458,8 +458,8 @@ export function IntegrationsManager({
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark transition-colors"
               onClick={handleSlackConnect}
             >
-              <SlackLogo />
-              Add to Slack
+              <Settings className="h-4 w-4" />
+              Connect
             </button>
           )}
         </div>
