@@ -376,7 +376,7 @@ export default function WidgetsPage() {
   }, [])
 
   // Derive base URL from current window location for correct embed code generation
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://yettobedecided-8lws.vercel.app'
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.kelohq.com'
 
   // Generate embed codes with comments for customization
   const generateChangelogPopupCode = () => {
@@ -608,20 +608,20 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
           </div>
           <div className="flex-1 min-w-0">
             <h2 className={`text-lg font-display font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-kelo-ink'}`}>
-              Add to Your Navbar
+              Feedback Portal Link
             </h2>
             <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>
-              Add a link to your navigation bar that redirects users to your feedback page.
+              Your public feedback page where users can submit ideas, vote, and track progress. Add this link anywhere on your website — navbar, footer, sidebar, or help menu.
             </p>
           </div>
         </div>
         <div className={`rounded-xl p-5 mb-4 ${isDark ? 'bg-white/[0.04]' : 'bg-kelo-surface'}`}>
           <p className={`text-sm font-medium mb-4 ${isDark ? 'text-white/60' : 'text-kelo-ink/70'}`}>
-            Use this code snippet to add a &quot;Feedback&quot; link to your website&apos;s navigation bar:
+            Copy this HTML snippet and paste it into your website&apos;s navigation, footer, or anywhere you want users to access your feedback portal:
           </p>
           <button
             onClick={() => {
-              const code = `<a href="https://yettobedecided-8lws.vercel.app/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
+              const code = `<a href="https://www.kelohq.com/${orgSlug}/features" target="_blank" style="text-decoration: none; color: inherit;">
   Feedback
 </a>`
               navigator.clipboard.writeText(code)

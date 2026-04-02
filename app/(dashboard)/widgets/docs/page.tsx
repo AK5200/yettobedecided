@@ -31,7 +31,7 @@ export default function WidgetDocsPage() {
       setOrgSlug(org?.slug || '')
     }
     fetchOrg()
-    setBaseUrl(typeof window !== 'undefined' ? window.location.origin : 'https://yettobedecided-8lws.vercel.app')
+    setBaseUrl(typeof window !== 'undefined' ? window.location.origin : 'https://www.kelohq.com')
   }, [])
 
   const copyCode = (code: string, id: string) => {
