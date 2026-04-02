@@ -23,10 +23,20 @@ export async function GET(request: Request) {
       return withCors(NextResponse.json({ error: 'post_id is required' }, { status: 400 }), origin)
     }
 
-    const { data: comments, error } = await supabase
+    // Check if requester is an admin (can see all comments including unapproved)
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+
+    let query = supabase
       .from('comments')
       .select('*')
       .eq('post_id', postId)
+
+    // Non-admin users only see approved comments
+    if (!authUser) {
+      query = query.eq('is_approved', true)
+    }
+
+    const { data: comments, error } = await query
       .order('created_at', { ascending: true })
 
     if (error) {
@@ -98,7 +108,7 @@ export async function POST(request: Request) {
     // Get org settings
     const { data: org } = await supabase
       .from('organizations')
-      .select('id, guest_posting_enabled, sso_secret_key')
+      .select('id, guest_posting_enabled, sso_secret_key, comment_moderation')
       .eq('id', boardData.org_id)
       .single()
     if (!org?.id) {
@@ -150,6 +160,9 @@ export async function POST(request: Request) {
       widgetUserId = widgetUser?.id || null
     }
 
+    // Admin comments skip moderation
+    const needsModeration = !is_from_admin && !!org?.comment_moderation
+
     const commentData = {
       post_id,
       content,
@@ -160,7 +173,8 @@ export async function POST(request: Request) {
       identified_user_avatar: ssoResult.user?.avatar || null,
       user_source: sourceForRow,
       is_from_admin,
-      is_internal: verifiedIsInternal
+      is_internal: verifiedIsInternal,
+      is_approved: !needsModeration,
     }
 
     const { data: comment, error } = await supabase
