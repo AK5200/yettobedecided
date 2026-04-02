@@ -192,6 +192,23 @@ export async function notifyIntegrations({
         continue
       }
 
+      // Telegram: use Bot API with chat_id from webhook_url
+      if (i.type === 'telegram' && i.webhook_url) {
+        const telegramBody = formatBody('telegram', payload) as { text: string; parse_mode: string }
+        // Extract chat_id and bot token from stored URL
+        // Format: https://api.telegram.org/bot<TOKEN>/sendMessage?chat_id=<CHAT_ID>
+        const urlMatch = i.webhook_url.match(/bot([^/]+)\/sendMessage\?chat_id=(.+)/)
+        if (urlMatch) {
+          const [, botToken, chatId] = urlMatch
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, ...telegramBody }),
+          })
+        }
+        continue
+      }
+
       // Fallback: webhook URL (all types including legacy Slack)
       if (!i.webhook_url) {
         continue
