@@ -187,8 +187,8 @@ const WEBHOOK_CONFIGS: IntegrationConfig[] = [
         <ol className="list-decimal pl-4 space-y-0.5">
           <li>Add <strong>@kelohq_bot</strong> to your Telegram group</li>
           <li>Send any message in the group</li>
-          <li>Visit <a href="https://api.telegram.org/bot{token}/getUpdates" target="_blank" rel="noopener noreferrer" className="text-kelo-yellow-dark underline">this link</a> or message the bot <code>/start</code></li>
-          <li>Copy the <code>chat_id</code> value (starts with <code>-</code> for groups)</li>
+          <li>Message <strong>@RawDataBot</strong> in the group — it will reply with the chat ID</li>
+          <li>Copy the <code>chat id</code> value (starts with <code>-</code> for groups)</li>
         </ol>
       </div>
     ),
