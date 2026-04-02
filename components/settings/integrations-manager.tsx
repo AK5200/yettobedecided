@@ -71,6 +71,7 @@ interface IntegrationConfig {
   helpText?: string
   helperNote?: React.ReactNode
   showChannelField: boolean
+  isTelegram?: boolean
 }
 
 interface SlackChannel {
@@ -178,15 +179,21 @@ const WEBHOOK_CONFIGS: IntegrationConfig[] = [
     name: 'Telegram',
     description: 'Get notified in Telegram groups',
     logo: <TelegramLogo />,
-    placeholder: 'https://api.telegram.org/bot<TOKEN>/sendMessage?chat_id=<CHAT_ID>',
-    helpUrl: 'https://core.telegram.org/bots#how-do-i-create-a-bot',
-    helpText: 'Learn how to create a Telegram bot',
+    placeholder: 'e.g. -1001234567890',
+    helpText: 'How to get your Chat ID',
     helperNote: (
-      <p className="text-xs text-kelo-muted dark:text-white/40 mt-1">
-        Format: https://api.telegram.org/bot&lt;TOKEN&gt;/sendMessage?chat_id=&lt;CHAT_ID&gt;
-      </p>
+      <div className="text-xs text-kelo-muted dark:text-white/40 mt-2 space-y-1">
+        <p className="font-medium">Setup:</p>
+        <ol className="list-decimal pl-4 space-y-0.5">
+          <li>Add <strong>@kelohq_bot</strong> to your Telegram group</li>
+          <li>Send any message in the group</li>
+          <li>Visit <a href="https://api.telegram.org/bot{token}/getUpdates" target="_blank" rel="noopener noreferrer" className="text-kelo-yellow-dark underline">this link</a> or message the bot <code>/start</code></li>
+          <li>Copy the <code>chat_id</code> value (starts with <code>-</code> for groups)</li>
+        </ol>
+      </div>
     ),
     showChannelField: false,
+    isTelegram: true,
   },
 ]
 
@@ -242,6 +249,7 @@ export function IntegrationsManager({
 
   const [saving, setSaving] = useState(false)
   const [configuring, setConfiguring] = useState<WebhookIntegrationType | null>(null)
+  const [testingTelegram, setTestingTelegram] = useState(false)
 
   // Show toast on OAuth callback
   useEffect(() => {
@@ -370,6 +378,31 @@ export function IntegrationsManager({
     toast.success(`${config?.name || type} integration saved!`)
     setSaving(false)
     setConfiguring(null)
+  }
+
+  const testTelegram = async () => {
+    const chatId = states['telegram']?.webhook_url
+    if (!chatId?.trim()) {
+      toast.error('Enter a Chat ID first')
+      return
+    }
+    setTestingTelegram(true)
+    try {
+      const res = await fetch('/api/integrations/telegram/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId.trim() }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success('Test message sent! Check your Telegram group.')
+      } else {
+        toast.error(data.error || 'Failed to send test message')
+      }
+    } catch {
+      toast.error('Failed to send test message')
+    }
+    setTestingTelegram(false)
   }
 
   const isConnected = (type: string) => !!states[type]?.webhook_url
@@ -576,7 +609,7 @@ export function IntegrationsManager({
               <div className="space-y-6 pt-4">
                 <div className="space-y-2">
                   <label htmlFor={`${activeConfig.type}-webhook`} className="text-sm font-semibold text-kelo-ink dark:text-white">
-                    Webhook URL
+                    {activeConfig.isTelegram ? 'Chat ID' : 'Webhook URL'}
                   </label>
                   <input
                     id={`${activeConfig.type}-webhook`}
@@ -679,6 +712,19 @@ export function IntegrationsManager({
                   >
                     Cancel
                   </button>
+                  {activeConfig.isTelegram && (
+                    <button
+                      onClick={testTelegram}
+                      disabled={testingTelegram || !states['telegram']?.webhook_url?.trim()}
+                      className={`px-4 py-2 text-sm font-semibold rounded-xl border transition-colors disabled:opacity-50 ${
+                        isDark
+                          ? 'border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.04]'
+                          : 'border-kelo-border text-kelo-muted hover:text-kelo-ink hover:bg-kelo-surface'
+                      }`}
+                    >
+                      {testingTelegram ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Test'}
+                    </button>
+                  )}
                   <button
                     onClick={() => saveIntegration(activeConfig.type)}
                     disabled={saving}
