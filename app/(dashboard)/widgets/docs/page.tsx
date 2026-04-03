@@ -485,22 +485,20 @@ if (window.Kelo) {
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold mb-2">Feedback Widget (Default)</h3>
-                <p className="text-muted-foreground mb-3">A floating button that opens a full-screen feedback interface. Or use a custom trigger.</p>
+                <p className="text-muted-foreground mb-3">A full-screen feedback interface. Add <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-kelo-trigger</code> to any element to open it.</p>
                 <Card className="bg-[#1e1e1e] border-gray-800 mb-4">
                   <div className="p-5 overflow-x-auto">
                     <pre className="text-sm text-gray-300 font-mono">
-                      <code>{`<!-- Default: Floating button (no trigger needed) -->
-<script 
-  src="${baseUrl}/widget.js" 
+                      <code>{`<script
+  src="${baseUrl}/widget.js"
   data-org="${orgSlug}"
 ></script>
 
-<!-- Or use custom trigger (hides floating button) -->
-<script 
-  src="${baseUrl}/widget.js" 
-  data-org="${orgSlug}"
-></script>
-<button data-kelo-feedback>Give Feedback</button>`}</code>
+<!-- Add data-kelo-trigger to any element -->
+<button data-kelo-trigger>Give Feedback</button>
+<!-- Or on a navbar link -->
+<a href="#" data-kelo-trigger>Feedback</a>
+<!-- Or open via JS: window.Kelo.open() -->`}</code>
                     </pre>
                   </div>
                 </Card>
@@ -528,7 +526,7 @@ if (window.Kelo) {
                   </div>
                 </Card>
                 <p className="text-sm text-muted-foreground">
-                  <strong>Note:</strong> The widget automatically detects elements with <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-kelo-changelog-popup</code> and attaches click handlers. No IDs needed!
+                  <strong>Note:</strong> Use <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-kelo-trigger</code> on any element to open the widget. Type-specific attributes like <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-kelo-changelog-popup</code> also work as aliases.
                 </p>
               </div>
 
@@ -553,15 +551,17 @@ if (window.Kelo) {
 
               <div>
                 <h3 className="text-xl font-semibold mb-2">All-in-One Popup</h3>
-                <p className="text-muted-foreground mb-3">Combines feedback board and changelog in a centered modal.</p>
+                <p className="text-muted-foreground mb-3">Combines feedback board and changelog in a slide-in panel.</p>
                 <Card className="bg-[#1e1e1e] border-gray-800">
                   <div className="p-5 overflow-x-auto">
                     <pre className="text-sm text-gray-300 font-mono">
-                      <code>{`<script 
-  src="${baseUrl}/widget.js" 
+                      <code>{`<script
+  src="${baseUrl}/widget.js"
   data-org="${orgSlug}"
   data-type="all-in-one-popup"
-></script>`}</code>
+></script>
+
+<button data-kelo-trigger>Feedback & Updates</button>`}</code>
                     </pre>
                   </div>
                 </Card>
@@ -569,15 +569,17 @@ if (window.Kelo) {
 
               <div>
                 <h3 className="text-xl font-semibold mb-2">All-in-One Popover</h3>
-                <p className="text-muted-foreground mb-3">Combines feedback board and changelog in a side panel.</p>
+                <p className="text-muted-foreground mb-3">Combines feedback board and changelog in a floating popover.</p>
                 <Card className="bg-[#1e1e1e] border-gray-800">
                   <div className="p-5 overflow-x-auto">
                     <pre className="text-sm text-gray-300 font-mono">
-                      <code>{`<script 
-  src="${baseUrl}/widget.js" 
+                      <code>{`<script
+  src="${baseUrl}/widget.js"
   data-org="${orgSlug}"
   data-type="all-in-one-popover"
-></script>`}</code>
+></script>
+
+<button data-kelo-trigger>Feedback & Updates</button>`}</code>
                     </pre>
                   </div>
                 </Card>
@@ -1349,7 +1351,7 @@ KeloChangelog.close(); // Close changelog`}</code>
           <section id="feedback-widget" className="mb-16 scroll-mt-8">
             <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">Feedback Widget</h2>
             <p className="text-muted-foreground mb-6">
-              The default feedback widget creates a floating button that opens a full-screen feedback interface where users can browse boards, submit feedback, and view existing posts.
+              The feedback widget opens a full-screen interface where users can browse boards, submit feedback, and view existing posts. Add <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-kelo-trigger</code> to any element on your site to open it.
             </p>
 
             <h3 className="text-xl font-semibold mt-8 mb-3">Default Behavior</h3>
@@ -1391,12 +1393,12 @@ KeloChangelog.close(); // Close changelog`}</code>
               </div>
             </Card>
 
-            <h3 className="text-xl font-semibold mt-8 mb-3">What it creates</h3>
+            <h3 className="text-xl font-semibold mt-8 mb-3">What it does</h3>
             <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
-              <li>A floating button in the bottom-right corner (customizable position)</li>
-              <li>Full-screen iframe when clicked, showing all your feedback boards</li>
+              <li>Opens a full-screen feedback interface when triggered</li>
               <li>Users can browse boards, submit new feedback, and vote on existing posts</li>
-              <li>Settings (colors, position, branding) are loaded from your dashboard</li>
+              <li>Trigger it from any element with <code className="bg-muted px-1.5 py-0.5 rounded text-sm">data-kelo-trigger</code> or via <code className="bg-muted px-1.5 py-0.5 rounded text-sm">window.Kelo.open()</code></li>
+              <li>Settings (colors, branding) are loaded from your dashboard</li>
             </ul>
           </section>
 
@@ -1467,13 +1469,13 @@ KeloChangelog.close(); // Close changelog`}</code>
                   variant="ghost"
                   size="sm"
                   className="h-7 text-xs text-gray-400 hover:text-white"
-                  onClick={() => copyCode(`<button id="kelo-changelog-trigger">What's New</button>
-
-<script 
-  src="${baseUrl}/widget.js" 
+                  onClick={() => copyCode(`<script
+  src="${baseUrl}/widget.js"
   data-org="${orgSlug}"
   data-type="changelog-dropdown"
-></script>`, 'changelog-dropdown')}
+></script>
+
+<button data-kelo-trigger>What's New</button>`, 'changelog-dropdown')}
                 >
                   {copiedCode === 'changelog-dropdown' ? (
                     <>
@@ -1490,13 +1492,13 @@ KeloChangelog.close(); // Close changelog`}</code>
               </div>
               <div className="p-5 overflow-x-auto">
                 <pre className="text-sm text-gray-300 font-mono">
-                  <code>{`<button id="kelo-changelog-trigger">What's New</button>
-
-<script 
-  src="${baseUrl}/widget.js" 
+                  <code>{`<script
+  src="${baseUrl}/widget.js"
   data-org="${orgSlug}"
   data-type="changelog-dropdown"
-></script>`}</code>
+></script>
+
+<button data-kelo-trigger>What's New</button>`}</code>
                 </pre>
               </div>
             </Card>

@@ -1,23 +1,25 @@
 (function () {
-  const script = document.currentScript;
-  const org = script.getAttribute('data-org');
-  const widgetType = script.getAttribute('data-type') || 'feedback';
-  const customTrigger = script.getAttribute('data-trigger');
+  var script = document.currentScript;
+  var org = script.getAttribute('data-org');
+  var widgetType = script.getAttribute('data-type') || 'feedback';
 
   if (!org) {
     console.error('Kelo: data-org required');
     return;
   }
 
-  const baseUrl = new URL(script.src).origin;
+  var baseUrl = new URL(script.src).origin;
 
   // Initialize Kelo global object
   window.Kelo = window.Kelo || {};
 
-  let _user = null;
+  var _user = null;
+  var _iframe = null;
+  var _initialized = false;
+  var _settings = null;
 
-  // Load saved session (scoped per org to prevent cross-tenant leakage)
-  const saved = localStorage.getItem('kelo_user_' + org);
+  // Load saved session (scoped per org)
+  var saved = localStorage.getItem('kelo_user_' + org);
   if (saved) {
     try { _user = JSON.parse(saved); } catch(e) {}
   }
@@ -28,10 +30,8 @@
   Kelo.identify = function(data) {
     if (!data) return null;
     if (data.token) {
-      // JWT Mode - just store token, backend will verify
       _user = { token: data.token };
     } else if (data.id && data.email) {
-      // Trust Mode
       _user = {
         id: data.id,
         email: data.email,
@@ -40,410 +40,53 @@
         company: data.company
       };
     }
-    
     if (_user) {
       localStorage.setItem('kelo_user_' + org, JSON.stringify(_user));
-      // Send identity to all open iframes
-      const iframes = document.querySelectorAll('iframe[id^="kelo-"]');
-      iframes.forEach(function(iframe) {
-        if (iframe.contentWindow) {
-          iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-        }
-      });
+      sendIdentityToIframe();
     }
-    
     return _user;
   };
-  
-  /**
-   * Clear identity (logout)
-   */
+
   Kelo.clearIdentity = function() {
     _user = null;
     localStorage.removeItem('kelo_user_' + org);
   };
-  
-  /**
-   * Check if user is identified
-   */
+
   Kelo.isIdentified = function() {
     return _user !== null;
   };
-  
-  /**
-   * Get current user
-   */
+
   Kelo.getUser = function() {
     return _user;
   };
-  
-  /**
-   * Internal: get identified_user payload for API calls
-   */
+
   Kelo._getIdentifyPayload = function() {
     return _user;
   };
 
+  function sendIdentityToIframe() {
+    if (_iframe && _iframe.contentWindow && _user) {
+      _iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
+    }
+  }
+
   // Fetch settings from API
   async function loadSettings() {
     try {
-      const res = await fetch(`${baseUrl}/api/widget-settings?org=${encodeURIComponent(org)}`);
+      var res = await fetch(baseUrl + '/api/widget-settings?org=' + encodeURIComponent(org));
       if (res.ok) {
-        const data = await res.json();
+        var data = await res.json();
         return data.settings || {};
       }
     } catch (e) {
-      console.warn('Kelo: Failed to load settings, using defaults');
+      console.warn('Kelo: Failed to load settings');
     }
     return {};
   }
 
-  // Find elements with data attributes for auto-trigger
-  function findDataAttributeTriggers() {
-    const triggers = {
-      changelogPopup: document.querySelectorAll('[data-kelo-changelog-popup]'),
-      changelogDropdown: document.querySelectorAll('[data-kelo-changelog-dropdown]'),
-      feedback: document.querySelectorAll('[data-kelo-feedback]'),
-      allInOnePopup: document.querySelectorAll('[data-kelo-all-in-one-popup]'),
-      allInOnePopover: document.querySelectorAll('[data-kelo-all-in-one-popover]'),
-    };
-    return triggers;
-  }
-
-  // Initialize widget based on type
-  async function init() {
-    const settings = await loadSettings();
-
-    // Apply settings with fallbacks
-    const accentColor = settings.accent_color || '#000000';
-    const buttonText = settings.button_text || 'Feedback';
-    const position = settings.position || 'bottom-right';
-    const showBranding = settings.show_branding !== false;
-
-    // Check for data attribute triggers first
-    const dataTriggers = findDataAttributeTriggers();
-    let hasDataTrigger = false;
-
-    if (dataTriggers.changelogPopup.length > 0) {
-      hasDataTrigger = true;
-      initChangelogPopup(settings, null, dataTriggers.changelogPopup);
-    } else if (dataTriggers.changelogDropdown.length > 0) {
-      hasDataTrigger = true;
-      initChangelogDropdown(settings, dataTriggers.changelogDropdown);
-    } else if (dataTriggers.allInOnePopup.length > 0) {
-      hasDataTrigger = true;
-      initAllInOnePopup(settings, dataTriggers.allInOnePopup);
-    } else if (dataTriggers.allInOnePopover.length > 0) {
-      hasDataTrigger = true;
-      initAllInOnePopover(settings, dataTriggers.allInOnePopover);
-    } else if (dataTriggers.feedback.length > 0) {
-      hasDataTrigger = true;
-      initFeedbackWidget(settings, accentColor, buttonText, position, dataTriggers.feedback);
-    } else if (widgetType === 'changelog-popup') {
-      initChangelogPopup(settings, customTrigger);
-    } else if (widgetType === 'changelog-dropdown') {
-      initChangelogDropdown(settings);
-    } else if (widgetType === 'all-in-one-popup') {
-      initAllInOnePopup(settings);
-    } else if (widgetType === 'all-in-one-popover') {
-      initAllInOnePopover(settings);
-    } else {
-      // Default feedback widget
-      initFeedbackWidget(settings, accentColor, buttonText, position);
-    }
-
-    // Auto-open widget if URL has kelo=open parameter
-    function checkAutoOpen() {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('kelo') === 'open') {
-          // Small delay to ensure widget is ready and identify() may have been called
-          setTimeout(function() {
-            if (window.Kelo && window.Kelo.open) {
-              window.Kelo.open();
-            }
-            // Clean up URL (remove kelo param)
-            urlParams.delete('kelo');
-            const newUrl = window.location.pathname + 
-              (urlParams.toString() ? '?' + urlParams.toString() : '') + 
-              window.location.hash;
-            window.history.replaceState({}, '', newUrl);
-          }, 800);
-        }
-      } catch (e) {
-        console.warn('Kelo: Auto-open check failed', e);
-      }
-    }
-
-    checkAutoOpen();
-  }
-
-  function initFeedbackWidget(settings, accentColor, buttonText, position, dataTriggerElements) {
-    // Create iframe (hidden by default) - use inset positioning for robustness
-    const iframe = document.createElement('iframe');
-    iframe.src = baseUrl + '/embed/widget?org=' + encodeURIComponent(org);
-    iframe.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;border:none;z-index:2147483647;display:none;background:white;pointer-events:auto;';
-    iframe.id = 'kelo-widget';
-    document.body.appendChild(iframe);
-
-    function openWidget() {
-      iframe.style.display = 'block';
-      const button = document.getElementById('kelo-trigger');
-      if (button) button.style.display = 'none';
-      iframe.contentWindow.postMessage('open', '*');
-      // Send identified user to iframe
-      if (_user) {
-        iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-      }
-    }
-    
-    // Send identity when iframe loads (in case it loads before open)
-    iframe.addEventListener('load', function() {
-      if (_user) {
-        iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-      }
-    });
-
-    function closeWidget() {
-      iframe.style.display = 'none';
-      const button = document.getElementById('kelo-trigger');
-      if (button) button.style.display = 'block';
-      iframe.contentWindow.postMessage('close', '*');
-    }
-
-    // Data attribute trigger support (Supahub-style) - hide default button if custom triggers exist
-    if (dataTriggerElements && dataTriggerElements.length > 0) {
-      dataTriggerElements.forEach(function(el) {
-        el.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          openWidget();
-        });
-      });
-      // Don't create default button if custom triggers exist
-    } else {
-      // Create default floating trigger button
-      const button = document.createElement('button');
-      button.innerHTML = '💬 ' + buttonText;
-
-      const posStyles = {
-        'bottom-right': 'bottom:20px;right:20px;',
-        'bottom-left': 'bottom:20px;left:20px;',
-        'top-right': 'top:20px;right:20px;',
-        'top-left': 'top:20px;left:20px;'
-      };
-
-      button.style.cssText = 'position:fixed;' + (posStyles[position] || posStyles['bottom-right']) + 'z-index:9998;padding:12px 20px;background:' + accentColor + ';color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:sans-serif;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,0.2);';
-      button.id = 'kelo-trigger';
-      document.body.appendChild(button);
-      button.addEventListener('click', openWidget);
-    }
-
-    window.addEventListener('message', function(e) {
-      if (e.data === 'kelo:close') {
-        closeWidget();
-      }
-    });
-    
-    // Attach open/close helpers without overwriting existing methods like identify()
-    window.Kelo.open = openWidget;
-    window.Kelo.close = closeWidget;
-  }
-
-  function initChangelogPopup(settings, customTrigger, dataTriggerElements) {
-    let isOpen = false;
-
-    // Create overlay - use inset positioning for robustness
-    const overlay = document.createElement('div');
-    overlay.id = 'kelo-changelog-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2147483646;display:none;';
-    document.body.appendChild(overlay);
-
-    // Create iframe container
-    const container = document.createElement('div');
-    container.id = 'kelo-changelog-container';
-    container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;display:none;width:90%;max-width:680px;max-height:90vh;';
-    document.body.appendChild(container);
-
-    // Create iframe
-    const iframe = document.createElement('iframe');
-    iframe.src = baseUrl + '/embed/changelog-popup?org=' + encodeURIComponent(org);
-    iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);';
-    container.appendChild(iframe);
-
-    function openPopup() {
-      overlay.style.display = 'block';
-      container.style.display = 'block';
-      isOpen = true;
-      // Send identified user to iframe
-      if (_user) {
-        iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-      }
-    }
-    
-    // Send identity when iframe loads
-    iframe.addEventListener('load', function() {
-      if (_user) {
-        iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-      }
-    });
-
-    function closePopup() {
-      overlay.style.display = 'none';
-      container.style.display = 'none';
-      isOpen = false;
-    }
-
-    overlay.addEventListener('click', closePopup);
-
-    // Data attribute trigger support (Supahub-style)
-    if (dataTriggerElements && dataTriggerElements.length > 0) {
-      dataTriggerElements.forEach(function(el) {
-        el.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          openPopup();
-        });
-      });
-    }
-
-    // Custom trigger support (ID-based, legacy)
-    if (customTrigger) {
-      const triggerEl = document.getElementById(customTrigger);
-      if (triggerEl) {
-        triggerEl.addEventListener('click', function(e) {
-          e.preventDefault();
-          openPopup();
-        });
-      }
-    }
-
-    // Auto-trigger on homepage load
-    if (settings.auto_trigger_enabled && settings.homepage_url) {
-      const currentUrl = window.location.href;
-      const homepageUrl = settings.homepage_url.trim();
-      
-      // Normalize URLs for comparison (remove trailing slashes, protocol, etc.)
-      const normalizeUrl = (url) => {
-        try {
-          const urlObj = new URL(url);
-          return urlObj.origin + urlObj.pathname.replace(/\/$/, '') + urlObj.search;
-        } catch {
-          // If URL parsing fails, just normalize the string
-          return url.replace(/\/$/, '').toLowerCase();
-        }
-      };
-      
-      const currentNormalized = normalizeUrl(currentUrl);
-      const homepageNormalized = normalizeUrl(homepageUrl);
-      
-      // Check if current page matches homepage
-      if (currentNormalized === homepageNormalized || currentUrl === homepageUrl) {
-        // Check if we've already shown it in this session
-        const sessionKey = 'kelo_changelog_shown_' + org;
-        if (!sessionStorage.getItem(sessionKey)) {
-          // Small delay to ensure page is fully loaded
-          setTimeout(() => {
-            openPopup();
-            sessionStorage.setItem(sessionKey, 'true');
-          }, 500);
-        }
-      }
-    }
-
-    // Listen for messages from iframe
-    window.addEventListener('message', function(e) {
-      if (e.data === 'kelo:close-changelog') {
-        closePopup();
-      }
-    });
-
-    window.KeloChangelog = {
-      open: openPopup,
-      close: closePopup
-    };
-  }
-
-  function initChangelogDropdown(settings, dataTriggerElements) {
-    let triggers = [];
-    
-    // Data attribute trigger support (Supahub-style)
-    if (dataTriggerElements && dataTriggerElements.length > 0) {
-      triggers = Array.from(dataTriggerElements);
-    } else {
-      // Legacy: ID-based trigger
-      const triggerId = 'kelo-changelog-trigger';
-      const trigger = document.getElementById(triggerId);
-      if (trigger) {
-        triggers = [trigger];
-      } else {
-        console.warn('Kelo: No trigger element found. Add data-kelo-changelog-dropdown to an element or use id="kelo-changelog-trigger"');
-        return;
-      }
-    }
-
-    // Create dropdown container
-    const dropdown = document.createElement('div');
-    dropdown.id = 'kelo-changelog-dropdown';
-    dropdown.style.cssText = 'position:absolute;z-index:9999;display:none;width:380px;max-height:500px;';
-
-    // Create iframe
-    const iframe = document.createElement('iframe');
-    iframe.src = baseUrl + '/embed/changelog-dropdown?org=' + encodeURIComponent(org);
-    iframe.style.cssText = 'width:100%;height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
-    dropdown.appendChild(iframe);
-    document.body.appendChild(dropdown);
-
-    let isOpen = false;
-    let activeTrigger = null;
-
-    function positionDropdown(triggerEl) {
-      const rect = triggerEl.getBoundingClientRect();
-      dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-      dropdown.style.left = Math.max(8, rect.left + window.scrollX - 150) + 'px';
-    }
-
-    function openDropdown(triggerEl) {
-      activeTrigger = triggerEl;
-      positionDropdown(triggerEl);
-      dropdown.style.display = 'block';
-      isOpen = true;
-    }
-
-    function closeDropdown() {
-      dropdown.style.display = 'none';
-      isOpen = false;
-      activeTrigger = null;
-    }
-
-    // Attach click handlers to all triggers
-    triggers.forEach(function(trigger) {
-      trigger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        if (isOpen && activeTrigger === trigger) {
-          closeDropdown();
-        } else {
-          openDropdown(trigger);
-        }
-      });
-    });
-
-    document.addEventListener('click', function(e) {
-      if (isOpen && !dropdown.contains(e.target) && !triggers.includes(e.target)) {
-        closeDropdown();
-      }
-    });
-
-    window.KeloChangelog = {
-      open: openDropdown,
-      close: closeDropdown
-    };
-  }
-
-  // Responsive size function - converts size to viewport width
+  // Responsive size function
   function getResponsiveSize(size) {
-    const sizeMap = {
+    var sizeMap = {
       'xsmall': '25vw',
       'small': '35vw',
       'medium': '45vw',
@@ -453,17 +96,158 @@
     return sizeMap[size] || '55vw';
   }
 
-  function initAllInOnePopup(settings, dataTriggerElements) {
-    let isOpen = false;
+  // ─── Widget initializers (lazy — only create iframe on first open) ───
 
-    // Get placement and responsive size from settings
-    const popupPlacement = settings.all_in_one_popup_placement || 'right';
-    const widgetSize = settings.size || 'large';
-    const responsiveWidth = getResponsiveSize(widgetSize);
-    const isLeft = popupPlacement === 'left';
+  function initFeedbackWidget(settings) {
+    function ensureIframe() {
+      if (_iframe) return;
+      _iframe = document.createElement('iframe');
+      _iframe.src = baseUrl + '/embed/widget?org=' + encodeURIComponent(org);
+      _iframe.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;border:none;z-index:2147483647;display:none;background:white;pointer-events:auto;';
+      _iframe.id = 'kelo-widget';
+      document.body.appendChild(_iframe);
+      _iframe.addEventListener('load', sendIdentityToIframe);
+    }
 
-    // Inject CSS reset to isolate widget from parent page styles
-    // This prevents parent transforms/filters from breaking position:fixed
+    function openWidget() {
+      ensureIframe();
+      _iframe.style.display = 'block';
+      _iframe.contentWindow.postMessage('open', '*');
+      sendIdentityToIframe();
+    }
+
+    function closeWidget() {
+      if (!_iframe) return;
+      _iframe.style.display = 'none';
+      _iframe.contentWindow.postMessage('close', '*');
+    }
+
+    window.addEventListener('message', function(e) {
+      if (e.data === 'kelo:close') closeWidget();
+    });
+
+    Kelo.open = openWidget;
+    Kelo.close = closeWidget;
+  }
+
+  function initChangelogPopup(settings) {
+    var overlay, container;
+
+    function ensureIframe() {
+      if (_iframe) return;
+
+      overlay = document.createElement('div');
+      overlay.id = 'kelo-changelog-overlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2147483646;display:none;';
+      document.body.appendChild(overlay);
+
+      container = document.createElement('div');
+      container.id = 'kelo-changelog-container';
+      container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;display:none;width:90%;max-width:680px;max-height:90vh;';
+      document.body.appendChild(container);
+
+      _iframe = document.createElement('iframe');
+      _iframe.src = baseUrl + '/embed/changelog-popup?org=' + encodeURIComponent(org);
+      _iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);';
+      container.appendChild(_iframe);
+
+      overlay.addEventListener('click', closePopup);
+      _iframe.addEventListener('load', sendIdentityToIframe);
+    }
+
+    function openPopup() {
+      ensureIframe();
+      overlay.style.display = 'block';
+      container.style.display = 'block';
+      sendIdentityToIframe();
+    }
+
+    function closePopup() {
+      if (!overlay) return;
+      overlay.style.display = 'none';
+      container.style.display = 'none';
+    }
+
+    // Auto-trigger on homepage
+    if (settings.auto_trigger_enabled && settings.homepage_url) {
+      var normalizeUrl = function(url) {
+        try {
+          var u = new URL(url);
+          return u.origin + u.pathname.replace(/\/$/, '') + u.search;
+        } catch(e) { return url.replace(/\/$/, '').toLowerCase(); }
+      };
+      if (normalizeUrl(window.location.href) === normalizeUrl(settings.homepage_url.trim())) {
+        var sessionKey = 'kelo_changelog_shown_' + org;
+        if (!sessionStorage.getItem(sessionKey)) {
+          setTimeout(function() {
+            openPopup();
+            sessionStorage.setItem(sessionKey, 'true');
+          }, 500);
+        }
+      }
+    }
+
+    window.addEventListener('message', function(e) {
+      if (e.data === 'kelo:close-changelog') closePopup();
+    });
+
+    Kelo.open = openPopup;
+    Kelo.close = closePopup;
+    window.KeloChangelog = { open: openPopup, close: closePopup };
+  }
+
+  function initChangelogDropdown(settings) {
+    var dropdown, isOpen = false;
+
+    function ensureIframe() {
+      if (_iframe) return;
+
+      dropdown = document.createElement('div');
+      dropdown.id = 'kelo-changelog-dropdown';
+      dropdown.style.cssText = 'position:absolute;z-index:9999;display:none;width:380px;max-height:500px;';
+      document.body.appendChild(dropdown);
+
+      _iframe = document.createElement('iframe');
+      _iframe.src = baseUrl + '/embed/changelog-dropdown?org=' + encodeURIComponent(org);
+      _iframe.style.cssText = 'width:100%;height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
+      dropdown.appendChild(_iframe);
+
+      document.addEventListener('click', function(e) {
+        if (isOpen && !dropdown.contains(e.target)) closeDropdown();
+      });
+    }
+
+    function openDropdown(triggerEl) {
+      ensureIframe();
+      if (triggerEl) {
+        var rect = triggerEl.getBoundingClientRect();
+        dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+        dropdown.style.left = Math.max(8, rect.left + window.scrollX - 150) + 'px';
+      }
+      dropdown.style.display = 'block';
+      isOpen = true;
+    }
+
+    function closeDropdown() {
+      if (!dropdown) return;
+      dropdown.style.display = 'none';
+      isOpen = false;
+    }
+
+    Kelo.open = openDropdown;
+    Kelo.close = closeDropdown;
+    window.KeloChangelog = { open: openDropdown, close: closeDropdown };
+  }
+
+  function initAllInOnePopup(settings) {
+    var overlay, container;
+    var isOpen = false;
+    var popupPlacement = settings.all_in_one_popup_placement || 'right';
+    var widgetSize = settings.size || 'large';
+    var responsiveWidth = getResponsiveSize(widgetSize);
+    var isLeft = popupPlacement === 'left';
+
+    // Inject transition styles
     var styleTag = document.createElement('style');
     styleTag.textContent = '#kelo-allinone-overlay, #kelo-allinone-container { position: fixed !important; will-change: auto !important; contain: none !important; filter: none !important; }' +
       '#kelo-allinone-overlay { opacity: 0; transition: opacity 0.3s ease; }' +
@@ -472,119 +256,78 @@
       '#kelo-allinone-container.kelo-visible { transform: translateX(0) !important; }';
     document.head.appendChild(styleTag);
 
-    // Create overlay - use top/left/right/bottom instead of width/height for reliability
-    const overlay = document.createElement('div');
-    overlay.id = 'kelo-allinone-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:2147483646;display:none;pointer-events:none;';
-    document.body.appendChild(overlay);
+    function ensureIframe() {
+      if (_iframe) return;
 
-    // Create iframe container - use top:0;bottom:0 instead of height:100vh for robustness
-    const container = document.createElement('div');
-    container.id = 'kelo-allinone-container';
-    const positionStyle = isLeft
-      ? `position:fixed;top:0;left:0;bottom:0;z-index:2147483647;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;`
-      : `position:fixed;top:0;right:0;bottom:0;z-index:2147483647;display:none;width:${responsiveWidth};min-width:300px;max-width:90vw;`;
-    container.style.cssText = positionStyle;
-    document.body.appendChild(container);
+      overlay = document.createElement('div');
+      overlay.id = 'kelo-allinone-overlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:2147483646;display:none;pointer-events:none;';
+      document.body.appendChild(overlay);
 
-    // Create iframe - pass style variant via URL for immediate rendering
-    // Note: The embed page will fetch settings from API, but we pass it via URL as a fallback
-    const iframe = document.createElement('iframe');
-    const styleVariant = String(settings.all_in_one_style_variant || '1');
-    // Add cache busting and ensure settings are fresh
-    iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
-    iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);display:block;margin:0;padding:0;';
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowtransparency', 'true');
-    container.appendChild(iframe);
-    
+      container = document.createElement('div');
+      container.id = 'kelo-allinone-container';
+      var posStyle = isLeft
+        ? 'position:fixed;top:0;left:0;bottom:0;z-index:2147483647;display:none;width:' + responsiveWidth + ';min-width:300px;max-width:90vw;'
+        : 'position:fixed;top:0;right:0;bottom:0;z-index:2147483647;display:none;width:' + responsiveWidth + ';min-width:300px;max-width:90vw;';
+      container.style.cssText = posStyle;
+      document.body.appendChild(container);
+
+      _iframe = document.createElement('iframe');
+      var styleVariant = String(settings.all_in_one_style_variant || '1');
+      _iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
+      _iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);display:block;margin:0;padding:0;';
+      _iframe.setAttribute('frameborder', '0');
+      _iframe.setAttribute('allowtransparency', 'true');
+      container.appendChild(_iframe);
+
+      overlay.addEventListener('click', closePopup);
+      _iframe.addEventListener('load', sendIdentityToIframe);
+    }
 
     function openPopup() {
+      ensureIframe();
       overlay.style.display = 'block';
       overlay.style.pointerEvents = 'auto';
       container.style.display = 'block';
-      // Trigger reflow before adding class so transition plays
-      container.offsetHeight;
+      container.offsetHeight; // reflow
       overlay.classList.add('kelo-visible');
       container.classList.add('kelo-visible');
-      const button = document.getElementById('kelo-allinone-trigger');
-      if (button) button.style.display = 'none';
       isOpen = true;
-      // Send identified user to iframe
-      if (_user) {
-        iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-      }
+      sendIdentityToIframe();
     }
 
-    // Send identity when iframe loads
-    iframe.addEventListener('load', function() {
-      if (_user) {
-        iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-      }
-    });
-
     function closePopup() {
+      if (!overlay) return;
       overlay.classList.remove('kelo-visible');
       container.classList.remove('kelo-visible');
       overlay.style.pointerEvents = 'none';
-      // Wait for transition to finish before hiding
       setTimeout(function() {
         overlay.style.display = 'none';
         container.style.display = 'none';
       }, 350);
-      const button = document.getElementById('kelo-allinone-trigger');
-      if (button) button.style.display = 'flex';
       isOpen = false;
     }
 
-    // Data attribute trigger support (Supahub-style) - hide default button if custom triggers exist
-    if (dataTriggerElements && dataTriggerElements.length > 0) {
-      dataTriggerElements.forEach(function(el) {
-        el.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          openPopup();
-        });
-      });
-      // Don't create default button if custom triggers exist
-    } else {
-      // Create floating trigger button - position based on popup placement
-      const button = document.createElement('button');
-      button.innerHTML = '💬';
-      const buttonHPos = isLeft ? 'left:20px;' : 'right:20px;';
-      button.style.cssText = 'position:fixed;bottom:20px;' + buttonHPos + 'z-index:9997;width:56px;height:56px;background:' + (settings.accent_color || '#7c3aed') + ';color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;transition:transform 0.2s ease,box-shadow 0.2s ease;';
-      button.id = 'kelo-allinone-trigger';
-      document.body.appendChild(button);
-      button.addEventListener('click', openPopup);
-    }
-
-    overlay.addEventListener('click', closePopup);
-
     window.addEventListener('message', function(e) {
-      if (e.data === 'kelo:close') {
-        closePopup();
-      }
+      if (e.data === 'kelo:close') closePopup();
     });
-    
-    // Attach open/close helpers without overwriting existing methods like identify()
-    window.Kelo.open = openPopup;
-    window.Kelo.close = closePopup;
+
+    Kelo.open = openPopup;
+    Kelo.close = closePopup;
   }
 
-  function initAllInOnePopover(settings, dataTriggerElements) {
-    let isOpen = false;
+  function initAllInOnePopover(settings) {
+    var popover;
+    var isOpen = false;
+    var popoverPlacement = settings.all_in_one_popover_placement || 'bottom-right';
+    var widgetSize = settings.size || 'large';
+    var responsiveWidth = getResponsiveSize(widgetSize);
+    var isBottom = popoverPlacement.includes('bottom');
+    var isLeft = popoverPlacement.includes('left');
+    var isRight = popoverPlacement.includes('right');
 
-    // Get placement and responsive size from settings
-    const popoverPlacement = settings.all_in_one_popover_placement || 'bottom-right';
-    const widgetSize = settings.size || 'large';
-    const responsiveWidth = getResponsiveSize(widgetSize);
-    const isBottom = popoverPlacement.includes('bottom');
-    const isLeft = popoverPlacement.includes('left');
-    const isRight = popoverPlacement.includes('right');
-
-    // Inject CSS reset to isolate widget from parent page styles
+    // Inject transition styles
     if (!document.getElementById('kelo-widget-styles')) {
-      // Determine slide origin based on placement
       var slideX = isRight ? '20px' : '-20px';
       var slideY = isBottom ? '20px' : '-20px';
       var styleTag = document.createElement('style');
@@ -594,129 +337,134 @@
       document.head.appendChild(styleTag);
     }
 
-    // Build position styles - only set one of top/bottom and one of left/right
-    let positionStyle = 'position:fixed;z-index:2147483647;display:none;';
+    function ensureIframe() {
+      if (_iframe) return;
 
-    // Set vertical position (only one of top or bottom) with responsive spacing
-    if (isBottom) {
-      // Responsive spacing from bottom: min 20px, preferred 5vh, max 80px
-      const bottomSpacing = Math.max(20, Math.min(80, window.innerHeight * 0.05));
-      positionStyle += 'bottom:' + bottomSpacing + 'px;';
-    } else {
-      // Responsive spacing from top: min 20px, preferred 5vh, max 80px
-      const topSpacing = Math.max(20, Math.min(80, window.innerHeight * 0.05));
-      positionStyle += 'top:' + topSpacing + 'px;';
+      var positionStyle = 'position:fixed;z-index:2147483647;display:none;';
+      if (isBottom) {
+        positionStyle += 'bottom:' + Math.max(20, Math.min(80, window.innerHeight * 0.05)) + 'px;';
+      } else {
+        positionStyle += 'top:' + Math.max(20, Math.min(80, window.innerHeight * 0.05)) + 'px;';
+      }
+      if (isLeft) {
+        positionStyle += 'left:' + Math.max(16, Math.min(24, window.innerWidth * 0.02)) + 'px;';
+      } else {
+        positionStyle += 'right:' + Math.max(16, Math.min(24, window.innerWidth * 0.02)) + 'px;';
+      }
+      positionStyle += 'width:' + responsiveWidth + ';min-width:300px;max-width:90vw;height:600px;max-height:calc(100vh - 120px);';
+
+      popover = document.createElement('div');
+      popover.id = 'kelo-allinone-popover';
+      popover.style.cssText = positionStyle;
+      document.body.appendChild(popover);
+
+      _iframe = document.createElement('iframe');
+      var styleVariant = String(settings.all_in_one_style_variant || '1');
+      _iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popover&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
+      _iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
+      popover.appendChild(_iframe);
+
+      _iframe.addEventListener('load', sendIdentityToIframe);
     }
-
-    // Set horizontal position (only one of left or right) with responsive spacing
-    if (isLeft) {
-      // Responsive spacing from left: min 16px, preferred 2vw, max 24px
-      const leftSpacing = Math.max(16, Math.min(24, window.innerWidth * 0.02));
-      positionStyle += 'left:' + leftSpacing + 'px;';
-    } else {
-      // Responsive spacing from right: min 16px, preferred 2vw, max 24px
-      const rightSpacing = Math.max(16, Math.min(24, window.innerWidth * 0.02));
-      positionStyle += 'right:' + rightSpacing + 'px;';
-    }
-
-    // Add size and other styles
-    positionStyle += `width:${responsiveWidth};min-width:300px;max-width:90vw;height:600px;max-height:calc(100vh - 120px);`;
-
-    // Create popover container with responsive width
-    const popover = document.createElement('div');
-    popover.id = 'kelo-allinone-popover';
-    popover.style.cssText = positionStyle;
-    document.body.appendChild(popover);
-
-    // Create iframe - pass style variant via URL for immediate rendering
-    // Note: The embed page will fetch settings from API, but we pass it via URL as a fallback
-    const iframe = document.createElement('iframe');
-    const styleVariant = String(settings.all_in_one_style_variant || '1');
-    // Add cache busting and ensure settings are fresh
-    iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popover&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
-    iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
-    popover.appendChild(iframe);
-    
 
     function openPopover() {
+      ensureIframe();
       popover.style.display = 'block';
-      // Trigger reflow before adding class so transition plays
-      popover.offsetHeight;
+      popover.offsetHeight; // reflow
       popover.classList.add('kelo-visible');
-      const button = document.getElementById('kelo-allinone-trigger');
-      if (button) button.innerHTML = '✕';
       isOpen = true;
-      // Send identified user to iframe
-      if (_user) {
-        iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-      }
+      sendIdentityToIframe();
     }
 
-    // Send identity when iframe loads
-    iframe.addEventListener('load', function() {
-      if (_user) {
-        iframe.contentWindow.postMessage({ type: 'kelo:identity', user: _user }, '*');
-      }
-    });
-
     function closePopover() {
+      if (!popover) return;
       popover.classList.remove('kelo-visible');
-      // Wait for transition to finish before hiding
       setTimeout(function() {
         popover.style.display = 'none';
       }, 300);
-      const button = document.getElementById('kelo-allinone-trigger');
-      if (button) button.innerHTML = '💬';
       isOpen = false;
     }
 
-    // Data attribute trigger support (Supahub-style) - hide default button if custom triggers exist
-    if (dataTriggerElements && dataTriggerElements.length > 0) {
-      dataTriggerElements.forEach(function(el) {
-        el.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          if (isOpen) {
-            closePopover();
-          } else {
-            openPopover();
-          }
-        });
-      });
-      // Don't create default button if custom triggers exist
-    } else {
-      // Create floating trigger button - position based on popover placement
-      const button = document.createElement('button');
-      button.innerHTML = '💬';
-      const buttonTop = isBottom ? 'auto' : '20px';
-      const buttonBottom = isBottom ? '20px' : 'auto';
-      const buttonLeft = isLeft ? '20px' : 'auto';
-      const buttonRight = isRight ? '20px' : 'auto';
-      const buttonStyle = `position:fixed;${buttonTop !== 'auto' ? 'top:' + buttonTop + ';' : ''}${buttonBottom !== 'auto' ? 'bottom:' + buttonBottom + ';' : ''}${buttonLeft !== 'auto' ? 'left:' + buttonLeft + ';' : ''}${buttonRight !== 'auto' ? 'right:' + buttonRight + ';' : ''}z-index:9997;width:56px;height:56px;background:${settings.accent_color || '#7c3aed'};color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;`;
-      button.style.cssText = buttonStyle;
-      button.id = 'kelo-allinone-trigger';
-      document.body.appendChild(button);
-      button.addEventListener('click', function() {
-        if (isOpen) {
-          closePopover();
-        } else {
-          openPopover();
-        }
-      });
-    }
-
-    window.addEventListener('message', function(e) {
-      if (e.data === 'kelo:close') {
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+      if (isOpen && popover && !popover.contains(e.target)) {
         closePopover();
       }
     });
-    
-    // Attach open/close helpers without overwriting existing methods like identify()
-    window.Kelo.open = openPopover;
-    window.Kelo.close = closePopover;
+
+    window.addEventListener('message', function(e) {
+      if (e.data === 'kelo:close') closePopover();
+    });
+
+    Kelo.open = openPopover;
+    Kelo.close = closePopover;
   }
 
-  // Start initialization
+  // ─── Initialization ───
+
+  async function init() {
+    if (_initialized) return;
+    _initialized = true;
+
+    _settings = await loadSettings();
+
+    // Initialize the correct widget type
+    if (widgetType === 'changelog-popup') {
+      initChangelogPopup(_settings);
+    } else if (widgetType === 'changelog-dropdown') {
+      initChangelogDropdown(_settings);
+    } else if (widgetType === 'all-in-one-popup') {
+      initAllInOnePopup(_settings);
+    } else if (widgetType === 'all-in-one-popover') {
+      initAllInOnePopover(_settings);
+    } else {
+      initFeedbackWidget(_settings);
+    }
+
+    // Bind data-kelo-trigger elements (universal trigger)
+    var triggers = document.querySelectorAll('[data-kelo-trigger]');
+    triggers.forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (Kelo.open) Kelo.open(el);
+      });
+    });
+
+    // Also support type-specific data attributes as aliases
+    var typeAttrMap = {
+      'data-kelo-feedback': 'feedback',
+      'data-kelo-changelog-popup': 'changelog-popup',
+      'data-kelo-changelog-dropdown': 'changelog-dropdown',
+      'data-kelo-all-in-one-popup': 'all-in-one-popup',
+      'data-kelo-all-in-one-popover': 'all-in-one-popover'
+    };
+    Object.keys(typeAttrMap).forEach(function(attr) {
+      document.querySelectorAll('[' + attr + ']').forEach(function(el) {
+        // Skip if already has data-kelo-trigger (avoid double-bind)
+        if (el.hasAttribute('data-kelo-trigger')) return;
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (Kelo.open) Kelo.open(el);
+        });
+      });
+    });
+
+    // Auto-open if URL has kelo=open parameter
+    try {
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('kelo') === 'open') {
+        setTimeout(function() {
+          if (Kelo.open) Kelo.open();
+          urlParams.delete('kelo');
+          var newUrl = window.location.pathname +
+            (urlParams.toString() ? '?' + urlParams.toString() : '') +
+            window.location.hash;
+          window.history.replaceState({}, '', newUrl);
+        }, 800);
+      }
+    } catch (e) {}
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

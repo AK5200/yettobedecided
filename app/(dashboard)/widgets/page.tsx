@@ -381,50 +381,38 @@ export default function WidgetsPage() {
   // Generate embed codes with comments for customization
   const generateChangelogPopupCode = () => {
     return `<!-- Kelo Changelog Popup Widget -->
-<!-- Add this script tag before closing </body> tag -->
+<!-- Add this before closing </body> tag -->
 <script>
   (function() {
     var script = document.createElement('script');
-    // Change this URL to your Kelo instance URL
     script.src = '${baseUrl}/widget.js';
     script.async = true;
-    // Replace 'your-workspace' with your actual workspace slug
     script.dataset.org = '${orgSlug}';
     script.dataset.type = 'changelog-popup';
     document.head.appendChild(script);
   })();
 </script>
 
-<!-- Optional: Custom trigger button -->
-<!-- Uncomment and customize the button below to trigger the popup manually -->
-<!--
-<button id="kelo-changelog-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
-  What's New
-</button>
--->`
+<!-- Add data-kelo-trigger to any element to open the widget -->
+<button data-kelo-trigger>What's New</button>`
   }
 
   const generateChangelogDropdownCode = () => {
     return `<!-- Kelo Changelog Dropdown Widget -->
-<!-- Add this script tag before closing </body> tag -->
+<!-- Add this before closing </body> tag -->
 <script>
   (function() {
     var script = document.createElement('script');
-    // Change this URL to your Kelo instance URL
     script.src = '${baseUrl}/widget.js';
     script.async = true;
-    // Replace 'your-workspace' with your actual workspace slug
     script.dataset.org = '${orgSlug}';
     script.dataset.type = 'changelog-dropdown';
     document.head.appendChild(script);
   })();
 </script>
 
-<!-- Add this button where you want the dropdown trigger -->
-<!-- Customize the button style below -->
-<button id="kelo-changelog-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
-  What's New
-</button>`
+<!-- Add data-kelo-trigger to any element to open the dropdown -->
+<button data-kelo-trigger>What's New</button>`
   }
 
   const generateAnnouncementCode = () => {
@@ -485,28 +473,22 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
 
   const generateAllInOneCode = (variant: 'popup' | 'popover') => {
     return `<!-- Kelo All-in-One Widget (${variant === 'popup' ? 'Pop-up' : 'Popover'}) -->
-<!-- This widget combines feedback board and changelog in one -->
+<!-- Add this before closing </body> tag -->
 <script>
   (function() {
     var script = document.createElement('script');
-    // Change this URL to your Kelo instance URL
-    // Adding version parameter to prevent caching issues
     script.src = '${baseUrl}/widget.js?v=' + new Date().getTime();
     script.async = true;
-    // Replace 'your-workspace' with your actual workspace slug
     script.dataset.org = '${orgSlug}';
     script.dataset.type = 'all-in-one-${variant}';
     document.head.appendChild(script);
   })();
 </script>
 
-<!-- Optional: Custom trigger button -->
-<!-- Uncomment and customize the button below -->
-<!--
-<button id="kelo-all-in-one-trigger" style="background: #F59E0B; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
-  Feedback & Updates
-</button>
--->`
+<!-- Add data-kelo-trigger to any element to open the widget -->
+<button data-kelo-trigger>Feedback</button>
+<!-- Or use it on a navbar link, menu item, etc. -->
+<!-- <a href="#" data-kelo-trigger>Feedback</a> -->`
   }
 
   const handleCopy = (code: string) => {
