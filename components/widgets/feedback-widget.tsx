@@ -416,7 +416,7 @@ export function FeedbackWidget({
               {loginHandler === 'kelo' && (
                 <>
                   <div className="text-xs text-muted-foreground text-center font-medium relative">
-                    <span className="bg-background px-2 relative z-10">or verify your email</span>
+                    <span className="bg-background dark:bg-[#1a1a1a] px-2 relative z-10">or verify your email</span>
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-border"></div>
                     </div>
@@ -475,7 +475,7 @@ export function FeedbackWidget({
                     </div>
                   )}
                   <div className="text-xs text-muted-foreground text-center font-medium relative">
-                    <span className="bg-background px-2 relative z-10">or</span>
+                    <span className="bg-background dark:bg-[#1a1a1a] px-2 relative z-10">or</span>
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-border"></div>
                     </div>
@@ -497,7 +497,7 @@ export function FeedbackWidget({
               {loginHandler === 'customer' && (
                 <>
                   <div className="text-xs text-muted-foreground text-center font-medium relative">
-                    <span className="bg-background px-2 relative z-10">or</span>
+                    <span className="bg-background dark:bg-[#1a1a1a] px-2 relative z-10">or</span>
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-border"></div>
                     </div>
@@ -575,7 +575,7 @@ export function FeedbackWidget({
                         {otpLoading ? 'Sending...' : 'Continue with Email'}
                       </Button>
                       <div className="text-xs text-muted-foreground text-center font-medium relative">
-                        <span className="bg-background px-2 relative z-10">or</span>
+                        <span className="bg-background dark:bg-[#1a1a1a] px-2 relative z-10">or</span>
                         <div className="absolute inset-0 flex items-center">
                           <div className="w-full border-t border-border"></div>
                         </div>
@@ -684,19 +684,19 @@ export function FeedbackWidget({
             {loading ? 'Submitting...' : 'Submit'}
           </Button>
           {success === 'pending' && (
-            <p className="text-sm text-amber-700 flex items-center gap-2 bg-amber-50/80 px-3 py-2 rounded-lg border border-amber-200">
+            <p className="text-sm text-amber-700 dark:text-amber-400 flex items-center gap-2 bg-amber-50/80 dark:bg-amber-950/30 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800">
               <Clock className="h-4 w-4" />
               Your post has been submitted and is waiting for admin approval.
             </p>
           )}
           {success === true && (
-            <p className="text-sm text-green-600 flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+            <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 bg-green-50 dark:bg-green-950/30 px-3 py-2 rounded-lg border border-green-200 dark:border-green-800">
               <Check className="h-4 w-4" />
               Thanks for the feedback!
             </p>
           )}
           {submitError && (
-            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg border border-red-200 dark:border-red-800">
               {submitError}
             </p>
           )}

@@ -74,14 +74,14 @@ export function ChangelogDropdown({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className='w-80'
+        className='w-80 bg-white dark:bg-[#1a1a1a] dark:border-white/10'
         align='end'
-        style={{ backgroundColor, borderRadius: radiusValue }}
+        style={{ borderRadius: radiusValue }}
       >
-        <div className='font-medium mb-2'>Latest Updates</div>
+        <div className='font-medium mb-2 dark:text-white'>Latest Updates</div>
         <div className='space-y-3 max-h-60 overflow-y-auto'>
           {entries.map(entry => (
-            <div key={entry.id} className='border-b pb-2 last:border-0'>
+            <div key={entry.id} className='border-b dark:border-white/10 pb-2 last:border-0'>
               <div className='flex items-center gap-2'>
                 {entry.label && (
                   <span className='text-xs px-2 py-0.5 rounded' style={{ background: accentColor, color: '#fff' }}>
@@ -89,7 +89,7 @@ export function ChangelogDropdown({
                   </span>
                 )}
               </div>
-              <h4 className='font-medium text-sm mt-1'>{entry.title}</h4>
+              <h4 className='font-medium text-sm mt-1 dark:text-white'>{entry.title}</h4>
               <p className='text-xs text-muted-foreground line-clamp-2'>{entry.description}</p>
             </div>
           ))}

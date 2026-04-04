@@ -56,11 +56,11 @@ export function ChangelogPopup({
 
   return (
     <div
-      className="h-full flex flex-col overflow-hidden"
-      style={{ backgroundColor, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
+      className="h-full flex flex-col overflow-hidden bg-white dark:bg-[#1a1a1a]"
+      style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
     >
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 border-b shrink-0" style={{ backgroundColor: headerBackgroundColor || backgroundColor }}>
+      <div className="px-6 pt-6 pb-4 border-b dark:border-white/10 shrink-0 bg-white dark:bg-[#1a1a1a]" style={{ backgroundColor: headerBackgroundColor || undefined }}>
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-xl font-bold text-foreground">{heading}</h1>
           <button
@@ -86,7 +86,7 @@ export function ChangelogPopup({
         ) : (
           <div className="space-y-6">
             {entries.map(entry => (
-              <div key={entry.id} className="pb-6 border-b last:border-0">
+              <div key={entry.id} className="pb-6 border-b dark:border-white/10 last:border-0">
                 <div className="flex items-center gap-2 mb-2">
                   {entry.category && (
                     <span
@@ -103,7 +103,7 @@ export function ChangelogPopup({
                 <h3 className="font-semibold text-foreground mb-1">{entry.title}</h3>
                 {entry.content && (
                   <div
-                    className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_img]:rounded-lg [&_img]:my-2"
+                    className="text-sm text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none [&_img]:rounded-lg [&_img]:my-2"
                     dangerouslySetInnerHTML={{ __html: entry.content }}
                   />
                 )}
@@ -114,7 +114,7 @@ export function ChangelogPopup({
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3 border-t shrink-0 flex items-center justify-between">
+      <div className="px-6 py-3 border-t dark:border-white/10 shrink-0 flex items-center justify-between">
         {showBranding ? (
           <span className="text-xs text-muted-foreground/50">Powered by Kelo</span>
         ) : <span />}

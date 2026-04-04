@@ -157,8 +157,8 @@ export default function AllInOneEmbedClient() {
     return (
       <div className="w-full min-h-screen flex items-center justify-center" style={{ pointerEvents: 'auto' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
-          <p className="text-sm text-gray-500">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white mx-auto mb-2"></div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     )
@@ -168,9 +168,11 @@ export default function AllInOneEmbedClient() {
     return <div className="p-4 text-sm">Missing org parameter.</div>
   }
 
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
   const accentColor = detectedAccent || settings?.accent_color || '#F59E0B'
-  const backgroundColor = settings?.background_color || '#ffffff'
-  const headerBackgroundColor = settings?.header_background_color || settings?.background_color || '#ffffff'
+  const rawBackgroundColor = settings?.background_color || '#ffffff'
+  const backgroundColor = isDark ? '#1a1a1a' : rawBackgroundColor
+  const headerBackgroundColor = isDark ? '#1a1a1a' : (settings?.header_background_color || settings?.background_color || '#ffffff')
   const showBranding = settings?.show_branding !== false
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'
@@ -238,10 +240,10 @@ export default function AllInOneEmbedClient() {
     >
       <button
         onClick={handleClose}
-        className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-50 bg-white shadow-sm"
+        className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors z-50 bg-white dark:bg-[#1a1a1a] shadow-sm"
         aria-label="Close"
       >
-        <X className="h-5 w-5 text-gray-500" />
+        <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
       </button>
 
       <div className="flex-1 overflow-y-auto w-full h-full">

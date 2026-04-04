@@ -169,6 +169,9 @@ export function AllInOneWidget({
   // Defensive: ensure styleVariant is always a string for reliable comparison
   const styleVariant = String(rawStyleVariant) as '1' | '2' | '3'
 
+  // Detect dark mode for inline style overrides
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+
   const [searchQuery, setSearchQuery] = useState('')
   const [posts, setPosts] = useState(initialPosts)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
@@ -260,16 +263,16 @@ export function AllInOneWidget({
         // Top Nav style (white background)
         return {
           containerClass: '',
-          containerStyle: { 
-            background: '#ffffff',
+          containerStyle: {
+            background: isDark ? '#1a1a1a' : '#ffffff',
             border: 'none',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
           },
           headerBg: 'transparent',
           cardClass: '',
           cardStyle: {
-            background: '#ffffff',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
+            background: isDark ? '#1a1a1a' : '#ffffff',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.08)',
           },
           cardBorder: 'border',
           buttonStyle: 'solid',
@@ -281,7 +284,7 @@ export function AllInOneWidget({
         return {
           containerClass: '',
           containerStyle: {
-            background: '#ffffff',
+            background: isDark ? '#1a1a1a' : '#ffffff',
             border: 'none',
             boxShadow: '0 32px 64px -16px rgba(0, 0, 0, 0.1)'
           },
@@ -383,10 +386,10 @@ export function AllInOneWidget({
       {/* Tabs */}
       <Tabs defaultValue="board" className={isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}>
         <div className={isEmbedded ? 'px-6' : ''}>
-          <TabsList className="w-auto gap-4 bg-transparent p-0 h-auto border-b pb-0 rounded-none">
+          <TabsList className="w-auto gap-4 bg-transparent p-0 h-auto border-b dark:border-white/10 pb-0 rounded-none">
             <TabsTrigger
               value="board"
-              className="px-0 pb-2 text-sm font-medium text-slate-500 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
+              className="px-0 pb-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
               style={{ 
                 '--tw-border-opacity': 1,
                 ...(styleVariant === '2' && {
@@ -406,7 +409,7 @@ export function AllInOneWidget({
             </TabsTrigger>
             <TabsTrigger
               value="changelog"
-              className="px-0 pb-2 text-sm font-medium text-slate-500 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
+              className="px-0 pb-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
               style={{ 
                 '--tw-border-opacity': 1,
                 ...(styleVariant === '2' && {
@@ -436,7 +439,7 @@ export function AllInOneWidget({
                 placeholder={styleVariant === '2' ? "Explore ideas..." : "Search posts..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={styleVariant === '2' ? 'pl-12 pr-4 py-4 bg-white/30 border border-white/20 rounded-2xl' : 'pl-9'}
+                className={styleVariant === '2' ? 'pl-12 pr-4 py-4 bg-white/30 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-2xl dark:text-white' : 'pl-9'}
               />
             </div>
             {styleVariant === '2' && (
@@ -571,10 +574,10 @@ export function AllInOneWidget({
                             style={
                               post.hasVoted
                                 ? { backgroundColor: accentColor }
-                                : { backgroundColor: '#ffffff', border: '1px solid rgba(0, 0, 0, 0.1)' }
+                                : { backgroundColor: isDark ? '#1a1a1a' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)' }
                             }
                           >
-                            <ChevronUp className="h-4 w-4" style={post.hasVoted ? {} : { color: '#6b7280' }} />
+                            <ChevronUp className="h-4 w-4" style={post.hasVoted ? {} : { color: isDark ? '#9ca3af' : '#6b7280' }} />
                             <span className={`text-lg font-extrabold ${post.hasVoted ? 'text-white' : 'text-foreground'}`}>
                               {post.votes}
                             </span>
@@ -706,7 +709,7 @@ export function AllInOneWidget({
                 return (
                   <div
                     key={entry.id}
-                    className="border-b border-border last:border-b-0 cursor-pointer -mx-3 px-4 py-3 rounded-xl transition-all hover:bg-muted/50"
+                    className="border-b border-border dark:border-white/10 last:border-b-0 cursor-pointer -mx-3 px-4 py-3 rounded-xl transition-all hover:bg-muted/50"
                     onClick={() => setExpandedChangelogId(isExpanded && index !== 0 ? '__none__' : entry.id)}
                   >
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
@@ -722,12 +725,12 @@ export function AllInOneWidget({
                     <div className="font-bold text-lg text-foreground mb-1">{entry.title}</div>
                     {isExpanded ? (
                       <div
-                        className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3 [&_video]:max-w-full [&_video]:h-auto [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40"
+                        className="text-sm text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3 [&_video]:max-w-full [&_video]:h-auto [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40"
                         dangerouslySetInnerHTML={{ __html: entry.content || '' }}
                       />
                     ) : (
                       <div
-                        className="text-sm text-muted-foreground line-clamp-2 leading-relaxed prose prose-sm max-w-none [&_img]:hidden [&_video]:hidden [&_audio]:hidden [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40"
+                        className="text-sm text-muted-foreground line-clamp-2 leading-relaxed prose prose-sm dark:prose-invert max-w-none [&_img]:hidden [&_video]:hidden [&_audio]:hidden [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40"
                         dangerouslySetInnerHTML={{ __html: entry.content || '' }}
                       />
                     )}
@@ -741,7 +744,7 @@ export function AllInOneWidget({
 
       {/* Footer */}
       {isEmbedded ? (
-        <div className="px-6 py-3 border-t flex items-center justify-between">
+        <div className="px-6 py-3 border-t dark:border-white/10 flex items-center justify-between">
           {showBranding ? (
             <span className="text-xs text-muted-foreground/60 flex items-center gap-1">
               <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
