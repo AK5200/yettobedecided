@@ -430,51 +430,58 @@ export default function WidgetsPage() {
       : announcementSettings.borderRadius === 'small' ? '8px'
       : '0px'
 
+    const linkHref = announcementSettings.linkType === 'changelog'
+      ? `https://www.kelohq.com/${orgSlug}/changelog`
+      : announcementSettings.linkType === 'custom'
+        ? announcementSettings.customUrl
+        : '#'
+
+    const isClickable = announcementSettings.linkType !== 'none'
+    const tag = isClickable ? 'a' : 'div'
+    const hrefAttr = announcementSettings.linkType === 'changelog' || announcementSettings.linkType === 'custom'
+      ? ` href="${linkHref}" target="_blank" rel="noopener noreferrer"`
+      : announcementSettings.linkType === 'popup'
+        ? ` href="#" data-kelo-trigger="changelog-popup"`
+        : ''
+
     return `<!-- Kelo Announcement Banner -->
-<!-- Customize colors, size, and text below -->
-<div class="kelo-announcement" style="
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: ${borderRadius};
-  background-color: ${announcementSettings.backgroundColor};
-  border: 1px solid ${announcementSettings.accentColor}30;
-  text-decoration: none;
-  transition: box-shadow 0.2s;
-">
-  <!-- Tag badge - customize color: ${announcementSettings.accentColor} -->
-  <!-- Size options: Change font-size to 10px (small), 12px (medium/default), or 14px (large) -->
-  <span style="
-    font-size: 12px;
-    /* Change to: font-size: 10px; for small, or font-size: 14px; for large */
-    font-weight: 600;
-    padding: 2px 10px;
+<!-- Place this where you want the banner to appear -->
+<div style="display: flex; justify-content: center; width: 100%; padding: 8px 0; position: relative; z-index: 10;">
+  <${tag}${hrefAttr} style="
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
     border-radius: ${borderRadius};
-    background-color: ${announcementSettings.accentColor};
-    color: white;
-  ">${announcementSettings.tag}</span>
+    background-color: ${announcementSettings.backgroundColor};
+    border: 1px solid ${announcementSettings.accentColor}30;
+    text-decoration: none;
+    ${isClickable ? 'cursor: pointer;' : ''}
+    transition: box-shadow 0.2s, transform 0.2s;
+  ">
+    <span style="
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: ${borderRadius};
+      background-color: ${announcementSettings.accentColor};
+      color: white;
+    ">${announcementSettings.tag}</span>
+    <span style="font-size: 14px; color: #374151;">
+      ${announcementSettings.text}
+    </span>${isClickable ? `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>` : ''}
+  </${tag}>
+</div>${announcementSettings.linkType === 'popup' ? `
 
-  <!-- Main text - customize: ${announcementSettings.text} -->
-  <!-- Size options: Change font-size to 12px (small), 14px (medium/default), or 16px (large) -->
-  <span style="font-size: 14px; color: #374151;">
-    ${announcementSettings.text}
-  </span>
-
-  <!-- Optional arrow icon (uncomment if using link) -->
-  <!-- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> -->
-</div>
-
-<!-- If using popup trigger, add this script -->
-${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enable popup functionality -->
+<!-- Kelo widget script (needed for popup trigger) -->
 <script>
   (function() {
+    if (window.Kelo) return;
     var script = document.createElement('script');
     script.src = '${baseUrl}/widget.js';
     script.async = true;
     script.dataset.org = '${orgSlug}';
-    script.dataset.type = 'changelog-popup';
-    script.dataset.trigger = 'kelo-announcement-trigger';
     document.head.appendChild(script);
   })();
 </script>` : ''}`
