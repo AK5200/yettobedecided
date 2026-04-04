@@ -69,12 +69,37 @@
     });
   }
 
+  // Add preconnect hint for faster API/iframe loads
+  try {
+    var link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = baseUrl;
+    document.head.appendChild(link);
+  } catch(e) {}
+
   async function loadSettings() {
+    // Check sessionStorage cache first (expires after 5 min)
+    var cacheKey = 'kelo_settings_' + org;
+    var cacheTimeKey = 'kelo_settings_t_' + org;
+    try {
+      var cached = sessionStorage.getItem(cacheKey);
+      var cachedTime = parseInt(sessionStorage.getItem(cacheTimeKey) || '0');
+      if (cached && Date.now() - cachedTime < 300000) {
+        return JSON.parse(cached);
+      }
+    } catch(e) {}
+
     try {
       var res = await fetch(baseUrl + '/api/widget-settings?org=' + encodeURIComponent(org));
       if (res.ok) {
         var data = await res.json();
-        return data.settings || {};
+        var settings = data.settings || {};
+        // Cache for next load
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify(settings));
+          sessionStorage.setItem(cacheTimeKey, String(Date.now()));
+        } catch(e) {}
+        return settings;
       }
     } catch (e) {
       console.warn('Kelo: Failed to load settings');
@@ -592,6 +617,28 @@
         }, 800);
       }
     } catch (e) {}
+
+    // Preload widgets that have triggers on the page (so they're ready on click)
+    var typesToPreload = new Set();
+    document.querySelectorAll('[data-kelo-trigger]').forEach(function(el) {
+      var t = el.getAttribute('data-kelo-trigger');
+      typesToPreload.add(t && t !== '' ? t : defaultType);
+    });
+    Object.keys(typeAttrMap).forEach(function(attr) {
+      if (document.querySelector('[' + attr + ']')) {
+        typesToPreload.add(typeAttrMap[attr]);
+      }
+    });
+    // Also preload the default type
+    if (defaultType !== 'announcement') {
+      typesToPreload.add(defaultType);
+    }
+    // Preload after a short delay to not block page render
+    setTimeout(function() {
+      typesToPreload.forEach(function(type) {
+        if (type !== 'announcement') ensureWidget(type);
+      });
+    }, 100);
 
     // Watch for theme changes
     if (_settings && _settings.auto_detect_theme) {
