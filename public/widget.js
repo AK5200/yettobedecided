@@ -408,8 +408,12 @@
         var text = _settings.announcement_text || '';
         var linkType = _settings.announcement_link_type || 'changelog';
         var customUrl = _settings.announcement_custom_url || '#';
-        var annAccent = _settings.accent_color || '#F59E0B';
-        var annBg = _settings.background_color || '#ffffff';
+        var annAccent = _settings.auto_detect_color ? (detectAccentColor() || _settings.accent_color || '#F59E0B') : (_settings.accent_color || '#F59E0B');
+        var annIsDark = _settings.auto_detect_theme ? detectTheme() === 'dark' : false;
+        var annBg = annIsDark ? '#1a1a1a' : (_settings.background_color || '#ffffff');
+        var annTextColor = annIsDark ? '#e5e5e5' : '#374151';
+        var annBorderColor = annIsDark ? annAccent + '40' : annAccent + '30';
+        var annArrowColor = annIsDark ? '#6b7280' : '#9ca3af';
         var annRadius = getBorderRadius(_settings.border_radius);
 
         if (!text) break; // Don't show empty announcement
@@ -435,7 +439,7 @@
             Kelo.open('changelog-popup');
           });
         }
-        inner.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:' + annRadius + ';background-color:' + annBg + ';border:1px solid ' + annAccent + '30;text-decoration:none;cursor:' + (linkType !== 'none' ? 'pointer' : 'default') + ';transition:box-shadow 0.2s,transform 0.2s;font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
+        inner.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:' + annRadius + ';background-color:' + annBg + ';border:1px solid ' + annBorderColor + ';text-decoration:none;cursor:' + (linkType !== 'none' ? 'pointer' : 'default') + ';transition:box-shadow 0.2s,transform 0.2s;font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
 
         var tagSpan = document.createElement('span');
         tagSpan.textContent = tag;
@@ -443,7 +447,7 @@
 
         var textSpan = document.createElement('span');
         textSpan.textContent = text;
-        textSpan.style.cssText = 'font-size:14px;color:#374151;';
+        textSpan.style.cssText = 'font-size:14px;color:' + annTextColor + ';';
 
         inner.appendChild(tagSpan);
         inner.appendChild(textSpan);
@@ -454,7 +458,7 @@
           arrow.setAttribute('height', '16');
           arrow.setAttribute('viewBox', '0 0 24 24');
           arrow.setAttribute('fill', 'none');
-          arrow.setAttribute('stroke', '#9ca3af');
+          arrow.setAttribute('stroke', annArrowColor);
           arrow.setAttribute('stroke-width', '2');
           var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
           path.setAttribute('d', 'M5 12h14M12 5l7 7-7 7');
