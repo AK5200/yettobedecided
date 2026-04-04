@@ -491,20 +491,30 @@
 
   // ─── Public API ───
 
-  /**
-   * Open a widget by type. If no type given, opens the default (from data-type).
-   * Usage: Kelo.open() or Kelo.open('changelog-popup') or Kelo.open('feedback', triggerEl)
-   */
-  Kelo.open = function(typeOrEl, triggerEl) {
+  var _ready = false;
+  var _queue = [];
+
+  function _doOpen(typeOrEl, triggerEl) {
     var type = defaultType;
     if (typeof typeOrEl === 'string') {
       type = typeOrEl;
     } else if (typeOrEl && typeOrEl.nodeType) {
-      // It's a DOM element (trigger), use default type
       triggerEl = typeOrEl;
     }
     var w = ensureWidget(type);
-    if (w.open) w.open(triggerEl);
+    if (w && w.open) w.open(triggerEl);
+  }
+
+  /**
+   * Open a widget by type. Queues if settings haven't loaded yet.
+   * Usage: Kelo.open() or Kelo.open('changelog-popup') or Kelo.open('feedback', triggerEl)
+   */
+  Kelo.open = function(typeOrEl, triggerEl) {
+    if (_ready) {
+      _doOpen(typeOrEl, triggerEl);
+    } else {
+      _queue.push([typeOrEl, triggerEl]);
+    }
   };
 
   Kelo.close = function(type) {
@@ -520,6 +530,16 @@
     _initialized = true;
 
     _settings = await loadSettings();
+
+    // Settings loaded — mark ready and flush queued open() calls
+    _ready = true;
+    _queue.forEach(function(args) { _doOpen(args[0], args[1]); });
+    _queue = [];
+
+    // Auto-show announcement banner if this is the announcement widget type
+    if (defaultType === 'announcement') {
+      _doOpen('announcement');
+    }
 
     // Bind data-kelo-trigger elements
     // data-kelo-trigger="" or data-kelo-trigger → opens default type

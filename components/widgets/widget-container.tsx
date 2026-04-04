@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { FeedbackWidget } from './feedback-widget'
 import { AllInOneWidget } from './all-in-one-widget'
-import { FloatingButton } from './floating-button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 interface WidgetSettings {
@@ -94,15 +93,6 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
 
   return (
     <div className="w-full min-h-screen bg-background" style={{ pointerEvents: 'auto' }}>
-      {!isOpen && (
-        <FloatingButton
-          position={settings.position}
-          text={settings.button_text}
-          accentColor={accentColor}
-          onClick={() => setIsOpen(true)}
-        />
-      )}
-
       {settings.widget_type === 'feedback' && isOpen && (
         <div className="w-full min-h-screen bg-background p-6" style={{ pointerEvents: 'auto' }}>
           <div className="max-w-2xl mx-auto relative">
