@@ -233,20 +233,6 @@
         w.overlay.addEventListener('click', function() { if (!w._justOpened) w.close(); });
         window.addEventListener('message', function(e) { if (e.data === 'kelo:close-changelog') w.close(); });
 
-        // Auto-trigger on homepage
-        if (_settings.auto_trigger_enabled && _settings.homepage_url) {
-          var normalizeUrl = function(url) {
-            try { var u = new URL(url); return u.origin + u.pathname.replace(/\/$/, '') + u.search; }
-            catch(e) { return url.replace(/\/$/, '').toLowerCase(); }
-          };
-          if (normalizeUrl(window.location.href) === normalizeUrl(_settings.homepage_url.trim())) {
-            var sessionKey = 'kelo_changelog_shown_' + org;
-            if (!sessionStorage.getItem(sessionKey)) {
-              setTimeout(function() { w.open(); sessionStorage.setItem(sessionKey, 'true'); }, 500);
-            }
-          }
-        }
-
         window.KeloChangelog = { open: w.open, close: w.close };
         break;
 
@@ -543,6 +529,23 @@
     // Auto-show announcement banner if this is the announcement widget type
     if (defaultType === 'announcement') {
       _doOpen('announcement');
+    }
+
+    // Auto-open changelog popup on homepage (if enabled in settings)
+    if (_settings.auto_trigger_enabled && _settings.homepage_url) {
+      var normalizeUrl = function(url) {
+        try { var u = new URL(url); return u.origin + u.pathname.replace(/\/$/, '') + u.search; }
+        catch(e) { return url.replace(/\/$/, '').toLowerCase(); }
+      };
+      if (normalizeUrl(window.location.href) === normalizeUrl(_settings.homepage_url.trim())) {
+        var sessionKey = 'kelo_changelog_shown_' + org;
+        if (!sessionStorage.getItem(sessionKey)) {
+          setTimeout(function() {
+            _doOpen('changelog-popup');
+            sessionStorage.setItem(sessionKey, 'true');
+          }, 500);
+        }
+      }
     }
 
     // Bind data-kelo-trigger elements
