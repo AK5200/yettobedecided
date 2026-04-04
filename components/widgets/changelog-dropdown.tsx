@@ -1,24 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
-import { Bell } from 'lucide-react'
 
 interface ChangelogEntry {
   id: string
   title: string
-  description: string
+  content: string
+  category: string | null
   published_at: string
-  label?: string
-}
-
-const BORDER_RADIUS_MAP: Record<string, string> = {
-  none: '0',
-  small: '8px',
-  medium: '12px',
-  large: '16px',
-  xlarge: '24px',
+  created_at: string
 }
 
 interface ChangelogDropdownProps {
@@ -32,74 +22,92 @@ interface ChangelogDropdownProps {
 export function ChangelogDropdown({
   orgSlug,
   accentColor = '#000',
-  backgroundColor = '#ffffff',
-  borderRadius = 'medium',
+  backgroundColor,
   showBranding = true,
 }: ChangelogDropdownProps) {
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
-  const [hasNew, setHasNew] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const lastSeen = localStorage.getItem(`kelo-dropdown-${orgSlug}`)
-
-    fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=5`)
+    fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=5&published_only=true`)
       .then(res => res.json())
       .then(data => {
-        if (data.entries) {
-          setEntries(data.entries)
-          if (data.entries.length > 0 && lastSeen !== data.entries[0].id) {
-            setHasNew(true)
-          }
-        }
+        setEntries(data.entries || [])
+        setLoading(false)
       })
+      .catch(() => setLoading(false))
   }, [orgSlug])
 
-  const markSeen = () => {
-    if (entries.length > 0) {
-      localStorage.setItem(`kelo-dropdown-${orgSlug}`, entries[0].id)
-      setHasNew(false)
-    }
+  function formatDate(dateStr: string) {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
-  const radiusValue = BORDER_RADIUS_MAP[borderRadius] || '12px'
-
   return (
-    <Popover onOpenChange={(open) => open && markSeen()}>
-      <PopoverTrigger asChild>
-        <Button variant='ghost' size='sm' className='relative'>
-          <Bell className='h-5 w-5' />
-          {hasNew && (
-            <span className='absolute -top-1 -right-1 h-3 w-3 rounded-full' style={{ background: accentColor }} />
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className='w-80 bg-white dark:bg-[#1a1a1a] dark:border-white/10'
-        align='end'
-        style={{ borderRadius: radiusValue }}
-      >
-        <div className='font-medium mb-2 dark:text-white'>Latest Updates</div>
-        <div className='space-y-3 max-h-60 overflow-y-auto'>
-          {entries.map(entry => (
-            <div key={entry.id} className='border-b dark:border-white/10 pb-2 last:border-0'>
-              <div className='flex items-center gap-2'>
-                {entry.label && (
-                  <span className='text-xs px-2 py-0.5 rounded' style={{ background: accentColor, color: '#fff' }}>
-                    {entry.label}
+    <div
+      className="h-full flex flex-col overflow-hidden bg-white dark:bg-[#1a1a1a]"
+      style={{ backgroundColor: backgroundColor || undefined, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
+    >
+      {/* Header */}
+      <div className="px-4 pt-4 pb-3 border-b dark:border-white/10 shrink-0">
+        <h2 className="font-semibold text-sm text-foreground">Latest Updates</h2>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-5 h-5 border-2 border-muted-foreground/20 border-t-muted-foreground rounded-full animate-spin" />
+          </div>
+        ) : entries.length === 0 ? (
+          <div className="text-center py-8 px-4">
+            <p className="text-xs text-muted-foreground">No updates yet.</p>
+          </div>
+        ) : (
+          <div>
+            {entries.map(entry => (
+              <div key={entry.id} className="px-4 py-3 border-b dark:border-white/10 last:border-0">
+                <div className="flex items-center gap-2 mb-1">
+                  {entry.category && (
+                    <span
+                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded text-white"
+                      style={{ background: accentColor }}
+                    >
+                      {entry.category}
+                    </span>
+                  )}
+                  <span className="text-[10px] text-muted-foreground">
+                    {formatDate(entry.published_at || entry.created_at)}
                   </span>
+                </div>
+                <h4 className="font-medium text-sm text-foreground">{entry.title}</h4>
+                {entry.content && (
+                  <div
+                    className="text-xs text-muted-foreground mt-0.5 line-clamp-2 prose prose-sm dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: entry.content }}
+                  />
                 )}
               </div>
-              <h4 className='font-medium text-sm mt-1 dark:text-white'>{entry.title}</h4>
-              <p className='text-xs text-muted-foreground line-clamp-2'>{entry.description}</p>
-            </div>
-          ))}
-        </div>
-        {showBranding && (
-          <div className='pt-2 text-center'>
-            <span className='text-xs text-muted-foreground/60'>Powered by Kelo</span>
+            ))}
           </div>
         )}
-      </PopoverContent>
-    </Popover>
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 py-2 border-t dark:border-white/10 shrink-0 flex items-center justify-between">
+        {showBranding ? (
+          <span className="text-[10px] text-muted-foreground/50">Powered by Kelo</span>
+        ) : <span />}
+        <a
+          href={`/${orgSlug}/changelog`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[10px] font-semibold hover:underline"
+          style={{ color: accentColor }}
+        >
+          View all →
+        </a>
+      </div>
+    </div>
   )
 }
