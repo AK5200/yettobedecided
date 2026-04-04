@@ -13,6 +13,39 @@
   // Initialize Kelo global object
   window.Kelo = window.Kelo || {};
 
+  // Start API fetch IMMEDIATELY — don't wait for DOMContentLoaded
+  // This runs in parallel with the rest of page loading
+  var _dataPromise = null;
+  (function startEarlyFetch() {
+    var cacheKey = 'kelo_data_' + org;
+    var cacheTimeKey = 'kelo_data_t_' + org;
+    try {
+      var cached = sessionStorage.getItem(cacheKey);
+      var cachedTime = parseInt(sessionStorage.getItem(cacheTimeKey) || '0');
+      if (cached && Date.now() - cachedTime < 120000) {
+        _dataPromise = Promise.resolve(JSON.parse(cached));
+        return;
+      }
+    } catch(e) {}
+    _dataPromise = fetch(baseUrl + '/api/widget?org=' + encodeURIComponent(org))
+      .then(function(res) { return res.ok ? res.json() : {}; })
+      .catch(function() { return {}; });
+  })();
+
+  // Preload iframe HTML pages immediately
+  try {
+    var preloadEmbed = function(path) {
+      var l = document.createElement('link');
+      l.rel = 'prefetch';
+      l.href = baseUrl + path + '?org=' + encodeURIComponent(org);
+      document.head.appendChild(l);
+    };
+    if (defaultType === 'all-in-one-popup' || defaultType === 'all-in-one-popover') preloadEmbed('/embed/all-in-one');
+    else if (defaultType === 'changelog-popup') preloadEmbed('/embed/changelog-popup');
+    else if (defaultType === 'changelog-dropdown') preloadEmbed('/embed/changelog-dropdown');
+    else preloadEmbed('/embed/widget');
+  } catch(e) {}
+
   var _user = null;
   var _initialized = false;
   var _settings = null;
@@ -77,38 +110,18 @@
     document.head.appendChild(link);
   } catch(e) {}
 
-  var _widgetData = null; // Full widget data: settings + boards + posts + changelog
+  var _widgetData = null;
 
   async function loadSettings() {
-    // Check sessionStorage cache first (expires after 2 min)
-    var cacheKey = 'kelo_data_' + org;
-    var cacheTimeKey = 'kelo_data_t_' + org;
+    // Use the early-fetched promise (started before DOMContentLoaded)
+    var data = await _dataPromise;
+    _widgetData = data;
+    // Cache for next page load
     try {
-      var cached = sessionStorage.getItem(cacheKey);
-      var cachedTime = parseInt(sessionStorage.getItem(cacheTimeKey) || '0');
-      if (cached && Date.now() - cachedTime < 120000) {
-        _widgetData = JSON.parse(cached);
-        return _widgetData.settings || {};
-      }
+      sessionStorage.setItem('kelo_data_' + org, JSON.stringify(data));
+      sessionStorage.setItem('kelo_data_t_' + org, String(Date.now()));
     } catch(e) {}
-
-    try {
-      // Fetch full widget data in one call (settings + boards + posts + changelog)
-      var res = await fetch(baseUrl + '/api/widget?org=' + encodeURIComponent(org));
-      if (res.ok) {
-        var data = await res.json();
-        _widgetData = data;
-        // Cache for next load
-        try {
-          sessionStorage.setItem(cacheKey, JSON.stringify(data));
-          sessionStorage.setItem(cacheTimeKey, String(Date.now()));
-        } catch(e) {}
-        return data.settings || {};
-      }
-    } catch (e) {
-      console.warn('Kelo: Failed to load settings');
-    }
-    return {};
+    return data.settings || {};
   }
 
   // ─── Auto-detect theme and color ───

@@ -16,6 +16,17 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.gravatar.com' },
     ],
   },
+  async headers() {
+    return [
+      {
+        // Cache widget.js aggressively — browser + CDN
+        source: '/widget.js',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=300, s-maxage=600, stale-while-revalidate=86400' },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig
