@@ -27,16 +27,28 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10_000)
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'kelo:data') {
+        const data = event.data.data
+        if (data) {
+          setSettings(data.settings)
+          setBoards(data.boards || [])
+          setChangelog(data.changelog || [])
+          setLoading(false)
+        }
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
 
-    const fetchWidgetData = async () => {
-      setLoading(true)
+  // Fallback: fetch if not received via postMessage within 1s
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (settings) return
       const baseUrl = apiUrl || window.location.origin
       try {
-        const response = await fetch(`${baseUrl}/api/widget?org=${encodeURIComponent(orgSlug)}`, {
-          signal: controller.signal,
-        })
+        const response = await fetch(`${baseUrl}/api/widget?org=${encodeURIComponent(orgSlug)}`)
         if (response.ok) {
           const data = await response.json()
           setSettings(data.settings)
@@ -44,24 +56,13 @@ export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
           setChangelog(data.changelog || [])
         }
       } catch (error) {
-        if ((error as Error).name === 'AbortError') {
-          console.error('Widget data fetch timed out after 10 seconds')
-        } else {
-          console.error('Failed to fetch widget data:', error)
-        }
+        console.error('Failed to fetch widget data:', error)
       } finally {
-        clearTimeout(timeoutId)
         setLoading(false)
       }
-    }
-
-    fetchWidgetData()
-
-    return () => {
-      clearTimeout(timeoutId)
-      controller.abort()
-    }
-  }, [apiUrl, orgSlug])
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [apiUrl, orgSlug, settings])
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {

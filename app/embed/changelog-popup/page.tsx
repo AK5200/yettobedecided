@@ -14,16 +14,30 @@ function PopupContent() {
 
   useEffect(() => { applyWidgetTheme() }, [])
 
+  // Listen for data from parent widget.js
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'kelo:data') {
+        setSettings(event.data.data?.settings || {})
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
+  // Fallback: fetch if not received via postMessage within 1s
   useEffect(() => {
     if (!org) return
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-    fetch(`${baseUrl}/api/widget?org=${encodeURIComponent(org)}`)
-      .then(res => res.json())
-      .then(data => {
-        setSettings(data.settings || {})
-      })
-      .catch(() => setSettings({}))
-  }, [org])
+    const timer = setTimeout(() => {
+      if (settings) return
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+      fetch(`${baseUrl}/api/widget?org=${encodeURIComponent(org)}`)
+        .then(res => res.json())
+        .then(data => setSettings(data.settings || {}))
+        .catch(() => setSettings({}))
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [org, settings])
 
   if (!settings) return null
 

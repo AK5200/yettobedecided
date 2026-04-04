@@ -34,7 +34,36 @@ export default function AllInOneEmbedClient() {
     }
   }, [org])
 
-  // Listen for identity from parent via postMessage
+  const applyWidgetData = useCallback((data: any) => {
+    if (!data) return
+    setBoards(data.boards || [])
+    setChangelog(data.changelog || [])
+    setSettings(data.settings || {})
+
+    if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+      let votedPostIds: Set<string> = new Set()
+      try {
+        const stored = sessionStorage.getItem(`kelo_votes_${org}`)
+        if (stored) votedPostIds = new Set(JSON.parse(stored))
+      } catch {}
+
+      const formattedPosts = data.posts.map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        content: p.content || '',
+        votes: p.vote_count || 0,
+        author_name: p.author_name || p.guest_name || 'Anonymous',
+        author_email: p.author_email || p.guest_email,
+        tags: p.tags || [],
+        status: p.status || 'open',
+        hasVoted: votedPostIds.has(p.id),
+      }))
+      setPosts(formattedPosts)
+    }
+    setLoading(false)
+  }, [org])
+
+  // Listen for data + identity from parent via postMessage
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === 'kelo:identity') {
@@ -43,10 +72,11 @@ export default function AllInOneEmbedClient() {
           setIdentifiedUser(user)
           try {
             sessionStorage.setItem(`kelo_identified_user_${org}`, JSON.stringify(user))
-          } catch {
-            // Ignore storage errors
-          }
+          } catch {}
         }
+      }
+      if (event.data && event.data.type === 'kelo:data') {
+        applyWidgetData(event.data.data)
       }
     }
 
@@ -54,54 +84,32 @@ export default function AllInOneEmbedClient() {
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [org])
+  }, [org, applyWidgetData])
 
+  // Fallback: fetch data if not received via postMessage within 1s
   useEffect(() => {
     if (!org) {
       setLoading(false)
       return
     }
 
-    const fetchData = async () => {
+    const timer = setTimeout(async () => {
+      // If data was already received via postMessage, skip
+      if (settings) return
+
       try {
         const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
         const res = await fetch(`${baseUrl}/api/widget?org=${encodeURIComponent(org)}`)
         if (res.ok) {
-          const data = await res.json()
-          setBoards(data.boards || [])
-          setChangelog(data.changelog || [])
-          setSettings(data.settings || {})
-
-          if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
-            // Read previously voted post IDs from sessionStorage
-            let votedPostIds: Set<string> = new Set()
-            try {
-              const stored = sessionStorage.getItem(`kelo_votes_${org}`)
-              if (stored) votedPostIds = new Set(JSON.parse(stored))
-            } catch {}
-
-            const formattedPosts = data.posts.map((p: any) => ({
-              id: p.id,
-              title: p.title,
-              content: p.content || '',
-              votes: p.vote_count || 0,
-              author_name: p.author_name || p.guest_name || 'Anonymous',
-              author_email: p.author_email || p.guest_email,
-              tags: p.tags || [],
-              status: p.status || 'open',
-              hasVoted: votedPostIds.has(p.id),
-            }))
-            setPosts(formattedPosts)
-          }
+          applyWidgetData(await res.json())
         }
       } catch (error) {
         console.error('Failed to fetch widget data:', error)
-      } finally {
         setLoading(false)
       }
-    }
+    }, 1000)
 
-    fetchData()
+    return () => clearTimeout(timer)
   }, [org])
 
   // Revert an optimistic vote UI update (called when API fails or no email)

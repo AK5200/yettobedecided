@@ -77,29 +77,33 @@
     document.head.appendChild(link);
   } catch(e) {}
 
+  var _widgetData = null; // Full widget data: settings + boards + posts + changelog
+
   async function loadSettings() {
-    // Check sessionStorage cache first (expires after 5 min)
-    var cacheKey = 'kelo_settings_' + org;
-    var cacheTimeKey = 'kelo_settings_t_' + org;
+    // Check sessionStorage cache first (expires after 2 min)
+    var cacheKey = 'kelo_data_' + org;
+    var cacheTimeKey = 'kelo_data_t_' + org;
     try {
       var cached = sessionStorage.getItem(cacheKey);
       var cachedTime = parseInt(sessionStorage.getItem(cacheTimeKey) || '0');
-      if (cached && Date.now() - cachedTime < 300000) {
-        return JSON.parse(cached);
+      if (cached && Date.now() - cachedTime < 120000) {
+        _widgetData = JSON.parse(cached);
+        return _widgetData.settings || {};
       }
     } catch(e) {}
 
     try {
-      var res = await fetch(baseUrl + '/api/widget-settings?org=' + encodeURIComponent(org));
+      // Fetch full widget data in one call (settings + boards + posts + changelog)
+      var res = await fetch(baseUrl + '/api/widget?org=' + encodeURIComponent(org));
       if (res.ok) {
         var data = await res.json();
-        var settings = data.settings || {};
+        _widgetData = data;
         // Cache for next load
         try {
-          sessionStorage.setItem(cacheKey, JSON.stringify(settings));
+          sessionStorage.setItem(cacheKey, JSON.stringify(data));
           sessionStorage.setItem(cacheTimeKey, String(Date.now()));
         } catch(e) {}
-        return settings;
+        return data.settings || {};
       }
     } catch (e) {
       console.warn('Kelo: Failed to load settings');
@@ -192,6 +196,12 @@
     }
   }
 
+  function sendDataToWidget(w) {
+    if (w.iframe && w.iframe.contentWindow && _widgetData) {
+      w.iframe.contentWindow.postMessage({ type: 'kelo:data', data: _widgetData }, '*');
+    }
+  }
+
   // ─── Widget initializers ───
 
   function ensureWidget(type) {
@@ -206,7 +216,7 @@
         w.iframe.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;border:none;z-index:2147483647;display:none;pointer-events:auto;';
         w.iframe.id = 'kelo-widget';
         document.body.appendChild(w.iframe);
-        w.iframe.addEventListener('load', function() { sendIdentityToWidget(w); });
+        w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w.open = function() {
           w.iframe.style.display = 'block';
@@ -240,7 +250,7 @@
         w.iframe.src = buildIframeSrc('/embed/changelog-popup');
         w.iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:' + borderRadius + ';box-shadow:' + boxShadow + ';overflow:hidden;';
         w.container.appendChild(w.iframe);
-        w.iframe.addEventListener('load', function() { sendIdentityToWidget(w); });
+        w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w._justOpened = false;
         w.open = function() {
@@ -338,7 +348,7 @@
         w.iframe.setAttribute('frameborder', '0');
         w.iframe.setAttribute('allowtransparency', 'true');
         w.container.appendChild(w.iframe);
-        w.iframe.addEventListener('load', function() { sendIdentityToWidget(w); });
+        w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w.open = function() {
           w.overlay.style.display = 'block';
@@ -392,7 +402,7 @@
         w.iframe.src = buildIframeSrc('/embed/all-in-one', '&mode=popover&style=' + encodeURIComponent(sv2) + '&t=' + Date.now());
         w.iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
         w.popover.appendChild(w.iframe);
-        w.iframe.addEventListener('load', function() { sendIdentityToWidget(w); });
+        w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w.isOpen = false;
         w.open = function() {
