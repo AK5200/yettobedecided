@@ -38,16 +38,14 @@ export function ChangelogDropdown({
       .catch(() => setLoading(false))
   }, [orgSlug])
 
-  // Report height to parent so iframe can auto-size
+  // Report height to parent so iframe can auto-size (capped at 500 on parent side)
   useEffect(() => {
     const reportHeight = () => {
-      const height = document.documentElement.scrollHeight
+      // Report natural content height — parent caps at 500px
+      const height = document.body.scrollHeight
       window.parent.postMessage({ type: 'kelo:resize', height: height }, '*')
     }
-    // Report after render
-    const timer = setTimeout(reportHeight, 100)
-    // Also report when entries change
-    reportHeight()
+    const timer = setTimeout(reportHeight, 150)
     return () => clearTimeout(timer)
   }, [entries, loading])
 
@@ -58,7 +56,7 @@ export function ChangelogDropdown({
 
   return (
     <div
-      className="h-full flex flex-col overflow-hidden bg-white dark:bg-[#1a1a1a]"
+      className="h-screen flex flex-col overflow-hidden bg-white dark:bg-[#1a1a1a]"
       style={{ backgroundColor: backgroundColor || undefined, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
     >
       {/* Header */}
