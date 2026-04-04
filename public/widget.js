@@ -217,9 +217,12 @@
         w.container.appendChild(w.iframe);
         w.iframe.addEventListener('load', function() { sendIdentityToWidget(w); });
 
+        w._justOpened = false;
         w.open = function() {
           w.overlay.style.display = 'block';
           w.container.style.display = 'block';
+          w._justOpened = true;
+          setTimeout(function() { w._justOpened = false; }, 100);
           sendIdentityToWidget(w);
         };
         w.close = function() {
@@ -227,7 +230,7 @@
           w.container.style.display = 'none';
         };
 
-        w.overlay.addEventListener('click', function() { w.close(); });
+        w.overlay.addEventListener('click', function() { if (!w._justOpened) w.close(); });
         window.addEventListener('message', function(e) { if (e.data === 'kelo:close-changelog') w.close(); });
 
         // Auto-trigger on homepage
@@ -259,22 +262,27 @@
         w.dropdown.appendChild(w.iframe);
 
         w.isOpen = false;
+        w._activeTrigger = null;
         w.open = function(triggerEl) {
+          if (w.isOpen) { w.close(); return; }
           if (triggerEl && triggerEl.getBoundingClientRect) {
+            w._activeTrigger = triggerEl;
             var rect = triggerEl.getBoundingClientRect();
             w.dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
             w.dropdown.style.left = Math.max(8, rect.left + window.scrollX - 150) + 'px';
           }
           w.dropdown.style.display = 'block';
-          w.isOpen = true;
+          // Delay isOpen so the current click event doesn't trigger outside-click handler
+          setTimeout(function() { w.isOpen = true; }, 0);
         };
         w.close = function() {
           w.dropdown.style.display = 'none';
           w.isOpen = false;
+          w._activeTrigger = null;
         };
 
         document.addEventListener('click', function(e) {
-          if (w.isOpen && !w.dropdown.contains(e.target)) w.close();
+          if (w.isOpen && !w.dropdown.contains(e.target) && e.target !== w._activeTrigger && !e.target.closest('[data-kelo-trigger]')) w.close();
         });
 
         window.KeloChangelog = { open: w.open, close: w.close };
