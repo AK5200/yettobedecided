@@ -241,8 +241,9 @@
     preview.id = 'kelo-instant-preview';
     preview.style.cssText = 'width:100%;height:100%;overflow-y:auto;background:' + bg + ';color:' + text + ';font-family:' + font + ';';
 
-    var heading = _settings.heading || 'Have something to say?';
-    var subheading = _settings.subheading || '';
+    var isChangelog = type === 'changelog-popup' || type === 'changelog-dropdown';
+    var heading = isChangelog ? (_settings.heading || "What's New") : (_settings.heading || 'Have something to say?');
+    var subheading = isChangelog ? (_settings.subheading || '') : (_settings.subheading || '');
 
     var html = '<div style="padding:24px;">';
     html += '<h2 style="font-size:20px;font-weight:700;margin:0 0 4px 0;">' + escapeHtml(heading) + '</h2>';
@@ -371,16 +372,23 @@
         w.dropdown.style.cssText = 'position:absolute;z-index:9999;display:none;width:380px;';
         document.body.appendChild(w.dropdown);
 
+        // Show instant preview while iframe loads
+        w._preview = createInstantPreview(w.dropdown, 'changelog-dropdown');
+        if (w._preview) { w._preview.style.borderRadius = '8px'; w._preview.style.maxHeight = '500px'; w._preview.style.boxShadow = '0 10px 40px rgba(0,0,0,0.15)'; }
+
         w.iframe = document.createElement('iframe');
         w.iframe.src = buildIframeSrc('/embed/changelog-dropdown');
-        w.iframe.style.cssText = 'width:100%;height:300px;max-height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
+        w.iframe.style.cssText = 'width:100%;height:300px;max-height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);display:none;';
         w.dropdown.appendChild(w.iframe);
 
-        // Auto-resize iframe to fit content
+        // Auto-resize iframe to fit content, swap out preview
         window.addEventListener('message', function(e) {
           if (e.data && e.data.type === 'kelo:resize' && e.data.height) {
             var h = Math.min(e.data.height, 500);
             w.iframe.style.height = h + 'px';
+            // Show iframe, hide preview
+            if (w._preview) { w._preview.style.display = 'none'; }
+            w.iframe.style.display = 'block';
           }
         });
 
