@@ -28,15 +28,12 @@ function DropdownContent() {
   if (!settings) return null
 
   return (
-    <div className="p-2">
-      <ChangelogDropdown
-        orgSlug={org}
-        accentColor={detectedAccent || settings.accent_color || '#000'}
-        backgroundColor={autoTheme ? undefined : (settings.background_color || '#ffffff')}
-        borderRadius={settings.border_radius || 'medium'}
-        showBranding={settings.show_branding !== false}
-      />
-    </div>
+    <ChangelogDropdown
+      orgSlug={org}
+      accentColor={detectedAccent || settings.accent_color || '#000'}
+      backgroundColor={autoTheme ? undefined : (settings.background_color || '#ffffff')}
+      showBranding={settings.show_branding !== false}
+    />
   )
 }
 
