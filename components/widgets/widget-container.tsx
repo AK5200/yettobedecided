@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { FeedbackWidget } from './feedback-widget'
 import { AllInOneWidget } from './all-in-one-widget'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { getEmbeddedWidgetData } from '@/lib/widget-theme'
+
+const _embeddedData = getEmbeddedWidgetData()
 
 interface WidgetSettings {
   widget_type: 'changelog' | 'feedback' | 'all-in-one'
@@ -21,10 +24,10 @@ interface WidgetContainerProps {
 
 export function WidgetContainer({ orgSlug, apiUrl }: WidgetContainerProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [settings, setSettings] = useState<WidgetSettings | null>(null)
-  const [boards, setBoards] = useState<{ id: string; name: string }[]>([])
-  const [changelog, setChangelog] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [settings, setSettings] = useState<WidgetSettings | null>(_embeddedData?.settings || null)
+  const [boards, setBoards] = useState<{ id: string; name: string }[]>(_embeddedData?.boards || [])
+  const [changelog, setChangelog] = useState<any[]>(_embeddedData?.changelog || [])
+  const [loading, setLoading] = useState(!_embeddedData)
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {

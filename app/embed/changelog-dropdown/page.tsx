@@ -3,12 +3,14 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ChangelogDropdown } from '@/components/widgets/changelog-dropdown'
-import { applyWidgetTheme, getWidgetAccent } from '@/lib/widget-theme'
+import { applyWidgetTheme, getWidgetAccent, getEmbeddedWidgetData } from '@/lib/widget-theme'
+
+const _embeddedData = getEmbeddedWidgetData()
 
 function DropdownContent() {
   const searchParams = useSearchParams()
   const org = searchParams.get('org') || ''
-  const [settings, setSettings] = useState<any>(null)
+  const [settings, setSettings] = useState<any>(_embeddedData?.settings || null)
   const detectedAccent = getWidgetAccent()
   const autoTheme = searchParams.get('theme') !== null
 
@@ -25,9 +27,9 @@ function DropdownContent() {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  // Fallback: fetch if not received via postMessage within 1s
+  // Fallback: fetch if no data from embedded or postMessage within 1s
   useEffect(() => {
-    if (!org) return
+    if (!org || settings) return
     const timer = setTimeout(() => {
       if (settings) return
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''

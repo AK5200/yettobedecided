@@ -44,3 +44,21 @@ export function getWidgetAccent(): string | null {
   if (typeof window === 'undefined') return null
   return new URLSearchParams(window.location.search).get('accent')
 }
+
+/**
+ * Read widget data embedded in URL hash by widget.js
+ * Returns the full widget data object or null
+ */
+export function getEmbeddedWidgetData(): any | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const hash = window.location.hash
+    if (!hash || !hash.includes('kelo=')) return null
+    const encoded = hash.split('kelo=')[1]
+    if (!encoded) return null
+    const json = decodeURIComponent(escape(atob(decodeURIComponent(encoded))))
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}

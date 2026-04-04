@@ -185,6 +185,12 @@
     if (_settings && _settings.auto_detect_theme) src += '&theme=' + detectTheme();
     if (_settings && _settings.auto_detect_color) { var c = detectAccentColor(); if (c) src += '&accent=' + encodeURIComponent(c); }
     if (extraParams) src += extraParams;
+    // Embed widget data in URL hash so iframe has it on first render (no waiting for postMessage)
+    if (_widgetData) {
+      try {
+        src += '#kelo=' + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(_widgetData)))));
+      } catch(e) {}
+    }
     return src;
   }
 

@@ -6,7 +6,10 @@ import { AllInOneWidget } from '@/components/widgets/all-in-one-widget'
 import { FeedbackWidget } from '@/components/widgets/feedback-widget'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { X } from 'lucide-react'
-import { applyWidgetTheme, getWidgetAccent } from '@/lib/widget-theme'
+import { applyWidgetTheme, getWidgetAccent, getEmbeddedWidgetData } from '@/lib/widget-theme'
+
+// Read embedded data immediately (before component mounts)
+const _embeddedData = getEmbeddedWidgetData()
 
 export default function AllInOneEmbedClient() {
   const searchParams = useSearchParams()
@@ -14,11 +17,19 @@ export default function AllInOneEmbedClient() {
   const detectedAccent = getWidgetAccent()
 
   useEffect(() => { applyWidgetTheme() }, [])
-  const [boards, setBoards] = useState<{ id: string; name: string }[]>([])
-  const [posts, setPosts] = useState<any[]>([])
-  const [changelog, setChangelog] = useState<any[]>([])
-  const [settings, setSettings] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [boards, setBoards] = useState<{ id: string; name: string }[]>(_embeddedData?.boards || [])
+  const [posts, setPosts] = useState<any[]>(() => {
+    if (!_embeddedData?.posts) return []
+    return _embeddedData.posts.map((p: any) => ({
+      id: p.id, title: p.title, content: p.content || '',
+      votes: p.vote_count || 0, author_name: p.author_name || p.guest_name || 'Anonymous',
+      author_email: p.author_email || p.guest_email, tags: p.tags || [],
+      status: p.status || 'open', hasVoted: false,
+    }))
+  })
+  const [changelog, setChangelog] = useState<any[]>(_embeddedData?.changelog || [])
+  const [settings, setSettings] = useState<any>(_embeddedData?.settings || null)
+  const [loading, setLoading] = useState(!_embeddedData)
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
 
