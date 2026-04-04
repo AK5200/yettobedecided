@@ -1,24 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 
 interface ChangelogEntry {
   id: string
   title: string
-  description: string
+  content: string
+  category: string | null
   published_at: string
-  label?: string
-}
-
-const BORDER_RADIUS_MAP: Record<string, string> = {
-  none: '0',
-  small: '8px',
-  medium: '12px',
-  large: '16px',
-  xlarge: '24px',
+  created_at: string
 }
 
 interface ChangelogPopupProps {
@@ -35,79 +26,94 @@ export function ChangelogPopup({
   orgSlug,
   accentColor = '#000',
   backgroundColor = '#ffffff',
-  borderRadius = 'medium',
   showBranding = true,
-  heading = 'Welcome back 👋',
-  subheading = "Here's what we added while you were away.",
+  heading = "What's New",
+  subheading = "Latest updates and improvements.",
 }: ChangelogPopupProps) {
-  const [open, setOpen] = useState(false)
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user has seen latest changelog
-    const lastSeen = localStorage.getItem(`kelo-changelog-${orgSlug}`)
-
-    fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=5`)
+    fetch(`/api/changelog?org=${encodeURIComponent(orgSlug)}&limit=10&published_only=true`)
       .then(res => res.json())
       .then(data => {
-        if (data.entries && data.entries.length > 0) {
-          setEntries(data.entries)
-          const latestId = data.entries[0].id
-          if (lastSeen !== latestId) {
-            setOpen(true)
-          }
-        }
+        setEntries(data.entries || [])
+        setLoading(false)
       })
+      .catch(() => setLoading(false))
   }, [orgSlug])
 
   const handleClose = () => {
-    if (entries.length > 0) {
-      localStorage.setItem(`kelo-changelog-${orgSlug}`, entries[0].id)
-    }
-    setOpen(false)
     window.parent.postMessage('kelo:close-changelog', '*')
   }
 
-  const radiusValue = BORDER_RADIUS_MAP[borderRadius] || '12px'
+  function formatDate(dateStr: string) {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent
-        className='max-w-lg'
-        style={{ backgroundColor, borderRadius: radiusValue }}
-      >
-        <DialogHeader>
-          <DialogTitle className='flex items-center gap-2'>
-            {heading}
-          </DialogTitle>
-          <p className='text-sm text-muted-foreground'>{subheading}</p>
-        </DialogHeader>
-
-        <div className='space-y-4 max-h-80 overflow-y-auto'>
-          {entries.map(entry => (
-            <div key={entry.id} className='border-b pb-4 last:border-0'>
-              {entry.label && (
-                <span className='text-xs px-2 py-1 rounded' style={{ background: accentColor, color: '#fff' }}>
-                  {entry.label}
-                </span>
-              )}
-              <h3 className='font-medium mt-2'>{entry.title}</h3>
-              <p className='text-sm text-muted-foreground mt-1'>{entry.description}</p>
-            </div>
-          ))}
+    <div
+      className="h-full flex flex-col overflow-hidden"
+      style={{ backgroundColor, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
+    >
+      {/* Header */}
+      <div className="px-6 pt-6 pb-4 border-b shrink-0">
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-xl font-bold text-foreground">{heading}</h1>
+          <button
+            onClick={handleClose}
+            className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+          >
+            <X className="h-4 w-4 text-muted-foreground" />
+          </button>
         </div>
+        <p className="text-sm text-muted-foreground">{subheading}</p>
+      </div>
 
-        <div className='flex justify-between items-center pt-4'>
-          {showBranding ? (
-            <span className='text-xs text-muted-foreground/60'>Powered by Kelo</span>
-          ) : (
-            <span />
-          )}
-          <Button variant='outline' size='sm' onClick={handleClose}>
-            Got it
-          </Button>
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-6 py-4">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-6 h-6 border-2 border-muted-foreground/20 border-t-muted-foreground rounded-full animate-spin" />
+          </div>
+        ) : entries.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No updates yet. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {entries.map(entry => (
+              <div key={entry.id} className="pb-6 border-b last:border-0">
+                <div className="flex items-center gap-2 mb-2">
+                  {entry.category && (
+                    <span
+                      className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
+                      style={{ background: accentColor }}
+                    >
+                      {entry.category}
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-foreground">
+                    {formatDate(entry.published_at || entry.created_at)}
+                  </span>
+                </div>
+                <h3 className="font-semibold text-foreground mb-1">{entry.title}</h3>
+                {entry.content && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">{entry.content}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      {showBranding && (
+        <div className="px-6 py-3 border-t shrink-0">
+          <span className="text-xs text-muted-foreground/50">Powered by Kelo</span>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </div>
   )
 }
