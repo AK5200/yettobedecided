@@ -130,8 +130,43 @@
     Kelo.close = closeWidget;
   }
 
+  // Maps for changelog popup styling
+  function getDialogSize(size) {
+    var sizeMap = {
+      'small': '480px',
+      'medium': '560px',
+      'large': '680px',
+      'xlarge': '780px'
+    };
+    return sizeMap[size] || '680px';
+  }
+
+  function getBorderRadius(br) {
+    var brMap = {
+      'none': '0',
+      'small': '8px',
+      'medium': '12px',
+      'large': '16px',
+      'xlarge': '24px'
+    };
+    return brMap[br] || '12px';
+  }
+
+  function getBoxShadow(shadow) {
+    var shadowMap = {
+      'none': 'none',
+      'small': '0 4px 12px rgba(0,0,0,0.1)',
+      'medium': '0 12px 32px rgba(0,0,0,0.15)',
+      'large': '0 25px 50px -12px rgba(0,0,0,0.25)'
+    };
+    return shadowMap[shadow] || '0 25px 50px -12px rgba(0,0,0,0.25)';
+  }
+
   function initChangelogPopup(settings) {
     var overlay, container;
+    var dialogSize = getDialogSize(settings.size);
+    var borderRadius = getBorderRadius(settings.border_radius);
+    var boxShadow = getBoxShadow(settings.shadow);
 
     function ensureIframe() {
       if (_iframe) return;
@@ -143,12 +178,12 @@
 
       container = document.createElement('div');
       container.id = 'kelo-changelog-container';
-      container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;display:none;width:90%;max-width:680px;max-height:90vh;';
+      container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;display:none;width:90%;max-width:' + dialogSize + ';max-height:90vh;';
       document.body.appendChild(container);
 
       _iframe = document.createElement('iframe');
       _iframe.src = baseUrl + '/embed/changelog-popup?org=' + encodeURIComponent(org);
-      _iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);';
+      _iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:' + borderRadius + ';box-shadow:' + boxShadow + ';overflow:hidden;';
       container.appendChild(_iframe);
 
       overlay.addEventListener('click', closePopup);

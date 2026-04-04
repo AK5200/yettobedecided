@@ -16,6 +16,7 @@ interface ChangelogPopupProps {
   orgSlug: string
   accentColor?: string
   backgroundColor?: string
+  headerBackgroundColor?: string
   borderRadius?: string
   showBranding?: boolean
   heading?: string
@@ -26,6 +27,7 @@ export function ChangelogPopup({
   orgSlug,
   accentColor = '#000',
   backgroundColor = '#ffffff',
+  headerBackgroundColor,
   showBranding = true,
   heading = "What's New",
   subheading = "Latest updates and improvements.",
@@ -58,7 +60,7 @@ export function ChangelogPopup({
       style={{ backgroundColor, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
     >
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 border-b shrink-0">
+      <div className="px-6 pt-6 pb-4 border-b shrink-0" style={{ backgroundColor: headerBackgroundColor || backgroundColor }}>
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-xl font-bold text-foreground">{heading}</h1>
           <button

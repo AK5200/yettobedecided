@@ -27,7 +27,7 @@ function PopupContent() {
       orgSlug={org}
       accentColor={settings.accent_color || '#000'}
       backgroundColor={settings.background_color || '#ffffff'}
-      borderRadius={settings.border_radius || 'medium'}
+      headerBackgroundColor={settings.header_background_color || settings.background_color || '#ffffff'}
       showBranding={settings.show_branding !== false}
       heading={settings.heading || 'Welcome back 👋'}
       subheading={settings.subheading || "Here's what we added while you were away."}
