@@ -10,6 +10,7 @@ function DropdownContent() {
   const org = searchParams.get('org') || ''
   const [settings, setSettings] = useState<any>(null)
   const detectedAccent = getWidgetAccent()
+  const autoTheme = searchParams.get('theme') !== null
 
   useEffect(() => { applyWidgetTheme() }, [])
 
@@ -31,7 +32,7 @@ function DropdownContent() {
       <ChangelogDropdown
         orgSlug={org}
         accentColor={detectedAccent || settings.accent_color || '#000'}
-        backgroundColor={settings.background_color || '#ffffff'}
+        backgroundColor={autoTheme ? undefined : (settings.background_color || '#ffffff')}
         borderRadius={settings.border_radius || 'medium'}
         showBranding={settings.show_branding !== false}
       />

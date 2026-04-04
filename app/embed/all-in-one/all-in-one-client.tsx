@@ -168,11 +168,10 @@ export default function AllInOneEmbedClient() {
     return <div className="p-4 text-sm">Missing org parameter.</div>
   }
 
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  const autoTheme = new URLSearchParams(window.location.search).get('theme') !== null
   const accentColor = detectedAccent || settings?.accent_color || '#F59E0B'
-  const rawBackgroundColor = settings?.background_color || '#ffffff'
-  const backgroundColor = isDark ? '#1a1a1a' : rawBackgroundColor
-  const headerBackgroundColor = isDark ? '#1a1a1a' : (settings?.header_background_color || settings?.background_color || '#ffffff')
+  const backgroundColor = autoTheme ? undefined : (settings?.background_color || '#ffffff')
+  const headerBackgroundColor = autoTheme ? undefined : (settings?.header_background_color || settings?.background_color || '#ffffff')
   const showBranding = settings?.show_branding !== false
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'
@@ -222,7 +221,7 @@ export default function AllInOneEmbedClient() {
 
   return (
     <div
-      className="w-full h-full relative flex flex-col"
+      className="w-full h-full relative flex flex-col bg-white dark:bg-[#1a1a1a]"
       style={{
         pointerEvents: 'auto',
         height: '100%',

@@ -152,7 +152,7 @@ export function AllInOneWidget({
   changelog,
   orgSlug,
   accentColor = '#7c3aed',
-  backgroundColor = '#ffffff',
+  backgroundColor,
   headerBackgroundColor,
   showBranding = true,
   heading = 'Have something to say?',
@@ -321,7 +321,7 @@ export function AllInOneWidget({
   // Show post detail view if a post is selected
   if (selectedPost) {
     return (
-      <div className={`${isEmbedded ? 'h-full flex flex-col' : borderRadiusClass} ${isEmbedded ? '' : 'p-4'} space-y-4`} style={isEmbedded ? {} : { backgroundColor }}>
+      <div className={`${isEmbedded ? 'h-full flex flex-col' : borderRadiusClass} ${isEmbedded ? '' : 'p-4'} space-y-4 bg-white dark:bg-[#1a1a1a]`} style={isEmbedded ? {} : { backgroundColor: backgroundColor || undefined }}>
         <PostDetailView
           post={selectedPost}
           orgSlug={orgSlug}
@@ -342,10 +342,10 @@ export function AllInOneWidget({
 
   return (
     <div
-      className={`${isEmbedded ? 'h-full flex flex-col' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? '' : 'p-4'} space-y-4 ${variantStyles.containerClass}`}
+      className={`${isEmbedded ? 'h-full flex flex-col' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? '' : 'p-4'} space-y-4 ${variantStyles.containerClass} bg-white dark:bg-[#1a1a1a]`}
       data-style-variant={styleVariant}
       style={isEmbedded ? {} : {
-        backgroundColor: variantStyles.containerStyle?.background || backgroundColor,
+        backgroundColor: variantStyles.containerStyle?.background || backgroundColor || undefined,
         border: variantStyles.containerStyle?.border,
         boxShadow: variantStyles.containerStyle?.boxShadow,
         ...variantStyles.containerStyle
@@ -353,7 +353,7 @@ export function AllInOneWidget({
     >
       {/* Header */}
       <div className={`px-6 pt-6 pb-4`} style={{
-        backgroundColor: headerBackgroundColor || variantStyles.headerBg || 'transparent',
+        backgroundColor: headerBackgroundColor || variantStyles.headerBg || undefined,
         borderRadius: getBorderRadiusStyle(borderRadius)
       }}>
         <div

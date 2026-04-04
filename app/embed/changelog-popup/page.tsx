@@ -10,6 +10,7 @@ function PopupContent() {
   const org = searchParams.get('org') || ''
   const [settings, setSettings] = useState<any>(null)
   const detectedAccent = getWidgetAccent()
+  const autoTheme = searchParams.get('theme') !== null
 
   useEffect(() => { applyWidgetTheme() }, [])
 
@@ -30,8 +31,8 @@ function PopupContent() {
     <ChangelogPopup
       orgSlug={org}
       accentColor={detectedAccent || settings.accent_color || '#000'}
-      backgroundColor={settings.background_color || '#ffffff'}
-      headerBackgroundColor={settings.header_background_color || settings.background_color || '#ffffff'}
+      backgroundColor={autoTheme ? undefined : (settings.background_color || '#ffffff')}
+      headerBackgroundColor={autoTheme ? undefined : (settings.header_background_color || settings.background_color || '#ffffff')}
       showBranding={settings.show_branding !== false}
       heading={settings.heading || 'Welcome back 👋'}
       subheading={settings.subheading || "Here's what we added while you were away."}
