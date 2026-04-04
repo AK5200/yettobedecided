@@ -6,10 +6,14 @@ import { AllInOneWidget } from '@/components/widgets/all-in-one-widget'
 import { FeedbackWidget } from '@/components/widgets/feedback-widget'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { X } from 'lucide-react'
+import { applyWidgetTheme, getWidgetAccent } from '@/lib/widget-theme'
 
 export default function AllInOneEmbedClient() {
   const searchParams = useSearchParams()
   const org = searchParams.get('org')
+  const detectedAccent = getWidgetAccent()
+
+  useEffect(() => { applyWidgetTheme() }, [])
   const [boards, setBoards] = useState<{ id: string; name: string }[]>([])
   const [posts, setPosts] = useState<any[]>([])
   const [changelog, setChangelog] = useState<any[]>([])
@@ -164,7 +168,7 @@ export default function AllInOneEmbedClient() {
     return <div className="p-4 text-sm">Missing org parameter.</div>
   }
 
-  const accentColor = settings?.accent_color || '#F59E0B'
+  const accentColor = detectedAccent || settings?.accent_color || '#F59E0B'
   const backgroundColor = settings?.background_color || '#ffffff'
   const headerBackgroundColor = settings?.header_background_color || settings?.background_color || '#ffffff'
   const showBranding = settings?.show_branding !== false

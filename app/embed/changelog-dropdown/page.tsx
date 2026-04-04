@@ -3,11 +3,15 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ChangelogDropdown } from '@/components/widgets/changelog-dropdown'
+import { applyWidgetTheme, getWidgetAccent } from '@/lib/widget-theme'
 
 function DropdownContent() {
   const searchParams = useSearchParams()
   const org = searchParams.get('org') || ''
   const [settings, setSettings] = useState<any>(null)
+  const detectedAccent = getWidgetAccent()
+
+  useEffect(() => { applyWidgetTheme() }, [])
 
   useEffect(() => {
     if (!org) return
@@ -26,7 +30,7 @@ function DropdownContent() {
     <div className="p-2">
       <ChangelogDropdown
         orgSlug={org}
-        accentColor={settings.accent_color || '#000'}
+        accentColor={detectedAccent || settings.accent_color || '#000'}
         backgroundColor={settings.background_color || '#ffffff'}
         borderRadius={settings.border_radius || 'medium'}
         showBranding={settings.show_branding !== false}

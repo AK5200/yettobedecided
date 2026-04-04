@@ -38,6 +38,9 @@ export type WidgetSettings = {
   subheading: string
   homepageUrl?: string
   autoTriggerEnabled?: boolean
+  // Auto-detect settings
+  autoDetectTheme?: boolean
+  autoDetectColor?: boolean
   // All-in-One widget specific settings
   allInOneTextStyle?: 'default' | 'bold' | 'italic' | 'bold-italic'
   allInOnePopoverPlacement?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
@@ -286,6 +289,8 @@ export default function WidgetsPage() {
         subheading: settings.subheading,
         homepage_url: settings.homepageUrl || null,
         auto_trigger_enabled: settings.autoTriggerEnabled || false,
+        auto_detect_theme: settings.autoDetectTheme || false,
+        auto_detect_color: settings.autoDetectColor || false,
         all_in_one_text_style: settings.allInOneTextStyle || 'default',
         all_in_one_popover_placement: settings.allInOnePopoverPlacement || 'bottom-right',
         all_in_one_popup_placement: settings.allInOnePopupPlacement || 'right',
@@ -304,6 +309,8 @@ export default function WidgetsPage() {
         subheading: settings.subheading,
         homepage_url: settings.homepageUrl || null,
         auto_trigger_enabled: settings.autoTriggerEnabled || false,
+        auto_detect_theme: settings.autoDetectTheme || false,
+        auto_detect_color: settings.autoDetectColor || false,
       }
 
       const res = await fetch('/api/widget-settings', {
@@ -360,6 +367,8 @@ export default function WidgetsPage() {
               subheading: data.settings.subheading || prev.subheading,
               homepageUrl: data.settings.homepage_url || prev.homepageUrl,
               autoTriggerEnabled: data.settings.auto_trigger_enabled ?? prev.autoTriggerEnabled,
+              autoDetectTheme: data.settings.auto_detect_theme ?? prev.autoDetectTheme,
+              autoDetectColor: data.settings.auto_detect_color ?? prev.autoDetectColor,
               allInOneTextStyle: data.settings.all_in_one_text_style || prev.allInOneTextStyle,
               allInOnePopoverPlacement: data.settings.all_in_one_popover_placement || prev.allInOnePopoverPlacement,
               allInOnePopupPlacement: data.settings.all_in_one_popup_placement || prev.allInOnePopupPlacement,
@@ -858,6 +867,26 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
+                <span className={`block text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Auto-detect dark/light mode</span>
+                <p className={`text-xs ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
+                  Automatically match the widget theme to the user&apos;s website
+                </p>
+              </div>
+              <Switch checked={settings.autoDetectTheme || false} onCheckedChange={(v) => updateSetting('autoDetectTheme', v)} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <span className={`block text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Auto-detect accent color</span>
+                <p className={`text-xs ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
+                  Automatically pick up the accent color from the user&apos;s website
+                </p>
+              </div>
+              <Switch checked={settings.autoDetectColor || false} onCheckedChange={(v) => updateSetting('autoDetectColor', v)} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
                 <span className={`block text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Show Branding</span>
                 <p className={`text-xs ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
                   Display &quot;Powered by Kelo&quot;
@@ -1091,6 +1120,26 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
                   </SelectContent>
                 </Select>
               </FormField>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <span className={`block text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Auto-detect dark/light mode</span>
+                <p className={`text-xs ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
+                  Automatically match the widget theme to the user&apos;s website
+                </p>
+              </div>
+              <Switch checked={settings.autoDetectTheme || false} onCheckedChange={(v) => updateSetting('autoDetectTheme', v)} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <span className={`block text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Auto-detect accent color</span>
+                <p className={`text-xs ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
+                  Automatically pick up the accent color from the user&apos;s website
+                </p>
+              </div>
+              <Switch checked={settings.autoDetectColor || false} onCheckedChange={(v) => updateSetting('autoDetectColor', v)} />
             </div>
 
             {/* Actions */}

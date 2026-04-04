@@ -3,11 +3,15 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ChangelogPopup } from '@/components/widgets/changelog-popup'
+import { applyWidgetTheme, getWidgetAccent } from '@/lib/widget-theme'
 
 function PopupContent() {
   const searchParams = useSearchParams()
   const org = searchParams.get('org') || ''
   const [settings, setSettings] = useState<any>(null)
+  const detectedAccent = getWidgetAccent()
+
+  useEffect(() => { applyWidgetTheme() }, [])
 
   useEffect(() => {
     if (!org) return
@@ -25,7 +29,7 @@ function PopupContent() {
   return (
     <ChangelogPopup
       orgSlug={org}
-      accentColor={settings.accent_color || '#000'}
+      accentColor={detectedAccent || settings.accent_color || '#000'}
       backgroundColor={settings.background_color || '#ffffff'}
       headerBackgroundColor={settings.header_background_color || settings.background_color || '#ffffff'}
       showBranding={settings.show_branding !== false}

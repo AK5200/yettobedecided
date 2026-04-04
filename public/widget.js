@@ -70,6 +70,12 @@
     }
   }
 
+  function sendThemeToIframe() {
+    if (_iframe && _iframe.contentWindow && _settings && _settings.auto_detect_theme) {
+      _iframe.contentWindow.postMessage({ type: 'kelo:theme', theme: detectTheme() }, '*');
+    }
+  }
+
   // Fetch settings from API
   async function loadSettings() {
     try {
@@ -82,6 +88,121 @@
       console.warn('Kelo: Failed to load settings');
     }
     return {};
+  }
+
+  // ─── Auto-detect theme and color from client site ───
+
+  function detectTheme() {
+    // 1. Check html/body class (Tailwind, Next.js, etc.)
+    var html = document.documentElement;
+    if (html.classList.contains('dark') || html.getAttribute('data-theme') === 'dark' || html.getAttribute('data-mode') === 'dark') {
+      return 'dark';
+    }
+    if (html.classList.contains('light') || html.getAttribute('data-theme') === 'light') {
+      return 'light';
+    }
+    // 2. Check body background color luminance
+    var bodyBg = getComputedStyle(document.body).backgroundColor;
+    if (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)') {
+      var lum = getLuminance(bodyBg);
+      if (lum !== null) return lum < 0.5 ? 'dark' : 'light';
+    }
+    // 3. Fall back to OS preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  }
+
+  function getLuminance(colorStr) {
+    var m = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (!m) return null;
+    var r = parseInt(m[1]) / 255;
+    var g = parseInt(m[2]) / 255;
+    var b = parseInt(m[3]) / 255;
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  function detectAccentColor() {
+    // 1. Check CSS custom properties commonly used for accent/primary color
+    var root = getComputedStyle(document.documentElement);
+    var cssVars = ['--primary', '--accent', '--brand', '--brand-color', '--theme-color', '--color-primary', '--accent-color'];
+    for (var i = 0; i < cssVars.length; i++) {
+      var val = root.getPropertyValue(cssVars[i]).trim();
+      if (val && val !== '') {
+        var hex = cssColorToHex(val);
+        if (hex) return hex;
+      }
+    }
+    // 2. Check <meta name="theme-color">
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      var hex = cssColorToHex(meta.getAttribute('content'));
+      if (hex) return hex;
+    }
+    // 3. Sample primary buttons
+    var btn = document.querySelector('button[class*="primary"], a[class*="primary"], .btn-primary, [data-primary]');
+    if (btn) {
+      var bg = getComputedStyle(btn).backgroundColor;
+      var hex = cssColorToHex(bg);
+      if (hex && hex !== '#000000' && hex !== '#ffffff') return hex;
+    }
+    // 4. Sample first link color
+    var link = document.querySelector('a[href]');
+    if (link) {
+      var color = getComputedStyle(link).color;
+      var hex = cssColorToHex(color);
+      if (hex && hex !== '#000000' && hex !== '#ffffff' && hex !== '#0000ee') return hex;
+    }
+    return null;
+  }
+
+  function cssColorToHex(str) {
+    if (!str || str === 'transparent' || str === 'inherit') return null;
+    // Already hex
+    if (str.charAt(0) === '#') return str.length === 4
+      ? '#' + str[1]+str[1] + str[2]+str[2] + str[3]+str[3]
+      : str.substring(0, 7);
+    // HSL value (from CSS custom properties like "220 90% 56%")
+    var hslMatch = str.match(/^(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%?\s+(\d+(?:\.\d+)?)%?$/);
+    if (hslMatch) {
+      return hslToHex(parseFloat(hslMatch[1]), parseFloat(hslMatch[2]), parseFloat(hslMatch[3]));
+    }
+    // hsl() function
+    var hslFn = str.match(/hsl\((\d+(?:\.\d+)?),?\s*(\d+(?:\.\d+)?)%,?\s*(\d+(?:\.\d+)?)%/);
+    if (hslFn) {
+      return hslToHex(parseFloat(hslFn[1]), parseFloat(hslFn[2]), parseFloat(hslFn[3]));
+    }
+    // rgb/rgba
+    var m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (m) {
+      return '#' + ((1 << 24) + (parseInt(m[1]) << 16) + (parseInt(m[2]) << 8) + parseInt(m[3])).toString(16).slice(1);
+    }
+    return null;
+  }
+
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    var a = s * Math.min(l, 1-l);
+    function f(n) {
+      var k = (n + h/30) % 12;
+      var color = l - a * Math.max(Math.min(k-3, 9-k, 1), -1);
+      return Math.round(255 * color).toString(16).padStart(2, '0');
+    }
+    return '#' + f(0) + f(8) + f(4);
+  }
+
+  function buildIframeSrc(path, extraParams) {
+    var src = baseUrl + path + '?org=' + encodeURIComponent(org);
+    if (_settings && _settings.auto_detect_theme) {
+      src += '&theme=' + detectTheme();
+    }
+    if (_settings && _settings.auto_detect_color) {
+      var color = detectAccentColor();
+      if (color) src += '&accent=' + encodeURIComponent(color);
+    }
+    if (extraParams) src += extraParams;
+    return src;
   }
 
   // Responsive size function
@@ -102,7 +223,7 @@
     function ensureIframe() {
       if (_iframe) return;
       _iframe = document.createElement('iframe');
-      _iframe.src = baseUrl + '/embed/widget?org=' + encodeURIComponent(org);
+      _iframe.src = buildIframeSrc('/embed/widget');
       _iframe.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;border:none;z-index:2147483647;display:none;background:white;pointer-events:auto;';
       _iframe.id = 'kelo-widget';
       document.body.appendChild(_iframe);
@@ -182,7 +303,7 @@
       document.body.appendChild(container);
 
       _iframe = document.createElement('iframe');
-      _iframe.src = baseUrl + '/embed/changelog-popup?org=' + encodeURIComponent(org);
+      _iframe.src = buildIframeSrc('/embed/changelog-popup');
       _iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:' + borderRadius + ';box-shadow:' + boxShadow + ';overflow:hidden;';
       container.appendChild(_iframe);
 
@@ -243,7 +364,7 @@
       document.body.appendChild(dropdown);
 
       _iframe = document.createElement('iframe');
-      _iframe.src = baseUrl + '/embed/changelog-dropdown?org=' + encodeURIComponent(org);
+      _iframe.src = buildIframeSrc('/embed/changelog-dropdown');
       _iframe.style.cssText = 'width:100%;height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
       dropdown.appendChild(_iframe);
 
@@ -309,7 +430,7 @@
 
       _iframe = document.createElement('iframe');
       var styleVariant = String(settings.all_in_one_style_variant || '1');
-      _iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popup&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
+      _iframe.src = buildIframeSrc('/embed/all-in-one', '&mode=popup&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now());
       _iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);display:block;margin:0;padding:0;';
       _iframe.setAttribute('frameborder', '0');
       _iframe.setAttribute('allowtransparency', 'true');
@@ -395,7 +516,7 @@
 
       _iframe = document.createElement('iframe');
       var styleVariant = String(settings.all_in_one_style_variant || '1');
-      _iframe.src = baseUrl + '/embed/all-in-one?org=' + encodeURIComponent(org) + '&mode=popover&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now();
+      _iframe.src = buildIframeSrc('/embed/all-in-one', '&mode=popover&style=' + encodeURIComponent(styleVariant) + '&t=' + Date.now());
       _iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
       popover.appendChild(_iframe);
 
@@ -498,6 +619,19 @@
         }, 800);
       }
     } catch (e) {}
+
+    // Watch for theme changes on client site and notify iframe
+    if (_settings && _settings.auto_detect_theme) {
+      // Watch for class/attribute changes on <html>
+      try {
+        var observer = new MutationObserver(sendThemeToIframe);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme', 'data-mode'] });
+      } catch (e) {}
+      // Watch for OS-level preference changes
+      try {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sendThemeToIframe);
+      } catch (e) {}
+    }
   }
 
   if (document.readyState === 'loading') {
