@@ -225,72 +225,6 @@
     }
   }
 
-  // ─── Instant preview (plain HTML, no React) ───
-
-  function createInstantPreview(container, type) {
-    if (!_widgetData) return null;
-    var isDark = _settings && _settings.auto_detect_theme ? detectTheme() === 'dark' : false;
-    var accent = _settings && _settings.auto_detect_color ? (detectAccentColor() || _settings.accent_color || '#F59E0B') : (_settings.accent_color || '#F59E0B');
-    var bg = isDark ? '#1a1a1a' : '#ffffff';
-    var text = isDark ? '#e5e5e5' : '#1a1a1a';
-    var muted = isDark ? '#888' : '#6b7280';
-    var border = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
-    var font = "'Inter',-apple-system,BlinkMacSystemFont,sans-serif";
-
-    var preview = document.createElement('div');
-    preview.id = 'kelo-instant-preview';
-    preview.style.cssText = 'width:100%;height:100%;overflow-y:auto;background:' + bg + ';color:' + text + ';font-family:' + font + ';';
-
-    var isChangelog = type === 'changelog-popup' || type === 'changelog-dropdown';
-    var heading = isChangelog ? (_settings.heading || "What's New") : (_settings.heading || 'Have something to say?');
-    var subheading = isChangelog ? (_settings.subheading || '') : (_settings.subheading || '');
-
-    var html = '<div style="padding:24px;">';
-    html += '<h2 style="font-size:20px;font-weight:700;margin:0 0 4px 0;">' + escapeHtml(heading) + '</h2>';
-    if (subheading) html += '<p style="font-size:13px;color:' + muted + ';margin:0 0 20px 0;">' + escapeHtml(subheading) + '</p>';
-
-    if (type === 'changelog-popup' || type === 'changelog-dropdown') {
-      var entries = (_widgetData.changelog || []).slice(0, 5);
-      entries.forEach(function(e) {
-        html += '<div style="padding:12px 0;border-bottom:1px solid ' + border + ';">';
-        if (e.category) html += '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:9999px;background:' + accent + ';color:white;margin-right:8px;">' + escapeHtml(e.category) + '</span>';
-        html += '<span style="font-size:11px;color:' + muted + ';">' + formatPreviewDate(e.published_at || e.created_at) + '</span>';
-        html += '<h3 style="font-size:14px;font-weight:600;margin:6px 0 4px 0;">' + escapeHtml(e.title) + '</h3>';
-        var entryText = (e.content || '').replace(/<[^>]*>/g, '').substring(0, 120);
-        if (entryText) html += '<p style="font-size:12px;color:' + muted + ';margin:0;line-height:1.5;">' + escapeHtml(entryText) + (e.content && e.content.replace(/<[^>]*>/g, '').length > 120 ? '...' : '') + '</p>';
-        html += '</div>';
-      });
-    } else {
-      // Posts preview (all-in-one, feedback)
-      var posts = (_widgetData.posts || []).slice(0, 5);
-      posts.forEach(function(p) {
-        html += '<div style="padding:12px 0;border-bottom:1px solid ' + border + ';display:flex;gap:12px;align-items:flex-start;">';
-        html += '<div style="min-width:40px;height:40px;border-radius:8px;border:1px solid ' + border + ';display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:' + muted + ';">';
-        html += '<span style="font-size:10px;">▲</span>' + (p.vote_count || 0);
-        html += '</div>';
-        html += '<div><h3 style="font-size:14px;font-weight:600;margin:0 0 4px 0;">' + escapeHtml(p.title) + '</h3>';
-        var desc = (p.content || '').replace(/<[^>]*>/g, '').substring(0, 80);
-        if (desc) html += '<p style="font-size:12px;color:' + muted + ';margin:0;">' + escapeHtml(desc) + (p.content && p.content.length > 80 ? '...' : '') + '</p>';
-        html += '</div></div>';
-      });
-    }
-
-    html += '</div>';
-    preview.innerHTML = html;
-    container.appendChild(preview);
-    return preview;
-  }
-
-  function escapeHtml(s) {
-    if (!s) return '';
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function formatPreviewDate(d) {
-    try { var dt = new Date(d); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
-    catch(e) { return ''; }
-  }
-
   // ─── Widget initializers ───
 
   function ensureWidget(type) {
@@ -366,21 +300,11 @@
         w.dropdown.style.cssText = 'position:absolute;z-index:9999;display:none;width:380px;';
         document.body.appendChild(w.dropdown);
 
-        // Show instant preview while iframe loads
-        w._preview = createInstantPreview(w.dropdown, 'changelog-dropdown');
-        if (w._preview) { w._preview.style.borderRadius = '8px'; w._preview.style.maxHeight = '500px'; w._preview.style.boxShadow = '0 10px 40px rgba(0,0,0,0.15)'; }
-
         w.iframe = document.createElement('iframe');
         w.iframe.src = buildIframeSrc('/embed/changelog-dropdown');
-        w.iframe.style.cssText = 'width:100%;height:300px;max-height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);display:none;';
+        w.iframe.style.cssText = 'width:100%;height:300px;max-height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
         w.dropdown.appendChild(w.iframe);
-
-        // Swap preview → iframe when iframe loads
-        w.iframe.addEventListener('load', function() {
-          if (w._preview) { w._preview.style.display = 'none'; }
-          w.iframe.style.display = 'block';
-          sendDataToWidget(w); sendIdentityToWidget(w);
-        });
+        w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         // Auto-resize iframe to fit content
         window.addEventListener('message', function(e) {
@@ -441,22 +365,14 @@
         w.container.style.cssText = 'position:fixed;top:0;' + (isLeft ? 'left' : 'right') + ':0;bottom:0;z-index:2147483647;display:none;width:' + responsiveWidth + ';min-width:300px;max-width:90vw;';
         document.body.appendChild(w.container);
 
-        // Show instant preview while iframe loads
-        w._preview = createInstantPreview(w.container, 'all-in-one-popup');
-
         w.iframe = document.createElement('iframe');
         var sv = String(_settings.all_in_one_style_variant || '1');
         w.iframe.src = buildIframeSrc('/embed/all-in-one', '&mode=popup&style=' + encodeURIComponent(sv) + '&t=' + Date.now());
-        w.iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);display:none;margin:0;padding:0;';
+        w.iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:0;box-shadow:-4px 0 20px rgba(0,0,0,0.1);display:block;margin:0;padding:0;';
         w.iframe.setAttribute('frameborder', '0');
         w.iframe.setAttribute('allowtransparency', 'true');
         w.container.appendChild(w.iframe);
-        w.iframe.addEventListener('load', function() {
-          // Swap preview with iframe
-          if (w._preview) { w._preview.style.display = 'none'; }
-          w.iframe.style.display = 'block';
-          sendDataToWidget(w); sendIdentityToWidget(w);
-        });
+        w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w.open = function() {
           w.overlay.style.display = 'block';
@@ -505,20 +421,12 @@
         w.popover.style.cssText = posStyle;
         document.body.appendChild(w.popover);
 
-        // Show instant preview while iframe loads
-        w._preview = createInstantPreview(w.popover, 'all-in-one-popover');
-        if (w._preview) w._preview.style.borderRadius = '12px';
-
         w.iframe = document.createElement('iframe');
         var sv2 = String(_settings.all_in_one_style_variant || '1');
         w.iframe.src = buildIframeSrc('/embed/all-in-one', '&mode=popover&style=' + encodeURIComponent(sv2) + '&t=' + Date.now());
-        w.iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);display:none;';
+        w.iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
         w.popover.appendChild(w.iframe);
-        w.iframe.addEventListener('load', function() {
-          if (w._preview) { w._preview.style.display = 'none'; }
-          w.iframe.style.display = 'block';
-          sendDataToWidget(w); sendIdentityToWidget(w);
-        });
+        w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w.isOpen = false;
         w.open = function() {
