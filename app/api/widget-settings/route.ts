@@ -64,12 +64,12 @@ export async function GET(request: Request) {
         org_id: resolvedOrgId,
       },
     }), origin)
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+    response.headers.set('Cache-Control', 'no-cache')
     return response
   }
 
   const response = withCors(NextResponse.json({ settings: data }), origin)
-  response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+  response.headers.set('Cache-Control', 'no-cache')
   return response
 }
 

@@ -22,7 +22,7 @@
     try {
       var cached = sessionStorage.getItem(cacheKey);
       var cachedTime = parseInt(sessionStorage.getItem(cacheTimeKey) || '0');
-      if (cached && Date.now() - cachedTime < 120000) {
+      if (cached && Date.now() - cachedTime < 30000) {
         _dataPromise = Promise.resolve(JSON.parse(cached));
         return;
       }

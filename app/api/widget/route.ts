@@ -91,6 +91,6 @@ export async function GET(request: NextRequest) {
     changelog: changelog || [],
     posts: allPosts,
   })
-  response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+  response.headers.set('Cache-Control', 'no-cache')
   return withCors(response, origin)
 }
