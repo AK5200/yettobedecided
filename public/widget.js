@@ -402,6 +402,88 @@
         });
         window.addEventListener('message', function(e) { if (e.data === 'kelo:close') w.close(); });
         break;
+
+      case 'announcement':
+        var tag = _settings.announcement_tag || 'New';
+        var text = _settings.announcement_text || '';
+        var linkType = _settings.announcement_link_type || 'changelog';
+        var customUrl = _settings.announcement_custom_url || '#';
+        var annAccent = _settings.accent_color || '#F59E0B';
+        var annBg = _settings.background_color || '#ffffff';
+        var annRadius = getBorderRadius(_settings.border_radius);
+
+        if (!text) break; // Don't show empty announcement
+
+        // Create the banner element
+        w.banner = document.createElement('div');
+        w.banner.id = 'kelo-announcement';
+        w.banner.style.cssText = 'display:none;width:100%;padding:8px 0;text-align:center;position:relative;z-index:10;';
+
+        var inner = document.createElement(linkType !== 'none' ? 'a' : 'div');
+        if (linkType === 'changelog') {
+          inner.href = baseUrl + '/' + org + '/changelog';
+          inner.target = '_blank';
+          inner.rel = 'noopener noreferrer';
+        } else if (linkType === 'custom' && customUrl) {
+          inner.href = customUrl;
+          inner.target = '_blank';
+          inner.rel = 'noopener noreferrer';
+        } else if (linkType === 'popup') {
+          inner.href = '#';
+          inner.addEventListener('click', function(e) {
+            e.preventDefault();
+            Kelo.open('changelog-popup');
+          });
+        }
+        inner.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:' + annRadius + ';background-color:' + annBg + ';border:1px solid ' + annAccent + '30;text-decoration:none;cursor:' + (linkType !== 'none' ? 'pointer' : 'default') + ';transition:box-shadow 0.2s,transform 0.2s;font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
+
+        var tagSpan = document.createElement('span');
+        tagSpan.textContent = tag;
+        tagSpan.style.cssText = 'font-size:12px;font-weight:600;padding:2px 10px;border-radius:' + annRadius + ';background-color:' + annAccent + ';color:white;';
+
+        var textSpan = document.createElement('span');
+        textSpan.textContent = text;
+        textSpan.style.cssText = 'font-size:14px;color:#374151;';
+
+        inner.appendChild(tagSpan);
+        inner.appendChild(textSpan);
+
+        if (linkType !== 'none') {
+          var arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          arrow.setAttribute('width', '16');
+          arrow.setAttribute('height', '16');
+          arrow.setAttribute('viewBox', '0 0 24 24');
+          arrow.setAttribute('fill', 'none');
+          arrow.setAttribute('stroke', '#9ca3af');
+          arrow.setAttribute('stroke-width', '2');
+          var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', 'M5 12h14M12 5l7 7-7 7');
+          arrow.appendChild(path);
+          inner.appendChild(arrow);
+        }
+
+        w.banner.appendChild(inner);
+
+        w.open = function() {
+          // Insert at the top of body, pushing content down (not overlapping)
+          if (!w.banner.parentNode) {
+            document.body.insertBefore(w.banner, document.body.firstChild);
+          }
+          w.banner.style.display = 'block';
+        };
+        w.close = function() {
+          w.banner.style.display = 'none';
+        };
+
+        // Auto-show the banner
+        w.open();
+
+        // Allow dismissal
+        var dismissed = sessionStorage.getItem('kelo_announcement_dismissed_' + org);
+        if (dismissed) {
+          w.banner.style.display = 'none';
+        }
+        break;
     }
 
     return w;

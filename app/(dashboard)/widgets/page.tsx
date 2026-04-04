@@ -444,66 +444,22 @@ export default function WidgetsPage() {
   }
 
   const generateAnnouncementCode = () => {
-    const borderRadius = announcementSettings.borderRadius === 'large' ? '9999px'
-      : announcementSettings.borderRadius === 'medium' ? '12px'
-      : announcementSettings.borderRadius === 'small' ? '8px'
-      : '0px'
-
-    const linkHref = announcementSettings.linkType === 'changelog'
-      ? `https://www.kelohq.com/${orgSlug}/changelog`
-      : announcementSettings.linkType === 'custom'
-        ? announcementSettings.customUrl
-        : '#'
-
-    const isClickable = announcementSettings.linkType !== 'none'
-    const tag = isClickable ? 'a' : 'div'
-    const hrefAttr = announcementSettings.linkType === 'changelog' || announcementSettings.linkType === 'custom'
-      ? ` href="${linkHref}" target="_blank" rel="noopener noreferrer"`
-      : announcementSettings.linkType === 'popup'
-        ? ` href="#" data-kelo-trigger="changelog-popup"`
-        : ''
-
     return `<!-- Kelo Announcement Banner -->
-<!-- Place this where you want the banner to appear -->
-<div style="display: flex; justify-content: center; width: 100%; padding: 8px 0; position: relative; z-index: 10;">
-  <${tag}${hrefAttr} style="
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: ${borderRadius};
-    background-color: ${announcementSettings.backgroundColor};
-    border: 1px solid ${announcementSettings.accentColor}30;
-    text-decoration: none;
-    ${isClickable ? 'cursor: pointer;' : ''}
-    transition: box-shadow 0.2s, transform 0.2s;
-  ">
-    <span style="
-      font-size: 12px;
-      font-weight: 600;
-      padding: 2px 10px;
-      border-radius: ${borderRadius};
-      background-color: ${announcementSettings.accentColor};
-      color: white;
-    ">${announcementSettings.tag}</span>
-    <span style="font-size: 14px; color: #374151;">
-      ${announcementSettings.text}
-    </span>${isClickable ? `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>` : ''}
-  </${tag}>
-</div>${announcementSettings.linkType === 'popup' ? `
-
-<!-- Kelo widget script (needed for popup trigger) -->
+<!-- The banner is rendered automatically from your widget settings -->
+<!-- Save your announcement settings above, then add this script -->
 <script>
   (function() {
-    if (window.Kelo) return;
     var script = document.createElement('script');
     script.src = '${baseUrl}/widget.js';
     script.async = true;
     script.dataset.org = '${orgSlug}';
+    script.dataset.type = 'announcement';
     document.head.appendChild(script);
   })();
-</script>` : ''}`
+</script>
+
+<!-- The banner appears at the top of the page automatically -->
+<!-- Customize tag, text, colors, and link behavior in Settings above -->`
   }
 
   const generateAllInOneCode = (variant: 'popup' | 'popover') => {
