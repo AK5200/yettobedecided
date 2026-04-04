@@ -32,6 +32,7 @@ export function ChangelogPopup({
   heading = "What's New",
   subheading = "Latest updates and improvements.",
 }: ChangelogPopupProps) {
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -56,11 +57,11 @@ export function ChangelogPopup({
 
   return (
     <div
-      className="h-full flex flex-col overflow-hidden bg-white dark:bg-[#1a1a1a]"
-      style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
+      className="h-full flex flex-col overflow-hidden"
+      style={{ backgroundColor: isDark ? '#1a1a1a' : backgroundColor, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
     >
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 border-b dark:border-white/10 shrink-0 bg-white dark:bg-[#1a1a1a]" style={{ backgroundColor: headerBackgroundColor || undefined }}>
+      <div className="px-6 pt-6 pb-4 border-b dark:border-white/10 shrink-0" style={{ backgroundColor: isDark ? '#1a1a1a' : (headerBackgroundColor || backgroundColor) }}>
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-xl font-bold text-foreground">{heading}</h1>
           <button
