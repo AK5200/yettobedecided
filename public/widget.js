@@ -375,14 +375,18 @@
         w.iframe.style.cssText = 'width:100%;height:300px;max-height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);display:none;';
         w.dropdown.appendChild(w.iframe);
 
-        // Auto-resize iframe to fit content, swap out preview
+        // Swap preview → iframe when iframe loads
+        w.iframe.addEventListener('load', function() {
+          if (w._preview) { w._preview.style.display = 'none'; }
+          w.iframe.style.display = 'block';
+          sendDataToWidget(w); sendIdentityToWidget(w);
+        });
+
+        // Auto-resize iframe to fit content
         window.addEventListener('message', function(e) {
           if (e.data && e.data.type === 'kelo:resize' && e.data.height) {
             var h = Math.min(e.data.height, 500);
             w.iframe.style.height = h + 'px';
-            // Show iframe, hide preview
-            if (w._preview) { w._preview.style.display = 'none'; }
-            w.iframe.style.display = 'block';
           }
         });
 
