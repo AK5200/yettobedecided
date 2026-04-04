@@ -2,15 +2,18 @@
 
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Sun, Moon } from 'lucide-react'
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => setMounted(true), [])
 
-  if (!mounted) return null
+  // Hide on embed/widget pages
+  if (!mounted || pathname.startsWith('/embed')) return null
 
   return (
     <button
