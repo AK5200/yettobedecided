@@ -38,6 +38,19 @@ export function ChangelogDropdown({
       .catch(() => setLoading(false))
   }, [orgSlug])
 
+  // Report height to parent so iframe can auto-size
+  useEffect(() => {
+    const reportHeight = () => {
+      const height = document.documentElement.scrollHeight
+      window.parent.postMessage({ type: 'kelo:resize', height: height }, '*')
+    }
+    // Report after render
+    const timer = setTimeout(reportHeight, 100)
+    // Also report when entries change
+    reportHeight()
+    return () => clearTimeout(timer)
+  }, [entries, loading])
+
   function formatDate(dateStr: string) {
     const d = new Date(dateStr)
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })

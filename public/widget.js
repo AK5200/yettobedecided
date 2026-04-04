@@ -253,13 +253,21 @@
       case 'changelog-dropdown':
         w.dropdown = document.createElement('div');
         w.dropdown.id = 'kelo-changelog-dropdown';
-        w.dropdown.style.cssText = 'position:absolute;z-index:9999;display:none;width:380px;max-height:500px;';
+        w.dropdown.style.cssText = 'position:absolute;z-index:9999;display:none;width:380px;';
         document.body.appendChild(w.dropdown);
 
         w.iframe = document.createElement('iframe');
         w.iframe.src = buildIframeSrc('/embed/changelog-dropdown');
-        w.iframe.style.cssText = 'width:100%;height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
+        w.iframe.style.cssText = 'width:100%;height:300px;max-height:500px;border:none;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.15);';
         w.dropdown.appendChild(w.iframe);
+
+        // Auto-resize iframe to fit content
+        window.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'kelo:resize' && e.data.height) {
+            var h = Math.min(e.data.height, 500);
+            w.iframe.style.height = h + 'px';
+          }
+        });
 
         w.isOpen = false;
         w._activeTrigger = null;
