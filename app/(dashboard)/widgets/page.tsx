@@ -844,6 +844,20 @@ ${announcementSettings.linkType === 'popup' ? `<!-- Include this script to enabl
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
+                <span className={`block text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Auto-open on page load</span>
+                <p className={`text-xs ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
+                  Automatically show the changelog popup when users visit a specific page (once per session)
+                </p>
+              </div>
+              <Switch checked={settings.autoTriggerEnabled || false} onCheckedChange={(v) => updateSetting('autoTriggerEnabled', v)} />
+            </div>
+
+            {settings.autoTriggerEnabled && (
+              <TextField label="Homepage URL" id="homepageUrl" value={settings.homepageUrl || ''} onChange={(v) => updateSetting('homepageUrl', v)} placeholder="https://yoursite.com" isDark={isDark} />
+            )}
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
                 <span className={`block text-sm font-semibold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Show Branding</span>
                 <p className={`text-xs ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
                   Display &quot;Powered by Kelo&quot;
