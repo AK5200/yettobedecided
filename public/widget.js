@@ -256,6 +256,8 @@
         if (e.category) html += '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:9999px;background:' + accent + ';color:white;margin-right:8px;">' + escapeHtml(e.category) + '</span>';
         html += '<span style="font-size:11px;color:' + muted + ';">' + formatPreviewDate(e.published_at || e.created_at) + '</span>';
         html += '<h3 style="font-size:14px;font-weight:600;margin:6px 0 4px 0;">' + escapeHtml(e.title) + '</h3>';
+        var entryText = (e.content || '').replace(/<[^>]*>/g, '').substring(0, 120);
+        if (entryText) html += '<p style="font-size:12px;color:' + muted + ';margin:0;line-height:1.5;">' + escapeHtml(entryText) + (e.content && e.content.replace(/<[^>]*>/g, '').length > 120 ? '...' : '') + '</p>';
         html += '</div>';
       });
     } else {
@@ -333,19 +335,11 @@
         w.container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;display:none;width:90%;max-width:' + dialogSize + ';max-height:90vh;';
         document.body.appendChild(w.container);
 
-        // Show instant preview while iframe loads
-        w._preview = createInstantPreview(w.container, 'changelog-popup');
-        if (w._preview) { w._preview.style.borderRadius = borderRadius; w._preview.style.maxHeight = '80vh'; w._preview.style.overflow = 'hidden'; }
-
         w.iframe = document.createElement('iframe');
         w.iframe.src = buildIframeSrc('/embed/changelog-popup');
-        w.iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:' + borderRadius + ';box-shadow:' + boxShadow + ';overflow:hidden;display:none;';
+        w.iframe.style.cssText = 'width:100%;height:80vh;border:none;border-radius:' + borderRadius + ';box-shadow:' + boxShadow + ';overflow:hidden;';
         w.container.appendChild(w.iframe);
-        w.iframe.addEventListener('load', function() {
-          if (w._preview) { w._preview.style.display = 'none'; }
-          w.iframe.style.display = 'block';
-          sendDataToWidget(w); sendIdentityToWidget(w);
-        });
+        w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w._justOpened = false;
         w.open = function() {
