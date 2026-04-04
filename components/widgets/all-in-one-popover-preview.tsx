@@ -649,7 +649,7 @@ export function AllInOnePopoverPreview({ orgId, orgSlug, onClose, settings }: Al
                         </span>
                       </div>
                       <div className="font-medium text-foreground text-sm">{entry.title}</div>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{entry.content}</p>
+                      <div className="text-xs text-muted-foreground line-clamp-2 mt-0.5 prose prose-sm max-w-none [&_img]:rounded-lg [&_img]:my-2" dangerouslySetInnerHTML={{ __html: entry.content || '' }} />
                     </div>
                   )
                 })}

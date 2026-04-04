@@ -100,7 +100,10 @@ export function ChangelogPopup({
                 </div>
                 <h3 className="font-semibold text-foreground mb-1">{entry.title}</h3>
                 {entry.content && (
-                  <p className="text-sm text-muted-foreground leading-relaxed">{entry.content}</p>
+                  <div
+                    className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_img]:rounded-lg [&_img]:my-2"
+                    dangerouslySetInnerHTML={{ __html: entry.content }}
+                  />
                 )}
               </div>
             ))}
@@ -109,11 +112,20 @@ export function ChangelogPopup({
       </div>
 
       {/* Footer */}
-      {showBranding && (
-        <div className="px-6 py-3 border-t shrink-0">
+      <div className="px-6 py-3 border-t shrink-0 flex items-center justify-between">
+        {showBranding ? (
           <span className="text-xs text-muted-foreground/50">Powered by Kelo</span>
-        </div>
-      )}
+        ) : <span />}
+        <a
+          href={`/${orgSlug}/changelog`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs font-semibold hover:underline"
+          style={{ color: accentColor }}
+        >
+          View all updates →
+        </a>
+      </div>
     </div>
   )
 }

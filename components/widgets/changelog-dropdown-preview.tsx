@@ -181,7 +181,7 @@ export function ChangelogDropdownPreview({ orgId, orgSlug, onClose, settings }: 
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-foreground text-sm">{entry.title}</h4>
-                        <p className="text-xs text-muted-foreground mt-1">{entry.content}</p>
+                        <div className="text-xs text-muted-foreground mt-1 prose prose-sm max-w-none [&_img]:rounded-lg [&_img]:my-2" dangerouslySetInnerHTML={{ __html: entry.content || '' }} />
                         {entry.image_url && (
                           <img
                             src={entry.image_url}

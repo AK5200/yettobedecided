@@ -644,7 +644,7 @@ export function AllInOnePopupPreview({ orgId, orgSlug, onClose, settings }: AllI
                         </span>
                       </div>
                       <div className="font-medium text-foreground">{entry.title}</div>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{entry.content}</p>
+                      <div className="text-sm text-muted-foreground line-clamp-2 mt-1 prose prose-sm max-w-none [&_img]:rounded-lg [&_img]:my-2" dangerouslySetInnerHTML={{ __html: entry.content || '' }} />
                     </div>
                   )
                 })}

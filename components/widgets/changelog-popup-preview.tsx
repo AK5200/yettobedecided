@@ -193,7 +193,7 @@ export function ChangelogPopupPreview({ orgId, orgSlug, onClose, settings }: Cha
                       />
                     )}
                     <h3 className="font-semibold text-foreground text-xl mb-2">{entry.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{entry.content}</p>
+                    <div className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_img]:rounded-lg [&_img]:my-2" dangerouslySetInnerHTML={{ __html: entry.content || '' }} />
                   </div>
                 )
               })
