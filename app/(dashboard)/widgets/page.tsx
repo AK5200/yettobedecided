@@ -274,7 +274,13 @@ export default function WidgetsPage() {
       const settingsToSave = type === 'announcement' ? {
         org_id: orgId,
         widget_type: 'announcement',
-        ...announcementSettings,
+        announcement_tag: announcementSettings.tag,
+        announcement_text: announcementSettings.text,
+        accent_color: announcementSettings.accentColor,
+        background_color: announcementSettings.backgroundColor,
+        border_radius: announcementSettings.borderRadius,
+        announcement_link_type: announcementSettings.linkType,
+        announcement_custom_url: announcementSettings.customUrl,
       } : type === 'all-in-one' ? {
         org_id: orgId,
         widget_type: 'all-in-one',
@@ -374,6 +380,19 @@ export default function WidgetsPage() {
               allInOnePopupPlacement: data.settings.all_in_one_popup_placement || prev.allInOnePopupPlacement,
               allInOneStyleVariant: data.settings.all_in_one_style_variant || prev.allInOneStyleVariant,
             }))
+            // Load announcement settings
+            if (data.settings.announcement_tag || data.settings.announcement_text || data.settings.announcement_link_type) {
+              setAnnouncementSettings(prev => ({
+                ...prev,
+                tag: data.settings.announcement_tag || prev.tag,
+                text: data.settings.announcement_text || prev.text,
+                accentColor: data.settings.accent_color || prev.accentColor,
+                backgroundColor: data.settings.background_color || prev.backgroundColor,
+                borderRadius: data.settings.border_radius || prev.borderRadius,
+                linkType: data.settings.announcement_link_type || prev.linkType,
+                customUrl: data.settings.announcement_custom_url || prev.customUrl,
+              }))
+            }
           }
         }
       } catch {
