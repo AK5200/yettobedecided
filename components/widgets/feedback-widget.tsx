@@ -49,6 +49,7 @@ export function FeedbackWidget({
   const [guestEmail, setGuestEmail] = useState('')
   const [guestName, setGuestName] = useState('')
   const [magicLinkStep, setMagicLinkStep] = useState<'email' | 'code' | null>(null)
+  const [showEmailVerify, setShowEmailVerify] = useState(false)
   const [magicLinkEmail, setMagicLinkEmail] = useState('')
   const [verificationToken, setVerificationToken] = useState('')
   const [otpCode, setOtpCode] = useState('')
@@ -138,7 +139,7 @@ export function FeedbackWidget({
   }, [orgSlug])
 
   const handleGuestSubmit = (email: string, name: string) => {
-    if (!email) return
+    if (!email && !name) return
     setGuestEmail(email)
     setGuestName(name)
     setIsIdentified(true)
@@ -405,18 +406,11 @@ export function FeedbackWidget({
       {!showForm && (
         <div className="space-y-4">
           {guestPostingEnabled ? (
-            // Guest posting enabled - show email/name form, optionally show login options
+            // Guest posting — name first, verification options below
             <>
               <div className="space-y-3">
                 <Input
-                  placeholder="Email"
-                  value={guestEmail}
-                  onChange={(event) => setGuestEmail(event.target.value)}
-                  className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200 placeholder:text-muted-foreground/50"
-                  style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
-                />
-                <Input
-                  placeholder="Name (optional)"
+                  placeholder="Your name"
                   value={guestName}
                   onChange={(event) => setGuestName(event.target.value)}
                   className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200 placeholder:text-muted-foreground/50"
@@ -424,8 +418,8 @@ export function FeedbackWidget({
                 />
                 <Button
                   className="w-full h-11 rounded-xl font-semibold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                  onClick={() => handleGuestSubmit(guestEmail, guestName)}
-                  disabled={!guestEmail}
+                  onClick={() => handleGuestSubmit('', guestName)}
+                  disabled={!guestName.trim()}
                   style={{
                     backgroundColor: accentColor,
                     boxShadow: `0 4px 14px -3px ${accentColor}40`
@@ -435,85 +429,104 @@ export function FeedbackWidget({
                 </Button>
               </div>
 
-              {/* Show login options below if login handler is configured */}
+              {/* Verification options */}
               {loginHandler === 'kelo' && (
                 <>
-                  <OrDivider text="or verify your email" />
-                  {magicLinkStep === 'code' ? (
-                    <div className="space-y-3">
-                      <div className="text-center">
-                        <div className="w-10 h-10 rounded-xl bg-muted/50 dark:bg-white/5 flex items-center justify-center mx-auto mb-2.5">
-                          <Mail className="h-5 w-5 text-muted-foreground" />
+                  <OrDivider />
+
+                  {/* Email verification — expandable */}
+                  {showEmailVerify || magicLinkStep === 'code' ? (
+                    magicLinkStep === 'code' ? (
+                      <div className="space-y-3">
+                        <div className="text-center">
+                          <div className="w-10 h-10 rounded-xl bg-muted/50 dark:bg-white/5 flex items-center justify-center mx-auto mb-2.5">
+                            <Mail className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Enter the 6-digit code sent to <strong className="text-foreground">{magicLinkEmail}</strong>
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Enter the 6-digit code sent to <strong className="text-foreground">{magicLinkEmail}</strong>
-                        </p>
+                        <Input
+                          placeholder="000000"
+                          value={otpCode}
+                          onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                          className="text-center text-2xl tracking-[0.3em] font-mono h-12 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
+                          style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
+                          maxLength={6}
+                          autoFocus
+                        />
+                        {otpError && (
+                          <p className="text-xs text-red-500 text-center font-medium">{otpError}</p>
+                        )}
+                        <Button
+                          className="w-full h-11 rounded-xl font-semibold text-white cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                          onClick={handleMagicLinkVerify}
+                          disabled={otpCode.length !== 6 || otpLoading}
+                          style={{ backgroundColor: accentColor, boxShadow: `0 4px 14px -3px ${accentColor}40` }}
+                        >
+                          {otpLoading ? 'Verifying...' : 'Verify Code'}
+                        </Button>
+                        <button
+                          className="text-xs text-muted-foreground/50 hover:text-muted-foreground w-full text-center cursor-pointer transition-colors duration-200"
+                          onClick={() => { setMagicLinkStep('email'); setOtpCode(''); setOtpError('') }}
+                        >
+                          Use a different email
+                        </button>
                       </div>
-                      <Input
-                        placeholder="000000"
-                        value={otpCode}
-                        onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="text-center text-2xl tracking-[0.3em] font-mono h-12 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
-                        style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
-                        maxLength={6}
-                        autoFocus
-                      />
-                      {otpError && (
-                        <p className="text-xs text-red-500 text-center font-medium">{otpError}</p>
-                      )}
-                      <Button
-                        className="w-full h-11 rounded-xl font-semibold text-white cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-                        onClick={handleMagicLinkVerify}
-                        disabled={otpCode.length !== 6 || otpLoading}
-                        style={{ backgroundColor: accentColor, boxShadow: `0 4px 14px -3px ${accentColor}40` }}
-                      >
-                        {otpLoading ? 'Verifying...' : 'Verify Code'}
-                      </Button>
-                      <button
-                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground w-full text-center cursor-pointer transition-colors duration-200"
-                        onClick={() => { setMagicLinkStep('email'); setOtpCode(''); setOtpError('') }}
-                      >
-                        Use a different email
-                      </button>
-                    </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <Input
+                          placeholder="Enter your email"
+                          type="email"
+                          value={magicLinkEmail}
+                          onChange={(event) => setMagicLinkEmail(event.target.value)}
+                          className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200 placeholder:text-muted-foreground/50"
+                          style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
+                          autoFocus
+                        />
+                        {otpError && (
+                          <p className="text-xs text-red-500 text-center font-medium">{otpError}</p>
+                        )}
+                        <Button
+                          variant="outline"
+                          className="w-full h-11 rounded-xl font-semibold cursor-pointer border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 transition-all duration-200"
+                          onClick={handleMagicLinkSend}
+                          disabled={!magicLinkEmail || otpLoading}
+                        >
+                          <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {otpLoading ? 'Sending...' : 'Send Code'}
+                        </Button>
+                        <button
+                          className="text-xs text-muted-foreground/50 hover:text-muted-foreground w-full text-center cursor-pointer transition-colors duration-200"
+                          onClick={() => { setShowEmailVerify(false); setMagicLinkStep(null) }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )
                   ) : (
-                    <div className="space-y-3">
-                      <Input
-                        placeholder="Enter your email"
-                        type="email"
-                        value={magicLinkEmail}
-                        onChange={(event) => setMagicLinkEmail(event.target.value)}
-                        className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200 placeholder:text-muted-foreground/50"
-                        style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
-                      />
-                      {otpError && (
-                        <p className="text-xs text-red-500 text-center font-medium">{otpError}</p>
+                    <div className="space-y-2.5">
+                      <Button
+                        variant="outline"
+                        className="w-full h-11 rounded-xl font-medium border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 hover:shadow-sm transition-all duration-200 cursor-pointer"
+                        onClick={() => setShowEmailVerify(true)}
+                      >
+                        <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                        Verify with email
+                      </Button>
+                      {oauthError && (
+                        <p className="text-xs text-red-500 text-center font-medium">{oauthError}</p>
                       )}
                       <Button
                         variant="outline"
-                        className="w-full h-11 rounded-xl font-semibold cursor-pointer border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 transition-all duration-200"
-                        onClick={handleMagicLinkSend}
-                        disabled={!magicLinkEmail || otpLoading}
+                        className="w-full h-11 rounded-xl font-medium border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 hover:shadow-sm transition-all duration-200 cursor-pointer"
+                        onClick={() => handleSocialClick('google')}
                       >
-                        <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {otpLoading ? 'Sending...' : 'Send Verification Code'}
+                        <GoogleIcon />
+                        <span className="ml-2">Continue with Google</span>
                       </Button>
                     </div>
                   )}
-                  <OrDivider />
-                  {oauthError && (
-                    <p className="text-xs text-red-500 text-center font-medium">{oauthError}</p>
-                  )}
-                  <div className="flex gap-2.5">
-                    <Button
-                      variant="outline"
-                      className="w-full h-11 rounded-xl font-medium border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 hover:shadow-sm transition-all duration-200 cursor-pointer"
-                      onClick={() => handleSocialClick('google')}
-                    >
-                      <GoogleIcon />
-                      <span className="ml-2">Google</span>
-                    </Button>
-                  </div>
                 </>
               )}
               {loginHandler === 'customer' && (
