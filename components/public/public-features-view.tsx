@@ -109,6 +109,21 @@ export function PublicFeaturesView({
   const [voterEmail, setVoterEmail] = useState('')
   const [votedPostIds, setVotedPostIds] = useState<string[]>([])
   const [votingIds, setVotingIds] = useState<string[]>([])
+
+  // Get or create anonymous voter ID for guest voting
+  const getVoterId = () => {
+    if (voterEmail) return voterEmail
+    try {
+      let anonId = localStorage.getItem('kelo_anon_voter')
+      if (!anonId) {
+        anonId = 'anon_' + Math.random().toString(36).substring(2) + Date.now().toString(36)
+        localStorage.setItem('kelo_anon_voter', anonId)
+      }
+      return anonId
+    } catch {
+      return 'anon_' + Math.random().toString(36).substring(2)
+    }
+  }
   const [createPostOpen, setCreatePostOpen] = useState(false)
 
   const buildUrl = (overrides: { board?: string | null; status?: string; q?: string }) => {
@@ -130,7 +145,8 @@ export function PublicFeaturesView({
   }
 
   useEffect(() => {
-    if (!voterEmail || boards.length === 0) {
+    const voterId = getVoterId()
+    if (!voterId || boards.length === 0) {
       setVotedPostIds([])
       return
     }
@@ -138,7 +154,7 @@ export function PublicFeaturesView({
       try {
         const votePromises = boards.map((board) =>
           fetch(
-            `/api/votes/by-email?board_id=${board.id}&voter_email=${encodeURIComponent(voterEmail)}`
+            `/api/votes/by-email?board_id=${board.id}&voter_email=${encodeURIComponent(voterId)}`
           )
             .then((res) => (res.ok ? res.json() : { post_ids: [] }))
             .then((data) => data.post_ids || [])
@@ -151,25 +167,19 @@ export function PublicFeaturesView({
       }
     }
     fetchVoteStatuses()
-  }, [voterEmail, boards])
+  }, [voterEmail, boards]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleVote = async (postId: string, e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
-    if (!voterEmail) {
-      const email = window.prompt('Enter your email to vote:')
-      if (!email) return
-      setVoterEmail(email)
-      setTimeout(() => handleVote(postId, e), 100)
-      return
-    }
+    const voterId = getVoterId()
     if (votingIds.includes(postId)) return
     setVotingIds((prev) => [...prev, postId])
     try {
       const response = await fetch('/api/votes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId, voter_email: voterEmail }),
+        body: JSON.stringify({ post_id: postId, voter_email: voterId }),
       })
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
