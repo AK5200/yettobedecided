@@ -138,10 +138,12 @@ export async function POST(request: Request) {
     }
 
     let widgetUserId: string | null = null
-    if (!is_from_admin && emailToUse) {
+    // Create widget user for tracking — use email if available, otherwise generate anonymous ID from name
+    const userEmail = emailToUse || (nameToUse ? `guest_${nameToUse.toLowerCase().replace(/\s+/g, '_')}_${Date.now().toString(36)}` : null)
+    if (!is_from_admin && userEmail) {
       const { user: widgetUser, error: userError } = await upsertWidgetUser(org.id, {
         external_id: ssoResult.user?.id,
-        email: emailToUse,
+        email: userEmail,
         name: nameToUse,
         avatar_url: ssoResult.user?.avatar,
         user_source: ssoResult.source,
