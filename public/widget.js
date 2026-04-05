@@ -453,7 +453,8 @@
         var text = _settings.announcement_text || '';
         var linkType = _settings.announcement_link_type || 'changelog';
         var customUrl = _settings.announcement_custom_url || '#';
-        var annAccent = _settings.auto_detect_color ? (detectAccentColor() || _settings.accent_color || '#F59E0B') : (_settings.accent_color || '#F59E0B');
+        // Announcement always uses manual accent color (no auto-detect color)
+        var annAccent = _settings.accent_color || '#F59E0B';
         var annIsDark = _settings.auto_detect_theme ? detectTheme() === 'dark' : false;
         var annBg = annIsDark ? '#1a1a1a' : (_settings.background_color || '#ffffff');
         var annTextColor = annIsDark ? '#e5e5e5' : '#374151';
