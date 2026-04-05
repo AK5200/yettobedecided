@@ -188,9 +188,10 @@ export default function AllInOneEmbedClient() {
   }
 
   const autoTheme = new URLSearchParams(window.location.search).get('theme') !== null
+  const autoOverride = autoTheme || detectedAccent !== null
   const accentColor = detectedAccent || settings?.accent_color || '#F59E0B'
-  const backgroundColor = autoTheme ? undefined : (settings?.background_color || '#ffffff')
-  const headerBackgroundColor = autoTheme ? undefined : (settings?.header_background_color || settings?.background_color || '#ffffff')
+  const backgroundColor = autoOverride ? undefined : (settings?.background_color || '#ffffff')
+  const headerBackgroundColor = autoOverride ? undefined : (settings?.header_background_color || settings?.background_color || '#ffffff')
   const showBranding = settings?.show_branding !== false
   const heading = settings?.heading || 'Have something to say?'
   const subheading = settings?.subheading || 'Suggest a feature, read through our feedback and check out our latest feature releases.'

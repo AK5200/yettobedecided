@@ -13,6 +13,7 @@ function DropdownContent() {
   const [settings, setSettings] = useState<any>(_embeddedData?.settings || null)
   const detectedAccent = getWidgetAccent()
   const autoTheme = searchParams.get('theme') !== null
+  const autoOverride = autoTheme || detectedAccent !== null
 
   useEffect(() => { applyWidgetTheme() }, [])
 
@@ -47,7 +48,7 @@ function DropdownContent() {
     <ChangelogDropdown
       orgSlug={org}
       accentColor={detectedAccent || settings.accent_color || '#000'}
-      backgroundColor={autoTheme ? undefined : (settings.background_color || '#ffffff')}
+      backgroundColor={autoOverride ? undefined : (settings.background_color || '#ffffff')}
       showBranding={settings.show_branding !== false}
     />
   )
