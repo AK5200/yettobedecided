@@ -106,6 +106,7 @@ export function PublicFeaturesView({
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
   const [sortBy, setSortBy] = useState<'latest' | 'most_votes'>('latest')
+  const [localPosts, setLocalPosts] = useState(posts)
   const [voterEmail, setVoterEmail] = useState('')
   const [votedPostIds, setVotedPostIds] = useState<string[]>([])
   const [votingIds, setVotingIds] = useState<string[]>([])
@@ -175,6 +176,14 @@ export function PublicFeaturesView({
     const voterId = getVoterId()
     if (votingIds.includes(postId)) return
     setVotingIds((prev) => [...prev, postId])
+
+    // Optimistic UI
+    const wasVoted = votedPostIds.includes(postId)
+    setVotedPostIds((prev) => wasVoted ? prev.filter(id => id !== postId) : [...prev, postId])
+    setLocalPosts((prev) => prev.map(p =>
+      p.id === postId ? { ...p, vote_count: (p.vote_count ?? 0) + (wasVoted ? -1 : 1) } : p
+    ))
+
     try {
       const response = await fetch('/api/widget/vote', {
         method: 'POST',
@@ -182,13 +191,20 @@ export function PublicFeaturesView({
         body: JSON.stringify({ post_id: postId, email: voterId }),
       })
       if (!response.ok) {
+        // Revert
+        setVotedPostIds((prev) => wasVoted ? [...prev, postId] : prev.filter(id => id !== postId))
+        setLocalPosts((prev) => prev.map(p =>
+          p.id === postId ? { ...p, vote_count: (p.vote_count ?? 0) + (wasVoted ? 1 : -1) } : p
+        ))
         const errorData = await response.json().catch(() => ({}))
         toast.error(errorData?.error || 'Unable to vote. Please try again.')
-        return
       }
-      toast.success('Vote updated!')
-      router.refresh()
     } catch {
+      // Revert
+      setVotedPostIds((prev) => wasVoted ? [...prev, postId] : prev.filter(id => id !== postId))
+      setLocalPosts((prev) => prev.map(p =>
+        p.id === postId ? { ...p, vote_count: (p.vote_count ?? 0) + (wasVoted ? 1 : -1) } : p
+      ))
       toast.error('Failed to vote')
     } finally {
       setVotingIds((prev) => prev.filter((id) => id !== postId))
@@ -200,7 +216,7 @@ export function PublicFeaturesView({
     router.refresh()
   }
 
-  const sortedPosts = [...posts].sort((a, b) => {
+  const sortedPosts = [...localPosts].sort((a, b) => {
     if (a.is_pinned && !b.is_pinned) return -1
     if (!a.is_pinned && b.is_pinned) return 1
     if (sortBy === 'most_votes') return (b.vote_count || 0) - (a.vote_count || 0)
@@ -265,13 +281,13 @@ export function PublicFeaturesView({
                   <span className={`ml-auto text-xs font-semibold rounded-full px-2 py-0.5 ${
                     !currentBoard ? 'bg-yellow-100 text-yellow-700' : 'bg-muted text-muted-foreground'
                   }`}>
-                    {posts.length}
+                    {localPosts.length}
                   </span>
                 </button>
                 {boards.map((board) => {
                   const boardColor = getBoardColor(board.name)
                   const isActive = currentBoard === board.slug
-                  const boardPosts = posts.filter(p => {
+                  const boardPosts = localPosts.filter(p => {
                     const b = p.boards || boards.find(bb => bb.id === p.board_id)
                     return b?.slug === board.slug
                   })
