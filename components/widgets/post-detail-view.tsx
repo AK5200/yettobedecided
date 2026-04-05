@@ -193,63 +193,63 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
   const canSubmitComment = newComment.trim() && (identifiedUser?.email || commentEmail)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Back button */}
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-sm font-semibold text-foreground/80 hover:text-foreground transition-all hover:bg-linear-to-r hover:from-muted/50 hover:to-transparent px-4 py-2.5 rounded-xl -ml-4 cursor-pointer shadow-sm hover:shadow-md"
+        className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 px-3 py-2 rounded-xl -ml-3 cursor-pointer hover:bg-muted/50 dark:hover:bg-white/5"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to board
       </button>
 
       {/* Post content */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="flex gap-4">
           {/* Vote button */}
           <button
             onClick={handleVote}
-            className={`flex flex-col items-center justify-center px-5 py-4 rounded-lg border transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 ${
+            className={`flex flex-col items-center justify-center w-16 py-3 rounded-xl border-2 transition-all duration-200 shrink-0 cursor-pointer hover:-translate-y-0.5 active:scale-95 ${
               post.hasVoted
-                ? 'border-transparent text-white shadow-md'
-                : 'border-border hover:border-border hover:shadow-sm text-muted-foreground bg-muted/50 hover:bg-background'
+                ? 'border-transparent text-white shadow-lg'
+                : 'border-border hover:border-border/80 hover:shadow-md text-muted-foreground bg-muted/30 dark:bg-white/5 hover:bg-muted/50'
             }`}
             style={
               post.hasVoted
                 ? {
                     backgroundColor: accentColor,
-                    boxShadow: `0 4px 12px -2px ${accentColor}40`
+                    boxShadow: `0 8px 20px -4px ${accentColor}50`
                   }
                 : {}
             }
           >
             <ChevronUp className="h-5 w-5" />
-            <span className="text-base font-semibold">{post.votes}</span>
+            <span className="text-base font-bold">{post.votes}</span>
           </button>
 
           {/* Post details */}
-          <div className="flex-1">
-            <h2 className="text-3xl font-extrabold text-foreground mb-4">{post.title}</h2>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-bold text-foreground mb-3 leading-tight">{post.title}</h2>
             {post.content && (
-              <div className="text-base text-foreground/80 whitespace-pre-wrap mb-5 leading-relaxed bg-linear-to-br from-muted/50 to-background p-5 rounded-xl border-2 border-border shadow-sm">{post.content}</div>
+              <div className="text-sm text-foreground/80 whitespace-pre-wrap mb-4 leading-relaxed bg-muted/30 dark:bg-white/5 p-5 rounded-xl border border-border/50 dark:border-white/10">{post.content}</div>
             )}
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
               {post.author_name && (
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium text-white"
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white shadow-sm"
                     style={{ backgroundColor: accentColor }}
                   >
                     {post.author_name.charAt(0).toUpperCase()}
                   </div>
-                  <span>{post.author_name}</span>
+                  <span className="font-medium">{post.author_name}</span>
                 </div>
               )}
               {post.created_at && (
-                <span>{formatDate(post.created_at)}</span>
+                <span className="text-muted-foreground/60">{formatDate(post.created_at)}</span>
               )}
               {post.tags?.map((tag) => (
-                <span key={tag.name} className="px-2 py-1 bg-muted rounded text-muted-foreground">
+                <span key={tag.name} className="px-2.5 py-0.5 bg-muted/60 dark:bg-white/10 rounded-full text-muted-foreground text-xs font-medium">
                   {tag.name}
                 </span>
               ))}
@@ -259,62 +259,68 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
       </div>
 
       {/* Comments section */}
-      <div className="border-t pt-4">
-        <div className="flex items-center gap-2 mb-4">
-          <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-medium text-foreground">
-            Comments {comments.length > 0 && `(${comments.length})`}
+      <div className="border-t border-border/60 dark:border-white/10 pt-5">
+        <div className="flex items-center gap-2 mb-5">
+          <MessageSquare className="h-4 w-4 text-muted-foreground/70" />
+          <h3 className="font-semibold text-foreground text-sm">
+            Comments {comments.length > 0 && <span className="text-muted-foreground font-normal">({comments.length})</span>}
           </h3>
         </div>
 
         {/* Comments list */}
-        <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
+        <div className="space-y-3 mb-5 max-h-96 overflow-y-auto">
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">Loading comments...</div>
+            <div className="flex items-center justify-center py-10">
+              <div className="w-5 h-5 border-2 border-muted-foreground/20 border-t-muted-foreground rounded-full animate-spin" />
+            </div>
           ) : comments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">No comments yet.</div>
+            <div className="text-center py-10 text-muted-foreground/60 text-sm">
+              No comments yet. Be the first to share your thoughts.
+            </div>
           ) : (
             comments.map((comment) => (
-              <div key={comment.id} className="flex gap-4 p-4 rounded-xl hover:bg-linear-to-r hover:from-muted/50 hover:to-transparent transition-all border border-border/50 hover:border-border hover:shadow-sm">
+              <div key={comment.id} className="flex gap-3.5 p-4 rounded-xl bg-muted/20 dark:bg-white/3 border border-border/30 dark:border-white/6 transition-all duration-200 hover:border-border/60 dark:hover:border-white/10">
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 shadow-md"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm"
                   style={{ backgroundColor: accentColor }}
                 >
                   {(comment.author_name || comment.guest_name || 'A').charAt(0).toUpperCase()}
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-sm font-bold text-foreground">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <span className="text-sm font-semibold text-foreground">
                       {comment.author_name || comment.guest_name || 'Anonymous'}
                     </span>
-                    <span className="text-xs text-muted-foreground font-semibold">
+                    <span className="text-xs text-muted-foreground/50">
                       {formatDate(comment.created_at)}
                     </span>
                   </div>
-                  <p className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                  <p className="text-sm text-foreground/75 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
                 </div>
               </div>
             ))
           )}
         </div>
 
-        {/* Add comment form - always visible */}
-        <form onSubmit={handleSubmitComment} className="space-y-2">
+        {/* Add comment form */}
+        <form onSubmit={handleSubmitComment} className="space-y-3">
           {!identifiedUser && (
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
               <Input
                 placeholder="Email *"
                 type="email"
                 value={commentEmail}
                 onChange={(e) => setCommentEmail(e.target.value)}
-                className="border-border"
+                className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
+                style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
                 required
               />
               <Input
                 placeholder="Name (optional)"
                 value={commentName}
                 onChange={(e) => setCommentName(e.target.value)}
-                className="border-border"
+                className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
+                style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
               />
             </div>
           )}
@@ -323,19 +329,20 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             rows={3}
-            className="resize-none overflow-y-auto"
+            className="resize-none overflow-y-auto rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
             style={{
               maxHeight: '120px',
-            }}
+              '--tw-ring-color': `${accentColor}30`,
+            } as React.CSSProperties}
           />
           <Button
             type="submit"
             disabled={!canSubmitComment || submitting}
             style={{
               backgroundColor: accentColor,
-              boxShadow: `0 4px 12px -2px ${accentColor}40`
+              boxShadow: `0 4px 14px -3px ${accentColor}40`
             }}
-            className="text-white font-semibold hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-white font-semibold rounded-xl h-10 px-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
             size="sm"
           >
             <Send className="h-4 w-4 mr-2" />

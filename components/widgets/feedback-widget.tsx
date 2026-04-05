@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Check, Clock } from 'lucide-react'
+import { Check, Clock, Mail, LogIn } from 'lucide-react'
 
 interface FeedbackBoard {
   id: string
@@ -372,9 +372,30 @@ export function FeedbackWidget({
 
   if (configLoading) {
     return (
-      <div className="text-sm text-muted-foreground text-center py-4">Loading...</div>
+      <div className="flex items-center justify-center py-8">
+        <div className="w-5 h-5 border-2 border-muted-foreground/20 border-t-muted-foreground rounded-full animate-spin" />
+      </div>
     )
   }
+
+  // Divider component
+  const OrDivider = ({ text = 'or' }: { text?: string }) => (
+    <div className="relative flex items-center py-1">
+      <div className="flex-1 border-t border-border/60 dark:border-white/10" />
+      <span className="px-3 text-xs text-muted-foreground/60 font-medium bg-background dark:bg-[#1a1a1a]">{text}</span>
+      <div className="flex-1 border-t border-border/60 dark:border-white/10" />
+    </div>
+  )
+
+  // Google icon SVG
+  const GoogleIcon = () => (
+    <svg className="w-4 h-4" viewBox="0 0 24 24">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+  )
 
   // Render logic based on auth state and config
   const showForm = isIdentified || identifiedUser
@@ -391,62 +412,65 @@ export function FeedbackWidget({
                   placeholder="Email"
                   value={guestEmail}
                   onChange={(event) => setGuestEmail(event.target.value)}
-                  className="border-border focus:border-border focus:ring-2 focus:ring-muted"
+                  className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200 placeholder:text-muted-foreground/50"
+                  style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
                 />
                 <Input
                   placeholder="Name (optional)"
                   value={guestName}
                   onChange={(event) => setGuestName(event.target.value)}
-                  className="border-border focus:border-border focus:ring-2 focus:ring-muted"
+                  className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200 placeholder:text-muted-foreground/50"
+                  style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
                 />
                 <Button
-                  className="w-full font-semibold shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  className="w-full h-11 rounded-xl font-semibold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   onClick={() => handleGuestSubmit(guestEmail, guestName)}
                   disabled={!guestEmail}
-                  style={{ 
+                  style={{
                     backgroundColor: accentColor,
-                    boxShadow: `0 2px 8px -2px ${accentColor}40`
+                    boxShadow: `0 4px 14px -3px ${accentColor}40`
                   }}
                 >
                   Continue
                 </Button>
               </div>
-              
+
               {/* Show login options below if login handler is configured */}
               {loginHandler === 'kelo' && (
                 <>
-                  <div className="text-xs text-muted-foreground text-center font-medium relative">
-                    <span className="bg-background dark:bg-[#1a1a1a] px-2 relative z-10">or verify your email</span>
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-border"></div>
-                    </div>
-                  </div>
+                  <OrDivider text="or verify your email" />
                   {magicLinkStep === 'code' ? (
                     <div className="space-y-3">
-                      <p className="text-xs text-muted-foreground text-center">
-                        Enter the 6-digit code sent to <strong>{magicLinkEmail}</strong>
-                      </p>
+                      <div className="text-center">
+                        <div className="w-10 h-10 rounded-xl bg-muted/50 dark:bg-white/5 flex items-center justify-center mx-auto mb-2.5">
+                          <Mail className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Enter the 6-digit code sent to <strong className="text-foreground">{magicLinkEmail}</strong>
+                        </p>
+                      </div>
                       <Input
                         placeholder="000000"
                         value={otpCode}
                         onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="text-center text-2xl tracking-widest font-mono border-border"
+                        className="text-center text-2xl tracking-[0.3em] font-mono h-12 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
+                        style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
                         maxLength={6}
                         autoFocus
                       />
                       {otpError && (
-                        <p className="text-xs text-red-500 text-center">{otpError}</p>
+                        <p className="text-xs text-red-500 text-center font-medium">{otpError}</p>
                       )}
                       <Button
-                        className="w-full font-semibold cursor-pointer"
+                        className="w-full h-11 rounded-xl font-semibold text-white cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                         onClick={handleMagicLinkVerify}
                         disabled={otpCode.length !== 6 || otpLoading}
-                        style={{ backgroundColor: accentColor }}
+                        style={{ backgroundColor: accentColor, boxShadow: `0 4px 14px -3px ${accentColor}40` }}
                       >
                         {otpLoading ? 'Verifying...' : 'Verify Code'}
                       </Button>
                       <button
-                        className="text-xs text-muted-foreground/60 hover:text-muted-foreground w-full text-center cursor-pointer"
+                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground w-full text-center cursor-pointer transition-colors duration-200"
                         onClick={() => { setMagicLinkStep('email'); setOtpCode(''); setOtpError('') }}
                       >
                         Use a different email
@@ -459,54 +483,48 @@ export function FeedbackWidget({
                         type="email"
                         value={magicLinkEmail}
                         onChange={(event) => setMagicLinkEmail(event.target.value)}
-                        className="border-border focus:border-border focus:ring-2 focus:ring-muted"
+                        className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200 placeholder:text-muted-foreground/50"
+                        style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
                       />
                       {otpError && (
-                        <p className="text-xs text-red-500 text-center">{otpError}</p>
+                        <p className="text-xs text-red-500 text-center font-medium">{otpError}</p>
                       )}
                       <Button
                         variant="outline"
-                        className="w-full font-semibold cursor-pointer"
+                        className="w-full h-11 rounded-xl font-semibold cursor-pointer border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 transition-all duration-200"
                         onClick={handleMagicLinkSend}
                         disabled={!magicLinkEmail || otpLoading}
                       >
+                        <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
                         {otpLoading ? 'Sending...' : 'Send Verification Code'}
                       </Button>
                     </div>
                   )}
-                  <div className="text-xs text-muted-foreground text-center font-medium relative">
-                    <span className="bg-background dark:bg-[#1a1a1a] px-2 relative z-10">or</span>
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-border"></div>
-                    </div>
-                  </div>
+                  <OrDivider />
                   {oauthError && (
-                    <p className="text-xs text-red-500 text-center">{oauthError}</p>
+                    <p className="text-xs text-red-500 text-center font-medium">{oauthError}</p>
                   )}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2.5">
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full h-11 rounded-xl font-medium border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 hover:shadow-sm transition-all duration-200 cursor-pointer"
                       onClick={() => handleSocialClick('google')}
                     >
-                      Google
+                      <GoogleIcon />
+                      <span className="ml-2">Google</span>
                     </Button>
                   </div>
                 </>
               )}
               {loginHandler === 'customer' && (
                 <>
-                  <div className="text-xs text-muted-foreground text-center font-medium relative">
-                    <span className="bg-background dark:bg-[#1a1a1a] px-2 relative z-10">or</span>
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-border"></div>
-                    </div>
-                  </div>
+                  <OrDivider />
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full h-11 rounded-xl font-medium border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 hover:shadow-sm transition-all duration-200 cursor-pointer"
                     onClick={handleCustomerLogin}
                   >
+                    <LogIn className="h-4 w-4 mr-2 text-muted-foreground" />
                     Login with {orgName || 'your account'}
                   </Button>
                 </>
@@ -516,105 +534,123 @@ export function FeedbackWidget({
             // Guest posting disabled - must login
             <>
               {loginHandler === 'kelo' ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground text-center">
-                    Please login to submit feedback
-                  </p>
+                <div className="space-y-4">
+                  <div className="text-center py-2">
+                    <div className="w-12 h-12 rounded-2xl bg-muted/50 dark:bg-white/5 flex items-center justify-center mx-auto mb-3">
+                      <LogIn className="h-6 w-6 text-muted-foreground/60" />
+                    </div>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Please login to submit feedback
+                    </p>
+                  </div>
                   {magicLinkStep === 'code' ? (
-                    <>
-                      <p className="text-xs text-muted-foreground text-center">
-                        Enter the 6-digit code sent to <strong>{magicLinkEmail}</strong>
-                      </p>
+                    <div className="space-y-3">
+                      <div className="text-center">
+                        <div className="w-10 h-10 rounded-xl bg-muted/50 dark:bg-white/5 flex items-center justify-center mx-auto mb-2.5">
+                          <Mail className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Enter the 6-digit code sent to <strong className="text-foreground">{magicLinkEmail}</strong>
+                        </p>
+                      </div>
                       <Input
                         placeholder="000000"
                         value={otpCode}
                         onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="text-center text-2xl tracking-widest font-mono border-border"
+                        className="text-center text-2xl tracking-[0.3em] font-mono h-12 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
+                        style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
                         maxLength={6}
                         autoFocus
                       />
                       {otpError && (
-                        <p className="text-xs text-red-500 text-center">{otpError}</p>
+                        <p className="text-xs text-red-500 text-center font-medium">{otpError}</p>
                       )}
                       <Button
-                        className="w-full font-semibold cursor-pointer"
+                        className="w-full h-11 rounded-xl font-semibold text-white cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                         onClick={handleMagicLinkVerify}
                         disabled={otpCode.length !== 6 || otpLoading}
-                        style={{ backgroundColor: accentColor }}
+                        style={{ backgroundColor: accentColor, boxShadow: `0 4px 14px -3px ${accentColor}40` }}
                       >
                         {otpLoading ? 'Verifying...' : 'Verify Code'}
                       </Button>
                       <button
-                        className="text-xs text-muted-foreground/60 hover:text-muted-foreground w-full text-center cursor-pointer"
+                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground w-full text-center cursor-pointer transition-colors duration-200"
                         onClick={() => { setMagicLinkStep('email'); setOtpCode(''); setOtpError('') }}
                       >
                         Use a different email
                       </button>
-                    </>
+                    </div>
                   ) : (
-                    <>
+                    <div className="space-y-3">
                       <Input
                         placeholder="Enter your email"
                         type="email"
                         value={magicLinkEmail}
                         onChange={(event) => setMagicLinkEmail(event.target.value)}
-                        className="border-border focus:border-border focus:ring-2 focus:ring-muted"
+                        className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200 placeholder:text-muted-foreground/50"
+                        style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
                       />
                       {otpError && (
-                        <p className="text-xs text-red-500 text-center">{otpError}</p>
+                        <p className="text-xs text-red-500 text-center font-medium">{otpError}</p>
                       )}
                       <Button
-                        className="w-full font-semibold cursor-pointer"
+                        className="w-full h-11 rounded-xl font-semibold text-white cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                         onClick={handleMagicLinkSend}
                         disabled={!magicLinkEmail || otpLoading}
                         style={{
                           backgroundColor: accentColor,
-                          boxShadow: `0 2px 8px -2px ${accentColor}40`
+                          boxShadow: `0 4px 14px -3px ${accentColor}40`
                         }}
                       >
+                        <Mail className="h-4 w-4 mr-2" />
                         {otpLoading ? 'Sending...' : 'Continue with Email'}
                       </Button>
-                      <div className="text-xs text-muted-foreground text-center font-medium relative">
-                        <span className="bg-background dark:bg-[#1a1a1a] px-2 relative z-10">or</span>
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-border"></div>
-                        </div>
-                      </div>
+                      <OrDivider />
                       {oauthError && (
-                        <p className="text-xs text-red-500 text-center">{oauthError}</p>
+                        <p className="text-xs text-red-500 text-center font-medium">{oauthError}</p>
                       )}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2.5">
                         <Button
                           variant="outline"
-                          className="w-full"
+                          className="w-full h-11 rounded-xl font-medium border-border/60 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/5 hover:shadow-sm transition-all duration-200 cursor-pointer"
                           onClick={() => handleSocialClick('google')}
                         >
-                          Google
+                          <GoogleIcon />
+                          <span className="ml-2">Google</span>
                         </Button>
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
               ) : loginHandler === 'customer' ? (
-                // Show "Login" button → redirect to ssoRedirectUrl
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground text-center">
-                    Please login to submit feedback
-                  </p>
+                // Show "Login" button -> redirect to ssoRedirectUrl
+                <div className="space-y-4">
+                  <div className="text-center py-2">
+                    <div className="w-12 h-12 rounded-2xl bg-muted/50 dark:bg-white/5 flex items-center justify-center mx-auto mb-3">
+                      <LogIn className="h-6 w-6 text-muted-foreground/60" />
+                    </div>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Please login to submit feedback
+                    </p>
+                  </div>
                   <Button
-                    className="w-full"
+                    className="w-full h-11 rounded-xl font-semibold text-white hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
                     onClick={handleCustomerLogin}
-                    style={{ 
+                    style={{
                       backgroundColor: accentColor,
-                      boxShadow: `0 2px 8px -2px ${accentColor}40`
+                      boxShadow: `0 4px 14px -3px ${accentColor}40`
                     }}
                   >
+                    <LogIn className="h-4 w-4 mr-2" />
                     Login with {orgName || 'your account'}
                   </Button>
                 </div>
               ) : (
                 // No login handler configured
-                <div className="text-center py-4">
+                <div className="text-center py-6">
+                  <div className="w-12 h-12 rounded-2xl bg-muted/50 dark:bg-white/5 flex items-center justify-center mx-auto mb-3">
+                    <LogIn className="h-6 w-6 text-muted-foreground/40" />
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     Please login to your account first
                   </p>
@@ -628,20 +664,26 @@ export function FeedbackWidget({
       {showForm && (
         <form onSubmit={handleSubmit} className="space-y-4">
           {(identifiedUser || guestEmail) && (
-            <div className="text-sm text-foreground/80 bg-linear-to-r from-muted/50 to-muted px-4 py-3 rounded-xl border border-border">
-              Posting as <span className="font-bold">{identifiedUser?.name || identifiedUser?.email || guestName || guestEmail}</span>
+            <div className="text-sm text-foreground/80 bg-muted/30 dark:bg-white/5 px-4 py-3 rounded-xl border border-border/40 dark:border-white/8 flex items-center gap-2">
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
+                style={{ backgroundColor: accentColor }}
+              >
+                {(identifiedUser?.name || identifiedUser?.email || guestName || guestEmail || '?').charAt(0).toUpperCase()}
+              </div>
+              Posting as <span className="font-semibold text-foreground">{identifiedUser?.name || identifiedUser?.email || guestName || guestEmail}</span>
             </div>
           )}
           {boards.length > 0 && (
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80">Board</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground/70">Board</label>
               <Select value={selectedBoard} onValueChange={setSelectedBoard}>
-                <SelectTrigger className="h-10 rounded-lg border-border text-sm cursor-pointer">
+                <SelectTrigger className="h-11 rounded-xl border-border/60 dark:border-white/10 text-sm cursor-pointer transition-all duration-200 hover:border-border">
                   <SelectValue placeholder="Select a board" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   {boards.map((board) => (
-                    <SelectItem key={board.id} value={board.id} className="cursor-pointer">
+                    <SelectItem key={board.id} value={board.id} className="cursor-pointer rounded-lg">
                       {board.name}
                     </SelectItem>
                   ))}
@@ -649,27 +691,29 @@ export function FeedbackWidget({
               </Select>
             </div>
           )}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">Title</label>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground/70">Title</label>
             <Input
               placeholder="Short, descriptive title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              className="h-10 rounded-lg border-border text-sm placeholder:text-muted-foreground/60"
+              className="h-11 rounded-xl border-border/60 dark:border-white/10 text-sm placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
+              style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
               required
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground/70">
               Description
-              <span className="text-muted-foreground/60 font-normal ml-1">(optional)</span>
+              <span className="text-muted-foreground/50 font-normal ml-1">(optional)</span>
             </label>
             <Textarea
               placeholder="Tell us more about your idea..."
               value={content}
               onChange={(event) => setContent(event.target.value)}
-              rows={3}
-              className="rounded-lg border-border text-sm placeholder:text-muted-foreground/60 resize-none"
+              rows={4}
+              className="rounded-xl border-border/60 dark:border-white/10 text-sm placeholder:text-muted-foreground/50 resize-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 min-h-[100px]"
+              style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
             />
           </div>
           <Button
@@ -677,34 +721,44 @@ export function FeedbackWidget({
             disabled={loading || !title.trim()}
             style={{
               backgroundColor: accentColor,
-              boxShadow: `0 4px 12px -2px ${accentColor}40`
+              boxShadow: `0 4px 14px -3px ${accentColor}40`
             }}
-            className="w-full h-10 text-white rounded-lg text-sm font-semibold shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-11 text-white rounded-xl text-sm font-semibold cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             {loading ? 'Submitting...' : 'Submit'}
           </Button>
           {success === 'pending' && (
-            <p className="text-sm text-amber-700 dark:text-amber-400 flex items-center gap-2 bg-amber-50/80 dark:bg-amber-950/30 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800">
-              <Clock className="h-4 w-4" />
-              Your post has been submitted and is waiting for admin approval.
-            </p>
+            <div className="flex items-start gap-3 bg-amber-50/80 dark:bg-amber-950/20 px-4 py-3.5 rounded-xl border border-amber-200/60 dark:border-amber-800/40">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0 mt-0.5">
+                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              </div>
+              <p className="text-sm text-amber-700 dark:text-amber-400 leading-relaxed">
+                Your post has been submitted and is waiting for admin approval.
+              </p>
+            </div>
           )}
           {success === true && (
-            <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 bg-green-50 dark:bg-green-950/30 px-3 py-2 rounded-lg border border-green-200 dark:border-green-800">
-              <Check className="h-4 w-4" />
-              Thanks for the feedback!
-            </p>
+            <div className="flex items-start gap-3 bg-emerald-50/80 dark:bg-emerald-950/20 px-4 py-3.5 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0 mt-0.5">
+                <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                Thanks for the feedback!
+              </p>
+            </div>
           )}
           {submitError && (
-            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg border border-red-200 dark:border-red-800">
-              {submitError}
-            </p>
+            <div className="flex items-start gap-3 bg-red-50/80 dark:bg-red-950/20 px-4 py-3.5 rounded-xl border border-red-200/60 dark:border-red-800/40">
+              <p className="text-sm text-red-600 dark:text-red-400 leading-relaxed">
+                {submitError}
+              </p>
+            </div>
           )}
         </form>
       )}
 
       {showBranding && (
-        <div className="text-xs text-muted-foreground text-center">Powered by Kelo</div>
+        <div className="text-xs text-muted-foreground/40 text-center font-medium pt-1">Powered by Kelo</div>
       )}
     </div>
   )
