@@ -357,17 +357,6 @@ export function AllInOneWidget({
         backgroundColor: headerBackgroundColor || variantStyles.headerBg || undefined,
         borderRadius: getBorderRadiusStyle(borderRadius)
       }}>
-        <div
-          className={`w-11 h-11 rounded-xl flex items-center justify-center mb-5`}
-          style={{
-            backgroundColor: styleVariant === '2'
-              ? accentColor
-              : hexToRgba(accentColor, 0.12),
-            boxShadow: `0 4px 12px -2px ${hexToRgba(accentColor, 0.25)}`
-          }}
-        >
-          <MessageSquare className="h-5 w-5" style={{ color: styleVariant === '2' ? 'white' : accentColor }} />
-        </div>
         <h2 className={`text-xl font-bold tracking-tight text-foreground ${
           textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
         } ${
