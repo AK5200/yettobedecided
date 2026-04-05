@@ -141,15 +141,6 @@ export default function PublicBoardPage({
     fetchData()
   }, [params])
 
-  useEffect(() => {
-    const voterId = userEmail || (() => { try { return localStorage.getItem('kelo_anon_voter') || '' } catch { return '' } })()
-    if (!voterId) {
-      setVotedPostIds([])
-      return
-    }
-    fetchVoteStatuses(voterId, board?.id)
-  }, [userEmail, board?.id])
-
   // Get or create anonymous voter ID for guest voting
   const getVoterId = () => {
     if (userEmail) return userEmail
@@ -165,11 +156,23 @@ export default function PublicBoardPage({
     }
   }
 
+  useEffect(() => {
+    const voterId = getVoterId()
+    fetchVoteStatuses(voterId, board?.id)
+  }, [userEmail, board?.id])
+
   const handleVote = async (postId: string) => {
     const voterId = getVoterId()
 
     if (votingIds.includes(postId)) return
     setVotingIds((prev) => [...prev, postId])
+
+    // Optimistic UI: toggle vote immediately
+    const wasVoted = votedPostIds.includes(postId)
+    setVotedPostIds((prev) => wasVoted ? prev.filter(id => id !== postId) : [...prev, postId])
+    setPosts((prev) => prev.map(p =>
+      p.id === postId ? { ...p, vote_count: (p.vote_count ?? 0) + (wasVoted ? -1 : 1) } : p
+    ))
 
     try {
       const response = await fetch('/api/votes', {
@@ -179,17 +182,14 @@ export default function PublicBoardPage({
       })
 
       if (!response.ok) {
+        // Revert optimistic update
+        setVotedPostIds((prev) => wasVoted ? [...prev, postId] : prev.filter(id => id !== postId))
+        setPosts((prev) => prev.map(p =>
+          p.id === postId ? { ...p, vote_count: (p.vote_count ?? 0) + (wasVoted ? 1 : -1) } : p
+        ))
         const errorBody = await response.json().catch(() => ({}))
         toast.error(errorBody?.error || 'Unable to update vote. Please try again.')
-        return
       }
-
-      await response.json()
-
-      if (board?.id) {
-        await fetchPosts(board.id)
-      }
-      await fetchVoteStatuses(voterId, board?.id)
     } finally {
       setVotingIds((prev) => prev.filter((id) => id !== postId))
     }

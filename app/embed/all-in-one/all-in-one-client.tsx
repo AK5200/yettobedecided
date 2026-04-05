@@ -21,9 +21,11 @@ export default function AllInOneEmbedClient() {
   const [posts, setPosts] = useState<any[]>(() => {
     if (!_embeddedData?.posts) return []
     // Read voted post IDs from sessionStorage to persist vote state across refreshes
+    // Note: org from useSearchParams is null during useState init, so read from URL directly
     let votedIds: Set<string> = new Set()
     try {
-      const stored = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(`kelo_votes_${org}`) : null
+      const urlOrg = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('org') : null
+      const stored = urlOrg && typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(`kelo_votes_${urlOrg}`) : null
       if (stored) votedIds = new Set(JSON.parse(stored))
     } catch {}
     return _embeddedData.posts.map((p: any) => ({
