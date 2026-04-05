@@ -176,10 +176,10 @@ export function PublicFeaturesView({
     if (votingIds.includes(postId)) return
     setVotingIds((prev) => [...prev, postId])
     try {
-      const response = await fetch('/api/votes', {
+      const response = await fetch('/api/widget/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId, voter_email: voterId }),
+        body: JSON.stringify({ post_id: postId, email: voterId }),
       })
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
