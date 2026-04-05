@@ -198,6 +198,31 @@
     return src;
   }
 
+  // ─── Scroll lock ───
+
+  var _savedScrollY = 0;
+  var _scrollLocked = false;
+
+  function lockScroll() {
+    if (_scrollLocked) return;
+    _scrollLocked = true;
+    _savedScrollY = window.scrollY;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + _savedScrollY + 'px';
+    document.body.style.width = '100%';
+  }
+
+  function unlockScroll() {
+    if (!_scrollLocked) return;
+    _scrollLocked = false;
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, _savedScrollY);
+  }
+
   // ─── Helpers ───
 
   function getResponsiveSize(size) {
@@ -242,11 +267,13 @@
         w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w.open = function() {
+          lockScroll();
           w.iframe.style.display = 'block';
           w.iframe.contentWindow.postMessage('open', '*');
           sendIdentityToWidget(w);
         };
         w.close = function() {
+          unlockScroll();
           w.iframe.style.display = 'none';
           w.iframe.contentWindow.postMessage('close', '*');
         };
@@ -277,6 +304,7 @@
 
         w._justOpened = false;
         w.open = function() {
+          lockScroll();
           w.overlay.style.display = 'block';
           w.container.style.display = 'block';
           w._justOpened = true;
@@ -284,6 +312,7 @@
           sendIdentityToWidget(w);
         };
         w.close = function() {
+          unlockScroll();
           w.overlay.style.display = 'none';
           w.container.style.display = 'none';
         };
@@ -375,6 +404,7 @@
         w.iframe.addEventListener('load', function() { sendDataToWidget(w); sendIdentityToWidget(w); });
 
         w.open = function() {
+          lockScroll();
           w.overlay.style.display = 'block';
           w.overlay.style.pointerEvents = 'auto';
           w.container.style.display = 'block';
@@ -384,6 +414,7 @@
           sendIdentityToWidget(w);
         };
         w.close = function() {
+          unlockScroll();
           w.overlay.classList.remove('kelo-visible');
           w.container.classList.remove('kelo-visible');
           w.overlay.style.pointerEvents = 'none';
