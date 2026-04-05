@@ -289,7 +289,7 @@ export default function AllInOneEmbedClient() {
       </div>
 
       <Dialog open={showFeedbackForm} onOpenChange={setShowFeedbackForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-sm max-h-[85vh] overflow-y-auto">
           <FeedbackWidget
             boards={boards}
             orgSlug={org || ''}
