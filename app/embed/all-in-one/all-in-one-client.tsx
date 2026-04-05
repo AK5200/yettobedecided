@@ -140,20 +140,30 @@ export default function AllInOneEmbedClient() {
     ))
   }, [])
 
-  const handleVote = useCallback(async (postId: string) => {
-    const email = identifiedUser?.email
-    if (!email) {
-      // No email — revert the optimistic update the widget already applied
-      revertVote(postId)
-      return
+  // Get or create anonymous voter ID for guest voting
+  const getAnonVoterId = useCallback(() => {
+    try {
+      let anonId = localStorage.getItem('kelo_anon_voter')
+      if (!anonId) {
+        anonId = 'anon_' + Math.random().toString(36).substring(2) + Date.now().toString(36)
+        localStorage.setItem('kelo_anon_voter', anonId)
+      }
+      return anonId
+    } catch {
+      return 'anon_' + Math.random().toString(36).substring(2)
     }
+  }, [])
+
+  const handleVote = useCallback(async (postId: string) => {
+    // Use identified email if available, otherwise use anonymous voter ID
+    const voterId = identifiedUser?.email || getAnonVoterId()
 
     try {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
       const res = await fetch(`${baseUrl}/api/widget/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId, email }),
+        body: JSON.stringify({ post_id: postId, email: voterId }),
       })
 
       if (res.ok) {
@@ -178,7 +188,7 @@ export default function AllInOneEmbedClient() {
       console.error('Vote failed:', error)
       revertVote(postId)
     }
-  }, [identifiedUser, org, revertVote])
+  }, [identifiedUser, org, revertVote, getAnonVoterId])
 
   if (loading) {
     return (
