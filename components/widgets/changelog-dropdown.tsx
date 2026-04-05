@@ -92,7 +92,7 @@ export function ChangelogDropdown({
             {entries.map(entry => (
               <div
                 key={entry.id}
-                className="px-4 py-3.5 border-b border-border/40 dark:border-white/6 last:border-0 transition-all duration-200 hover:bg-muted/40 dark:hover:bg-white/3"
+                className="px-4 py-3.5 border-b border-border/40 dark:border-white/6 last:border-0 transition-all duration-200 hover:bg-muted/40 dark:hover:bg-white/3 cursor-pointer"
               >
                 <div className="flex items-center gap-2 mb-1.5">
                   {entry.category && (
