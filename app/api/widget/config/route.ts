@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   const { data: org } = await client
     .from('organizations')
-    .select('id, name, slug, logo_url, guest_posting_enabled, social_login_enabled, login_handler, sso_redirect_enabled, sso_redirect_url')
+    .select('id, name, slug, logo_url, guest_posting_enabled, guest_commenting_enabled, guest_voting_enabled, social_login_enabled, login_handler, sso_redirect_enabled, sso_redirect_url')
     .eq('slug', orgSlug)
     .single()
 
@@ -47,8 +47,10 @@ export async function GET(request: NextRequest) {
       org: { name: org.name, slug: org.slug, logo: org.logo_url },
       auth: {
         guestPostingEnabled: org.guest_posting_enabled,
+        guestCommentingEnabled: org.guest_commenting_enabled ?? true,
+        guestVotingEnabled: org.guest_voting_enabled ?? true,
         loginHandler: loginHandler,
-        socialLoginEnabled: loginHandler === 'kelo', // Keep for backward compatibility
+        socialLoginEnabled: loginHandler === 'kelo',
         ssoRedirectEnabled: loginHandler === 'customer',
         ssoRedirectUrl: org.sso_redirect_url,
       },

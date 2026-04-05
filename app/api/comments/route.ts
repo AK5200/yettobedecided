@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     // Get org settings
     const { data: org } = await supabase
       .from('organizations')
-      .select('id, guest_posting_enabled, sso_secret_key, comment_moderation')
+      .select('id, guest_posting_enabled, guest_commenting_enabled, sso_secret_key, comment_moderation')
       .eq('id', boardData.org_id)
       .single()
     if (!org?.id) {
@@ -126,13 +126,15 @@ export async function POST(request: Request) {
     const emailToUse = ssoResult.user?.email || guest_email || author_email
     const nameToUse = ssoResult.user?.name || guest_name || author_name
 
-    if (!emailToUse && !is_from_admin && !org?.guest_posting_enabled) {
-      return withCors(NextResponse.json({ error: 'Guest posting is disabled' }, { status: 403 }), origin)
+    // Check guest commenting permission
+    const guestCommentingAllowed = org?.guest_commenting_enabled ?? org?.guest_posting_enabled ?? true
+    if (!emailToUse && !nameToUse && !is_from_admin && !guestCommentingAllowed) {
+      return withCors(NextResponse.json({ error: 'Guest commenting is disabled' }, { status: 403 }), origin)
     }
 
-    // Require email for non-admin comments
-    if (!is_from_admin && !emailToUse) {
-      return withCors(NextResponse.json({ error: 'author_email is required' }, { status: 400 }), origin)
+    // Require at least name or email for non-admin comments
+    if (!is_from_admin && !emailToUse && !nameToUse) {
+      return withCors(NextResponse.json({ error: 'Name or email is required' }, { status: 400 }), origin)
     }
 
     let widgetUserId: string | null = null

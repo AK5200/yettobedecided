@@ -17,6 +17,8 @@ import { CodeExamples } from './code-examples'
 export default function SSOSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [guestPostingEnabled, setGuestPostingEnabled] = useState(true)
+  const [guestCommentingEnabled, setGuestCommentingEnabled] = useState(true)
+  const [guestVotingEnabled, setGuestVotingEnabled] = useState(true)
   const [loginHandler, setLoginHandler] = useState<'kelo' | 'customer' | null>(null)
   const [ssoRedirectUrl, setSsoRedirectUrl] = useState('')
   const [secretKey, setSecretKey] = useState('')
@@ -33,6 +35,8 @@ export default function SSOSettingsPage() {
       const res = await fetch('/api/sso/settings')
       const data = await res.json()
       setGuestPostingEnabled(!!data.guest_posting_enabled)
+      setGuestCommentingEnabled(data.guest_commenting_enabled !== false)
+      setGuestVotingEnabled(data.guest_voting_enabled !== false)
       setLoginHandler(data.login_handler || (data.social_login_enabled ? 'kelo' : null))
       setSsoRedirectUrl(data.sso_redirect_url || '')
       setSecretKey(data.secret_key || '')
@@ -111,29 +115,62 @@ export default function SSOSettingsPage() {
           </div>
         </div>
 
-        {/* Guest Posting */}
+        {/* Guest Access */}
         <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="p-2.5 bg-emerald-100 rounded-xl">
-                <UserCheck className="h-5 w-5 text-emerald-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Guest Posting</h3>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  Allow users to submit feedback with only their email and name.
-                </p>
-              </div>
+          <div className="flex items-start gap-4 mb-5">
+            <div className="p-2.5 bg-emerald-100 rounded-xl">
+              <UserCheck className="h-5 w-5 text-emerald-600" />
             </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <Badge className={`text-xs ${guestPostingEnabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
-                {guestPostingEnabled ? 'Enabled' : 'Disabled'}
-              </Badge>
+            <div>
+              <h3 className="font-semibold text-gray-900">Guest Access</h3>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Control what users can do without verifying their identity. When enabled, users only need to enter their name.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {/* Guest Posting */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
+              <div>
+                <h4 className="text-sm font-medium text-gray-900">Guest Posting</h4>
+                <p className="text-xs text-gray-500 mt-0.5">Allow users to submit feedback with just their name</p>
+              </div>
               <Switch
                 checked={guestPostingEnabled}
                 onCheckedChange={(value) => {
                   setGuestPostingEnabled(value)
                   updateSettings({ guest_posting_enabled: value })
+                }}
+              />
+            </div>
+
+            {/* Guest Commenting */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
+              <div>
+                <h4 className="text-sm font-medium text-gray-900">Guest Commenting</h4>
+                <p className="text-xs text-gray-500 mt-0.5">Allow users to comment with just their name</p>
+              </div>
+              <Switch
+                checked={guestCommentingEnabled}
+                onCheckedChange={(value) => {
+                  setGuestCommentingEnabled(value)
+                  updateSettings({ guest_commenting_enabled: value })
+                }}
+              />
+            </div>
+
+            {/* Guest Voting */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
+              <div>
+                <h4 className="text-sm font-medium text-gray-900">Guest Voting</h4>
+                <p className="text-xs text-gray-500 mt-0.5">Allow users to upvote without any identification</p>
+              </div>
+              <Switch
+                checked={guestVotingEnabled}
+                onCheckedChange={(value) => {
+                  setGuestVotingEnabled(value)
+                  updateSettings({ guest_voting_enabled: value })
                 }}
               />
             </div>

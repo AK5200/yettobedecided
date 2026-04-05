@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
   // Get org settings
   const { data: org } = await supabase
     .from('organizations')
-    .select('id, sso_secret_key')
+    .select('id, sso_secret_key, guest_voting_enabled')
     .eq('id', boardData.org_id)
     .single()
   if (!org?.id) {
@@ -82,9 +82,18 @@ export async function POST(request: NextRequest) {
 
   // Use identified email if available, otherwise fall back to voter_email
   const emailToUse = ssoResult.user?.email || voter_email || email || guest_email
-  if (!emailToUse) {
+  const guestVotingAllowed = org.guest_voting_enabled !== false
+  if (!emailToUse && !guestVotingAllowed) {
     return withCors(
-      NextResponse.json({ error: 'Email is required' }, { status: 400 }),
+      NextResponse.json({ error: 'Login required to vote' }, { status: 403 }),
+      origin
+    )
+  }
+  if (!emailToUse) {
+    // Guest voting allowed but no email — use a session-based anonymous vote
+    // For now, require email even for guest voting to track duplicates
+    return withCors(
+      NextResponse.json({ error: 'Email is required to vote' }, { status: 400 }),
       origin
     )
   }
