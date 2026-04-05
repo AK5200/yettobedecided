@@ -39,8 +39,8 @@ export function CommentForm({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!content.trim()) return
-    if (!effectiveEmail.trim()) {
-      toast.error('Please enter your email to comment.')
+    if (!effectiveName.trim() && !effectiveEmail.trim()) {
+      toast.error('Please enter your name to comment.')
       return
     }
     setLoading(true)
@@ -50,8 +50,10 @@ export function CommentForm({
       body: JSON.stringify({
         post_id: postId,
         content,
-        author_email: effectiveEmail,
+        author_email: effectiveEmail || null,
         author_name: effectiveName || null,
+        guest_email: effectiveEmail || null,
+        guest_name: effectiveName || null,
         is_from_admin: isAdmin || false,
         is_internal: isInternal,
       }),
@@ -72,26 +74,14 @@ export function CommentForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       {showEmailFields && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <Label htmlFor={`comment-email-${postId}`}>Email (Required)</Label>
-            <Input
-              id={`comment-email-${postId}`}
-              type="email"
-              placeholder="you@example.com"
-              value={localEmail}
-              onChange={(e) => setLocalEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor={`comment-name-${postId}`}>Name (Optional)</Label>
-            <Input
-              id={`comment-name-${postId}`}
-              placeholder="Your name"
-              value={localName}
-              onChange={(e) => setLocalName(e.target.value)}
-            />
-          </div>
+        <div className="space-y-1">
+          <Label htmlFor={`comment-name-${postId}`}>Name</Label>
+          <Input
+            id={`comment-name-${postId}`}
+            placeholder="Your name"
+            value={localName}
+            onChange={(e) => setLocalName(e.target.value)}
+          />
         </div>
       )}
       <Textarea
@@ -101,7 +91,7 @@ export function CommentForm({
         className={isInternal ? 'border-yellow-400 bg-yellow-50' : ''}
       />
       <div className="flex items-center justify-between">
-        <Button type="submit" disabled={loading || !content.trim() || !effectiveEmail.trim()}>
+        <Button type="submit" disabled={loading || !content.trim() || (!effectiveName.trim() && !effectiveEmail.trim())}>
           {loading ? 'Posting...' : 'Post Comment'}
         </Button>
         {isAdmin && (
