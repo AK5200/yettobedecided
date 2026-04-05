@@ -142,18 +142,31 @@ export default function PublicBoardPage({
   }, [params])
 
   useEffect(() => {
-    if (!userEmail) {
+    const voterId = userEmail || (() => { try { return localStorage.getItem('kelo_anon_voter') || '' } catch { return '' } })()
+    if (!voterId) {
       setVotedPostIds([])
       return
     }
-    fetchVoteStatuses(userEmail, board?.id)
+    fetchVoteStatuses(voterId, board?.id)
   }, [userEmail, board?.id])
 
-  const handleVote = async (postId: string) => {
-    if (!userEmail) {
-      toast.error('Please enter your email before voting.')
-      return
+  // Get or create anonymous voter ID for guest voting
+  const getVoterId = () => {
+    if (userEmail) return userEmail
+    try {
+      let anonId = localStorage.getItem('kelo_anon_voter')
+      if (!anonId) {
+        anonId = 'anon_' + Math.random().toString(36).substring(2) + Date.now().toString(36)
+        localStorage.setItem('kelo_anon_voter', anonId)
+      }
+      return anonId
+    } catch {
+      return 'anon_' + Math.random().toString(36).substring(2)
     }
+  }
+
+  const handleVote = async (postId: string) => {
+    const voterId = getVoterId()
 
     if (votingIds.includes(postId)) return
     setVotingIds((prev) => [...prev, postId])
@@ -162,7 +175,7 @@ export default function PublicBoardPage({
       const response = await fetch('/api/votes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId, voter_email: userEmail, voter_name: userName || null }),
+        body: JSON.stringify({ post_id: postId, voter_email: voterId, voter_name: userName || null }),
       })
 
       if (!response.ok) {
@@ -176,7 +189,7 @@ export default function PublicBoardPage({
       if (board?.id) {
         await fetchPosts(board.id)
       }
-      await fetchVoteStatuses(userEmail, board?.id)
+      await fetchVoteStatuses(voterId, board?.id)
     } finally {
       setVotingIds((prev) => prev.filter((id) => id !== postId))
     }

@@ -20,11 +20,17 @@ export default function AllInOneEmbedClient() {
   const [boards, setBoards] = useState<{ id: string; name: string }[]>(_embeddedData?.boards || [])
   const [posts, setPosts] = useState<any[]>(() => {
     if (!_embeddedData?.posts) return []
+    // Read voted post IDs from sessionStorage to persist vote state across refreshes
+    let votedIds: Set<string> = new Set()
+    try {
+      const stored = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(`kelo_votes_${org}`) : null
+      if (stored) votedIds = new Set(JSON.parse(stored))
+    } catch {}
     return _embeddedData.posts.map((p: any) => ({
       id: p.id, title: p.title, content: p.content || '',
       votes: p.vote_count || 0, author_name: p.author_name || p.guest_name || 'Anonymous',
       author_email: p.author_email || p.guest_email, tags: p.tags || [],
-      status: p.status || 'open', hasVoted: false,
+      status: p.status || 'open', hasVoted: votedIds.has(p.id),
     }))
   })
   const [changelog, setChangelog] = useState<any[]>(_embeddedData?.changelog || [])
