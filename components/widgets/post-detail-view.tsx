@@ -130,9 +130,9 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     e.preventDefault()
     if (!newComment.trim() || submitting) return
 
-    const email = identifiedUser?.email || commentEmail
+    const email = identifiedUser?.email || commentEmail || null
     const name = identifiedUser?.name || commentName
-    if (!email) return
+    if (!name && !email) return
 
     const content = newComment.trim()
 
@@ -190,7 +190,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
     onVote?.(post.id)
   }
 
-  const canSubmitComment = newComment.trim() && (identifiedUser?.email || commentEmail)
+  const canSubmitComment = newComment.trim() && (identifiedUser?.name || identifiedUser?.email || commentName)
 
   return (
     <div className="space-y-5">
@@ -305,24 +305,13 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         {/* Add comment form */}
         <form onSubmit={handleSubmitComment} className="space-y-3">
           {!identifiedUser && (
-            <div className="flex gap-2.5">
-              <Input
-                placeholder="Email *"
-                type="email"
-                value={commentEmail}
-                onChange={(e) => setCommentEmail(e.target.value)}
-                className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
-                style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
-                required
-              />
-              <Input
-                placeholder="Name (optional)"
-                value={commentName}
-                onChange={(e) => setCommentName(e.target.value)}
-                className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
-                style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
-              />
-            </div>
+            <Input
+              placeholder="Your name"
+              value={commentName}
+              onChange={(e) => setCommentName(e.target.value)}
+              className="h-11 rounded-xl border-border/60 dark:border-white/10 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
+              style={{ '--tw-ring-color': `${accentColor}30` } as React.CSSProperties}
+            />
           )}
           <Textarea
             placeholder="Add a comment..."
