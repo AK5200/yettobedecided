@@ -53,30 +53,30 @@ interface AllInOneWidgetProps {
 function getCategoryStyle(category: string): { bg: string; text: string } {
   switch (category) {
     case 'feature':
-      return { bg: 'bg-green-100', text: 'text-green-700' }
+      return { bg: 'bg-emerald-100 dark:bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400' }
     case 'improvement':
-      return { bg: 'bg-blue-100', text: 'text-blue-700' }
+      return { bg: 'bg-blue-100 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' }
     case 'fix':
-      return { bg: 'bg-orange-100', text: 'text-orange-700' }
+      return { bg: 'bg-amber-100 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' }
     default:
-      return { bg: 'bg-muted', text: 'text-muted-foreground/80' }
+      return { bg: 'bg-muted', text: 'text-muted-foreground' }
   }
 }
 
 function getStatusStyle(status: string): { bg: string; text: string } {
   switch (status?.toLowerCase()) {
     case 'open':
-      return { bg: 'bg-muted', text: 'text-muted-foreground' }
+      return { bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400' }
     case 'planned':
-      return { bg: 'bg-blue-100', text: 'text-blue-700' }
+      return { bg: 'bg-blue-100 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' }
     case 'in_progress':
-      return { bg: 'bg-yellow-100', text: 'text-yellow-700' }
+      return { bg: 'bg-amber-100 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' }
     case 'shipped':
-      return { bg: 'bg-green-100', text: 'text-green-700' }
+      return { bg: 'bg-emerald-100 dark:bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400' }
     case 'closed':
-      return { bg: 'bg-muted', text: 'text-muted-foreground' }
+      return { bg: 'bg-red-100 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400' }
     default:
-      return { bg: 'bg-muted', text: 'text-muted-foreground' }
+      return { bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400' }
   }
 }
 
@@ -260,7 +260,7 @@ export function AllInOneWidget({
   const getVariantStyles = () => {
     switch (styleVariant) {
       case '2':
-        // Top Nav style (white background)
+        // Modern/Glass style
         return {
           containerClass: '',
           containerStyle: {
@@ -271,16 +271,17 @@ export function AllInOneWidget({
           headerBg: 'transparent',
           cardClass: '',
           cardStyle: {
-            background: isDark ? '#1a1a1a' : '#ffffff',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.08)',
+            background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
+            border: 'none',
+            boxShadow: isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
           },
-          cardBorder: 'border',
+          cardBorder: '',
           buttonStyle: 'solid',
-          borderRadius: '40px',
+          borderRadius: 'rounded-2xl',
           voteButtonClass: 'bg-background border border-border',
         }
       case '3':
-        // Clean Supahub-style (horizontal tabs, vote on right, divider lines)
+        // Clean editorial style (divider lines, vote on right)
         return {
           containerClass: '',
           containerStyle: {
@@ -294,7 +295,7 @@ export function AllInOneWidget({
             background: 'transparent',
             border: 'none',
           },
-          cardBorder: 'border-b',
+          cardBorder: '',
           buttonStyle: 'solid',
           borderRadius: borderRadiusClass,
           voteButtonClass: 'bg-background border border-border',
@@ -342,7 +343,7 @@ export function AllInOneWidget({
 
   return (
     <div
-      className={`${isEmbedded ? 'h-full flex flex-col' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? '' : 'p-4'} space-y-4 ${variantStyles.containerClass} bg-white dark:bg-[#1a1a1a]`}
+      className={`${isEmbedded ? 'h-full flex flex-col' : (variantStyles.borderRadius || borderRadiusClass)} ${isEmbedded ? '' : 'p-5'} space-y-4 ${variantStyles.containerClass} bg-white dark:bg-[#1a1a1a] dark:text-white`}
       data-style-variant={styleVariant}
       style={isEmbedded ? {} : {
         backgroundColor: variantStyles.containerStyle?.background || backgroundColor || undefined,
@@ -352,29 +353,29 @@ export function AllInOneWidget({
       }}
     >
       {/* Header */}
-      <div className={`px-6 pt-6 pb-4`} style={{
+      <div className={`px-6 pt-6 pb-5`} style={{
         backgroundColor: headerBackgroundColor || variantStyles.headerBg || undefined,
         borderRadius: getBorderRadiusStyle(borderRadius)
       }}>
         <div
-          className={`w-10 h-10 ${styleVariant === '2' ? 'rounded-2xl shadow-lg' : borderRadiusClass} flex items-center justify-center mb-4`}
+          className={`w-11 h-11 rounded-xl flex items-center justify-center mb-5`}
           style={{
             backgroundColor: styleVariant === '2'
               ? accentColor
-              : hexToRgba(accentColor, 0.15),
-            boxShadow: styleVariant === '2' ? `0 0 20px ${hexToRgba(accentColor, 0.2)}` : undefined
+              : hexToRgba(accentColor, 0.12),
+            boxShadow: `0 4px 12px -2px ${hexToRgba(accentColor, 0.25)}`
           }}
         >
           <MessageSquare className="h-5 w-5" style={{ color: styleVariant === '2' ? 'white' : accentColor }} />
         </div>
-        <h2 className={`${styleVariant === '2' ? 'text-3xl font-extrabold' : 'text-lg font-semibold'} text-foreground ${
+        <h2 className={`text-xl font-bold tracking-tight text-foreground ${
           textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
         } ${
           textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
         }`}>
           {heading}
         </h2>
-        <p className={`text-sm ${styleVariant === '2' ? 'font-medium' : ''} text-muted-foreground mt-1 ${
+        <p className={`text-sm text-muted-foreground mt-2 leading-relaxed ${
           textStyle === 'bold' || textStyle === 'bold-italic' ? 'font-bold' : ''
         } ${
           textStyle === 'italic' || textStyle === 'bold-italic' ? 'italic' : ''
@@ -386,15 +387,12 @@ export function AllInOneWidget({
       {/* Tabs */}
       <Tabs defaultValue="board" className={isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}>
         <div className={isEmbedded ? 'px-6' : ''}>
-          <TabsList className="w-auto gap-4 bg-transparent p-0 h-auto border-b dark:border-white/10 pb-0 rounded-none">
+          <TabsList className="w-auto gap-6 bg-transparent p-0 h-auto border-b border-border/40 dark:border-white/10 pb-0 rounded-none">
             <TabsTrigger
               value="board"
-              className="px-0 pb-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
-              style={{ 
+              className="px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-2"
+              style={{
                 '--tw-border-opacity': 1,
-                ...(styleVariant === '2' && {
-                  color: accentColor
-                })
               } as any}
             >
               <span className="flex items-center gap-1.5">
@@ -409,12 +407,9 @@ export function AllInOneWidget({
             </TabsTrigger>
             <TabsTrigger
               value="changelog"
-              className="px-0 pb-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-all data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-current"
-              style={{ 
+              className="px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-2"
+              style={{
                 '--tw-border-opacity': 1,
-                ...(styleVariant === '2' && {
-                  color: accentColor
-                })
               } as any}
             >
               <span className="flex items-center gap-1.5">
@@ -430,107 +425,92 @@ export function AllInOneWidget({
         </div>
 
         {/* Board Tab */}
-        <TabsContent value="board" className={`pt-4 transition-all space-y-3 ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
+        <TabsContent value="board" className={`pt-4 transition-all duration-200 space-y-4 ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
           {/* Search and Create */}
-          <div className={`flex ${styleVariant === '2' ? 'gap-3' : 'gap-2'} items-center ${isEmbedded ? 'px-6' : ''} ${styleVariant === '2' ? 'py-2' : ''}`}>
+          <div className={`flex gap-3 items-center ${isEmbedded ? 'px-6' : ''}`}>
             <div className="relative flex-1">
-              <Search className={`absolute ${styleVariant === '2' ? 'left-4' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60`} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
               <Input
-                placeholder={styleVariant === '2' ? "Explore ideas..." : "Search posts..."}
+                placeholder="Search posts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={styleVariant === '2' ? 'pl-12 pr-4 py-4 bg-white/30 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-2xl dark:text-white' : 'pl-9'}
+                className="h-10 pl-10 pr-4 rounded-xl border-border/60 dark:border-white/10 bg-transparent dark:bg-white/5 dark:text-white transition-all duration-200 focus:ring-2 focus:ring-offset-0"
+                style={{ '--tw-ring-color': hexToRgba(accentColor, 0.3) } as any}
               />
             </div>
             <Button
               onClick={onCreatePost}
-              style={variantStyles.buttonStyle === 'solid' ? {
+              style={{
                 backgroundColor: accentColor,
                 color: 'white',
-                boxShadow: styleVariant === '2' ? `0 0 20px ${hexToRgba(accentColor, 0.2)}` : undefined
-              } : {}}
-              className={`shrink-0 ${styleVariant === '2' ? 'px-8 py-4 font-bold shadow-xl' : borderRadiusClass} ${
-                variantStyles.buttonStyle === 'outline'
-                  ? 'border-2'
-                  : 'text-white'
-              }`}
+                boxShadow: `0 2px 8px -2px ${hexToRgba(accentColor, 0.4)}`
+              }}
+              className="shrink-0 h-10 px-5 rounded-xl font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
             >
-              {styleVariant === '2' ? (
-                <span className="flex items-center gap-2">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 4v16m8-8H4" />
-                  </svg>
-                  New Post
-                </span>
-              ) : 'Create New Post'}
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M12 4v16m8-8H4" />
+                </svg>
+                New Post
+              </span>
             </Button>
           </div>
 
           {/* Posts List - 3 distinct branches matching preview exactly */}
           <div className={`${isEmbedded ? 'flex-1 px-6' : 'max-h-80'} overflow-y-auto`}>
             {filteredPosts.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground text-sm">
+              <div className="text-center py-10 text-muted-foreground text-sm">
                 {searchQuery ? 'No posts found matching your search.' : 'No posts yet. Be the first to create one!'}
               </div>
             ) : (
-              <div className={`${styleVariant === '3' ? 'divide-y divide-border' : styleVariant === '2' ? 'space-y-4' : 'space-y-3'} pb-4`}>
+              <div className={`${styleVariant === '3' ? '' : styleVariant === '2' ? 'space-y-4' : 'space-y-3'} pb-4`}>
                 {filteredPosts.map((post) => {
                   const statusStyle = post.status ? getStatusStyle(post.status) : null
 
                   if (styleVariant === '3') {
-                    // Style 3 - Supahub: content left, vote RIGHT, divider lines
+                    // Style 3 - Clean editorial: no cards, divider lines, vote on right, minimal
                     return (
                       <div
                         key={post.id}
                         onClick={() => handlePostClick(post)}
-                        className="py-4 first:pt-2 last:pb-2 hover:bg-muted/50 transition-colors cursor-pointer px-1"
+                        className="py-5 border-b border-border/30 dark:border-white/10 last:border-b-0 hover:bg-muted/30 transition-all duration-200 cursor-pointer px-2"
                       >
                         <div className="flex items-start gap-4">
                           {/* Content first = appears LEFT */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-foreground text-sm">{post.title}</h4>
+                            <h4 className="font-semibold text-foreground text-base leading-snug">{post.title}</h4>
                             {post.content && (
-                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{post.content}</p>
+                              <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{post.content}</p>
                             )}
-                            <div className="flex items-center gap-2 mt-2.5">
+                            <div className="flex items-center gap-3 mt-3">
+                              {post.status && statusStyle && (
+                                <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 text-[10px] font-semibold px-2 py-0.5 rounded-full`}>
+                                  {getStatusLabel(post.status)}
+                                </Badge>
+                              )}
                               {post.author_name && (
-                                <div className="flex items-center gap-1.5">
-                                  <div
-                                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium text-white"
-                                    style={{ backgroundColor: accentColor }}
-                                  >
-                                    {post.author_name.charAt(0).toUpperCase()}
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">{post.author_name}</span>
-                                </div>
+                                <span className="text-xs text-muted-foreground">{post.author_name}</span>
                               )}
                               {post.tags?.map((tag) => (
-                                <Badge key={tag.name} className="bg-red-50 text-red-600 border-0 text-[10px] font-medium px-2 py-0.5 rounded">
+                                <Badge key={tag.name} variant="outline" className="text-[10px] font-medium px-2 py-0.5 rounded-full border-border/50">
                                   {tag.name}
                                 </Badge>
                               ))}
                             </div>
                           </div>
 
-                          {/* Vote button second = appears RIGHT */}
+                          {/* Vote count on RIGHT - number only, minimal */}
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               handleVote(post.id)
                             }}
-                            className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg border transition-colors shrink-0 ${
-                              post.hasVoted
-                                ? 'border-transparent text-white'
-                                : 'border-border hover:border-border text-muted-foreground'
-                            }`}
-                            style={
-                              post.hasVoted
-                                ? { backgroundColor: accentColor }
-                                : {}
-                            }
+                            className="flex flex-col items-center justify-center shrink-0 transition-all duration-200"
                           >
-                            <ChevronUp className="h-4 w-4" />
-                            <span className="text-sm font-semibold">{post.votes}</span>
+                            <ChevronUp className="h-4 w-4 transition-colors duration-200" style={post.hasVoted ? { color: accentColor } : { color: isDark ? '#6b7280' : '#9ca3af' }} />
+                            <span className="text-sm font-bold transition-colors duration-200" style={post.hasVoted ? { color: accentColor } : {}}>
+                              {post.votes}
+                            </span>
                           </button>
                         </div>
                       </div>
@@ -538,60 +518,59 @@ export function AllInOneWidget({
                   }
 
                   if (styleVariant === '2') {
-                    // Style 2 - Modern/Glass: larger elements, glow effects, hover animations
+                    // Style 2 - Modern/Glass: no border, shadow, rounded-2xl, glass feel
                     return (
                       <div
                         key={post.id}
                         onClick={() => handlePostClick(post)}
-                        className={`p-6 ${variantStyles.cardBorder} ${borderRadiusClass} hover:border-border transition-all cursor-pointer hover:translate-y-[-2px] hover:shadow-md`}
+                        className="p-6 rounded-2xl transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-lg bg-white/80 dark:bg-white/5"
                         style={{
                           ...variantStyles.cardStyle,
                           ...(post.hasVoted && {
-                            borderColor: hexToRgba(accentColor, 0.3),
-                            boxShadow: `0 0 20px ${hexToRgba(accentColor, 0.1)}`
+                            boxShadow: `0 4px 24px -4px ${hexToRgba(accentColor, 0.2)}`
                           })
                         }}
                       >
-                        <div className="flex gap-6">
-                          {/* Vote button LEFT - larger for style 2 */}
+                        <div className="flex gap-5">
+                          {/* Vote button LEFT - accent glow when active */}
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               handleVote(post.id)
                             }}
-                            className={`flex flex-col items-center justify-center px-3 py-3 min-w-[64px] ${borderRadiusClass} border transition-colors shrink-0 ${
+                            className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all duration-200 shrink-0 ${
                               post.hasVoted
-                                ? 'border-transparent text-white'
-                                : 'bg-background hover:border-border'
+                                ? 'text-white'
+                                : 'hover:shadow-sm'
                             }`}
                             style={
                               post.hasVoted
-                                ? { backgroundColor: accentColor }
-                                : { backgroundColor: isDark ? '#1a1a1a' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)' }
+                                ? { backgroundColor: accentColor, boxShadow: `0 4px 16px -2px ${hexToRgba(accentColor, 0.4)}` }
+                                : { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)' }
                             }
                           >
                             <ChevronUp className="h-4 w-4" style={post.hasVoted ? {} : { color: isDark ? '#9ca3af' : '#6b7280' }} />
-                            <span className={`text-lg font-extrabold ${post.hasVoted ? 'text-white' : 'text-foreground'}`}>
+                            <span className={`text-base font-bold ${post.hasVoted ? 'text-white' : 'text-foreground'}`}>
                               {post.votes}
                             </span>
                           </button>
 
-                          {/* Content RIGHT - larger text for style 2 */}
+                          {/* Content RIGHT - larger typography */}
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start mb-2">
-                              <h4 className="text-xl font-bold text-foreground line-clamp-1" style={post.hasVoted ? { color: accentColor } : {}}>
+                              <h4 className="text-base font-bold text-foreground line-clamp-1">
                                 {post.title}
                               </h4>
                               {post.status && statusStyle && (
-                                <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 text-[10px] font-bold uppercase tracking-widest rounded-full`}>
+                                <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 text-[10px] font-semibold rounded-full px-2.5 py-0.5`}>
                                   {getStatusLabel(post.status)}
                                 </Badge>
                               )}
                             </div>
                             {post.content && (
-                              <p className="text-sm text-muted-foreground mb-4 leading-relaxed font-medium line-clamp-3">{post.content}</p>
+                              <p className="text-sm text-muted-foreground mb-3 leading-relaxed line-clamp-2">{post.content}</p>
                             )}
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                               {post.author_name && (
                                 <div className="flex items-center gap-2">
                                   <div
@@ -600,11 +579,11 @@ export function AllInOneWidget({
                                   >
                                     {post.author_name.charAt(0).toUpperCase()}
                                   </div>
-                                  <span className="text-xs font-bold text-foreground/80">{post.author_name}</span>
+                                  <span className="text-xs font-medium text-muted-foreground">{post.author_name}</span>
                                 </div>
                               )}
                               {post.tags?.map((tag) => (
-                                <Badge key={tag.name} variant="outline" className={`text-xs ${borderRadiusClass}`}>
+                                <Badge key={tag.name} variant="outline" className="text-xs rounded-full">
                                   {tag.name}
                                 </Badge>
                               ))}
@@ -615,65 +594,65 @@ export function AllInOneWidget({
                     )
                   }
 
-                  // Style 1 - Standard: bordered cards, vote left
+                  // Style 1 - Standard: bordered cards, vote left, hover elevation
                   return (
                     <div
                       key={post.id}
                       onClick={() => handlePostClick(post)}
-                      className={`p-5 ${variantStyles.cardBorder} border-border ${borderRadiusClass} hover:border-border hover:shadow-lg transition-all cursor-pointer bg-linear-to-br from-background to-muted/30 hover:from-background hover:to-muted/50 shadow-sm`}
+                      className="p-5 border border-border/60 dark:border-white/10 rounded-xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer bg-background"
                     >
-                      <div className="flex gap-3">
-                        {/* Vote button LEFT */}
+                      <div className="flex gap-4">
+                        {/* Vote button LEFT - bordered square */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
                             handleVote(post.id)
                           }}
-                          className={`flex flex-col items-center justify-center px-3 py-2.5 ${borderRadiusClass} border transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 ${
+                          className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl border transition-all duration-200 shrink-0 ${
                             post.hasVoted
-                              ? 'border-transparent text-white shadow-md'
-                              : 'border-border hover:border-border hover:shadow-sm text-muted-foreground bg-muted/50 hover:bg-background'
+                              ? 'border-transparent text-white'
+                              : 'border-border/60 dark:border-white/10 hover:shadow-sm hover:border-border text-muted-foreground'
                           }`}
                           style={
                             post.hasVoted
-                              ? { 
+                              ? {
                                   backgroundColor: accentColor,
-                                  boxShadow: `0 4px 12px -2px ${accentColor}40`
+                                  boxShadow: `0 4px 14px -3px ${hexToRgba(accentColor, 0.4)}`
                                 }
                               : {}
                           }
                         >
-                          <ChevronUp className="h-4 w-4" />
-                          <span className="text-sm font-medium">{post.votes}</span>
+                          <ChevronUp className="h-3.5 w-3.5" />
+                          <span className="text-xs font-bold">{post.votes}</span>
                         </button>
 
                         {/* Content RIGHT */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-bold text-foreground text-base flex-1 hover:text-foreground/80 transition-colors">{post.title}</h4>
+                            <h4 className="font-semibold text-foreground text-sm leading-snug flex-1">{post.title}</h4>
                             {post.status && statusStyle && (
-                              <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 ${borderRadiusClass} text-xs`}>
+                              <Badge className={`${statusStyle.bg} ${statusStyle.text} border-0 rounded-full text-[10px] font-semibold px-2 py-0.5`}>
                                 {getStatusLabel(post.status)}
                               </Badge>
                             )}
                           </div>
                           {post.content && (
-                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">{post.content}</p>
+                            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{post.content}</p>
                           )}
                           <div className="flex items-center gap-3 mt-3">
                             {post.author_name && (
                               <div className="flex items-center gap-1.5">
                                 <div
-                                  className={`w-6 h-6 ${borderRadiusClass === 'rounded-none' ? 'rounded-full' : borderRadiusClass} flex items-center justify-center text-xs font-bold text-white shadow-sm`}
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
                                   style={{ backgroundColor: accentColor }}
                                 >
                                   {post.author_name.charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-xs font-medium text-muted-foreground">{post.author_name}</span>
+                                <span className="text-xs text-muted-foreground">{post.author_name}</span>
                               </div>
                             )}
                             {post.tags?.map((tag) => (
-                              <Badge key={tag.name} variant="outline" className={`text-xs ${borderRadiusClass}`}>
+                              <Badge key={tag.name} variant="outline" className="text-[10px] rounded-full border-border/50">
                                 {tag.name}
                               </Badge>
                             ))}
@@ -689,10 +668,10 @@ export function AllInOneWidget({
         </TabsContent>
 
         {/* Changelog Tab */}
-        <TabsContent value="changelog" className={`pt-4 transition-all ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
-          <div className={`${isEmbedded ? 'flex-1 px-6' : 'max-h-80'} overflow-y-auto space-y-1`}>
+        <TabsContent value="changelog" className={`pt-4 transition-all duration-200 ${isEmbedded ? 'flex-1 flex flex-col min-h-0' : ''}`}>
+          <div className={`${isEmbedded ? 'flex-1 px-6' : 'max-h-80'} overflow-y-auto`}>
             {changelog.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground text-sm">
+              <div className="text-center py-10 text-muted-foreground text-sm">
                 No changelog entries yet.
               </div>
             ) : (
@@ -702,23 +681,23 @@ export function AllInOneWidget({
                 return (
                   <div
                     key={entry.id}
-                    className="border-b border-border dark:border-white/10 last:border-b-0 cursor-pointer -mx-3 px-4 py-3 rounded-xl transition-all hover:bg-muted/50"
+                    className="border-b border-border/30 dark:border-white/10 last:border-b-0 cursor-pointer px-3 py-5 rounded-xl transition-all duration-200 hover:bg-muted/40"
                     onClick={() => setExpandedChangelogId(isExpanded && index !== 0 ? '__none__' : entry.id)}
                   >
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                      <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 shadow-md font-bold px-2.5 py-0.5`}>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2.5">
+                      <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 font-semibold px-2.5 py-0.5 rounded-full text-[11px]`}>
                         {entry.category}
                       </Badge>
-                      <span className="font-semibold">
+                      <span className="font-medium">
                         {entry.published_at
                           ? formatDate(entry.published_at)
                           : 'Recently'}
                       </span>
                     </div>
-                    <div className="font-bold text-lg text-foreground mb-1">{entry.title}</div>
+                    <div className="font-bold text-base text-foreground mb-1.5">{entry.title}</div>
                     {isExpanded ? (
                       <div
-                        className="text-sm text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3 [&_video]:max-w-full [&_video]:h-auto [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40"
+                        className="text-sm text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-3 [&_video]:max-w-full [&_video]:h-auto [&_a]:text-muted-foreground [&_a]:underline [&_a]:decoration-muted-foreground/40"
                         dangerouslySetInnerHTML={{ __html: entry.content || '' }}
                       />
                     ) : (
@@ -737,9 +716,9 @@ export function AllInOneWidget({
 
       {/* Footer */}
       {isEmbedded ? (
-        <div className="px-6 py-3 border-t dark:border-white/10 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-border/40 dark:border-white/10 flex items-center justify-between">
           {showBranding ? (
-            <span className="text-xs text-muted-foreground/60 flex items-center gap-1">
+            <span className="text-xs text-muted-foreground/50 flex items-center gap-1.5">
               <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
               Powered by Kelo
             </span>
@@ -750,14 +729,14 @@ export function AllInOneWidget({
             href={`${typeof window !== 'undefined' ? window.location.origin : ''}/${orgSlug}/features`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-medium hover:underline"
+            className="text-xs font-medium hover:underline transition-colors duration-200"
             style={{ color: accentColor }}
           >
             View all posts
           </a>
         </div>
       ) : showBranding ? (
-        <div className="pt-2 text-xs text-muted-foreground/60 text-center flex items-center justify-center gap-1">
+        <div className="pt-3 text-xs text-muted-foreground/50 text-center flex items-center justify-center gap-1.5">
           <MessageSquare className="h-3 w-3" style={{ color: accentColor }} />
           Powered by Kelo
         </div>
