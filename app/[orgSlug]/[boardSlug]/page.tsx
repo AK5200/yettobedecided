@@ -186,8 +186,8 @@ export default function PublicBoardPage({
     e.preventDefault()
     if (!board?.id) return
     if (!newTitle.trim()) return
-    if (!userEmail.trim()) {
-      toast.error('Please enter your email to submit feedback.')
+    if (!userName.trim()) {
+      toast.error('Please enter your name to submit feedback.')
       return
     }
     setSubmitLoading(true)
@@ -199,8 +199,8 @@ export default function PublicBoardPage({
         board_id: board.id,
         title: newTitle,
         content: newContent,
-        guest_name: userName || null,
-        guest_email: userEmail,
+        guest_name: userName || 'Anonymous',
+        guest_email: userEmail || null,
         is_guest: true,
       }),
     })
@@ -233,30 +233,30 @@ export default function PublicBoardPage({
         <h1 className="text-2xl font-bold">{board?.name}</h1>
       </div>
 
-      {/* User identity section - shared across all actions */}
-      <div className="border p-4 rounded max-w-2xl bg-muted/30">
-        <h3 className="font-semibold mb-3">Your Information</h3>
-        <p className="text-sm text-muted-foreground mb-3">
-          Enter your email to vote, comment, and submit feedback.
+      {/* User identity section */}
+      <div className="border border-border/60 p-5 rounded-xl max-w-2xl bg-muted/20">
+        <h3 className="font-semibold mb-1">Your Information</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Add your name to submit feedback. Email is optional but needed for voting.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <Label htmlFor="userEmail">Email (Required)</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="userName">Name</Label>
+            <Input
+              id="userName"
+              placeholder="Your name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="userEmail">Email <span className="text-muted-foreground font-normal">(optional)</span></Label>
             <Input
               id="userEmail"
               type="email"
               placeholder="you@example.com"
               value={userEmail}
               onChange={(e) => setUserEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="userName">Name (Optional)</Label>
-            <Input
-              id="userName"
-              placeholder="Your name"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
             />
           </div>
         </div>
@@ -276,7 +276,7 @@ export default function PublicBoardPage({
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}
           />
-          <Button type="submit" disabled={submitLoading || !newTitle.trim() || !userEmail.trim()}>
+          <Button type="submit" disabled={submitLoading || !newTitle.trim() || !userName.trim()}>
             {submitLoading ? 'Submitting...' : 'Submit Feedback'}
           </Button>
         </form>
