@@ -213,29 +213,8 @@ export function AllInOneWidget({
     onVote?.(postId)
   }
 
-  const handlePostClick = async (post: Post) => {
-    // Fetch full post details including created_at
-    try {
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-      const res = await fetch(`${baseUrl}/api/posts/${post.id}`)
-      if (res.ok) {
-        const data = await res.json()
-        const fullPost: Post = {
-          ...post,
-          content: data.post?.content || post.content,
-          created_at: data.post?.created_at,
-          tags: data.post?.tags || post.tags,
-        }
-        setSelectedPost(fullPost)
-      } else {
-        // Fallback to existing post data
-        setSelectedPost(post)
-      }
-    } catch (error) {
-      console.error('Failed to fetch post details:', error)
-      // Fallback to existing post data
-      setSelectedPost(post)
-    }
+  const handlePostClick = (post: Post) => {
+    setSelectedPost(post)
   }
 
   const handleBack = () => {
