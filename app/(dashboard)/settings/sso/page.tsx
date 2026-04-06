@@ -9,10 +9,32 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import {
   Eye, EyeOff, Copy, RefreshCw, Fingerprint, UserCheck,
-  LogIn, Key, BookOpen, CheckCircle2, Loader2, Shield
+  LogIn, Key, BookOpen, CheckCircle2, Loader2, Shield, HelpCircle, X
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { CodeExamples } from './code-examples'
+
+function InfoPopup({ children, content }: { children: React.ReactNode; content: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="relative inline-block">
+      <button type="button" onClick={() => setOpen(!open)} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+        {children}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-8 z-50 w-72 p-4 bg-white rounded-xl shadow-xl border border-gray-200 text-sm text-gray-600 leading-relaxed">
+            <button onClick={() => setOpen(false)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+              <X className="h-3.5 w-3.5" />
+            </button>
+            {content}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 export default function SSOSettingsPage() {
   const [loading, setLoading] = useState(true)
@@ -314,105 +336,131 @@ export default function SSOSettingsPage() {
           </div>
         </div>
 
-        {/* SDK Integration */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="p-2.5 bg-indigo-100 rounded-xl">
-              <Key className="h-5 w-5 text-indigo-600" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <h3 className="font-semibold text-gray-900">SDK Integration</h3>
+        {/* SDK Integration + Integration Guide — only for "Your Website" handler */}
+        {loginHandler === 'customer' && (
+          <>
+            {/* Step 1: SDK Integration */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-bold shrink-0">1</div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-semibold text-gray-900">SDK Integration</h3>
+                    {secretKey && (
+                      <Badge className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        Key Active
+                      </Badge>
+                    )}
+                    <div className="ml-auto">
+                      <InfoPopup content={
+                        <div>
+                          <p className="font-semibold text-gray-900 mb-2">Why do I need this?</p>
+                          <p>When you choose &quot;Your Website&quot; as the login handler, you need a secret key so Kelo can verify that the user identity your app sends is authentic and hasn&apos;t been tampered with.</p>
+                          <p className="mt-2">Generate a key here, then use it in your backend to sign user tokens.</p>
+                        </div>
+                      }>
+                        <HelpCircle className="h-4 w-4" />
+                      </InfoPopup>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    Generate a secret key to identify users via the Kelo SDK.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {secretKey ? (
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                      Secret Key
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        readOnly
+                        value={showKey ? secretKey : '\u2022'.repeat(40)}
+                        className="font-mono text-sm bg-white h-11"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setShowKey(!showKey)}
+                        className="h-11 w-11 shrink-0 rounded-lg"
+                      >
+                        {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => copyToClipboard(secretKey)}
+                        className="h-11 w-11 shrink-0 rounded-lg"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-6 px-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                    <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-3">
+                      <Key className="h-6 w-6 text-indigo-600" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-700 mb-1">No secret key generated</p>
+                    <p className="text-xs text-gray-500 mb-4">Generate a key to start identifying users via the SDK.</p>
+                    <Button
+                      onClick={() => generateKey(false)}
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
+                    >
+                      <Key className="h-4 w-4 mr-2" />
+                      Generate Secret Key
+                    </Button>
+                  </div>
+                )}
+
                 {secretKey && (
-                  <Badge className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Key Active
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => generateKey(true)}
+                      className="rounded-lg text-sm"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Regenerate Key
+                    </Button>
+                  </div>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Generate a secret key to identify users via the Kelo SDK.
-              </p>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            {secretKey ? (
-              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
-                  Secret Key
-                </Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    readOnly
-                    value={showKey ? secretKey : '\u2022'.repeat(40)}
-                    className="font-mono text-sm bg-white h-11"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setShowKey(!showKey)}
-                    className="h-11 w-11 shrink-0 rounded-lg"
-                  >
-                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(secretKey)}
-                    className="h-11 w-11 shrink-0 rounded-lg"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
+            {/* Step 2: Integration Guide */}
+            <div id="integration-guide" className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold shrink-0">2</div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-semibold text-gray-900">Integration Guide</h3>
+                    <div className="ml-auto">
+                      <InfoPopup content={
+                        <div>
+                          <p className="font-semibold text-gray-900 mb-2">Trust Mode vs JWT Mode</p>
+                          <p className="mb-2"><strong>Trust Mode</strong> — simple frontend call. Your app sends user data directly. No server-side setup. Good for internal tools, MVPs, and low-stakes apps.</p>
+                          <p className="mb-2"><strong>JWT Mode</strong> — your backend signs a token with the secret key. Cryptographically verified — users can&apos;t fake identity. Required for production apps where user identity matters.</p>
+                          <p className="text-xs text-gray-400 mt-3">Start with Trust Mode, upgrade to JWT when you need security.</p>
+                        </div>
+                      }>
+                        <HelpCircle className="h-4 w-4" />
+                      </InfoPopup>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    Choose a mode and follow the code examples to identify users.
+                  </p>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-6 px-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-3">
-                  <Key className="h-6 w-6 text-indigo-600" />
-                </div>
-                <p className="text-sm font-medium text-gray-700 mb-1">No secret key generated</p>
-                <p className="text-xs text-gray-500 mb-4">Generate a key to start identifying users via the SDK.</p>
-                <Button
-                  onClick={() => generateKey(false)}
-                  className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
-                >
-                  <Key className="h-4 w-4 mr-2" />
-                  Generate Secret Key
-                </Button>
-              </div>
-            )}
-
-            {secretKey && (
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => generateKey(true)}
-                  className="rounded-lg text-sm"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Regenerate Key
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Integration Guide */}
-        <div id="integration-guide" className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="p-2.5 bg-amber-100 rounded-xl">
-              <BookOpen className="h-5 w-5 text-amber-600" />
+              <CodeExamples secretKey={secretKey} />
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Integration Guide</h3>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Follow these examples to integrate user identification into your app.
-              </p>
-            </div>
-          </div>
-          <CodeExamples secretKey={secretKey} />
-        </div>
+          </>
+        )}
       </div>
     </div>
   )
