@@ -237,8 +237,8 @@ export default function AllInOneEmbedClient() {
       // Ignore storage errors
     }
 
-    // Add the new post to the list immediately
-    if (post) {
+    // Add the new post to the list only if approved (not in moderation)
+    if (post && post.is_approved !== false) {
       const newPost = {
         id: post.id,
         title: post.title,
