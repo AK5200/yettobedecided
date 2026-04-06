@@ -306,6 +306,8 @@ export default function AllInOneEmbedClient() {
           identifiedUser={identifiedUser}
           onPostsChange={setPosts}
           guestCommentingEnabled={auth?.guestCommentingEnabled !== false}
+          guestVotingEnabled={auth?.guestVotingEnabled !== false}
+          onLoginRequired={() => setShowFeedbackForm(true)}
         />
       </div>
 

@@ -49,6 +49,8 @@ interface AllInOneWidgetProps {
   identifiedUser?: any
   onPostsChange?: (posts: Post[]) => void
   guestCommentingEnabled?: boolean
+  guestVotingEnabled?: boolean
+  onLoginRequired?: () => void
 }
 
 function getCategoryStyle(category: string): { bg: string; text: string } {
@@ -167,6 +169,8 @@ export function AllInOneWidget({
   identifiedUser,
   onPostsChange,
   guestCommentingEnabled = true,
+  guestVotingEnabled = true,
+  onLoginRequired,
 }: AllInOneWidgetProps) {
   // Defensive: ensure styleVariant is always a string for reliable comparison
   const styleVariant = String(rawStyleVariant) as '1' | '2' | '3'
@@ -191,6 +195,11 @@ export function AllInOneWidget({
   )
 
   const handleVote = (postId: string) => {
+    // If guest voting is OFF and user is not identified, prompt login
+    if (!guestVotingEnabled && !identifiedUser) {
+      onLoginRequired?.()
+      return
+    }
     setPosts((prev) => {
       const updated = prev.map((post) =>
         post.id === postId

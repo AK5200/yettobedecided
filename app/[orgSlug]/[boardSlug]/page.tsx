@@ -67,6 +67,7 @@ export default function PublicBoardPage({
   const [loading, setLoading] = useState(true)
   const [orgSlugState, setOrgSlugState] = useState('')
   const [guestCommentingEnabled, setGuestCommentingEnabled] = useState(true)
+  const [guestVotingEnabled, setGuestVotingEnabled] = useState(true)
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
   const [submitLoading, setSubmitLoading] = useState(false)
@@ -130,6 +131,7 @@ export default function PublicBoardPage({
           const configData = await configRes.json()
           if (configData.auth) {
             setGuestCommentingEnabled(configData.auth.guestCommentingEnabled !== false)
+            setGuestVotingEnabled(configData.auth.guestVotingEnabled !== false)
           }
         }
       } catch {}
@@ -177,6 +179,11 @@ export default function PublicBoardPage({
   }, [userEmail, board?.id])
 
   const handleVote = async (postId: string) => {
+    // If guest voting is OFF and no email, prompt for email
+    if (!guestVotingEnabled && !userEmail) {
+      toast.error('Please enter your email to vote.')
+      return
+    }
     const voterId = getVoterId()
 
     if (votingIds.includes(postId)) return

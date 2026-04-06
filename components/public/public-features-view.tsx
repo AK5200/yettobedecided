@@ -170,9 +170,17 @@ export function PublicFeaturesView({
     fetchVoteStatuses()
   }, [voterEmail, boards]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const guestVotingEnabled = (org as any).guest_voting_enabled !== false
+  const [showVoteLogin, setShowVoteLogin] = useState(false)
+
   const handleVote = async (postId: string, e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
+    // If guest voting is OFF and user hasn't provided email, show login
+    if (!guestVotingEnabled && !voterEmail) {
+      setShowVoteLogin(true)
+      return
+    }
     const voterId = getVoterId()
     if (votingIds.includes(postId)) return
     setVotingIds((prev) => [...prev, postId])
@@ -545,6 +553,31 @@ export function PublicFeaturesView({
           </div>
         )}
       </div>
+
+      {/* Vote login dialog */}
+      <Dialog open={showVoteLogin} onOpenChange={setShowVoteLogin}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Login to vote</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-4">Enter your email to verify your identity and vote on posts.</p>
+          <div className="space-y-3">
+            <Input
+              placeholder="Your email"
+              type="email"
+              value={voterEmail}
+              onChange={(e) => setVoterEmail(e.target.value)}
+            />
+            <Button
+              className="w-full"
+              disabled={!voterEmail}
+              onClick={() => setShowVoteLogin(false)}
+            >
+              Continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
