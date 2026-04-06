@@ -139,6 +139,10 @@ export default function SSOSettingsPage() {
               <Switch
                 checked={guestPostingEnabled}
                 onCheckedChange={(value) => {
+                  if (!loginHandler && !value) {
+                    toast.error('All guest access must be enabled when login handler is set to "None"')
+                    return
+                  }
                   setGuestPostingEnabled(value)
                   updateSettings({ guest_posting_enabled: value })
                 }}
@@ -154,6 +158,10 @@ export default function SSOSettingsPage() {
               <Switch
                 checked={guestCommentingEnabled}
                 onCheckedChange={(value) => {
+                  if (!loginHandler && !value) {
+                    toast.error('All guest access must be enabled when login handler is set to "None"')
+                    return
+                  }
                   setGuestCommentingEnabled(value)
                   updateSettings({ guest_commenting_enabled: value })
                 }}
@@ -169,10 +177,13 @@ export default function SSOSettingsPage() {
               <Switch
                 checked={guestVotingEnabled}
                 onCheckedChange={(value) => {
+                  if (!loginHandler && !value) {
+                    toast.error('All guest access must be enabled when login handler is set to "None"')
+                    return
+                  }
                   setGuestVotingEnabled(value)
                   updateSettings({ guest_voting_enabled: value })
                 }}
-              />
             </div>
           </div>
         </div>
@@ -196,9 +207,13 @@ export default function SSOSettingsPage() {
             onValueChange={(value) => {
               const handler = value === 'none' ? null : value as 'kelo' | 'customer'
               setLoginHandler(handler)
-              if (handler === null && !guestPostingEnabled) {
+              if (handler === null) {
+                // Force all guest access ON when no login handler
                 setGuestPostingEnabled(true)
-                updateSettings({ guest_posting_enabled: true })
+                setGuestCommentingEnabled(true)
+                setGuestVotingEnabled(true)
+                updateSettings({ guest_posting_enabled: true, guest_commenting_enabled: true, guest_voting_enabled: true })
+                toast.success('All guest access enabled (required when login handler is "None")')
               }
             }}
             className="space-y-3"
