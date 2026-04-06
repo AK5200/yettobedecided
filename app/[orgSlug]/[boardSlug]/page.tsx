@@ -65,6 +65,8 @@ export default function PublicBoardPage({
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
   const [loading, setLoading] = useState(true)
+  const [orgSlugState, setOrgSlugState] = useState('')
+  const [guestCommentingEnabled, setGuestCommentingEnabled] = useState(true)
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
   const [submitLoading, setSubmitLoading] = useState(false)
@@ -107,6 +109,7 @@ export default function PublicBoardPage({
     const fetchData = async () => {
       setLoading(true)
       const { orgSlug, boardSlug } = await params
+      setOrgSlugState(orgSlug)
 
       const { data: orgData } = await supabase
         .from('organizations')
@@ -118,6 +121,7 @@ export default function PublicBoardPage({
         setLoading(false)
         return
       }
+      setGuestCommentingEnabled(orgData.guest_commenting_enabled !== false)
 
       const { data: boardData } = await supabase
         .from('boards')
@@ -380,6 +384,8 @@ export default function PublicBoardPage({
                 authorEmail={userEmail}
                 authorName={userName}
                 onCommentAdded={() => setCommentRefresh((prev) => prev + 1)}
+                guestCommentingEnabled={guestCommentingEnabled}
+                orgSlug={orgSlugState}
               />
             </DialogContent>
           </Dialog>
