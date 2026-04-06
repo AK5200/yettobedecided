@@ -184,6 +184,7 @@ export default function SSOSettingsPage() {
                   setGuestVotingEnabled(value)
                   updateSettings({ guest_voting_enabled: value })
                 }}
+              />
             </div>
           </div>
         </div>
