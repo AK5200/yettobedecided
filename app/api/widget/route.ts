@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const { data: org, error: orgError } = await adminClient
     .from('organizations')
-    .select('id, name, slug, logo_url, description')
+    .select('id, name, slug, logo_url, description, guest_posting_enabled, guest_commenting_enabled, guest_voting_enabled, login_handler')
     .eq('slug', orgSlug)
     .single()
 
@@ -90,6 +90,12 @@ export async function GET(request: NextRequest) {
     boards: boards || [],
     changelog: changelog || [],
     posts: allPosts,
+    auth: {
+      guestPostingEnabled: org.guest_posting_enabled !== false,
+      guestCommentingEnabled: org.guest_commenting_enabled !== false,
+      guestVotingEnabled: org.guest_voting_enabled !== false,
+      loginHandler: org.login_handler || null,
+    },
   })
   response.headers.set('Cache-Control', 'no-cache')
   return withCors(response, origin)

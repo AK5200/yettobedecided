@@ -37,6 +37,7 @@ export default function AllInOneEmbedClient() {
   })
   const [changelog, setChangelog] = useState<any[]>(_embeddedData?.changelog || [])
   const [settings, setSettings] = useState<any>(_embeddedData?.settings || null)
+  const [auth, setAuth] = useState<any>(_embeddedData?.auth || null)
   const [loading, setLoading] = useState(!_embeddedData)
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
@@ -58,6 +59,7 @@ export default function AllInOneEmbedClient() {
     setBoards(data.boards || [])
     setChangelog(data.changelog || [])
     setSettings(data.settings || {})
+    if (data.auth) setAuth(data.auth)
 
     if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
       let votedPostIds: Set<string> = new Set()
@@ -303,6 +305,7 @@ export default function AllInOneEmbedClient() {
           onVote={handleVote}
           identifiedUser={identifiedUser}
           onPostsChange={setPosts}
+          guestCommentingEnabled={auth?.guestCommentingEnabled !== false}
         />
       </div>
 

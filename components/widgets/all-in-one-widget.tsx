@@ -48,6 +48,7 @@ interface AllInOneWidgetProps {
   onVote?: (postId: string) => void
   identifiedUser?: any
   onPostsChange?: (posts: Post[]) => void
+  guestCommentingEnabled?: boolean
 }
 
 function getCategoryStyle(category: string): { bg: string; text: string } {
@@ -165,6 +166,7 @@ export function AllInOneWidget({
   onVote,
   identifiedUser,
   onPostsChange,
+  guestCommentingEnabled = true,
 }: AllInOneWidgetProps) {
   // Defensive: ensure styleVariant is always a string for reliable comparison
   const styleVariant = String(rawStyleVariant) as '1' | '2' | '3'
@@ -309,6 +311,7 @@ export function AllInOneWidget({
           onBack={handleBack}
           onVote={handleVote}
           identifiedUser={identifiedUser}
+          guestCommentingEnabled={guestCommentingEnabled}
         />
         {showBranding && (
           <div className="pt-2 text-xs text-muted-foreground/60 text-center flex items-center justify-center gap-1">
