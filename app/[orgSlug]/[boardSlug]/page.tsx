@@ -123,6 +123,17 @@ export default function PublicBoardPage({
       }
       setGuestCommentingEnabled(orgData.guest_commenting_enabled !== false)
 
+      // Also fetch from widget config API as a reliable source (bypasses RLS)
+      try {
+        const configRes = await fetch(`/api/widget/config?org=${orgSlug}`)
+        if (configRes.ok) {
+          const configData = await configRes.json()
+          if (configData.auth) {
+            setGuestCommentingEnabled(configData.auth.guestCommentingEnabled !== false)
+          }
+        }
+      } catch {}
+
       const { data: boardData } = await supabase
         .from('boards')
         .select('*')
@@ -384,7 +395,7 @@ export default function PublicBoardPage({
                 authorEmail={userEmail}
                 authorName={userName}
                 onCommentAdded={() => setCommentRefresh((prev) => prev + 1)}
-                guestCommentingEnabled={guestCommentingEnabled}
+                guestCommentingEnabled={guestCommentingEnabled ?? true}
                 orgSlug={orgSlugState}
               />
             </DialogContent>
