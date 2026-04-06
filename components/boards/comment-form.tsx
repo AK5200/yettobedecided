@@ -44,7 +44,15 @@ export function CommentForm({
   const [loading, setLoading] = useState(false)
   const [isInternal, setIsInternal] = useState(false)
   const [localName, setLocalName] = useState('')
-  const [verifiedUser, setVerifiedUser] = useState<{ email: string; name?: string } | null>(null)
+  const [verifiedUser, setVerifiedUser] = useState<{ email: string; name?: string } | null>(() => {
+    // Read shared identity from localStorage
+    if (typeof window === 'undefined' || !orgSlug) return null
+    try {
+      const stored = localStorage.getItem(`kelo_identified_user_${orgSlug}`)
+      if (stored) return JSON.parse(stored)
+    } catch {}
+    return null
+  })
 
   // Verify flow state
   const [showVerify, setShowVerify] = useState(false)
@@ -130,7 +138,9 @@ export function CommentForm({
         body: JSON.stringify({ token: verificationToken, code: otpCode }),
       })
       if (res.ok) {
-        setVerifiedUser({ email: verifyEmail, name: localName || verifyEmail.split('@')[0] })
+        const userData = { email: verifyEmail, name: localName || verifyEmail.split('@')[0] }
+        setVerifiedUser(userData)
+        try { localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(userData)) } catch {}
         setShowVerify(false)
         setVerifyStep('options')
         toast.success('Identity verified!')
@@ -154,7 +164,9 @@ export function CommentForm({
       if (event.data && event.data.type === 'kelo:oauth-success') {
         const user = event.data.user
         if (user) {
-          setVerifiedUser({ email: user.email, name: user.name })
+          const userData = { email: user.email, name: user.name }
+          setVerifiedUser(userData)
+          try { localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(userData)) } catch {}
           setShowVerify(false)
           toast.success('Identity verified!')
         }

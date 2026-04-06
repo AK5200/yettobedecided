@@ -127,6 +127,19 @@ export function PublicFeaturesView({
   }
   const [createPostOpen, setCreatePostOpen] = useState(false)
 
+  // Read shared identity from localStorage (set by widget or public hub verification)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(`kelo_identified_user_${orgSlug}`)
+      if (stored) {
+        const user = JSON.parse(stored)
+        if (user.email && !voterEmail) {
+          setVoterEmail(user.email)
+        }
+      }
+    } catch {}
+  }, [orgSlug])
+
   const buildUrl = (overrides: { board?: string | null; status?: string; q?: string }) => {
     const params = new URLSearchParams()
     const board = overrides.board !== undefined ? overrides.board : currentBoard
@@ -571,7 +584,10 @@ export function PublicFeaturesView({
             <Button
               className="w-full"
               disabled={!voterEmail}
-              onClick={() => setShowVoteLogin(false)}
+              onClick={() => {
+                try { localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify({ email: voterEmail, name: voterEmail.split('@')[0] })) } catch {}
+                setShowVoteLogin(false)
+              }}
             >
               Continue with Email
             </Button>
@@ -590,6 +606,7 @@ export function PublicFeaturesView({
                 const handler = (event: MessageEvent) => {
                   if (event.data?.type === 'kelo:oauth-success' && event.data.user) {
                     setVoterEmail(event.data.user.email)
+                    try { localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(event.data.user)) } catch {}
                     setShowVoteLogin(false)
                     window.removeEventListener('message', handler)
                   }

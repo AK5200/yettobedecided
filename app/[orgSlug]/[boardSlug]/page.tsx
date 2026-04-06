@@ -61,9 +61,26 @@ export default function PublicBoardPage({
   const [org, setOrg] = useState<Org | null>(null)
   const [board, setBoard] = useState<Board | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
-  // Shared user identity for all actions
-  const [userEmail, setUserEmail] = useState('')
-  const [userName, setUserName] = useState('')
+  // Shared user identity for all actions — read from localStorage if available
+  const [userEmail, setUserEmail] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    try {
+      // Read orgSlug from URL for the storage key
+      const slug = window.location.pathname.split('/')[1] || ''
+      const stored = localStorage.getItem(`kelo_identified_user_${slug}`)
+      if (stored) return JSON.parse(stored).email || ''
+    } catch {}
+    return ''
+  })
+  const [userName, setUserName] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    try {
+      const slug = window.location.pathname.split('/')[1] || ''
+      const stored = localStorage.getItem(`kelo_identified_user_${slug}`)
+      if (stored) return JSON.parse(stored).name || ''
+    } catch {}
+    return ''
+  })
   const [loading, setLoading] = useState(true)
   const [orgSlugState, setOrgSlugState] = useState('')
   const [guestCommentingEnabled, setGuestCommentingEnabled] = useState(true)

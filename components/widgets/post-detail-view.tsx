@@ -82,7 +82,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         const user = event.data.user
         if (user) {
           setIdentifiedUser(user)
-          try { sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user)) } catch {}
+          try { localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user)) } catch {}
         }
       }
     }
@@ -90,7 +90,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
 
     if (!identifiedUserProp) {
       try {
-        const stored = sessionStorage.getItem(`kelo_identified_user_${orgSlug}`)
+        const stored = localStorage.getItem(`kelo_identified_user_${orgSlug}`)
         if (stored) setIdentifiedUser(JSON.parse(stored))
       } catch {}
     }
@@ -145,7 +145,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
       if (res.ok) {
         const userData = { email: verifyEmail, name: commentName || verifyEmail.split('@')[0] }
         setIdentifiedUser(userData)
-        try { sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(userData)) } catch {}
+        try { localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(userData)) } catch {}
         setShowVerify(false)
         setVerifyStep('options')
       } else {
@@ -170,7 +170,7 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         const user = event.data.user
         if (user) {
           setIdentifiedUser(user)
-          try { sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user)) } catch {}
+          try { localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user)) } catch {}
           setShowVerify(false)
         }
         window.removeEventListener('message', handleOAuth)

@@ -48,7 +48,7 @@ export default function AllInOneEmbedClient() {
   // Read identified user from sessionStorage on mount
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem(`kelo_identified_user_${org}`)
+      const stored = localStorage.getItem(`kelo_identified_user_${org}`)
       if (stored) {
         setIdentifiedUser(JSON.parse(stored))
       }
@@ -95,7 +95,7 @@ export default function AllInOneEmbedClient() {
         if (user) {
           setIdentifiedUser(user)
           try {
-            sessionStorage.setItem(`kelo_identified_user_${org}`, JSON.stringify(user))
+            localStorage.setItem(`kelo_identified_user_${org}`, JSON.stringify(user))
           } catch {}
         }
       }
@@ -229,7 +229,7 @@ export default function AllInOneEmbedClient() {
   const handleFeedbackSubmit = async (post?: any) => {
     // Re-read identified user from sessionStorage (user may have just authenticated in the feedback form)
     try {
-      const stored = sessionStorage.getItem(`kelo_identified_user_${org}`)
+      const stored = localStorage.getItem(`kelo_identified_user_${org}`)
       if (stored) {
         setIdentifiedUser(JSON.parse(stored))
       }
@@ -333,7 +333,7 @@ export default function AllInOneEmbedClient() {
         accentColor={accentColor}
         onVerified={(user) => {
           setIdentifiedUser(user)
-          try { sessionStorage.setItem(`kelo_identified_user_${org}`, JSON.stringify(user)) } catch {}
+          try { localStorage.setItem(`kelo_identified_user_${org}`, JSON.stringify(user)) } catch {}
           setShowLoginDialog(false)
         }}
       />

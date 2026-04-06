@@ -94,7 +94,7 @@ export function FeedbackWidget({
           setIdentifiedUser(user)
           // Store in sessionStorage for persistence (scoped per org)
           try {
-            sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
+            localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
           } catch (e) {
             // Ignore storage errors
           }
@@ -106,7 +106,7 @@ export function FeedbackWidget({
 
     // Check sessionStorage for existing identity (scoped per org)
     try {
-      const stored = sessionStorage.getItem(`kelo_identified_user_${orgSlug}`)
+      const stored = localStorage.getItem(`kelo_identified_user_${orgSlug}`)
       if (stored) {
         const user = JSON.parse(stored)
         setIsIdentified(true)
@@ -147,7 +147,7 @@ export function FeedbackWidget({
     const userData = { id: email, email, name }
     setIdentifiedUser(userData)
     try {
-      sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(userData))
+      localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(userData))
     } catch {
       // Ignore storage errors
     }
@@ -197,7 +197,7 @@ export function FeedbackWidget({
           setIdentifiedUser(user)
           setIsIdentified(true)
           try {
-            sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
+            localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
           } catch {
             // Ignore storage errors
           }
@@ -303,7 +303,7 @@ export function FeedbackWidget({
       setMagicLinkStep(null)
 
       try {
-        sessionStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
+        localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(user))
       } catch {
         // Ignore storage errors
       }
