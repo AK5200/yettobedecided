@@ -40,6 +40,8 @@ interface PostDetailDialogProps {
   isAdmin?: boolean
   adminEmail?: string
   children: React.ReactNode
+  guestCommentingEnabled?: boolean
+  orgSlug?: string
 }
 
 interface Status {
@@ -66,10 +68,14 @@ function PostDetailContent({
   post,
   isAdmin,
   adminEmail,
+  guestCommentingEnabled,
+  orgSlug,
 }: {
   post: Post
   isAdmin?: boolean
   adminEmail?: string
+  guestCommentingEnabled?: boolean
+  orgSlug?: string
 }) {
   const router = useRouter()
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -198,6 +204,8 @@ function PostDetailContent({
             authorEmail={adminEmail}
             authorName={isAdmin ? 'Admin' : undefined}
             onCommentAdded={handleCommentAdded}
+            guestCommentingEnabled={guestCommentingEnabled}
+            orgSlug={orgSlug}
           />
         </div>
       </div>
@@ -361,7 +369,7 @@ function PostDetailContent({
   )
 }
 
-export function PostDetailDialog({ post, isAdmin, adminEmail, children }: PostDetailDialogProps) {
+export function PostDetailDialog({ post, isAdmin, adminEmail, children, guestCommentingEnabled, orgSlug }: PostDetailDialogProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -369,7 +377,7 @@ export function PostDetailDialog({ post, isAdmin, adminEmail, children }: PostDe
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] overflow-hidden p-6 lg:p-8 rounded-xl border-border">
         {open && (
-          <PostDetailContent post={post} isAdmin={isAdmin} adminEmail={adminEmail} />
+          <PostDetailContent post={post} isAdmin={isAdmin} adminEmail={adminEmail} guestCommentingEnabled={guestCommentingEnabled} orgSlug={orgSlug} />
         )}
       </DialogContent>
     </Dialog>

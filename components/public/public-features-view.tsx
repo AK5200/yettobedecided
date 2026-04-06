@@ -438,7 +438,7 @@ export function PublicFeaturesView({
                   const boardColorConfig = board ? getBoardColor(board.name) : null
 
                   return (
-                    <PostDetailDialog key={post.id} post={post}>
+                    <PostDetailDialog key={post.id} post={post} orgSlug={orgSlug} guestCommentingEnabled={(org as any).guest_commenting_enabled !== false}>
                       <article className="bg-card rounded-xl p-4 shadow-sm flex gap-4 hover:shadow-md transition-all cursor-pointer">
                         {/* Upvote box */}
                         <button
