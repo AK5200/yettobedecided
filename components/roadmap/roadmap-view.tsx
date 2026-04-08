@@ -34,6 +34,10 @@ import {
   AlertTriangle,
   Eye,
   EyeOff,
+  Search,
+  GripVertical,
+  MessageSquare,
+  Sparkles,
 } from 'lucide-react'
 import { PostDetailDialog } from '@/components/boards/post-detail-dialog'
 import { toast } from 'sonner'
@@ -89,8 +93,68 @@ const getColorClasses = (hexColor: string) => {
   return colorMap[hexColor] || { bg: 'bg-muted/50', border: 'border-border', headerBg: 'bg-muted' }
 }
 
-export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
+export function RoadmapView({ posts: initialPosts, isAdmin, adminEmail }: RoadmapViewProps) {
   const router = useRouter()
+
+  // Local posts state for optimistic drag-and-drop
+  const [posts, setPosts] = useState<RoadmapPost[]>(initialPosts)
+  const [query, setQuery] = useState('')
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [dragOverCol, setDragOverCol] = useState<string | null>(null)
+
+  useEffect(() => {
+    setPosts(initialPosts)
+  }, [initialPosts])
+
+  const movePost = async (postId: string, toStatusKey: string) => {
+    const snapshot = posts
+    const target = posts.find((p) => p.id === postId)
+    if (!target || target.status === toStatusKey) return
+
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, status: toStatusKey as any } : p))
+    )
+
+    try {
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: toStatusKey }),
+      })
+      if (!res.ok) {
+        setPosts(snapshot)
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Failed to move post')
+      } else {
+        toast.success('Status updated')
+      }
+    } catch {
+      setPosts(snapshot)
+      toast.error('Failed to move post')
+    }
+  }
+
+  const onDragStart = (e: React.DragEvent, postId: string) => {
+    setDraggingId(postId)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', postId)
+  }
+  const onDragEnd = () => {
+    setDraggingId(null)
+    setDragOverCol(null)
+  }
+  const onColDragOver = (e: React.DragEvent, key: string) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragOverCol !== key) setDragOverCol(key)
+  }
+  const onColDrop = (e: React.DragEvent, key: string) => {
+    e.preventDefault()
+    const id = e.dataTransfer.getData('text/plain')
+    setDragOverCol(null)
+    setDraggingId(null)
+    if (id) movePost(id, key)
+  }
 
   // Status management state
   const [statuses, setStatuses] = useState<Status[]>([])
@@ -295,15 +359,23 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
     return post.author_name || 'Anonymous'
   }
 
+  const totalVisible = posts.length
+
   return (
-    <div className="flex-1 bg-background">
+    <div className="flex-1 bg-gradient-to-b from-muted/40 via-background to-background">
       {/* Header */}
-      <div className="border-b bg-background">
+      <div className="border-b bg-background/60 backdrop-blur">
         <div className="px-8 py-6 flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Roadmap</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Track the progress of features and manage statuses
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground mb-2">
+              <Sparkles className="h-3 w-3 text-amber-500" />
+              Roadmap
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              What we&apos;re building
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Drag cards across columns to update status. {totalVisible} total items.
             </p>
           </div>
           {isAdmin && (
@@ -377,80 +449,173 @@ export function RoadmapView({ posts, isAdmin, adminEmail }: RoadmapViewProps) {
                   </p>
                 </div>
               ) : (
-                <div
-                  className="grid gap-4"
-                  style={{
-                    gridTemplateColumns: `repeat(${Math.min(displayStatuses.length, 5)}, minmax(0, 1fr))`
-                  }}
-                >
-                  {displayStatuses.map((status) => {
-                    const columnPosts = getPostsForStatus(status.key)
-                    const colors = getColorClasses(status.color)
+                <>
+                  {/* Search bar */}
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                      <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search roadmap…"
+                        className="h-10 w-72 rounded-xl border border-border bg-background/80 backdrop-blur pl-9 pr-3 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-amber-300/50 focus:border-amber-300 transition"
+                      />
+                    </div>
+                  </div>
 
-                    return (
-                      <div
-                        key={status.id}
-                        className={`rounded-lg border ${colors.border} ${colors.bg} overflow-hidden`}
-                      >
-                        {/* Column Header */}
-                        <div className={`px-4 py-3 ${colors.headerBg} border-b ${colors.border}`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Circle
-                                className="h-4 w-4"
-                                style={{ color: status.color, fill: status.color }}
+                  <div
+                    className="grid gap-5"
+                    style={{
+                      gridTemplateColumns: `repeat(${Math.min(displayStatuses.length, 5)}, minmax(0, 1fr))`,
+                    }}
+                  >
+                    {displayStatuses.map((status) => {
+                      const q = query.trim().toLowerCase()
+                      const columnPosts = getPostsForStatus(status.key).filter((p) =>
+                        !q
+                          ? true
+                          : p.title.toLowerCase().includes(q) ||
+                            (p.content || '').toLowerCase().includes(q)
+                      )
+                      const isOver = dragOverCol === status.key
+
+                      return (
+                        <section
+                          key={status.id}
+                          onDragOver={(e) => onColDragOver(e, status.key)}
+                          onDragLeave={() =>
+                            dragOverCol === status.key && setDragOverCol(null)
+                          }
+                          onDrop={(e) => onColDrop(e, status.key)}
+                          className={`flex flex-col rounded-2xl border bg-background/60 backdrop-blur-sm shadow-sm transition-all ${
+                            isOver
+                              ? 'border-amber-300 ring-2 ring-amber-200/60 shadow-lg'
+                              : 'border-border'
+                          }`}
+                        >
+                          {/* Column Header */}
+                          <div
+                            className="rounded-t-2xl px-4 py-3 border-b border-border/70"
+                            style={{
+                              background: `linear-gradient(180deg, ${status.color}14 0%, ${status.color}06 100%)`,
+                            }}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className="w-2 h-2 rounded-full shrink-0"
+                                style={{ backgroundColor: status.color }}
                               />
-                              <span className="font-semibold text-foreground text-sm">{status.name}</span>
+                              <h2 className="text-[13px] font-semibold text-foreground tracking-tight uppercase">
+                                {status.name}
+                              </h2>
+                              <span
+                                className="ml-auto text-[11px] font-bold rounded-full px-2 py-0.5"
+                                style={{
+                                  backgroundColor: status.color + '20',
+                                  color: status.color,
+                                }}
+                              >
+                                {columnPosts.length}
+                              </span>
                             </div>
-                            <Badge variant="secondary" className="text-xs">
-                              {columnPosts.length}
-                            </Badge>
                           </div>
-                        </div>
 
-                        {/* Posts */}
-                        <div className="p-3 min-h-[350px]">
-                          {columnPosts.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-8 text-center">
-                              <p className="text-xs text-muted-foreground/60">No items</p>
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              {columnPosts.map((post) => (
-                                <PostDetailDialog
-                                  key={post.id}
-                                  post={post}
-                                  isAdmin={isAdmin}
-                                  adminEmail={adminEmail}
-                                >
-                                  <div className="bg-card rounded-lg border border-border p-3 shadow-sm hover:shadow-md hover:border-border cursor-pointer transition-all">
-                                    <h4 className="text-sm font-medium text-foreground line-clamp-2 mb-2">
-                                      {post.title}
-                                    </h4>
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-1 text-muted-foreground">
-                                        <ChevronUp className="h-3 w-3" />
-                                        <span className="text-xs font-medium">{post.vote_count || 0}</span>
-                                      </div>
-                                      {post.board_name && (
-                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                                          {post.board_name}
-                                        </Badge>
-                                      )}
+                          {/* Posts */}
+                          <div
+                            className={`p-3 space-y-2.5 flex-1 min-h-[420px] rounded-b-2xl transition-colors ${
+                              isOver ? 'bg-amber-50/40' : ''
+                            }`}
+                          >
+                            {columnPosts.length === 0 ? (
+                              <div className="h-full min-h-[380px] flex items-center justify-center rounded-xl border border-dashed border-border/70">
+                                <p className="text-xs text-muted-foreground/60">
+                                  {isOver ? 'Drop here' : 'No items'}
+                                </p>
+                              </div>
+                            ) : (
+                              columnPosts.map((post) => {
+                                const isDragging = draggingId === post.id
+                                const initials =
+                                  (getAuthorName(post)
+                                    .split(/\s+/)
+                                    .map((w) => w[0])
+                                    .join('')
+                                    .slice(0, 2) || '?').toUpperCase()
+                                return (
+                                  <div
+                                    key={post.id}
+                                    draggable
+                                    onDragStart={(e) => onDragStart(e, post.id)}
+                                    onDragEnd={onDragEnd}
+                                    className={`group relative bg-card rounded-xl border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-amber-300/70 transition-all ${
+                                      isDragging ? 'opacity-40 rotate-1 scale-[0.98]' : ''
+                                    }`}
+                                  >
+                                    <span
+                                      className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full"
+                                      style={{ backgroundColor: status.color }}
+                                    />
+                                    <div
+                                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-muted-foreground/50"
+                                      title="Drag to move"
+                                    >
+                                      <GripVertical className="h-4 w-4" />
                                     </div>
-                                    <p className="text-[10px] text-muted-foreground/60 mt-2 truncate">
-                                      {getAuthorName(post)}
-                                    </p>
+
+                                    <PostDetailDialog
+                                      post={post}
+                                      isAdmin={isAdmin}
+                                      adminEmail={adminEmail}
+                                    >
+                                      <div className="p-4 pl-5 cursor-pointer">
+                                        <h4 className="text-[13px] font-semibold text-foreground mb-1.5 pr-6 leading-snug line-clamp-2 group-hover:text-amber-700 transition-colors">
+                                          {post.title}
+                                        </h4>
+                                        {post.content && (
+                                          <p className="text-[11.5px] text-muted-foreground leading-relaxed mb-3 line-clamp-2">
+                                            {post.content}
+                                          </p>
+                                        )}
+                                        <div className="flex items-center justify-between mt-3">
+                                          <div className="flex items-center gap-1.5">
+                                            <div
+                                              className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-2 ring-background"
+                                              style={{
+                                                background: `linear-gradient(135deg, ${status.color}, ${status.color}cc)`,
+                                              }}
+                                              title={getAuthorName(post)}
+                                            >
+                                              {initials}
+                                            </div>
+                                            {post.board_name && (
+                                              <Badge
+                                                variant="outline"
+                                                className="text-[10px] px-1.5 py-0 h-5"
+                                              >
+                                                {post.board_name}
+                                              </Badge>
+                                            )}
+                                          </div>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-1.5 py-0.5 text-[10.5px] font-bold text-foreground/80">
+                                              <ChevronUp className="h-3 w-3" />
+                                              {post.vote_count || 0}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </PostDetailDialog>
                                   </div>
-                                </PostDetailDialog>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                                )
+                              })
+                            )}
+                          </div>
+                        </section>
+                      )
+                    })}
+                  </div>
+                </>
               )}
             </div>
           </TabsContent>
