@@ -19,6 +19,7 @@ interface ExistingOrg {
 
 export function StepOrg({ onComplete }: StepOrgProps) {
   const [existingOrg, setExistingOrg] = useState<ExistingOrg | null>(null)
+  const [isOwner, setIsOwner] = useState(false)
   const [showCreateNew, setShowCreateNew] = useState(false)
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -34,11 +35,12 @@ export function StepOrg({ onComplete }: StepOrgProps) {
 
         const { data: membership } = await supabase
           .from('org_members')
-          .select('org_id')
+          .select('org_id, role')
           .eq('user_id', user.id)
           .single()
 
         if (membership?.org_id) {
+          setIsOwner(membership.role === 'owner')
           const { data: org } = await supabase
             .from('organizations')
             .select('id, name, slug')
@@ -141,14 +143,16 @@ export function StepOrg({ onComplete }: StepOrgProps) {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowCreateNew(true)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Create a new organization
-          </button>
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setShowCreateNew(true)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create a new organization
+            </button>
+          )}
         </div>
       )}
 

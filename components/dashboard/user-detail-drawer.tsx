@@ -82,13 +82,13 @@ const SOURCE_DISPLAY: Record<UserSource, { label: string; bg: string; darkBg: st
   guest: { label: 'Guest', bg: 'bg-gray-100', darkBg: 'bg-white/[0.06]', text: 'text-gray-500', darkText: 'text-white/40' },
 }
 
-const STATUS_CONFIG: Record<string, { label: string; bg: string; darkBg: string; text: string; darkText: string }> = {
-  open: { label: 'Open', bg: 'bg-indigo-50', darkBg: 'bg-indigo-500/10', text: 'text-indigo-600', darkText: 'text-indigo-400' },
-  'in-progress': { label: 'In Progress', bg: 'bg-yellow-50', darkBg: 'bg-yellow-500/10', text: 'text-yellow-700', darkText: 'text-yellow-400' },
-  planned: { label: 'Planned', bg: 'bg-purple-50', darkBg: 'bg-purple-500/10', text: 'text-purple-600', darkText: 'text-purple-400' },
-  completed: { label: 'Completed', bg: 'bg-green-50', darkBg: 'bg-green-500/10', text: 'text-green-600', darkText: 'text-green-400' },
-  shipped: { label: 'Shipped', bg: 'bg-green-50', darkBg: 'bg-green-500/10', text: 'text-green-600', darkText: 'text-green-400' },
-  closed: { label: 'Closed', bg: 'bg-gray-100', darkBg: 'bg-white/[0.06]', text: 'text-gray-500', darkText: 'text-white/40' },
+// Fallback — overridden by DB statuses when loaded
+const DEFAULT_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  open: { label: 'Open', color: '#6B7280' },
+  planned: { label: 'Planned', color: '#3B82F6' },
+  in_progress: { label: 'In Progress', color: '#F59E0B' },
+  shipped: { label: 'Shipped', color: '#10B981' },
+  closed: { label: 'Closed', color: '#EF4444' },
 }
 
 function timeAgo(dateStr: string): string {
@@ -115,6 +115,19 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
   const [votesLoaded, setVotesLoaded] = useState(false)
   const [commentsLoaded, setCommentsLoaded] = useState(false)
   const [banReason, setBanReason] = useState('')
+  const [statusMap, setStatusMap] = useState<Record<string, { label: string; color: string }>>(DEFAULT_STATUS_CONFIG)
+
+  useEffect(() => {
+    fetch('/api/statuses').then(r => r.json()).then(data => {
+      if (data.statuses) {
+        const map: Record<string, { label: string; color: string }> = {}
+        for (const s of data.statuses) {
+          map[s.key] = { label: s.name, color: s.color }
+        }
+        setStatusMap(map)
+      }
+    }).catch(() => {})
+  }, [])
   const [banLoading, setBanLoading] = useState(false)
   const [selectedPost, setSelectedPost] = useState<FullPost | null>(null)
   const [loadingPost, setLoadingPost] = useState(false)
@@ -241,8 +254,15 @@ export function UserDetailDrawer({ user, onOpenChange, onUserUpdated }: UserDeta
                   <h3 className={`text-lg font-display font-bold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>{selectedPost.title}</h3>
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     {(() => {
-                      const s = STATUS_CONFIG[selectedPost.status] || STATUS_CONFIG.open
-                      return <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${isDark ? `${s.darkBg} ${s.darkText}` : `${s.bg} ${s.text}`}`}>{s.label}</span>
+                      const s = statusMap[selectedPost.status] || { label: selectedPost.status, color: '#6B7280' }
+                      return (
+                        <span
+                          className="text-xs font-bold px-2 py-0.5 rounded-lg"
+                          style={{ backgroundColor: s.color + '18', color: s.color }}
+                        >
+                          {s.label}
+                        </span>
+                      )
                     })()}
                     <span className={`text-xs ${isDark ? 'text-white/30' : 'text-kelo-muted'}`}>
                       {(selectedPost.boards as any)?.name || 'Board'} · {new Date(selectedPost.created_at).toLocaleDateString()}

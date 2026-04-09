@@ -45,16 +45,28 @@ export default function AllInOneEmbedClient() {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
 
-  // Read identified user from sessionStorage on mount
+  // Read identified user from localStorage on mount, fallback to widget_session cookie
   useEffect(() => {
     try {
       const stored = localStorage.getItem(`kelo_identified_user_${org}`)
       if (stored) {
         setIdentifiedUser(JSON.parse(stored))
+        return
       }
-    } catch {
-      // Ignore storage errors
-    }
+    } catch {}
+
+    // Check widget_session cookie for shared auth
+    fetch('/api/auth/widget/session')
+      .then(r => r.json())
+      .then(data => {
+        if (data.user?.email) {
+          setIdentifiedUser(data.user)
+          try {
+            localStorage.setItem(`kelo_identified_user_${org}`, JSON.stringify(data.user))
+          } catch {}
+        }
+      })
+      .catch(() => {})
   }, [org])
 
   const applyWidgetData = useCallback((data: any) => {

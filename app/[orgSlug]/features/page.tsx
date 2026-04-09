@@ -1,7 +1,15 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { PublicFeaturesView } from '@/components/public/public-features-view'
+
+const DEFAULT_STATUSES = [
+  { key: 'open', name: 'Open', color: '#6B7280', order: 0 },
+  { key: 'planned', name: 'Planned', color: '#3B82F6', order: 1 },
+  { key: 'in_progress', name: 'In Progress', color: '#F59E0B', order: 2 },
+  { key: 'shipped', name: 'Shipped', color: '#10B981', order: 3 },
+  { key: 'closed', name: 'Closed', color: '#EF4444', order: 4 },
+]
 
 export async function generateMetadata({
   params,
@@ -104,6 +112,16 @@ export default async function PublicFeaturesPage({
     return acc
   }, {})
 
+  // Fetch statuses from DB (use admin client to bypass RLS)
+  const adminSupabase = createAdminClient()
+  const { data: dbStatuses } = await adminSupabase
+    .from('statuses')
+    .select('key, name, color')
+    .eq('org_id', org.id)
+    .order('order', { ascending: true })
+
+  const statuses = dbStatuses && dbStatuses.length > 0 ? dbStatuses : DEFAULT_STATUSES
+
   // Get changelog entries
   const { data: changelogEntries } = await supabase
     .from('changelog_entries')
@@ -124,6 +142,7 @@ export default async function PublicFeaturesPage({
       currentBoard={resolvedSearchParams.board}
       currentStatus={resolvedSearchParams.status || 'all'}
       searchQuery={resolvedSearchParams.q || ''}
+      statuses={statuses.map(s => ({ key: s.key, name: s.name, color: s.color }))}
     />
   )
 }

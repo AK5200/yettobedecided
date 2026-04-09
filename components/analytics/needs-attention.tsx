@@ -20,15 +20,26 @@ interface NeedsAttentionProps {
   orgId: string
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  open: { label: 'Open', color: 'text-blue-700', bg: 'bg-blue-50' },
-  planned: { label: 'Planned', color: 'text-violet-700', bg: 'bg-violet-50' },
-  in_progress: { label: 'In Progress', color: 'text-amber-700', bg: 'bg-amber-50' },
+const DEFAULT_STATUS_MAP: Record<string, { name: string; color: string }> = {
+  open: { name: 'Open', color: '#6B7280' },
+  planned: { name: 'Planned', color: '#3B82F6' },
+  in_progress: { name: 'In Progress', color: '#F59E0B' },
 }
 
 export function NeedsAttention({ orgId }: NeedsAttentionProps) {
   const [dismissed, setDismissed] = useState(false)
   const [stalePosts, setStalePosts] = useState<StalePost[]>([])
+  const [statusMap, setStatusMap] = useState<Record<string, { name: string; color: string }>>(DEFAULT_STATUS_MAP)
+
+  useEffect(() => {
+    fetch('/api/statuses').then(r => r.json()).then(d => {
+      if (d.statuses) {
+        const map: Record<string, { name: string; color: string }> = {}
+        for (const s of d.statuses) map[s.key] = { name: s.name, color: s.color }
+        setStatusMap(map)
+      }
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,7 +94,7 @@ export function NeedsAttention({ orgId }: NeedsAttentionProps) {
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto">
             {stalePosts.map((post) => {
-              const statusConfig = STATUS_CONFIG[post.status] || STATUS_CONFIG.open
+              const s = statusMap[post.status] || { name: post.status, color: '#6B7280' }
               return (
                 <PostDetailDialog key={post.id} post={post} isAdmin>
                   <div className="flex items-center gap-3 px-6 py-3.5 hover:bg-muted/50 transition-colors cursor-pointer border-b border-border/50 last:border-b-0">
@@ -92,8 +103,11 @@ export function NeedsAttention({ orgId }: NeedsAttentionProps) {
                         {post.title}
                       </h4>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.color}`}>
-                          {statusConfig.label}
+                        <span
+                          className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: s.color + '18', color: s.color }}
+                        >
+                          {s.name}
                         </span>
                         <span className="flex items-center gap-1 text-[11px] text-muted-foreground/60">
                           <Clock className="h-3 w-3" />

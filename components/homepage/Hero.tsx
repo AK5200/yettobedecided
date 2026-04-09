@@ -75,19 +75,8 @@ export default function Hero() {
         </p>
 
         <div className="flex items-center gap-2 mb-10">
-          <div className="flex -space-x-2">
-            {['#F5C518', '#0A0A0A', '#6B7280', '#22C55E'].map((color, i) => (
-              <div
-                key={i}
-                className="w-7 h-7 rounded-full border-2 border-white dark:border-[#080808] flex items-center justify-center text-xs font-bold"
-                style={{ background: color, color: i === 0 || i === 2 ? '#0A0A0A' : '#fff', zIndex: 4 - i }}
-              >
-                {['A', 'M', 'S', 'J'][i]}
-              </div>
-            ))}
-          </div>
           <span className="text-sm text-kelo-muted dark:text-white/50 font-medium">
-            Trusted by <span className="text-kelo-ink dark:text-white font-semibold">400+ product teams</span>
+            Built for founders who <span className="text-kelo-ink dark:text-white font-semibold">actually listen</span> to their users.
           </span>
         </div>
 
@@ -113,7 +102,7 @@ export default function Hero() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm text-kelo-muted dark:text-white/40">
-          <TrustItem text="Free forever plan" />
+          <TrustItem text="7-day free trial" />
           <span className="hidden sm:block w-px h-4 bg-kelo-border dark:bg-white/10" />
           <TrustItem text="No per-seat pricing" />
           <span className="hidden sm:block w-px h-4 bg-kelo-border dark:bg-white/10" />

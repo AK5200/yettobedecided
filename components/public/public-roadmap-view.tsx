@@ -8,10 +8,8 @@ import {
   MessageSquare,
   Map,
   Search,
-  GripVertical,
   Sparkles,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import type { Post, Organization } from '@/lib/types/database'
 
 interface RoadmapColumn {
@@ -27,14 +25,6 @@ interface PublicRoadmapViewProps {
   orgSlug: string
   columns: RoadmapColumn[]
   commentCountMap: Record<string, number>
-}
-
-// Map roadmap column key -> DB status value (matches page.tsx mapping)
-const COLUMN_KEY_TO_STATUS: Record<string, Post['status']> = {
-  planned: 'planned',
-  in_progress: 'in_progress',
-  next: 'open',
-  completed: 'shipped',
 }
 
 function getInitials(name?: string | null) {
@@ -54,10 +44,8 @@ export function PublicRoadmapView({
   columns: initialColumns,
   commentCountMap,
 }: PublicRoadmapViewProps) {
-  const [columns, setColumns] = useState<RoadmapColumn[]>(initialColumns)
+  const columns = initialColumns
   const [query, setQuery] = useState('')
-  const [draggingId, setDraggingId] = useState<string | null>(null)
-  const [dragOverCol, setDragOverCol] = useState<string | null>(null)
 
   const totalPosts = useMemo(
     () => columns.reduce((sum, col) => sum + col.posts.length, 0),
@@ -77,86 +65,6 @@ export function PublicRoadmapView({
     }))
   }, [columns, query])
 
-  const movePost = async (postId: string, fromKey: string, toKey: string) => {
-    if (fromKey === toKey) return
-
-    // Snapshot for revert
-    const snapshot = columns
-
-    // Optimistic update
-    let moved: Post | undefined
-    const next = columns.map((c) => {
-      if (c.key === fromKey) {
-        const idx = c.posts.findIndex((p) => p.id === postId)
-        if (idx >= 0) {
-          moved = c.posts[idx]
-          return { ...c, posts: c.posts.filter((p) => p.id !== postId) }
-        }
-      }
-      return c
-    })
-    if (!moved) return
-    const newStatus = COLUMN_KEY_TO_STATUS[toKey]
-    const movedWithStatus = { ...moved, status: newStatus } as Post
-    const next2 = next.map((c) =>
-      c.key === toKey ? { ...c, posts: [movedWithStatus, ...c.posts] } : c
-    )
-    setColumns(next2)
-
-    try {
-      const res = await fetch(`/api/posts/${postId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      })
-      if (!res.ok) {
-        setColumns(snapshot)
-        if (res.status === 401) {
-          toast.error('Sign in as an admin to move items')
-        } else {
-          const data = await res.json().catch(() => ({}))
-          toast.error(data.error || 'Failed to move item')
-        }
-      } else {
-        toast.success('Status updated')
-      }
-    } catch {
-      setColumns(snapshot)
-      toast.error('Failed to move item')
-    }
-  }
-
-  const onDragStart = (e: React.DragEvent, postId: string, fromKey: string) => {
-    setDraggingId(postId)
-    e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/plain', JSON.stringify({ postId, fromKey }))
-  }
-
-  const onDragEnd = () => {
-    setDraggingId(null)
-    setDragOverCol(null)
-  }
-
-  const onColumnDragOver = (e: React.DragEvent, key: string) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-    if (dragOverCol !== key) setDragOverCol(key)
-  }
-
-  const onColumnDrop = (e: React.DragEvent, toKey: string) => {
-    e.preventDefault()
-    const raw = e.dataTransfer.getData('text/plain')
-    setDragOverCol(null)
-    setDraggingId(null)
-    if (!raw) return
-    try {
-      const { postId, fromKey } = JSON.parse(raw)
-      movePost(postId, fromKey, toKey)
-    } catch {
-      /* noop */
-    }
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background">
       <PublicHubNav org={org} orgSlug={orgSlug} />
@@ -173,8 +81,7 @@ export function PublicRoadmapView({
               What we&apos;re building
             </h1>
             <p className="text-sm text-muted-foreground mt-2 max-w-xl">
-              Track every idea from review to launch. Drag cards across columns
-              to update status (admins only).
+              Track every idea from review to launch.
             </p>
           </div>
 
@@ -209,20 +116,10 @@ export function PublicRoadmapView({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
             {filteredColumns.map((column) => {
-              const isOver = dragOverCol === column.key
               return (
                 <section
                   key={column.key}
-                  onDragOver={(e) => onColumnDragOver(e, column.key)}
-                  onDragLeave={() =>
-                    dragOverCol === column.key && setDragOverCol(null)
-                  }
-                  onDrop={(e) => onColumnDrop(e, column.key)}
-                  className={`flex flex-col rounded-2xl border bg-background/60 backdrop-blur-sm shadow-sm transition-all ${
-                    isOver
-                      ? 'border-amber-300 ring-2 ring-amber-200/60 shadow-lg'
-                      : 'border-border'
-                  }`}
+                  className="flex flex-col rounded-2xl border border-border bg-background/60 backdrop-blur-sm shadow-sm"
                 >
                   {/* Column header (sticky-like) */}
                   <div
@@ -252,44 +149,26 @@ export function PublicRoadmapView({
                   </div>
 
                   {/* Column content */}
-                  <div
-                    className={`p-3 space-y-2.5 flex-1 min-h-[420px] rounded-b-2xl transition-colors ${
-                      isOver ? 'bg-amber-50/40' : ''
-                    }`}
-                  >
+                  <div className="p-3 space-y-2.5 flex-1 min-h-[420px] rounded-b-2xl">
                     {column.posts.length === 0 ? (
                       <div className="h-full min-h-[380px] flex items-center justify-center rounded-xl border border-dashed border-border/70">
                         <p className="text-xs text-muted-foreground/60">
-                          {isOver ? 'Drop here' : 'No items'}
+                          No items
                         </p>
                       </div>
                     ) : (
                       column.posts.map((post) => {
-                        const isDragging = draggingId === post.id
                         const author = authorOf(post as any)
                         return (
                           <div
                             key={post.id}
-                            draggable
-                            onDragStart={(e) => onDragStart(e, post.id, column.key)}
-                            onDragEnd={onDragEnd}
-                            className={`group relative bg-card rounded-xl border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-amber-300/70 transition-all ${
-                              isDragging ? 'opacity-40 rotate-1 scale-[0.98]' : ''
-                            }`}
+                            className="group relative bg-card rounded-xl border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-amber-300/70 transition-all"
                           >
                             {/* Left status accent bar */}
                             <span
                               className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full"
                               style={{ backgroundColor: column.dotColor }}
                             />
-
-                            {/* Drag handle */}
-                            <div
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-muted-foreground/50"
-                              title="Drag to move"
-                            >
-                              <GripVertical className="h-4 w-4" />
-                            </div>
 
                             <PostDetailDialog post={post}>
                               <div className="p-4 pl-5 cursor-pointer">

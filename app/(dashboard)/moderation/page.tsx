@@ -199,8 +199,8 @@ export default function ModerationPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 bg-white p-8">
-        <div className="text-gray-500">Loading...</div>
+      <div className="flex-1 bg-white dark:bg-[#0a0a0a] p-8">
+        <div className="text-gray-500 dark:text-white/40">Loading...</div>
       </div>
     )
   }
@@ -208,15 +208,15 @@ export default function ModerationPage() {
   const totalPending = pendingPosts.length + pendingComments.length
 
   return (
-    <div className="flex-1 bg-white">
+    <div className="flex-1 bg-white dark:bg-[#0a0a0a]">
       {/* Header */}
       <div className="border-b">
         <div className="px-8 py-6">
           <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-gray-600" />
+            <Shield className="h-6 w-6 text-gray-600 dark:text-white/50" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Moderation</h1>
-              <p className="text-gray-500 text-sm">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Moderation</h1>
+              <p className="text-gray-500 dark:text-white/40 text-sm">
                 Review and approve posts and comments before they go live
               </p>
             </div>
@@ -231,8 +231,8 @@ export default function ModerationPage() {
             <div className="w-16 h-16 rounded-full bg-emerald-100 mx-auto mb-4 flex items-center justify-center">
               <Check className="h-8 w-8 text-emerald-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">All caught up!</h2>
-            <p className="text-gray-500 max-w-md mx-auto">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">All caught up!</h2>
+            <p className="text-gray-500 dark:text-white/40 max-w-md mx-auto">
               There are no posts or comments waiting for moderation.
               New items will appear here when moderation is enabled.
             </p>
@@ -242,7 +242,7 @@ export default function ModerationPage() {
             <TabsList className="bg-transparent h-auto p-0 gap-0 border-b mb-6">
               <TabsTrigger
                 value="posts"
-                className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-gray-600 data-[state=active]:text-gray-900"
+                className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-gray-600 dark:text-white/50 data-[state=active]:text-gray-900 data-[state=active]:dark:text-white"
               >
                 <span className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
@@ -256,7 +256,7 @@ export default function ModerationPage() {
               </TabsTrigger>
               <TabsTrigger
                 value="comments"
-                className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-gray-600 data-[state=active]:text-gray-900"
+                className="px-4 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none text-gray-600 dark:text-white/50 data-[state=active]:text-gray-900 data-[state=active]:dark:text-white"
               >
                 <span className="flex items-center gap-2">
                   <MessageCircle className="h-4 w-4" />
@@ -273,8 +273,8 @@ export default function ModerationPage() {
             {/* Posts Tab */}
             <TabsContent value="posts" className="space-y-4">
               {pendingPosts.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <div className="text-center py-12 text-gray-500 dark:text-white/40">
+                  <MessageSquare className="h-12 w-12 text-gray-300 dark:text-white/20 mx-auto mb-3" />
                   <p>No posts pending moderation</p>
                 </div>
               ) : (
@@ -290,15 +290,15 @@ export default function ModerationPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium text-gray-900">{post.title}</h3>
+                            <h3 className="font-medium text-gray-900 dark:text-white">{post.title}</h3>
                             <Badge variant="outline" className="text-xs">
                               {post.board.name}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                          <p className="text-sm text-gray-600 dark:text-white/50 line-clamp-2 mb-2">
                             {post.content || 'No description'}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-white/40">
                             {post.identified_user_avatar ? (
                               <Image
                                 src={post.identified_user_avatar}
@@ -317,7 +317,7 @@ export default function ModerationPage() {
                                 Verified
                               </span>
                             )}
-                            <span className="text-gray-400">•</span>
+                            <span className="text-gray-400 dark:text-white/30">•</span>
                             <span>{formatDate(post.created_at)}</span>
                           </div>
                         </div>
@@ -352,8 +352,8 @@ export default function ModerationPage() {
             {/* Comments Tab */}
             <TabsContent value="comments" className="space-y-4">
               {pendingComments.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <MessageCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <div className="text-center py-12 text-gray-500 dark:text-white/40">
+                  <MessageCircle className="h-12 w-12 text-gray-300 dark:text-white/20 mx-auto mb-3" />
                   <p>No comments pending moderation</p>
                 </div>
               ) : (
@@ -369,13 +369,13 @@ export default function ModerationPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm text-gray-500">Comment on:</span>
-                            <span className="font-medium text-gray-900">{comment.post.title}</span>
+                            <span className="text-sm text-gray-500 dark:text-white/40">Comment on:</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{comment.post.title}</span>
                           </div>
-                          <p className="text-sm text-gray-600 line-clamp-3 mb-2">
+                          <p className="text-sm text-gray-600 dark:text-white/50 line-clamp-3 mb-2">
                             {comment.content}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-white/40">
                             {comment.identified_user_avatar ? (
                               <Image
                                 src={comment.identified_user_avatar}
@@ -394,7 +394,7 @@ export default function ModerationPage() {
                                 Verified
                               </span>
                             )}
-                            <span className="text-gray-400">•</span>
+                            <span className="text-gray-400 dark:text-white/30">•</span>
                             <span>{formatDate(comment.created_at)}</span>
                           </div>
                         </div>

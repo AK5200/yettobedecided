@@ -63,6 +63,7 @@ const plans = [
     description: 'For scaling teams with enterprise needs.',
     cta: 'Start 7-day free trial',
     highlight: false,
+    comingSoon: true,
     features: [
       'Everything in Pro',
       'SSO / SAML',
@@ -77,7 +78,7 @@ const plans = [
 ];
 
 export default function Pricing() {
-  const [annual, setAnnual] = useState(false);
+  const [annual, setAnnual] = useState(true);
 
   return (
     <section id="pricing" className="py-28 bg-kelo-surface dark:bg-[#0D0D0D] transition-colors duration-300">
@@ -118,11 +119,6 @@ export default function Pricing() {
           ))}
         </div>
 
-        <div className="flex items-center justify-center mt-10">
-          <a href="#" className="text-sm font-semibold text-kelo-ink dark:text-white underline underline-offset-2 hover:text-kelo-yellow-dark transition-colors whitespace-nowrap">
-            Compare all features →
-          </a>
-        </div>
       </div>
     </section>
   );
@@ -136,6 +132,7 @@ interface Plan {
   cta: string;
   highlight: boolean;
   badge?: string;
+  comingSoon?: boolean;
   features: string[];
   notIncluded: string[];
 }
@@ -164,31 +161,45 @@ function PlanCard({ plan, annual }: { plan: Plan; annual: boolean }) {
         <div className={`text-xs font-bold mb-2 uppercase tracking-wider ${plan.highlight ? 'text-kelo-yellow' : 'text-kelo-muted dark:text-white/40'}`}>
           {plan.name}
         </div>
-        <div className="flex items-end gap-1 mb-2">
-          <span className={`text-4xl font-display font-extrabold leading-none ${plan.highlight ? 'text-white' : 'text-kelo-ink dark:text-white'}`}>
-            {displayPrice}
-          </span>
-          {basePrice > 0 && (
-            <span className={`text-sm font-medium mb-0.5 ${plan.highlight ? 'text-white/50' : 'text-kelo-muted dark:text-white/40'}`}>
-              {plan.period}
+        {plan.comingSoon ? (
+          <div className="flex items-end gap-1 mb-2">
+            <span className={`text-2xl font-display font-extrabold leading-none ${plan.highlight ? 'text-white' : 'text-kelo-ink dark:text-white'}`}>
+              Coming soon
             </span>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex items-end gap-1 mb-2">
+            <span className={`text-4xl font-display font-extrabold leading-none ${plan.highlight ? 'text-white' : 'text-kelo-ink dark:text-white'}`}>
+              {displayPrice}
+            </span>
+            {basePrice > 0 && (
+              <span className={`text-sm font-medium mb-0.5 ${plan.highlight ? 'text-white/50' : 'text-kelo-muted dark:text-white/40'}`}>
+                {plan.period}
+              </span>
+            )}
+          </div>
+        )}
         <p className={`text-xs leading-relaxed ${plan.highlight ? 'text-white/60' : 'text-kelo-muted dark:text-white/40'}`}>
           {plan.description}
         </p>
       </div>
 
-      <Link
-        href="/signup"
-        className={`block text-center py-2.5 px-4 rounded-xl text-sm font-semibold mb-5 transition-all duration-200 ${
-          plan.highlight
-            ? 'bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark shadow-[0_2px_12px_rgba(245,197,24,0.4)]'
-            : 'bg-kelo-surface dark:bg-white/[0.08] border border-kelo-border dark:border-white/10 text-kelo-ink dark:text-white hover:bg-kelo-surface-2 dark:hover:bg-white/[0.12] hover:border-kelo-border-dark dark:hover:border-white/20'
-        }`}
-      >
-        {plan.cta}
-      </Link>
+      {plan.comingSoon ? (
+        <div className="block text-center py-2.5 px-4 rounded-xl text-sm font-semibold mb-5 bg-kelo-surface dark:bg-white/[0.05] border border-kelo-border dark:border-white/10 text-kelo-muted dark:text-white/30 cursor-default">
+          Coming soon
+        </div>
+      ) : (
+        <Link
+          href="/signup"
+          className={`block text-center py-2.5 px-4 rounded-xl text-sm font-semibold mb-5 transition-all duration-200 ${
+            plan.highlight
+              ? 'bg-kelo-yellow text-kelo-ink hover:bg-kelo-yellow-dark shadow-[0_2px_12px_rgba(245,197,24,0.4)]'
+              : 'bg-kelo-surface dark:bg-white/[0.08] border border-kelo-border dark:border-white/10 text-kelo-ink dark:text-white hover:bg-kelo-surface-2 dark:hover:bg-white/[0.12] hover:border-kelo-border-dark dark:hover:border-white/20'
+          }`}
+        >
+          {plan.cta}
+        </Link>
+      )}
 
       <div className="flex flex-col gap-2.5 flex-1">
         {plan.features.map((f) => (

@@ -2,23 +2,32 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
+interface StatusDef {
+  key: string
+  name: string
+  color: string
+}
+
 interface StatusFilterProps {
   value: string
   onChange: (value: string) => void
+  statuses: StatusDef[]
 }
 
-const STATUSES = ['all', 'open', 'planned', 'in_progress', 'shipped', 'closed']
-
-export function StatusFilter({ value, onChange }: StatusFilterProps) {
+export function StatusFilter({ value, onChange, statuses }: StatusFilterProps) {
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-40">
         <SelectValue placeholder="Status" />
       </SelectTrigger>
       <SelectContent>
-        {STATUSES.map((status) => (
-          <SelectItem key={status} value={status}>
-            {status === 'all' ? 'All' : status.replace('_', ' ')}
+        <SelectItem value="all">All</SelectItem>
+        {statuses.map((status) => (
+          <SelectItem key={status.key} value={status.key}>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
+              {status.name}
+            </div>
           </SelectItem>
         ))}
       </SelectContent>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -40,15 +39,14 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
   const [actionLoading, setActionLoading] = useState(false)
 
   const fetchComments = async () => {
-    const supabase = createClient()
-    const { data } = await supabase
-      .from('comments')
-      .select('*, widget_users(avatar_url, name, email, user_source, company_name)')
-      .eq('post_id', postId)
-      .order('created_at', { ascending: true })
-
-    if (data) {
-      setComments(data)
+    try {
+      const res = await fetch(`/api/comments?post_id=${postId}`)
+      const data = await res.json()
+      if (data.comments) {
+        setComments(data.comments)
+      }
+    } catch (error) {
+      console.error('Failed to fetch comments:', error)
     }
     setLoading(false)
   }

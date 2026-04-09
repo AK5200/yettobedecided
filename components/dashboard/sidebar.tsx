@@ -323,17 +323,21 @@ export function Sidebar() {
                   </DropdownMenuItem>
                 )
               })}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  setOrgSwitcherOpen(false)
-                  setCreateOrgOpen(true)
-                }}
-                className="cursor-pointer"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create new organization
-              </DropdownMenuItem>
+              {allOrgs.some((m) => m.role === 'owner') && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setOrgSwitcherOpen(false)
+                      setCreateOrgOpen(true)
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create new organization
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="flex items-center gap-1">

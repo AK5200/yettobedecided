@@ -23,16 +23,20 @@ export async function GET(request: Request) {
       return withCors(NextResponse.json({ error: 'post_id is required' }, { status: 400 }), origin)
     }
 
-    // Check if requester is an admin (can see all comments including unapproved)
+    // Check if requester is an authenticated org member
     const { data: { user: authUser } } = await supabase.auth.getUser()
+    const isAuthenticated = !!authUser
 
-    let query = supabase
+    // Use admin client for authenticated users to bypass RLS (so admins can see comments on unapproved posts)
+    const queryClient = isAuthenticated ? createAdminClient() : supabase
+
+    let query = queryClient
       .from('comments')
-      .select('*')
+      .select('*, widget_users(avatar_url, name, email, user_source, company_name)')
       .eq('post_id', postId)
 
-    // Non-admin users only see approved comments
-    if (!authUser) {
+    // Non-authenticated users only see approved comments
+    if (!isAuthenticated) {
       query = query.eq('is_approved', true)
     }
 

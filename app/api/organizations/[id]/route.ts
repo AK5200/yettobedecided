@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { getCurrentOrg } from '@/lib/org-context'
 
@@ -74,6 +74,54 @@ export async function PATCH(
         }
 
         return NextResponse.json({ organization: org })
+    } catch (error) {
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+}
+
+export async function DELETE(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id: orgId } = await params
+        const supabase = await createClient()
+        const context = await getCurrentOrg(supabase)
+
+        if (!context) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        if (context.orgId !== orgId || context.role !== 'owner') {
+            return NextResponse.json({ error: 'Only the organization owner can delete this organization.' }, { status: 403 })
+        }
+
+        // Verify confirmation name matches
+        const body = await request.json()
+        const { confirmName } = body
+
+        const { data: org } = await supabase
+            .from('organizations')
+            .select('name')
+            .eq('id', orgId)
+            .single()
+
+        if (!org || org.name !== confirmName) {
+            return NextResponse.json({ error: 'Organization name does not match.' }, { status: 400 })
+        }
+
+        // Use admin client to delete (RLS may not have a DELETE policy)
+        const adminSupabase = createAdminClient()
+        const { error: deleteError } = await adminSupabase
+            .from('organizations')
+            .delete()
+            .eq('id', orgId)
+
+        if (deleteError) {
+            return NextResponse.json({ error: deleteError.message }, { status: 500 })
+        }
+
+        return NextResponse.json({ success: true })
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }

@@ -35,7 +35,6 @@ import {
   Eye,
   EyeOff,
   Search,
-  GripVertical,
   MessageSquare,
   Sparkles,
 } from 'lucide-react'
@@ -96,65 +95,12 @@ const getColorClasses = (hexColor: string) => {
 export function RoadmapView({ posts: initialPosts, isAdmin, adminEmail }: RoadmapViewProps) {
   const router = useRouter()
 
-  // Local posts state for optimistic drag-and-drop
   const [posts, setPosts] = useState<RoadmapPost[]>(initialPosts)
   const [query, setQuery] = useState('')
-  const [draggingId, setDraggingId] = useState<string | null>(null)
-  const [dragOverCol, setDragOverCol] = useState<string | null>(null)
 
   useEffect(() => {
     setPosts(initialPosts)
   }, [initialPosts])
-
-  const movePost = async (postId: string, toStatusKey: string) => {
-    const snapshot = posts
-    const target = posts.find((p) => p.id === postId)
-    if (!target || target.status === toStatusKey) return
-
-    setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, status: toStatusKey as any } : p))
-    )
-
-    try {
-      const res = await fetch(`/api/posts/${postId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: toStatusKey }),
-      })
-      if (!res.ok) {
-        setPosts(snapshot)
-        const data = await res.json().catch(() => ({}))
-        toast.error(data.error || 'Failed to move post')
-      } else {
-        toast.success('Status updated')
-      }
-    } catch {
-      setPosts(snapshot)
-      toast.error('Failed to move post')
-    }
-  }
-
-  const onDragStart = (e: React.DragEvent, postId: string) => {
-    setDraggingId(postId)
-    e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/plain', postId)
-  }
-  const onDragEnd = () => {
-    setDraggingId(null)
-    setDragOverCol(null)
-  }
-  const onColDragOver = (e: React.DragEvent, key: string) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-    if (dragOverCol !== key) setDragOverCol(key)
-  }
-  const onColDrop = (e: React.DragEvent, key: string) => {
-    e.preventDefault()
-    const id = e.dataTransfer.getData('text/plain')
-    setDragOverCol(null)
-    setDraggingId(null)
-    if (id) movePost(id, key)
-  }
 
   // Status management state
   const [statuses, setStatuses] = useState<Status[]>([])
@@ -478,21 +424,10 @@ export function RoadmapView({ posts: initialPosts, isAdmin, adminEmail }: Roadma
                           : p.title.toLowerCase().includes(q) ||
                             (p.content || '').toLowerCase().includes(q)
                       )
-                      const isOver = dragOverCol === status.key
-
                       return (
                         <section
                           key={status.id}
-                          onDragOver={(e) => onColDragOver(e, status.key)}
-                          onDragLeave={() =>
-                            dragOverCol === status.key && setDragOverCol(null)
-                          }
-                          onDrop={(e) => onColDrop(e, status.key)}
-                          className={`flex flex-col rounded-2xl border bg-background/60 backdrop-blur-sm shadow-sm transition-all ${
-                            isOver
-                              ? 'border-amber-300 ring-2 ring-amber-200/60 shadow-lg'
-                              : 'border-border'
-                          }`}
+                          className="flex flex-col rounded-2xl border border-border bg-background/60 backdrop-blur-sm shadow-sm"
                         >
                           {/* Column Header */}
                           <div
@@ -522,20 +457,15 @@ export function RoadmapView({ posts: initialPosts, isAdmin, adminEmail }: Roadma
                           </div>
 
                           {/* Posts */}
-                          <div
-                            className={`p-3 space-y-2.5 flex-1 min-h-[420px] rounded-b-2xl transition-colors ${
-                              isOver ? 'bg-amber-50/40' : ''
-                            }`}
-                          >
+                          <div className="p-3 space-y-2.5 flex-1 min-h-[420px] rounded-b-2xl">
                             {columnPosts.length === 0 ? (
                               <div className="h-full min-h-[380px] flex items-center justify-center rounded-xl border border-dashed border-border/70">
                                 <p className="text-xs text-muted-foreground/60">
-                                  {isOver ? 'Drop here' : 'No items'}
+                                  No items
                                 </p>
                               </div>
                             ) : (
                               columnPosts.map((post) => {
-                                const isDragging = draggingId === post.id
                                 const initials =
                                   (getAuthorName(post)
                                     .split(/\s+/)
@@ -545,23 +475,12 @@ export function RoadmapView({ posts: initialPosts, isAdmin, adminEmail }: Roadma
                                 return (
                                   <div
                                     key={post.id}
-                                    draggable
-                                    onDragStart={(e) => onDragStart(e, post.id)}
-                                    onDragEnd={onDragEnd}
-                                    className={`group relative bg-card rounded-xl border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-amber-300/70 transition-all ${
-                                      isDragging ? 'opacity-40 rotate-1 scale-[0.98]' : ''
-                                    }`}
+                                    className="group relative bg-card rounded-xl border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-amber-300/70 transition-all"
                                   >
                                     <span
                                       className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full"
                                       style={{ backgroundColor: status.color }}
                                     />
-                                    <div
-                                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-muted-foreground/50"
-                                      title="Drag to move"
-                                    >
-                                      <GripVertical className="h-4 w-4" />
-                                    </div>
 
                                     <PostDetailDialog
                                       post={post}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
@@ -53,6 +53,22 @@ export function CommentForm({
     } catch {}
     return null
   })
+
+  // Check widget_session cookie for shared auth (if no local identity and no admin email)
+  useEffect(() => {
+    if (verifiedUser || authorEmail || !orgSlug) return
+    fetch('/api/auth/widget/session')
+      .then(r => r.json())
+      .then(data => {
+        if (data.user?.email) {
+          setVerifiedUser({ email: data.user.email, name: data.user.name })
+          try {
+            localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(data.user))
+          } catch {}
+        }
+      })
+      .catch(() => {})
+  }, [orgSlug, authorEmail])
 
   // Verify flow state
   const [showVerify, setShowVerify] = useState(false)

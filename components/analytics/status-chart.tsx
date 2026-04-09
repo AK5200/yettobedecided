@@ -9,24 +9,12 @@ interface StatusChartProps {
   days?: number
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  open: '#3b82f6',
-  under_review: '#f59e0b',
-  planned: '#8b5cf6',
-  in_progress: '#f97316',
-  completed: '#10b981',
-  shipped: '#22c55e',
-  closed: '#6b7280',
-}
-
-const STATUS_NAMES: Record<string, string> = {
-  open: 'Open',
-  under_review: 'Under Review',
-  planned: 'Planned',
-  in_progress: 'In Progress',
-  completed: 'Completed',
-  shipped: 'Shipped',
-  closed: 'Closed',
+const DEFAULT_STATUS_MAP: Record<string, { name: string; color: string }> = {
+  open: { name: 'Open', color: '#6B7280' },
+  planned: { name: 'Planned', color: '#3B82F6' },
+  in_progress: { name: 'In Progress', color: '#F59E0B' },
+  shipped: { name: 'Shipped', color: '#10B981' },
+  closed: { name: 'Closed', color: '#EF4444' },
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -67,6 +55,17 @@ const CustomLegend = ({ payload }: any) => {
 export function StatusChart({ orgId, days = 30 }: StatusChartProps) {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [statusMap, setStatusMap] = useState<Record<string, { name: string; color: string }>>(DEFAULT_STATUS_MAP)
+
+  useEffect(() => {
+    fetch('/api/statuses').then(r => r.json()).then(d => {
+      if (d.statuses) {
+        const map: Record<string, { name: string; color: string }> = {}
+        for (const s of d.statuses) map[s.key] = { name: s.name, color: s.color }
+        setStatusMap(map)
+      }
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +76,7 @@ export function StatusChart({ orgId, days = 30 }: StatusChartProps) {
           const byStatus = json.by_status || {}
           const total = Object.values(byStatus).reduce((sum: number, count: any) => sum + count, 0)
           const chartData = Object.entries(byStatus).map(([status, count]) => ({
-            name: STATUS_NAMES[status] || status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' '),
+            name: statusMap[status]?.name || status.replace('_', ' '),
             value: count,
             status,
             total,
@@ -94,7 +93,7 @@ export function StatusChart({ orgId, days = 30 }: StatusChartProps) {
     if (orgId) {
       fetchData()
     }
-  }, [orgId, days])
+  }, [orgId, days, statusMap])
 
   if (loading) {
     return (
@@ -133,7 +132,7 @@ export function StatusChart({ orgId, days = 30 }: StatusChartProps) {
             {data.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={STATUS_COLORS[entry.status] || '#6b7280'}
+                fill={statusMap[entry.status]?.color || '#6b7280'}
                 style={{
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
                 }}
@@ -153,7 +152,7 @@ export function StatusChart({ orgId, days = 30 }: StatusChartProps) {
       )}
       <CustomLegend payload={data.map((entry, index) => ({
         value: entry.name,
-        color: STATUS_COLORS[entry.status] || '#6b7280',
+        color: statusMap[entry.status]?.color || '#6b7280',
         payload: entry,
       }))} />
     </div>

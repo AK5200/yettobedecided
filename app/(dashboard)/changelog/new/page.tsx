@@ -77,21 +77,21 @@ export default function NewChangelogPage() {
     }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
       <div className="max-w-5xl mx-auto p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Changelog</h1>
-          <p className="text-gray-600">Share updates, features, and improvements with your users</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Create New Changelog</h1>
+          <p className="text-gray-600 dark:text-white/50">Share updates, features, and improvements with your users</p>
         </div>
 
-        <Card className="border-2 border-amber-200 shadow-lg bg-white">
-          <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-200">
-            <CardTitle className="text-xl text-gray-900">Entry Details</CardTitle>
+        <Card className="border-2 border-amber-200 dark:border-amber-500/20 shadow-lg bg-white dark:bg-[#111111]">
+          <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-500/10 dark:to-yellow-500/10 border-b border-amber-200 dark:border-amber-500/20">
+            <CardTitle className="text-xl text-gray-900 dark:text-white">Entry Details</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit(true)} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-gray-700 font-medium">
+                <Label htmlFor="title" className="text-gray-700 dark:text-white/70 font-medium">
                   Title <span className="text-amber-600">*</span>
                 </Label>
                 <Input
@@ -106,7 +106,7 @@ export default function NewChangelogPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-gray-700 font-medium">Category</Label>
+                <Label className="text-gray-700 dark:text-white/70 font-medium">Category</Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger className="border-amber-200 focus:border-amber-400">
                     <SelectValue placeholder="Select category" />
@@ -121,7 +121,7 @@ export default function NewChangelogPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-gray-700 font-medium">
+                <Label className="text-gray-700 dark:text-white/70 font-medium">
                   Content <span className="text-amber-600">*</span>
                 </Label>
                 <RichTextEditor

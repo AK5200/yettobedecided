@@ -1,29 +1,9 @@
 import type { Metadata } from "next";
-import { Raleway, Libre_Baskerville, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
-
-const raleway = Raleway({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-raleway",
-});
-
-const libreBaskerville = Libre_Baskerville({
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  variable: "--font-libre-baskerville",
-});
-
-const nunito = Nunito({
-  weight: ["400", "500", "600", "700", "800", "900"],
-  subsets: ["latin"],
-  variable: "--font-nunito",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://kelohq.com'),
@@ -66,7 +46,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
       </head>
-      <body className={`${raleway.variable} ${libreBaskerville.variable} ${nunito.variable} antialiased`}>
+      <body className="antialiased">
         <ThemeProvider>
           {children}
           <ThemeToggle />

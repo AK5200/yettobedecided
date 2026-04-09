@@ -18,15 +18,30 @@ function formatDate(dateString?: string | null): string {
   })
 }
 
+interface StatusDef {
+  key: string
+  name: string
+  color: string
+}
+
 interface PostCardProps {
   post: Post
   orgId: string
   onUpdate: () => void
   isAdmin?: boolean
   adminEmail?: string
+  statuses?: StatusDef[]
 }
 
-export function PostCard({ post, orgId, onUpdate, isAdmin, adminEmail }: PostCardProps) {
+const FALLBACK_STATUSES: StatusDef[] = [
+  { key: 'open', name: 'Open', color: '#6B7280' },
+  { key: 'planned', name: 'Planned', color: '#3B82F6' },
+  { key: 'in_progress', name: 'In Progress', color: '#F59E0B' },
+  { key: 'shipped', name: 'Shipped', color: '#10B981' },
+  { key: 'closed', name: 'Closed', color: '#EF4444' },
+]
+
+export function PostCard({ post, orgId, onUpdate, isAdmin, adminEmail, statuses }: PostCardProps) {
   const handleStatusChange = async (newStatus: string) => {
     await fetch(`/api/posts/${post.id}`, {
       method: 'PATCH',
@@ -90,6 +105,7 @@ export function PostCard({ post, orgId, onUpdate, isAdmin, adminEmail }: PostCar
               postId={post.id}
               currentStatus={post.status}
               onStatusChange={handleStatusChange}
+              statuses={statuses || FALLBACK_STATUSES}
             />
             <PostAdminActions
               postId={post.id}

@@ -38,7 +38,7 @@ export interface Post {
   board_id: string
   title: string
   content: string | null
-  status: 'open' | 'planned' | 'in_progress' | 'shipped' | 'closed'
+  status: string
   author_email: string | null
   author_name: string | null
   is_guest: boolean

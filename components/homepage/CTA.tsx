@@ -42,7 +42,7 @@ export default function CTA() {
               </h2>
 
               <p className="text-base text-white/55 max-w-lg mx-auto mb-10 leading-relaxed">
-                Join hundreds of product teams who use Kelo to collect feedback, prioritize features, and ship what users actually want.
+                Collect feedback, prioritize features, and ship what users actually want. All in one place.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
@@ -64,7 +64,7 @@ export default function CTA() {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
-                {['Free forever plan', 'No credit card', 'Cancel anytime'].map((item, i) => (
+                {['7-day free trial', 'No credit card', 'Cancel anytime'].map((item, i) => (
                   <React.Fragment key={item}>
                     <div className="flex items-center gap-1.5 text-xs text-white/40 font-medium">
                       <svg className="w-3 h-3 text-kelo-yellow/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>

@@ -68,8 +68,8 @@ export default function Changelog() {
 
             <div className="grid grid-cols-2 gap-3">
               {[
-                { value: '12', label: 'Releases this year' },
-                { value: '94%', label: 'User-requested features' },
+                { value: '100%', label: 'Transparent roadmap' },
+                { value: '0', label: 'Hidden agendas' },
               ].map((s) => (
                 <div key={s.label} className="p-4 bg-kelo-surface dark:bg-white/5 border border-kelo-border dark:border-white/10 rounded-xl">
                   <div className="text-2xl font-display font-extrabold text-kelo-ink dark:text-white mb-0.5">{s.value}</div>

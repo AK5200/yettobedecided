@@ -197,21 +197,8 @@ export default function WaitlistPage() {
             )}
 
             <div className="mt-8 flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {['#F5C518', '#22C55E', '#6366F1', '#EC4899'].map((color, i) => (
-                  <div
-                    key={i}
-                    className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-[10px] font-bold text-white ${
-                      isDark ? 'border-[#080808]' : 'border-white'
-                    }`}
-                    style={{ backgroundColor: color }}
-                  >
-                    {['A', 'B', 'C', 'D'][i]}
-                  </div>
-                ))}
-              </div>
               <p className="text-xs text-kelo-muted dark:text-white/40 font-medium">
-                <span className="text-kelo-ink dark:text-white font-semibold">240+</span> founders already joined
+                Be among the <span className="text-kelo-ink dark:text-white font-semibold">first founders</span> to try Kelo
               </p>
             </div>
           </div>

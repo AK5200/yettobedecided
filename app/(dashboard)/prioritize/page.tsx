@@ -91,20 +91,20 @@ export default function PrioritizePage() {
   )
 
   return (
-    <div className="flex-1 bg-white">
+    <div className="flex-1 bg-white dark:bg-[#0a0a0a]">
       {/* Header */}
       <div className="border-b">
         <div className="px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">Prioritize</h1>
-              <span className="text-gray-400">&gt;</span>
-              <span className="font-semibold text-lg text-gray-900">Value vs Effort</span>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Prioritize</h1>
+              <span className="text-gray-400 dark:text-white/30">&gt;</span>
+              <span className="font-semibold text-lg text-gray-900 dark:text-white">Value vs Effort</span>
             </div>
             <div className="flex items-center gap-3">
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-white/30" />
                 <Input
                   placeholder="Search all posts..."
                   value={searchQuery}
@@ -135,15 +135,15 @@ export default function PrioritizePage() {
         <div className="w-80 border-r overflow-y-auto">
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Posts</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-white">Posts</h2>
               <Badge variant="outline">{filterStatus === 'all' ? 'All' : filterStatus}</Badge>
             </div>
           </div>
 
           {loading ? (
-            <div className="text-center py-12 text-gray-500">Loading...</div>
+            <div className="text-center py-12 text-gray-500 dark:text-white/40">Loading...</div>
           ) : filteredPosts.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">No posts found</div>
+            <div className="text-center py-12 text-gray-500 dark:text-white/40">No posts found</div>
           ) : (
             <div className="divide-y">
               {filteredPosts.map((post) => (
@@ -153,15 +153,15 @@ export default function PrioritizePage() {
                   onClick={() => router.push(`/boards/${post.board_id}?post=${post.id}`)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex items-center gap-1 text-gray-500 text-sm">
+                    <div className="flex items-center gap-1 text-gray-500 dark:text-white/40 text-sm">
                       <ChevronUp className="h-3 w-3" />
                       <span>{post.vote_count}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900 truncate">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {post.title}
                       </div>
-                      <div className="text-xs text-gray-500 truncate mt-0.5">
+                      <div className="text-xs text-gray-500 dark:text-white/40 truncate mt-0.5">
                         {post.content}
                       </div>
                     </div>
@@ -178,11 +178,11 @@ export default function PrioritizePage() {
             {/* Y-axis label */}
             <div className="flex items-center h-full">
               <div className="flex flex-col items-center justify-center h-full -rotate-180 mr-4">
-                <span className="text-xs font-semibold text-gray-400 tracking-widest [writing-mode:vertical-lr]">
+                <span className="text-xs font-semibold text-gray-400 dark:text-white/30 tracking-widest [writing-mode:vertical-lr]">
                   VERY VALUABLE
                 </span>
                 <div className="flex-1 w-px bg-gray-200 my-4" />
-                <span className="text-xs font-semibold text-gray-400 tracking-widest [writing-mode:vertical-lr]">
+                <span className="text-xs font-semibold text-gray-400 dark:text-white/30 tracking-widest [writing-mode:vertical-lr]">
                   NOT VALUABLE
                 </span>
               </div>
@@ -231,9 +231,9 @@ export default function PrioritizePage() {
 
             {/* X-axis label */}
             <div className="flex items-center justify-center mt-4 pt-4">
-              <span className="text-xs font-semibold text-gray-400 tracking-widest">EASY TO ADD</span>
+              <span className="text-xs font-semibold text-gray-400 dark:text-white/30 tracking-widest">EASY TO ADD</span>
               <div className="flex-1 h-px bg-gray-200 mx-4 max-w-md" />
-              <span className="text-xs font-semibold text-gray-400 tracking-widest">DIFFICULT TO ADD</span>
+              <span className="text-xs font-semibold text-gray-400 dark:text-white/30 tracking-widest">DIFFICULT TO ADD</span>
             </div>
           </div>
         </div>

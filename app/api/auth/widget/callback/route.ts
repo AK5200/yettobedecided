@@ -137,6 +137,8 @@ export async function GET(request: Request) {
 
     if (popup) {
       // Popup mode: send user data back to the widget iframe via postMessage, then close
+      // Also set the widget_session cookie so public hub pages can pick up the identity
+      const jwtSecret = process.env.WIDGET_JWT_SECRET || process.env.JWT_SECRET
       const userData = JSON.stringify({
         id: user.id,
         email: user.email,
@@ -149,9 +151,27 @@ export async function GET(request: Request) {
         }
         window.close();
       </script></body></html>`
-      return new NextResponse(html, {
+      const response = new NextResponse(html, {
         headers: { 'Content-Type': 'text/html' },
       })
+
+      // Set cookie for shared auth across widget and public hub
+      if (jwtSecret) {
+        const token = jwt.sign(
+          { id: user.id, email: user.email, name: user.name, avatar: user.avatar_url },
+          jwtSecret,
+          { expiresIn: '7d' }
+        )
+        response.cookies.set('widget_session', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        })
+      }
+
+      return response
     }
 
     const jwtSecret = process.env.WIDGET_JWT_SECRET || process.env.JWT_SECRET

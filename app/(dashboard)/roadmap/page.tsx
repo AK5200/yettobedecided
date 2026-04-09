@@ -38,7 +38,6 @@ export default async function RoadmapPage() {
       .eq('is_approved', true)
       .neq('status', 'merged')
       .is('merged_into_id', null)
-      .in('status', ['open', 'planned', 'in_progress', 'shipped', 'closed'])
       .order('vote_count', { ascending: false })
 
     if (error) {

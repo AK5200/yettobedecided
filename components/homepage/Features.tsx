@@ -124,12 +124,12 @@ export default function Features() {
                 <span className="text-kelo-yellow">in record time.</span>
               </h3>
               <p className="text-white/50 text-sm leading-relaxed mb-8 max-w-sm">
-                The average Kelo team ships 2× more user-requested features per quarter than teams using spreadsheets.
+                Stop losing feature requests in Slack threads and spreadsheets. Kelo gives you one place to collect, prioritize, and ship.
               </p>
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { value: '2×', label: 'More features shipped' },
-                  { value: '400+', label: 'Product teams' },
+                  { value: '∞', label: 'Unlimited feedback' },
+                  { value: '0', label: 'Per-seat fees' },
                   { value: '2 min', label: 'Setup time' },
                 ].map((stat) => (
                   <div key={stat.label} className="p-4 rounded-xl border border-white/8 bg-white/5">

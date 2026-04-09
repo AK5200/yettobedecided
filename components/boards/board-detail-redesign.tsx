@@ -230,30 +230,17 @@ export function BoardDetailRedesign({
                     {statusFilter === 'all' && <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
                   </div>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStatusChange('open')}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Open</span>
-                    {statusFilter === 'open' && <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStatusChange('in_progress')}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>In Progress</span>
-                    {statusFilter === 'in_progress' && <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStatusChange('planned')}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Planned</span>
-                    {statusFilter === 'planned' && <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStatusChange('completed')}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Completed</span>
-                    {statusFilter === 'completed' && <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
-                  </div>
-                </DropdownMenuItem>
+                {statuses.map((s) => (
+                  <DropdownMenuItem key={s.key} onClick={() => handleStatusChange(s.key)}>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                        <span>{s.name}</span>
+                      </div>
+                      {statusFilter === s.key && <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 

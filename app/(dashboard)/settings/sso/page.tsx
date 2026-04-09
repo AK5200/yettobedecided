@@ -18,14 +18,14 @@ function InfoPopup({ children, content }: { children: React.ReactNode; content: 
   const [open, setOpen] = useState(false)
   return (
     <div className="relative inline-block">
-      <button type="button" onClick={() => setOpen(!open)} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+      <button type="button" onClick={() => setOpen(!open)} className="text-gray-400 dark:text-white/30 hover:text-gray-600 hover:dark:text-white/50 transition-colors cursor-pointer">
         {children}
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-8 z-50 w-72 p-4 bg-white rounded-xl shadow-xl border border-gray-200 text-sm text-gray-600 leading-relaxed">
-            <button onClick={() => setOpen(false)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+          <div className="absolute right-0 top-8 z-50 w-72 p-4 bg-white dark:bg-[#111111] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 text-sm text-gray-600 dark:text-white/50 leading-relaxed">
+            <button onClick={() => setOpen(false)} className="absolute top-2 right-2 text-gray-400 dark:text-white/30 hover:text-gray-600 hover:dark:text-white/50">
               <X className="h-3.5 w-3.5" />
             </button>
             {content}
@@ -114,7 +114,7 @@ export default function SSOSettingsPage() {
       <div className="flex-1 bg-gradient-to-br from-gray-50 to-white min-h-screen">
         <div className="p-4 md:p-8 max-w-3xl mx-auto">
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-white/30" />
           </div>
         </div>
       </div>
@@ -130,8 +130,8 @@ export default function SSOSettingsPage() {
             <Fingerprint className="h-6 w-6 text-violet-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">User Identification</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Identification</h1>
+            <p className="text-sm text-gray-500 dark:text-white/40">
               Configure how users authenticate when interacting with your feedback widget.
             </p>
           </div>
@@ -144,8 +144,8 @@ export default function SSOSettingsPage() {
               <UserCheck className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Guest Access</h3>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Guest Access</h3>
+              <p className="text-sm text-gray-500 dark:text-white/40 mt-0.5">
                 Control what users can do without verifying their identity. When enabled, users only need to enter their name.
               </p>
             </div>
@@ -153,10 +153,10 @@ export default function SSOSettingsPage() {
 
           <div className="space-y-4">
             {/* Guest Posting */}
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-white/[0.04]">
               <div>
-                <h4 className="text-sm font-medium text-gray-900">Guest Posting</h4>
-                <p className="text-xs text-gray-500 mt-0.5">Allow users to submit feedback with just their name</p>
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white">Guest Posting</h4>
+                <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Allow users to submit feedback with just their name</p>
               </div>
               <Switch
                 checked={guestPostingEnabled}
@@ -172,10 +172,10 @@ export default function SSOSettingsPage() {
             </div>
 
             {/* Guest Commenting */}
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-white/[0.04]">
               <div>
-                <h4 className="text-sm font-medium text-gray-900">Guest Commenting</h4>
-                <p className="text-xs text-gray-500 mt-0.5">Allow users to comment with just their name</p>
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white">Guest Commenting</h4>
+                <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Allow users to comment with just their name</p>
               </div>
               <Switch
                 checked={guestCommentingEnabled}
@@ -191,10 +191,10 @@ export default function SSOSettingsPage() {
             </div>
 
             {/* Guest Voting */}
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-white">
+            <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-white/[0.04]">
               <div>
-                <h4 className="text-sm font-medium text-gray-900">Guest Voting</h4>
-                <p className="text-xs text-gray-500 mt-0.5">Allow users to upvote without any identification</p>
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white">Guest Voting</h4>
+                <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5">Allow users to upvote without any identification</p>
               </div>
               <Switch
                 checked={guestVotingEnabled}
@@ -218,8 +218,8 @@ export default function SSOSettingsPage() {
               <LogIn className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Login Handler</h3>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Login Handler</h3>
+              <p className="text-sm text-gray-500 dark:text-white/40 mt-0.5">
                 Choose who handles user login when users try to post while logged out.
               </p>
             </div>
@@ -246,16 +246,16 @@ export default function SSOSettingsPage() {
               className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
                 loginHandler === 'kelo'
                   ? 'border-amber-300 bg-amber-50/50 shadow-sm'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                  : 'border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.04] hover:border-gray-300 dark:hover:border-white/20 hover:shadow-sm'
               }`}
             >
               <RadioGroupItem value="kelo" id="kelo" className="mt-0.5" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900">Kelo</span>
+                  <span className="font-medium text-gray-900 dark:text-white">Kelo</span>
                   <Badge className="text-[10px] bg-amber-100 text-amber-700 border-amber-200">Recommended</Badge>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-white/40 mt-1">
                   We handle login (Google/GitHub OAuth)
                 </p>
               </div>
@@ -266,13 +266,13 @@ export default function SSOSettingsPage() {
               className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
                 loginHandler === 'customer'
                   ? 'border-amber-300 bg-amber-50/50 shadow-sm'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                  : 'border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.04] hover:border-gray-300 dark:hover:border-white/20 hover:shadow-sm'
               }`}
             >
               <RadioGroupItem value="customer" id="customer" className="mt-0.5" />
               <div className="flex-1">
-                <span className="font-medium text-gray-900">Your Website</span>
-                <p className="text-sm text-gray-500 mt-1">
+                <span className="font-medium text-gray-900 dark:text-white">Your Website</span>
+                <p className="text-sm text-gray-500 dark:text-white/40 mt-1">
                   Redirect to your login page
                 </p>
               </div>
@@ -283,13 +283,13 @@ export default function SSOSettingsPage() {
               className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
                 !loginHandler
                   ? 'border-amber-300 bg-amber-50/50 shadow-sm'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                  : 'border-gray-200 dark:border-white/10 bg-white dark:bg-white/[0.04] hover:border-gray-300 dark:hover:border-white/20 hover:shadow-sm'
               }`}
             >
               <RadioGroupItem value="none" id="none" className="mt-0.5" />
               <div className="flex-1">
-                <span className="font-medium text-gray-900">None</span>
-                <p className="text-sm text-gray-500 mt-1">
+                <span className="font-medium text-gray-900 dark:text-white">None</span>
+                <p className="text-sm text-gray-500 dark:text-white/40 mt-1">
                   No login handler (users must use guest posting if enabled)
                 </p>
               </div>
@@ -345,7 +345,7 @@ export default function SSOSettingsPage() {
                 <div className="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-bold shrink-0">1</div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-gray-900">SDK Integration</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">SDK Integration</h3>
                     {secretKey && (
                       <Badge className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
                         <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -355,7 +355,7 @@ export default function SSOSettingsPage() {
                     <div className="ml-auto">
                       <InfoPopup content={
                         <div>
-                          <p className="font-semibold text-gray-900 mb-2">Why do I need this?</p>
+                          <p className="font-semibold text-gray-900 dark:text-white mb-2">Why do I need this?</p>
                           <p>When you choose &quot;Your Website&quot; as the login handler, you need a secret key so Kelo can verify that the user identity your app sends is authentic and hasn&apos;t been tampered with.</p>
                           <p className="mt-2">Generate a key here, then use it in your backend to sign user tokens.</p>
                         </div>
@@ -364,7 +364,7 @@ export default function SSOSettingsPage() {
                       </InfoPopup>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500 mt-0.5">
+                  <p className="text-sm text-gray-500 dark:text-white/40 mt-0.5">
                     Generate a secret key to identify users via the Kelo SDK.
                   </p>
                 </div>
@@ -373,14 +373,14 @@ export default function SSOSettingsPage() {
               <div className="space-y-4">
                 {secretKey ? (
                   <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                    <Label className="text-xs font-medium text-gray-500 dark:text-white/40 uppercase tracking-wider mb-2 block">
                       Secret Key
                     </Label>
                     <div className="flex items-center gap-2">
                       <Input
                         readOnly
                         value={showKey ? secretKey : '\u2022'.repeat(40)}
-                        className="font-mono text-sm bg-white h-11"
+                        className="font-mono text-sm bg-white dark:bg-white/[0.04] h-11"
                       />
                       <Button
                         variant="outline"
@@ -406,7 +406,7 @@ export default function SSOSettingsPage() {
                       <Key className="h-6 w-6 text-indigo-600" />
                     </div>
                     <p className="text-sm font-medium text-gray-700 mb-1">No secret key generated</p>
-                    <p className="text-xs text-gray-500 mb-4">Generate a key to start identifying users via the SDK.</p>
+                    <p className="text-xs text-gray-500 dark:text-white/40 mb-4">Generate a key to start identifying users via the SDK.</p>
                     <Button
                       onClick={() => generateKey(false)}
                       className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
@@ -438,21 +438,21 @@ export default function SSOSettingsPage() {
                 <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold shrink-0">2</div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-gray-900">Integration Guide</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Integration Guide</h3>
                     <div className="ml-auto">
                       <InfoPopup content={
                         <div>
-                          <p className="font-semibold text-gray-900 mb-2">Trust Mode vs JWT Mode</p>
+                          <p className="font-semibold text-gray-900 dark:text-white mb-2">Trust Mode vs JWT Mode</p>
                           <p className="mb-2"><strong>Trust Mode</strong> — simple frontend call. Your app sends user data directly. No server-side setup. Good for internal tools, MVPs, and low-stakes apps.</p>
                           <p className="mb-2"><strong>JWT Mode</strong> — your backend signs a token with the secret key. Cryptographically verified — users can&apos;t fake identity. Required for production apps where user identity matters.</p>
-                          <p className="text-xs text-gray-400 mt-3">Start with Trust Mode, upgrade to JWT when you need security.</p>
+                          <p className="text-xs text-gray-400 dark:text-white/30 mt-3">Start with Trust Mode, upgrade to JWT when you need security.</p>
                         </div>
                       }>
                         <HelpCircle className="h-4 w-4" />
                       </InfoPopup>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500 mt-0.5">
+                  <p className="text-sm text-gray-500 dark:text-white/40 mt-0.5">
                     Choose a mode and follow the code examples to identify users.
                   </p>
                 </div>

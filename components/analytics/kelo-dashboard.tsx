@@ -106,18 +106,9 @@ function KPICard({ label, value, sub, delta, positive, accent, icon, isDark, spa
 }
 
 // ── Feedback Item ──────────────────────────────────────────────────────────────
-function FeedbackItem({ title, board, votes, status, priority, time, isDark }: RecentPost & { isDark: boolean }) {
-  const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
-    'open': { label: 'Open', bg: isDark ? 'bg-indigo-500/10' : 'bg-indigo-50', text: isDark ? 'text-indigo-400' : 'text-indigo-600' },
-    'under_review': { label: 'In Review', bg: isDark ? 'bg-yellow-500/10' : 'bg-yellow-50', text: isDark ? 'text-yellow-400' : 'text-yellow-600' },
-    'planned': { label: 'Planned', bg: isDark ? 'bg-purple-500/10' : 'bg-purple-50', text: isDark ? 'text-purple-400' : 'text-purple-600' },
-    'in_progress': { label: 'In Progress', bg: isDark ? 'bg-orange-500/10' : 'bg-orange-50', text: isDark ? 'text-orange-400' : 'text-orange-600' },
-    'shipped': { label: 'Shipped', bg: isDark ? 'bg-green-500/10' : 'bg-green-50', text: isDark ? 'text-green-400' : 'text-green-600' },
-    'closed': { label: 'Closed', bg: isDark ? 'bg-gray-500/10' : 'bg-gray-100', text: isDark ? 'text-gray-400' : 'text-gray-500' },
-    'completed': { label: 'Completed', bg: isDark ? 'bg-green-500/10' : 'bg-green-50', text: isDark ? 'text-green-400' : 'text-green-600' },
-  }
+function FeedbackItem({ title, board, votes, status, priority, time, isDark, statusMap }: RecentPost & { isDark: boolean; statusMap?: Record<string, { name: string; color: string }> }) {
   const priorityDot: Record<string, string> = { quick_wins: '#22c55e', big_bets: '#6366f1', fill_ins: '#F5C518', time_sinks: '#ef4444', drop: '#6b7280', unscored: '#9ca3af' }
-  const s = statusConfig[status] || statusConfig['open']
+  const s = statusMap?.[status] || { name: status.replace('_', ' '), color: '#6B7280' }
   return (
     <div className={`flex items-center gap-3 py-3 border-b last:border-b-0 ${isDark ? 'border-white/[0.05]' : 'border-kelo-border'}`}>
       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: priorityDot[priority] || '#9ca3af' }} />
@@ -126,7 +117,7 @@ function FeedbackItem({ title, board, votes, status, priority, time, isDark }: R
         <div className="text-[11px] text-kelo-muted dark:text-white/30 mt-0.5">{board} · {time}</div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${s.bg} ${s.text}`}>{s.label}</span>
+        <span className="text-xs font-bold px-2 py-0.5 rounded-lg" style={{ backgroundColor: s.color + '18', color: s.color }}>{s.name}</span>
         <span className={`text-xs font-semibold ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>▲ {votes}</span>
       </div>
     </div>
@@ -273,6 +264,17 @@ export function KeloDashboard() {
   const [prioritization, setPrioritization] = useState<PriorityData | null>(null)
   const [contributors, setContributors] = useState<Contributor[]>([])
   const [staleCount, setStaleCount] = useState(0)
+  const [statusMap, setStatusMap] = useState<Record<string, { name: string; color: string }>>({})
+
+  useEffect(() => {
+    fetch('/api/statuses').then(r => r.json()).then(d => {
+      if (d.statuses) {
+        const map: Record<string, { name: string; color: string }> = {}
+        for (const s of d.statuses) map[s.key] = { name: s.name, color: s.color }
+        setStatusMap(map)
+      }
+    }).catch(() => {})
+  }, [])
 
   // Fetch org
   useEffect(() => {
@@ -584,7 +586,7 @@ export function KeloDashboard() {
           <SectionLabel isDark={isDark}>Recent Feedback</SectionLabel>
           <div className={`rounded-2xl border p-5 ${isDark ? 'bg-[#111111] border-white/[0.07]' : 'bg-white border-kelo-border'}`}>
             {recentFeedback.length > 0 ? (
-              recentFeedback.map((item) => <FeedbackItem key={item.id} {...item} isDark={isDark} />)
+              recentFeedback.map((item) => <FeedbackItem key={item.id} {...item} isDark={isDark} statusMap={statusMap} />)
             ) : (
               <div className="text-sm text-kelo-muted dark:text-white/30 text-center py-8">No feedback yet. Share your board to start collecting!</div>
             )}

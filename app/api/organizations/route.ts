@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { getCurrentOrg } from '@/lib/org-context'
 
@@ -49,13 +49,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
-    // Check if user already has orgs (to determine if onboarding should be skipped)
-    const { data: existingMemberships } = await supabase
+    // Check if user already has orgs — use admin client to bypass RLS
+    const adminSupabase = createAdminClient()
+    const { data: existingMemberships } = await adminSupabase
       .from('org_members')
-      .select('org_id')
+      .select('org_id, role')
       .eq('user_id', user.id)
 
     const isAdditionalOrg = existingMemberships && existingMemberships.length > 0
+
+    // Only owners can create additional organizations
+    if (isAdditionalOrg) {
+      const isOwner = existingMemberships.some((m: any) => m.role === 'owner')
+      if (!isOwner) {
+        return NextResponse.json(
+          { error: 'Only organization owners can create new organizations' },
+          { status: 403 }
+        )
+      }
+    }
 
     // Create slug from name
     const slug = name

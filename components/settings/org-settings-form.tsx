@@ -31,6 +31,8 @@ export function OrgSettingsForm({ orgId, userRole, initialValues }: OrgSettingsF
   const [logoUrl, setLogoUrl] = useState(initialValues.logoUrl)
   const [loading, setLoading] = useState(false)
   const [logoError, setLogoError] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const hasChanges =
     name !== initialValues.name ||
@@ -286,6 +288,87 @@ export function OrgSettingsForm({ orgId, userRole, initialValues }: OrgSettingsF
           </div>
         </div>
       </form>
+
+      {/* Danger Zone — owner only */}
+      {userRole === 'owner' && (
+        <div className={`mt-8 rounded-2xl border p-6 ${isDark ? 'bg-[#111111] border-red-500/20' : 'bg-white border-red-200'}`}>
+          <div className="flex items-start gap-3 mb-5">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-500/10">
+              <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className={`text-sm font-semibold ${isDark ? 'text-red-400' : 'text-red-600'}`}>Danger Zone</h3>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>Irreversible actions that affect your entire organization.</p>
+            </div>
+          </div>
+
+          <div className={`rounded-xl border p-4 ${isDark ? 'border-red-500/10 bg-red-500/[0.03]' : 'border-red-100 bg-red-50/30'}`}>
+            <h4 className={`text-sm font-semibold mb-1 ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Delete this organization</h4>
+            <p className={`text-xs mb-4 ${isDark ? 'text-white/40' : 'text-kelo-muted'}`}>
+              This will permanently delete <strong className={isDark ? 'text-white/70' : 'text-kelo-ink'}>{initialValues.name}</strong> and all of its data including boards, posts, comments, votes, changelogs, and team members. This action cannot be undone.
+            </p>
+
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <label className={`text-xs font-semibold tracking-wide ${isDark ? 'text-white/60' : 'text-kelo-ink'}`}>
+                  Type <strong className={isDark ? 'text-red-400' : 'text-red-600'}>{initialValues.name}</strong> to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  placeholder={initialValues.name}
+                  className={`${inputClasses(isDark)} !border-red-300 dark:!border-red-500/20 focus:!border-red-400 focus:!shadow-[0_0_0_3px_rgba(239,68,68,0.1)]`}
+                />
+              </div>
+
+              <button
+                type="button"
+                disabled={deleteConfirm !== initialValues.name || deleteLoading}
+                onClick={async () => {
+                  setDeleteLoading(true)
+                  try {
+                    const res = await fetch(`/api/organizations/${orgId}`, {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ confirmName: deleteConfirm }),
+                    })
+                    if (!res.ok) {
+                      const data = await res.json()
+                      toast.error(data.error || 'Failed to delete organization.')
+                      setDeleteLoading(false)
+                      return
+                    }
+                    toast.success('Organization deleted.')
+                    // Clear org cookie and redirect
+                    document.cookie = 'kelo_current_org=; path=/; max-age=0'
+                    window.location.href = '/'
+                  } catch {
+                    toast.error('Something went wrong.')
+                    setDeleteLoading(false)
+                  }
+                }}
+                className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${
+                  deleteConfirm === initialValues.name
+                    ? 'bg-red-600 text-white hover:bg-red-700 shadow-sm'
+                    : (isDark ? 'bg-white/[0.06] text-white/30' : 'bg-gray-100 text-gray-400')
+                }`}
+              >
+                {deleteLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    Deleting...
+                  </span>
+                ) : (
+                  'Delete this organization'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

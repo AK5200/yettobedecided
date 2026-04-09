@@ -32,6 +32,12 @@ import {
 import { toast } from 'sonner'
 import type { Board, Post, ChangelogEntry, Organization } from '@/lib/types/database'
 
+interface StatusDef {
+  key: string
+  name: string
+  color: string
+}
+
 interface PublicFeaturesViewProps {
   org: Organization
   orgSlug: string
@@ -42,14 +48,22 @@ interface PublicFeaturesViewProps {
   currentBoard?: string
   currentStatus: string
   searchQuery: string
+  statuses: StatusDef[]
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  all: { label: 'All', color: 'text-muted-foreground', bg: 'bg-muted' },
-  open: { label: 'Open', color: 'text-blue-700', bg: 'bg-blue-50' },
-  planned: { label: 'Planned', color: 'text-violet-700', bg: 'bg-violet-50' },
-  in_progress: { label: 'In Progress', color: 'text-amber-700', bg: 'bg-amber-50' },
-  shipped: { label: 'Shipped', color: 'text-emerald-700', bg: 'bg-emerald-50' },
+function buildStatusConfig(statuses: StatusDef[]): Record<string, { label: string; color: string; bg: string; hex: string }> {
+  const config: Record<string, { label: string; color: string; bg: string; hex: string }> = {
+    all: { label: 'All', color: 'text-muted-foreground', bg: 'bg-muted', hex: '#6B7280' },
+  }
+  for (const s of statuses) {
+    config[s.key] = {
+      label: s.name,
+      color: '',
+      bg: '',
+      hex: s.color,
+    }
+  }
+  return config
 }
 
 // Deterministic color for author names
@@ -102,8 +116,10 @@ export function PublicFeaturesView({
   currentBoard,
   currentStatus,
   searchQuery: initialSearchQuery,
+  statuses,
 }: PublicFeaturesViewProps) {
   const router = useRouter()
+  const STATUS_CONFIG = buildStatusConfig(statuses)
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
   const [sortBy, setSortBy] = useState<'latest' | 'most_votes'>('latest')
   const [localPosts, setLocalPosts] = useState(posts)
@@ -127,17 +143,33 @@ export function PublicFeaturesView({
   }
   const [createPostOpen, setCreatePostOpen] = useState(false)
 
-  // Read shared identity from localStorage (set by widget or public hub verification)
+  // Read shared identity from localStorage or widget_session cookie
   useEffect(() => {
+    // First check localStorage (set by widget postMessage or public hub verification)
     try {
       const stored = localStorage.getItem(`kelo_identified_user_${orgSlug}`)
       if (stored) {
         const user = JSON.parse(stored)
         if (user.email && !voterEmail) {
           setVoterEmail(user.email)
+          return
         }
       }
     } catch {}
+
+    // Fall back to widget_session cookie (shared auth from widget OAuth)
+    fetch('/api/auth/widget/session')
+      .then(r => r.json())
+      .then(data => {
+        if (data.user?.email) {
+          setVoterEmail(data.user.email)
+          // Persist to localStorage so it's available immediately next time
+          try {
+            localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(data.user))
+          } catch {}
+        }
+      })
+      .catch(() => {})
   }, [orgSlug])
 
   const buildUrl = (overrides: { board?: string | null; status?: string; q?: string }) => {
@@ -364,9 +396,13 @@ export function PublicFeaturesView({
                     onClick={() => (window.location.href = buildUrl({ status: key }))}
                     className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
                       currentStatus === key
-                        ? `${config.bg} ${config.color}`
+                        ? ''
                         : 'text-muted-foreground hover:text-foreground/80'
                     }`}
+                    style={currentStatus === key ? {
+                      backgroundColor: config.hex + '18',
+                      color: config.hex,
+                    } : undefined}
                   >
                     {config.label}
                   </button>
@@ -451,7 +487,7 @@ export function PublicFeaturesView({
                   const tags = tagsByPostId[post.id] || []
                   const isVoted = votedPostIds.includes(post.id)
                   const isVoting = votingIds.includes(post.id)
-                  const statusConfig = STATUS_CONFIG[post.status] || STATUS_CONFIG.open
+                  const statusConfig = STATUS_CONFIG[post.status] || { label: post.status, hex: '#6B7280', color: '', bg: '' }
                   const authorName = post.is_guest
                     ? post.guest_name || 'Guest'
                     : post.author_name || 'Anonymous'
@@ -490,7 +526,10 @@ export function PublicFeaturesView({
                               </span>
                             )}
                             {post.status && (
-                              <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.color}`}>
+                              <span
+                                className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                style={{ backgroundColor: statusConfig.hex + '18', color: statusConfig.hex }}
+                              >
                                 {statusConfig.label}
                               </span>
                             )}
