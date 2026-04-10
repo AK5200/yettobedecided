@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Board, Post, ChangelogEntry, Organization } from '@/lib/types/database'
+import { detectSSORedirectIdentity } from '@/lib/sso-redirect'
 
 interface StatusDef {
   key: string
@@ -143,9 +144,16 @@ export function PublicFeaturesView({
   }
   const [createPostOpen, setCreatePostOpen] = useState(false)
 
-  // Read shared identity from localStorage or widget_session cookie
+  // Read shared identity from SSO redirect, localStorage, or widget_session cookie
   useEffect(() => {
-    // First check localStorage (set by widget postMessage or public hub verification)
+    // First: check if redirected back from client login with identity in URL
+    const ssoUser = detectSSORedirectIdentity(orgSlug)
+    if (ssoUser?.email) {
+      setVoterEmail(ssoUser.email)
+      return
+    }
+
+    // Then check localStorage (set by widget postMessage or public hub verification)
     try {
       const stored = localStorage.getItem(`kelo_identified_user_${orgSlug}`)
       if (stored) {

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { X, Mail, Shield } from 'lucide-react'
+import { detectSSORedirectIdentity } from '@/lib/sso-redirect'
 import { applyWidgetTheme, getWidgetAccent, getEmbeddedWidgetData } from '@/lib/widget-theme'
 
 // Read embedded data immediately (before component mounts)
@@ -46,8 +47,18 @@ export default function AllInOneEmbedClient() {
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
   const [orgName, setOrgName] = useState('')
 
-  // Read identified user from localStorage on mount, fallback to widget_session cookie
+  // Read identified user from SSO redirect, localStorage, or widget_session cookie
   useEffect(() => {
+    // First: check if redirected back from client login with identity in URL
+    if (org) {
+      const ssoUser = detectSSORedirectIdentity(org)
+      if (ssoUser?.email) {
+        setIdentifiedUser(ssoUser)
+        return
+      }
+    }
+
+    // Then check localStorage
     try {
       const stored = localStorage.getItem(`kelo_identified_user_${org}`)
       if (stored) {
