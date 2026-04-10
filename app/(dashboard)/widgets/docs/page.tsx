@@ -116,6 +116,39 @@ export function KeloWidget() {
 }`
   }
 
+  const ssoRedirectCode = `// After successful login on your server/client
+const params = new URLSearchParams(window.location.search);
+const redirect = params.get('redirect');
+
+if (redirect && params.get('kelo') === 'open') {
+  // Build the return URL with user identity
+  const returnUrl = new URL(redirect);
+  returnUrl.searchParams.set('kelo_user_id', user.id);
+  returnUrl.searchParams.set('kelo_user_email', user.email);
+  returnUrl.searchParams.set('kelo_user_name', user.name);
+  window.location.href = returnUrl.toString();
+  return; // Don't continue to your homepage
+}
+
+// Normal flow — go to your dashboard
+window.location.href = '/dashboard';`
+
+  const ssoJwtCode = `const jwt = require('jsonwebtoken');
+// Your SSO secret from Kelo Settings > User Identification
+const SSO_SECRET = process.env.KELO_SSO_SECRET;
+
+// After user logs in, sign their identity
+const token = jwt.sign(
+  { id: user.id, email: user.email, name: user.name },
+  SSO_SECRET,
+  { expiresIn: '1h' }
+);
+
+// Redirect back with JWT token
+const returnUrl = new URL(req.query.redirect);
+returnUrl.searchParams.set('kelo_token', token);
+res.redirect(returnUrl.toString());`
+
   const identifyCode = `// Identify the logged-in user (Trust Mode)
 Kelo.identify({
   id: 'user_123',          // Required: unique user ID
@@ -249,6 +282,9 @@ if (window.Kelo) {
               </a>
               <a href="#jwt-mode" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
                 JWT Mode (SSO)
+              </a>
+              <a href="#sso" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                SSO Redirect
               </a>
               <a href="#widget-auth" className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
                 Widget Auth
@@ -1022,6 +1058,64 @@ if (window.Kelo) {
               <li>User data stored with <code className="bg-muted px-1.5 py-0.5 rounded text-sm">source: 'verified_jwt'</code></li>
               <li>Custom attributes available for filtering and prioritization</li>
             </ul>
+          </section>
+
+          <hr className="my-12" />
+
+          {/* SSO Redirect — Your Website */}
+          <section id="sso" className="mb-16 scroll-mt-8">
+            <h2 className="text-3xl font-semibold mb-4 pb-3 border-b">SSO Redirect — Your Website</h2>
+            <p className="text-muted-foreground mb-6">
+              When you select <strong className="text-foreground">&quot;Your Website&quot;</strong> as the login handler in User Identification settings, Kelo redirects unauthenticated users to your login page. After login, you must redirect them back with their identity.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">How it works</h3>
+                <ol className="space-y-3 text-sm text-muted-foreground list-decimal list-inside">
+                  <li>User clicks &quot;Login&quot; on the public hub or widget</li>
+                  <li>Kelo redirects to: <code className="bg-muted px-1.5 py-0.5 rounded text-xs">https://yourapp.com/login?redirect=RETURN_URL&amp;kelo=open</code></li>
+                  <li>Your app authenticates the user</li>
+                  <li>Your app redirects back to the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">redirect</code> URL with identity params</li>
+                  <li>Kelo detects the identity and the user can vote, comment, and post</li>
+                </ol>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Your login handler (required)</h3>
+                <p className="text-sm text-muted-foreground mb-3">After your user logs in, check for the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">redirect</code> query parameter and redirect back with identity:</p>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="flex items-center justify-between p-3 border-b border-gray-700">
+                    <span className="text-xs text-gray-400">JavaScript</span>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs text-gray-400 hover:text-white" onClick={() => copyCode(ssoRedirectCode, 'sso-redirect')}>
+                      {copiedCode === 'sso-redirect' ? <><Check className="h-3 w-3 mr-1" /> Copied</> : <><Copy className="h-3 w-3 mr-1" /> Copy</>}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-sm text-gray-300 overflow-x-auto"><code>{ssoRedirectCode}</code></pre>
+                </Card>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">JWT Mode (secure)</h3>
+                <p className="text-sm text-muted-foreground mb-3">For extra security, sign the identity with your SSO secret key and pass a JWT token instead:</p>
+                <Card className="bg-[#1e1e1e] border-gray-800">
+                  <div className="flex items-center justify-between p-3 border-b border-gray-700">
+                    <span className="text-xs text-gray-400">Node.js (server-side)</span>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs text-gray-400 hover:text-white" onClick={() => copyCode(ssoJwtCode, 'sso-jwt')}>
+                      {copiedCode === 'sso-jwt' ? <><Check className="h-3 w-3 mr-1" /> Copied</> : <><Copy className="h-3 w-3 mr-1" /> Copy</>}
+                    </Button>
+                  </div>
+                  <pre className="p-4 text-sm text-gray-300 overflow-x-auto"><code>{ssoJwtCode}</code></pre>
+                </Card>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Widget on your site</h3>
+                <p className="text-sm text-muted-foreground">
+                  If the Kelo widget is embedded on your own site (iframe), use <code className="bg-muted px-1.5 py-0.5 rounded text-xs">Kelo.identify()</code> instead — see <a href="#trust-mode" className="text-amber-600 hover:text-amber-700 dark:text-amber-400 font-medium">Trust Mode</a> or <a href="#jwt-mode" className="text-amber-600 hover:text-amber-700 dark:text-amber-400 font-medium">JWT Mode</a> above. The SSO redirect flow is for the public hub (kelohq.com/your-org).
+                </p>
+              </div>
+            </div>
           </section>
 
           <hr className="my-12" />

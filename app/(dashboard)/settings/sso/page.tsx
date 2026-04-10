@@ -273,8 +273,11 @@ export default function SSOSettingsPage() {
               <div className="flex-1">
                 <span className="font-medium text-gray-900 dark:text-white">Your Website</span>
                 <p className="text-sm text-gray-500 dark:text-white/40 mt-1">
-                  Redirect to your login page
+                  Users are redirected to your login page. After login, redirect back with user identity in the URL.
                 </p>
+                <a href="/widgets/docs#sso" className="text-xs font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 mt-1 inline-block">
+                  View integration guide →
+                </a>
               </div>
             </label>
 
