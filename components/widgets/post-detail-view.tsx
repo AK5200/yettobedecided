@@ -35,9 +35,12 @@ interface PostDetailViewProps {
   onVote?: (postId: string) => void
   identifiedUser?: any
   guestCommentingEnabled?: boolean
+  loginHandler?: string | null
+  ssoRedirectUrl?: string | null
+  orgName?: string
 }
 
-export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59E0B', onBack, onVote, identifiedUser: identifiedUserProp, guestCommentingEnabled = true }: PostDetailViewProps) {
+export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59E0B', onBack, onVote, identifiedUser: identifiedUserProp, guestCommentingEnabled = true, loginHandler, ssoRedirectUrl, orgName }: PostDetailViewProps) {
   const [post, setPost] = useState<PostDetail>(initialPost)
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
@@ -322,7 +325,21 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
         {!guestCommentingEnabled && !identifiedUser ? (
           <div className="space-y-2.5">
             <p className="text-xs text-muted-foreground text-center">Verify your identity to comment</p>
-            {showVerify ? (
+            {loginHandler === 'customer' && ssoRedirectUrl ? (
+              <Button
+                type="button"
+                onClick={() => {
+                  let parentUrl = ''
+                  try { parentUrl = window.top?.location.href || window.location.href } catch { parentUrl = document.referrer || window.location.origin }
+                  const redirectUrl = `${ssoRedirectUrl}?redirect=${encodeURIComponent(parentUrl)}&kelo=open`
+                  if (window.top) { window.top.location.href = redirectUrl } else { window.location.href = redirectUrl }
+                }}
+                style={{ backgroundColor: accentColor }}
+                className="w-full h-9 text-xs text-white rounded-lg font-semibold cursor-pointer"
+              >
+                Login to {orgName || orgSlug}
+              </Button>
+            ) : showVerify ? (
               <div className="p-3 rounded-lg border border-border/40 dark:border-white/8 bg-muted/20 dark:bg-white/3 space-y-2.5">
                 {verifyStep === 'code' ? (
                   <>
@@ -473,6 +490,20 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
                         {otpLoading ? 'Sending...' : 'Send code'}
                       </Button>
                     </>
+                  ) : loginHandler === 'customer' && ssoRedirectUrl ? (
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        let parentUrl = ''
+                        try { parentUrl = window.top?.location.href || window.location.href } catch { parentUrl = document.referrer || window.location.origin }
+                        const redirectUrl = `${ssoRedirectUrl}?redirect=${encodeURIComponent(parentUrl)}&kelo=open`
+                        if (window.top) { window.top.location.href = redirectUrl } else { window.location.href = redirectUrl }
+                      }}
+                      style={{ backgroundColor: accentColor }}
+                      className="w-full h-8 text-xs text-white rounded-lg font-semibold cursor-pointer"
+                    >
+                      Login to {orgName || orgSlug}
+                    </Button>
                   ) : (
                     <div className="space-y-2">
                       <Button

@@ -44,6 +44,7 @@ export default function AllInOneEmbedClient() {
   const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [identifiedUser, setIdentifiedUser] = useState<any>(null)
+  const [orgName, setOrgName] = useState('')
 
   // Read identified user from localStorage on mount, fallback to widget_session cookie
   useEffect(() => {
@@ -75,6 +76,7 @@ export default function AllInOneEmbedClient() {
     setChangelog(data.changelog || [])
     setSettings(data.settings || {})
     if (data.auth) setAuth(data.auth)
+    if (data.org?.name) setOrgName(data.org.name)
 
     if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
       let votedPostIds: Set<string> = new Set()
@@ -323,6 +325,9 @@ export default function AllInOneEmbedClient() {
           guestCommentingEnabled={auth?.guestCommentingEnabled !== false}
           guestVotingEnabled={auth?.guestVotingEnabled !== false}
           onLoginRequired={() => setShowLoginDialog(true)}
+          loginHandler={auth?.loginHandler || null}
+          ssoRedirectUrl={auth?.ssoRedirectUrl || null}
+          orgName={orgName}
         />
       </div>
 
@@ -343,6 +348,9 @@ export default function AllInOneEmbedClient() {
         onOpenChange={setShowLoginDialog}
         orgSlug={org || ''}
         accentColor={accentColor}
+        loginHandler={auth?.loginHandler || null}
+        ssoRedirectUrl={auth?.ssoRedirectUrl || null}
+        orgName={orgName || org || ''}
         onVerified={(user) => {
           setIdentifiedUser(user)
           try { localStorage.setItem(`kelo_identified_user_${org}`, JSON.stringify(user)) } catch {}
@@ -365,12 +373,15 @@ function GoogleIcon() {
   )
 }
 
-function LoginDialog({ open, onOpenChange, orgSlug, accentColor, onVerified }: {
+function LoginDialog({ open, onOpenChange, orgSlug, accentColor, onVerified, loginHandler, ssoRedirectUrl, orgName }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   orgSlug: string
   accentColor: string
   onVerified: (user: any) => void
+  loginHandler: string | null
+  ssoRedirectUrl: string | null
+  orgName: string
 }) {
   const [step, setStep] = useState<'options' | 'email' | 'code'>('options')
   const [email, setEmail] = useState('')
@@ -512,6 +523,32 @@ function LoginDialog({ open, onOpenChange, orgSlug, accentColor, onVerified }: {
               >
                 Back
               </button>
+            </>
+          ) : loginHandler === 'customer' && ssoRedirectUrl ? (
+            <>
+              <p className="text-sm text-muted-foreground text-center">
+                Please log in to continue
+              </p>
+              <Button
+                onClick={() => {
+                  let parentUrl = ''
+                  try {
+                    parentUrl = window.top?.location.href || window.location.href
+                  } catch {
+                    parentUrl = document.referrer || window.location.origin
+                  }
+                  const redirectUrl = `${ssoRedirectUrl}?redirect=${encodeURIComponent(parentUrl)}&kelo=open`
+                  if (window.top) {
+                    window.top.location.href = redirectUrl
+                  } else {
+                    window.location.href = redirectUrl
+                  }
+                }}
+                className="w-full h-11 rounded-xl font-semibold text-white"
+                style={{ backgroundColor: accentColor }}
+              >
+                Login to {orgName}
+              </Button>
             </>
           ) : (
             <>

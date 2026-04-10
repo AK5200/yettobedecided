@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const { data: org, error: orgError } = await adminClient
     .from('organizations')
-    .select('id, name, slug, logo_url, description, guest_posting_enabled, guest_commenting_enabled, guest_voting_enabled, login_handler')
+    .select('id, name, slug, logo_url, description, guest_posting_enabled, guest_commenting_enabled, guest_voting_enabled, login_handler, sso_redirect_url')
     .eq('slug', orgSlug)
     .single()
 
@@ -95,6 +95,7 @@ export async function GET(request: NextRequest) {
       guestCommentingEnabled: org.guest_commenting_enabled !== false,
       guestVotingEnabled: org.guest_voting_enabled !== false,
       loginHandler: org.login_handler || null,
+      ssoRedirectUrl: org.sso_redirect_url || null,
     },
   })
   response.headers.set('Cache-Control', 'no-cache')

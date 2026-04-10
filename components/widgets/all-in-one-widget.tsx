@@ -51,6 +51,9 @@ interface AllInOneWidgetProps {
   guestCommentingEnabled?: boolean
   guestVotingEnabled?: boolean
   onLoginRequired?: () => void
+  loginHandler?: string | null
+  ssoRedirectUrl?: string | null
+  orgName?: string
 }
 
 function getCategoryStyle(category: string): { bg: string; text: string } {
@@ -171,6 +174,9 @@ export function AllInOneWidget({
   guestCommentingEnabled = true,
   guestVotingEnabled = true,
   onLoginRequired,
+  loginHandler,
+  ssoRedirectUrl,
+  orgName,
 }: AllInOneWidgetProps) {
   // Defensive: ensure styleVariant is always a string for reliable comparison
   const styleVariant = String(rawStyleVariant) as '1' | '2' | '3'
@@ -321,6 +327,9 @@ export function AllInOneWidget({
           onVote={handleVote}
           identifiedUser={identifiedUser}
           guestCommentingEnabled={guestCommentingEnabled}
+          loginHandler={loginHandler}
+          ssoRedirectUrl={ssoRedirectUrl}
+          orgName={orgName}
         />
         {showBranding && (
           <div className="pt-2 text-xs text-muted-foreground/60 text-center flex items-center justify-center gap-1">
