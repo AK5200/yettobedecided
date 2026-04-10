@@ -299,7 +299,7 @@ export function BoardsListRedesign({ activeBoards, archivedBoards }: BoardsListR
                           <div className="p-1 rounded bg-violet-50">
                             <Calendar className="h-3 w-3 text-violet-400" />
                           </div>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-muted-foreground" suppressHydrationWarning>
                             {new Date(board.created_at).toLocaleDateString('en-US', {
                               month: 'short',
                               day: 'numeric',

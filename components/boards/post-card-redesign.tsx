@@ -211,7 +211,7 @@ export function PostCardRedesign({
                 {/* Date */}
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  <span>{formatDate(post.created_at)}</span>
+                  <span suppressHydrationWarning>{formatDate(post.created_at)}</span>
                 </div>
 
                 {/* Comment Count (if available) */}

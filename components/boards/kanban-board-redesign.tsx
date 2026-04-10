@@ -297,7 +297,7 @@ export function KanbanBoardRedesign({ posts, isAdmin, adminEmail, boardId, statu
                                 <span className="text-[10px] text-muted-foreground font-medium truncate flex-1">
                                   {getAuthorName(post)}
                                 </span>
-                                <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
+                                <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60" suppressHydrationWarning>
                                   <Calendar className="h-2.5 w-2.5" />
                                   {formatDate(post.created_at)}
                                 </div>

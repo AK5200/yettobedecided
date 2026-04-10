@@ -91,7 +91,7 @@ export function PostCard({ post, orgId, onUpdate, isAdmin, adminEmail, statuses 
                   )}
                 </div>
                 <span>•</span>
-                <span>{formatDate(post.created_at)}</span>
+                <span suppressHydrationWarning>{formatDate(post.created_at)}</span>
               </div>
               {post.admin_note && (
                 <div className="text-sm text-red-600">

@@ -159,7 +159,7 @@ function PostDetailContent({
               </span>
             </div>
             <span className="text-xs text-muted-foreground/40">·</span>
-            <span className="text-xs text-muted-foreground/60">{formatDate(post.created_at)}</span>
+            <span className="text-xs text-muted-foreground/60" suppressHydrationWarning>{formatDate(post.created_at)}</span>
           </div>
         </DialogHeader>
 
@@ -302,7 +302,7 @@ function PostDetailContent({
             <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2 block">
               Created
             </label>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground" suppressHydrationWarning>
               <Calendar className="h-3.5 w-3.5 text-muted-foreground/60" />
               {formatDate(post.created_at)}
             </div>

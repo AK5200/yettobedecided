@@ -176,7 +176,7 @@ export function CommentList({ postId, isAdmin, refreshTrigger, userEmail }: Comm
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-1">{comment.content}</p>
-              <small className="text-[10px] text-muted-foreground">
+              <small className="text-[10px] text-muted-foreground" suppressHydrationWarning>
                 {new Date(comment.created_at).toLocaleDateString()}
               </small>
             </div>
