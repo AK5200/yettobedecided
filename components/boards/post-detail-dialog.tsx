@@ -42,6 +42,9 @@ interface PostDetailDialogProps {
   children: React.ReactNode
   guestCommentingEnabled?: boolean
   orgSlug?: string
+  loginHandler?: string | null
+  ssoRedirectUrl?: string | null
+  orgName?: string
 }
 
 interface Status {
@@ -70,12 +73,18 @@ function PostDetailContent({
   adminEmail,
   guestCommentingEnabled,
   orgSlug,
+  loginHandler,
+  ssoRedirectUrl,
+  orgName,
 }: {
   post: Post
   isAdmin?: boolean
   adminEmail?: string
   guestCommentingEnabled?: boolean
   orgSlug?: string
+  loginHandler?: string | null
+  ssoRedirectUrl?: string | null
+  orgName?: string
 }) {
   const router = useRouter()
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -206,6 +215,9 @@ function PostDetailContent({
             onCommentAdded={handleCommentAdded}
             guestCommentingEnabled={guestCommentingEnabled}
             orgSlug={orgSlug}
+            loginHandler={loginHandler}
+            ssoRedirectUrl={ssoRedirectUrl}
+            orgName={orgName}
           />
         </div>
       </div>
@@ -369,7 +381,7 @@ function PostDetailContent({
   )
 }
 
-export function PostDetailDialog({ post, isAdmin, adminEmail, children, guestCommentingEnabled, orgSlug }: PostDetailDialogProps) {
+export function PostDetailDialog({ post, isAdmin, adminEmail, children, guestCommentingEnabled, orgSlug, loginHandler, ssoRedirectUrl, orgName }: PostDetailDialogProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -377,7 +389,7 @@ export function PostDetailDialog({ post, isAdmin, adminEmail, children, guestCom
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] overflow-hidden p-6 lg:p-8 rounded-xl border-border">
         {open && (
-          <PostDetailContent post={post} isAdmin={isAdmin} adminEmail={adminEmail} guestCommentingEnabled={guestCommentingEnabled} orgSlug={orgSlug} />
+          <PostDetailContent post={post} isAdmin={isAdmin} adminEmail={adminEmail} guestCommentingEnabled={guestCommentingEnabled} orgSlug={orgSlug} loginHandler={loginHandler} ssoRedirectUrl={ssoRedirectUrl} orgName={orgName} />
         )}
       </DialogContent>
     </Dialog>

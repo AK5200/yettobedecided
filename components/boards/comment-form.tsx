@@ -17,6 +17,9 @@ interface CommentFormProps {
   onCommentAdded: () => void
   guestCommentingEnabled?: boolean
   orgSlug?: string
+  loginHandler?: string | null
+  ssoRedirectUrl?: string | null
+  orgName?: string
 }
 
 // Google icon SVG
@@ -39,6 +42,9 @@ export function CommentForm({
   onCommentAdded,
   guestCommentingEnabled = true,
   orgSlug,
+  loginHandler,
+  ssoRedirectUrl,
+  orgName,
 }: CommentFormProps) {
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
@@ -242,6 +248,17 @@ export function CommentForm({
             {otpLoading ? 'Sending...' : 'Send Code'}
           </Button>
         </>
+      ) : loginHandler === 'customer' && ssoRedirectUrl ? (
+        <Button
+          type="button"
+          onClick={() => {
+            const returnUrl = typeof window !== 'undefined' ? window.location.href : ''
+            window.location.href = `${ssoRedirectUrl}?redirect=${encodeURIComponent(returnUrl)}&kelo=open`
+          }}
+          className="w-full h-9 text-sm rounded-lg font-semibold cursor-pointer"
+        >
+          Login to {orgName || 'continue'}
+        </Button>
       ) : (
         <div className="space-y-2">
           <Button
@@ -278,6 +295,25 @@ export function CommentForm({
 
   // Guest commenting OFF and not verified — show login prompt
   if (!guestCommentingEnabled && !isIdentified && !isAdmin) {
+    // Customer login handler — show direct redirect button
+    if (loginHandler === 'customer' && ssoRedirectUrl) {
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground text-center">Login to comment</p>
+          <Button
+            type="button"
+            onClick={() => {
+              const returnUrl = typeof window !== 'undefined' ? window.location.href : ''
+              window.location.href = `${ssoRedirectUrl}?redirect=${encodeURIComponent(returnUrl)}&kelo=open`
+            }}
+            className="w-full h-10 text-sm rounded-lg font-semibold cursor-pointer"
+          >
+            Login to {orgName || 'continue'}
+          </Button>
+        </div>
+      )
+    }
+
     return (
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground text-center">Verify your identity to comment</p>

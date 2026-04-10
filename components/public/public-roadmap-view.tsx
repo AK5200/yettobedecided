@@ -170,7 +170,7 @@ export function PublicRoadmapView({
                               style={{ backgroundColor: column.dotColor }}
                             />
 
-                            <PostDetailDialog post={post}>
+                            <PostDetailDialog post={post} orgSlug={orgSlug} guestCommentingEnabled={(org as any).guest_commenting_enabled !== false} loginHandler={(org as any).login_handler} ssoRedirectUrl={(org as any).sso_redirect_url} orgName={org.name}>
                               <div className="p-4 pl-5 cursor-pointer">
                                 <h3 className="text-[13px] font-semibold text-foreground mb-1.5 pr-6 leading-snug line-clamp-2 group-hover:text-amber-700 transition-colors">
                                   {post.title}
