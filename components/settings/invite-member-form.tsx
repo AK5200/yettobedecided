@@ -1,9 +1,71 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
+
+function RoleInfoTooltip({ isDark }: { isDark: boolean }) {
+  const [open, setOpen] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setOpen(true)
+  }
+  const handleLeave = () => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150)
+  }
+
+  return (
+    <div className="relative inline-block" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+      <button
+        type="button"
+        className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
+          isDark
+            ? 'bg-white/10 text-white/40 hover:bg-white/20 hover:text-white/70'
+            : 'bg-kelo-border text-kelo-muted hover:bg-kelo-ink/10 hover:text-kelo-ink'
+        }`}
+        aria-label="Role information"
+      >
+        ?
+      </button>
+      {open && (
+        <div
+          className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 p-4 rounded-xl border shadow-xl z-50 text-left ${
+            isDark
+              ? 'bg-[#111111] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]'
+              : 'bg-white border-kelo-border shadow-[0_8px_32px_rgba(0,0,0,0.12)]'
+          }`}
+          onMouseEnter={handleEnter}
+          onMouseLeave={handleLeave}
+        >
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="w-2 h-2 rounded-full bg-kelo-yellow" />
+                <span className={`text-xs font-bold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Admin</span>
+              </div>
+              <p className={`text-xs leading-relaxed ${isDark ? 'text-white/50' : 'text-kelo-muted'}`}>
+                Full create, read, and write access. Can approve/reject posts and manage settings. Cannot create new organizations.
+              </p>
+            </div>
+            <div className={`border-t ${isDark ? 'border-white/[0.06]' : 'border-kelo-border'}`} />
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className={`text-xs font-bold ${isDark ? 'text-white' : 'text-kelo-ink'}`}>Member</span>
+              </div>
+              <p className={`text-xs leading-relaxed ${isDark ? 'text-white/50' : 'text-kelo-muted'}`}>
+                Full read access. Can create posts, add comments, manage tags, and approve/reject posts in moderation.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface InviteMemberFormProps {
   orgId: string
@@ -97,6 +159,7 @@ export function InviteMemberForm({ orgId }: InviteMemberFormProps) {
                 <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
               </svg>
               Role
+              <RoleInfoTooltip isDark={isDark} />
             </label>
             <div className={`flex h-11 rounded-xl border p-1 ${
               isDark
