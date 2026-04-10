@@ -185,7 +185,9 @@ export async function POST(request: Request) {
       is_approved: !needsModeration,
     }
 
-    const { data: comment, error } = await supabase
+    // Use admin client for insert to avoid RLS blocking the .select() read-back
+    const adminSupabase = createAdminClient()
+    const { data: comment, error } = await adminSupabase
       .from('comments')
       .insert(commentData)
       .select()
