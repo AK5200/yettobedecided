@@ -180,6 +180,31 @@ export function PublicFeaturesView({
       .catch(() => {})
   }, [orgSlug])
 
+  // Listen for identity set by client JS after page load (Kelo.identify, storage event, custom event)
+  useEffect(() => {
+    const checkIdentity = () => {
+      if (voterEmail) return
+      // Re-check flat localStorage keys and our scoped key
+      const ssoUser = detectSSORedirectIdentity(orgSlug)
+      if (ssoUser?.email) { setVoterEmail(ssoUser.email); return }
+      try {
+        const stored = localStorage.getItem(`kelo_identified_user_${orgSlug}`)
+        if (stored) {
+          const user = JSON.parse(stored)
+          if (user.email) setVoterEmail(user.email)
+        }
+      } catch {}
+    }
+    window.addEventListener('kelo:sso-identity', checkIdentity)
+    window.addEventListener('storage', checkIdentity)
+    window.addEventListener('focus', checkIdentity)
+    return () => {
+      window.removeEventListener('kelo:sso-identity', checkIdentity)
+      window.removeEventListener('storage', checkIdentity)
+      window.removeEventListener('focus', checkIdentity)
+    }
+  }, [orgSlug, voterEmail])
+
   const buildUrl = (overrides: { board?: string | null; status?: string; q?: string }) => {
     const params = new URLSearchParams()
     const board = overrides.board !== undefined ? overrides.board : currentBoard

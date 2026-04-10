@@ -1,62 +1,52 @@
 /**
- * SSO redirect identity detection for public hub pages.
+ * SSO redirect identity detection for public hub and widget pages.
  *
- * After a "Your Website" login redirect, the client should redirect back
- * with identity info appended to the URL:
+ * Supports two mechanisms:
  *
- * Trust mode:  ?kelo_user_id=X&kelo_user_email=Y&kelo_user_name=Z
- * JWT mode:    ?kelo_token=SIGNED_JWT
+ * 1. URL params (after redirect from client login page):
+ *    Trust mode:  ?kelo_user_id=X&kelo_user_email=Y&kelo_user_name=Z
+ *    JWT mode:    ?kelo_token=SIGNED_JWT
  *
- * This module detects those params, stores the identity in localStorage,
- * and cleans the URL.
+ * 2. Flat localStorage keys (set by client's JS after login):
+ *    kelo_user_id, kelo_user_email, kelo_user_name
+ *
+ * Both paths store the result into kelo_identified_user_${orgSlug}
+ * which is what the widget/public hub components read.
  */
 
 interface SSOIdentity {
   id?: string
   email: string
   name?: string
+  token?: string
 }
 
 /**
- * Check URL for SSO redirect identity params.
- * Returns the identity if found, null otherwise.
- * Automatically cleans the URL params after extraction.
+ * Check URL params for SSO identity, then fall back to flat localStorage keys.
+ * Stores into kelo_identified_user_${orgSlug} and cleans up.
  */
 export function detectSSORedirectIdentity(orgSlug: string): SSOIdentity | null {
   if (typeof window === 'undefined') return null
 
+  // --- Path 1: URL params ---
   const params = new URLSearchParams(window.location.search)
 
-  // Check for trust mode params
-  const email = params.get('kelo_user_email')
-  if (email) {
+  // Trust mode params
+  const urlEmail = params.get('kelo_user_email')?.trim()
+  if (urlEmail) {
     const identity: SSOIdentity = {
-      id: params.get('kelo_user_id') || undefined,
-      email,
-      name: params.get('kelo_user_name') || email.split('@')[0],
+      id: params.get('kelo_user_id')?.trim() || undefined,
+      email: urlEmail,
+      name: params.get('kelo_user_name')?.trim() || urlEmail.split('@')[0],
     }
-
-    // Store in localStorage
-    try {
-      localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(identity))
-    } catch {}
-
-    // Clean URL — remove kelo_ params
-    params.delete('kelo_user_id')
-    params.delete('kelo_user_email')
-    params.delete('kelo_user_name')
-    params.delete('kelo')
-    const cleanSearch = params.toString()
-    const cleanUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : '') + window.location.hash
-    window.history.replaceState({}, '', cleanUrl)
-
+    persist(orgSlug, identity)
+    cleanUrlParams(['kelo_user_id', 'kelo_user_email', 'kelo_user_name', 'kelo'])
     return identity
   }
 
-  // Check for JWT mode param
-  const token = params.get('kelo_token')
+  // JWT mode param
+  const token = params.get('kelo_token')?.trim()
   if (token) {
-    // Decode JWT payload (client-side, no verification — server verifies when used)
     try {
       const payload = JSON.parse(atob(token.split('.')[1]))
       if (payload.email) {
@@ -64,27 +54,50 @@ export function detectSSORedirectIdentity(orgSlug: string): SSOIdentity | null {
           id: payload.id || payload.sub,
           email: payload.email,
           name: payload.name || payload.email.split('@')[0],
-        }
-
-        // Store identity AND token for server-side verification
-        localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify({
-          ...identity,
           token,
-        }))
-
-        // Clean URL
-        params.delete('kelo_token')
-        params.delete('kelo')
-        const cleanSearch = params.toString()
-        const cleanUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : '') + window.location.hash
-        window.history.replaceState({}, '', cleanUrl)
-
+        }
+        persist(orgSlug, identity)
+        cleanUrlParams(['kelo_token', 'kelo'])
         return identity
       }
-    } catch {
-      // Invalid JWT, ignore
-    }
+    } catch {}
   }
 
+  // --- Path 2: Flat localStorage keys (set by client's JS) ---
+  try {
+    const lsEmail = localStorage.getItem('kelo_user_email')?.trim()
+    if (lsEmail) {
+      const identity: SSOIdentity = {
+        id: localStorage.getItem('kelo_user_id')?.trim() || undefined,
+        email: lsEmail,
+        name: localStorage.getItem('kelo_user_name')?.trim() || lsEmail.split('@')[0],
+      }
+      persist(orgSlug, identity)
+      return identity
+    }
+  } catch {}
+
   return null
+}
+
+function persist(orgSlug: string, identity: SSOIdentity) {
+  try {
+    localStorage.setItem(`kelo_identified_user_${orgSlug}`, JSON.stringify(identity))
+  } catch {}
+}
+
+function cleanUrlParams(keys: string[]) {
+  const params = new URLSearchParams(window.location.search)
+  let changed = false
+  for (const key of keys) {
+    if (params.has(key)) {
+      params.delete(key)
+      changed = true
+    }
+  }
+  if (changed) {
+    const cleanSearch = params.toString()
+    const cleanUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : '') + window.location.hash
+    window.history.replaceState({}, '', cleanUrl)
+  }
 }
