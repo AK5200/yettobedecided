@@ -1073,17 +1073,23 @@ if (window.Kelo) {
               <div>
                 <h3 className="text-lg font-semibold mb-3">How it works</h3>
                 <ol className="space-y-3 text-sm text-muted-foreground list-decimal list-inside">
-                  <li>User clicks &quot;Login&quot; on the public hub or widget</li>
-                  <li>Kelo redirects to: <code className="bg-muted px-1.5 py-0.5 rounded text-xs">https://yourapp.com/login?redirect=RETURN_URL&amp;kelo=open</code></li>
-                  <li>Your app authenticates the user</li>
-                  <li>Your app redirects back to the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">redirect</code> URL with identity params</li>
-                  <li>Kelo detects the identity and the user can vote, comment, and post</li>
+                  <li>User tries to vote, comment, or post on the <strong className="text-foreground">Kelo public hub</strong> or <strong className="text-foreground">widget</strong></li>
+                  <li>Kelo redirects them to your login page with a return URL:<br/><code className="bg-muted px-1.5 py-0.5 rounded text-xs mt-1 inline-block">https://yourapp.com/login?redirect=https://kelohq.com/your-org/features&amp;kelo=open</code></li>
+                  <li>Your app authenticates the user (your normal login flow)</li>
+                  <li>After login, your app reads the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">redirect</code> query param and redirects back to it with the user&apos;s identity appended</li>
+                  <li>The user lands back <strong className="text-foreground">exactly where they were</strong> (the same post, comment section, or page) and is now identified</li>
                 </ol>
+              </div>
+
+              <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5">
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  <strong>Important:</strong> The <code className="bg-amber-100 dark:bg-amber-500/20 px-1 py-0.5 rounded text-xs">redirect</code> parameter contains the exact page the user was on. You must redirect back to this URL (not your homepage) so the user returns to the same place.
+                </p>
               </div>
 
               <div>
                 <h3 className="text-lg font-semibold mb-3">Your login handler (required)</h3>
-                <p className="text-sm text-muted-foreground mb-3">After your user logs in, check for the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">redirect</code> query parameter and redirect back with identity:</p>
+                <p className="text-sm text-muted-foreground mb-3">After your user logs in, check for the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">redirect</code> query parameter and redirect back to it with the user&apos;s identity:</p>
                 <Card className="bg-[#1e1e1e] border-gray-800">
                   <div className="flex items-center justify-between p-3 border-b border-gray-700">
                     <span className="text-xs text-gray-400">JavaScript</span>
@@ -1110,9 +1116,12 @@ if (window.Kelo) {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-3">Widget on your site</h3>
+                <h3 className="text-lg font-semibold mb-3">Widget embedded on your site</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  If the Kelo widget is embedded on your own site (iframe), the redirect flow above handles it automatically — Kelo redirects to your login page, and after login you redirect back to the same page where the widget is.
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  If the Kelo widget is embedded on your own site (iframe), use <code className="bg-muted px-1.5 py-0.5 rounded text-xs">Kelo.identify()</code> instead — see <a href="#trust-mode" className="text-amber-600 hover:text-amber-700 dark:text-amber-400 font-medium">Trust Mode</a> or <a href="#jwt-mode" className="text-amber-600 hover:text-amber-700 dark:text-amber-400 font-medium">JWT Mode</a> above. The SSO redirect flow is for the public hub (kelohq.com/your-org).
+                  Alternatively, if your user is <strong className="text-foreground">already logged in</strong> on your site, you can skip the redirect entirely and pass their identity directly using <code className="bg-muted px-1.5 py-0.5 rounded text-xs">Kelo.identify()</code> — see <a href="#trust-mode" className="text-amber-600 hover:text-amber-700 dark:text-amber-400 font-medium">Trust Mode</a> or <a href="#jwt-mode" className="text-amber-600 hover:text-amber-700 dark:text-amber-400 font-medium">JWT Mode</a>.
                 </p>
               </div>
             </div>
