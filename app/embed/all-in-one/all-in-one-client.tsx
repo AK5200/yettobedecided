@@ -429,11 +429,11 @@ function LoginDialog({ open, onOpenChange, orgSlug, accentColor, onVerified }: {
 
   const handleGoogle = () => {
     const popup = window.open(
-      `/api/auth/widget/callback?provider=google&org=${orgSlug}`,
+      `/api/auth/widget/google?org_slug=${orgSlug}&popup=1`,
       'kelo-oauth', 'width=500,height=600,left=200,top=100'
     )
     const handler = (event: MessageEvent) => {
-      if (event.data?.type === 'kelo:oauth-success' && event.data.user) {
+      if (event.data?.type === 'kelo:identity' && event.data.user) {
         onVerified(event.data.user)
         window.removeEventListener('message', handler)
       }

@@ -162,11 +162,11 @@ export function PostDetailView({ post: initialPost, orgSlug, accentColor = '#F59
   const handleGoogleVerify = () => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
     const popup = window.open(
-      `${baseUrl}/api/auth/widget/callback?provider=google&org=${orgSlug}`,
+      `${baseUrl}/api/auth/widget/google?org_slug=${orgSlug}&popup=1`,
       'kelo-oauth', 'width=500,height=600,left=200,top=100'
     )
     const handleOAuth = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'kelo:oauth-success') {
+      if (event.data && event.data.type === 'kelo:identity') {
         const user = event.data.user
         if (user) {
           setIdentifiedUser(user)

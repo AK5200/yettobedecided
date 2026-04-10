@@ -173,11 +173,11 @@ export function CommentForm({
 
   const handleGoogleVerify = () => {
     const popup = window.open(
-      `/api/auth/widget/callback?provider=google&org=${orgSlug}`,
+      `/api/auth/widget/google?org_slug=${orgSlug}&popup=1`,
       'kelo-oauth', 'width=500,height=600,left=200,top=100'
     )
     const handleOAuth = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'kelo:oauth-success') {
+      if (event.data && event.data.type === 'kelo:identity') {
         const user = event.data.user
         if (user) {
           const userData = { email: user.email, name: user.name }
