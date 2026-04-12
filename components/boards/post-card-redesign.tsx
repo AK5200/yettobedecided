@@ -57,6 +57,28 @@ const statusColors: Record<string, string> = {
   closed: '#EF4444',
 }
 
+// Deterministic color for author names
+const AUTHOR_PALETTE = [
+  { text: 'text-blue-600', bg: '#2563EB' },
+  { text: 'text-violet-600', bg: '#7C3AED' },
+  { text: 'text-emerald-600', bg: '#059669' },
+  { text: 'text-rose-600', bg: '#E11D48' },
+  { text: 'text-amber-600', bg: '#D97706' },
+  { text: 'text-cyan-600', bg: '#0891B2' },
+  { text: 'text-indigo-600', bg: '#4F46E5' },
+  { text: 'text-teal-600', bg: '#0D9488' },
+  { text: 'text-pink-600', bg: '#DB2777' },
+  { text: 'text-orange-600', bg: '#EA580C' },
+]
+
+function getAuthorStyle(name: string) {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return AUTHOR_PALETTE[Math.abs(hash) % AUTHOR_PALETTE.length]
+}
+
 export function PostCardRedesign({
   post,
   onUpdate,
@@ -145,6 +167,8 @@ export function PostCardRedesign({
 
   const currentStatus = statuses.find(s => s.key === post.status)
   const statusColor = currentStatus?.color || statusColors[post.status] || '#6B7280'
+  const authorName = getAuthorName()
+  const authorStyle = getAuthorStyle(authorName)
 
   return (
     <Card className="group relative overflow-hidden border-border hover:border-border hover:shadow-md transition-all duration-200 bg-card">
@@ -163,18 +187,28 @@ export function PostCardRedesign({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              {/* Title & Badges */}
-              <div className="flex items-start gap-2 mb-2">
-                <h3 className="text-base font-semibold text-foreground group-hover:text-amber-600 transition-colors flex-1">
-                  {post.title}
-                </h3>
+              {/* Badges row */}
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 {post.is_pinned && (
-                  <Badge variant="secondary" className="gap-1 bg-purple-50 text-purple-700 border-purple-200">
-                    <Pin className="h-3 w-3" />
-                    Pinned
-                  </Badge>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                    <Pin className="h-3 w-3 fill-amber-500 text-amber-500" />
+                    Featured
+                  </span>
+                )}
+                {post.status && (
+                  <span
+                    className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    style={{ backgroundColor: statusColor + '18', color: statusColor }}
+                  >
+                    {currentStatus?.name || post.status}
+                  </span>
                 )}
               </div>
+
+              {/* Title */}
+              <h3 className="text-base font-semibold text-foreground group-hover:text-amber-600 transition-colors mb-1">
+                {post.title}
+              </h3>
 
               {/* Description */}
               {post.content && (
@@ -194,12 +228,15 @@ export function PostCardRedesign({
                       className="w-5 h-5 rounded-full border border-border"
                     />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-muted to-muted flex items-center justify-center text-[10px] font-medium text-muted-foreground">
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium text-white"
+                      style={{ backgroundColor: authorStyle.bg }}
+                    >
                       {getAuthorInitial()}
                     </div>
                   )}
-                  <span className="font-medium text-foreground/80">
-                    {getAuthorName()}
+                  <span className={`font-medium ${authorStyle.text}`}>
+                    {authorName}
                   </span>
                   {post.user_source === 'verified_sso' && (
                     <Badge variant="secondary" className="px-1 py-0 text-[10px] bg-green-50 text-green-700 border-green-200">
@@ -219,19 +256,6 @@ export function PostCardRedesign({
                   <div className="flex items-center gap-1">
                     <MessageSquare className="h-3 w-3" />
                     <span>{(post as any).comment_count}</span>
-                  </div>
-                )}
-
-                {/* Status Badge - only show if no admin dropdown */}
-                {!isAdmin && (
-                  <div className="flex items-center gap-1.5 ml-auto">
-                    <Circle
-                      className="h-2.5 w-2.5"
-                      style={{ color: statusColor, fill: statusColor }}
-                    />
-                    <span className="text-xs font-medium" style={{ color: statusColor }}>
-                      {currentStatus?.name || post.status}
-                    </span>
                   </div>
                 )}
               </div>
