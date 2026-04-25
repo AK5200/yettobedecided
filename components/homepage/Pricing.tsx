@@ -191,7 +191,7 @@ function PlanCard({ plan, isEarlyBird, annual }: { plan: Plan; isEarlyBird: bool
                   {plan.period}
                 </span>
                 {strikePrice && (
-                  <span className={`text-xs line-through ${plan.highlight ? 'text-white/30' : 'text-kelo-muted/60 dark:text-white/25'}`}>
+                  <span className={`text-sm font-medium line-through ${plan.highlight ? 'text-white/40' : 'text-kelo-muted dark:text-white/35'}`}>
                     {strikePrice}
                   </span>
                 )}
