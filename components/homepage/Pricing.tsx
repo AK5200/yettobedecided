@@ -1,28 +1,19 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
+
+const EARLY_BIRD_END = new Date('2026-05-25T23:59:59');
+
+function getDaysLeft(): number {
+  const diff = EARLY_BIRD_END.getTime() - new Date().getTime();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
 
 const plans = [
   {
-    name: 'Lite',
-    price: '$9',
-    period: '/month',
-    description: 'For indie hackers and early-stage products.',
-    cta: 'Start 7-day free trial',
-    highlight: false,
-    features: [
-      '3 feedback boards',
-      'Unlimited feedback items',
-      'Public roadmap',
-      'Full changelog',
-      'Email notifications',
-      'Kelo branding',
-    ],
-    notIncluded: ['Custom domain', 'Priority support', 'Analytics'],
-  },
-  {
     name: 'Starter',
-    price: '$19',
+    earlyBirdPrice: '$19',
+    regularPrice: '$29',
     period: '/month',
     description: 'For growing products with real user bases.',
     cta: 'Start 7-day free trial',
@@ -39,7 +30,8 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '$39',
+    earlyBirdPrice: '$39',
+    regularPrice: '$49',
     period: '/month',
     description: 'For product teams who ship fast and often.',
     cta: 'Start 7-day free trial',
@@ -58,10 +50,11 @@ const plans = [
   },
   {
     name: 'Business',
-    price: '$99',
+    earlyBirdPrice: '',
+    regularPrice: '',
     period: '/month',
     description: 'For scaling teams with enterprise needs.',
-    cta: 'Start 7-day free trial',
+    cta: 'Coming soon',
     highlight: false,
     comingSoon: true,
     features: [
@@ -78,11 +71,12 @@ const plans = [
 ];
 
 export default function Pricing() {
-  const [annual, setAnnual] = useState(true);
+  const daysLeft = getDaysLeft();
+  const isEarlyBird = daysLeft > 0;
 
   return (
     <section id="pricing" className="py-28 bg-kelo-surface dark:bg-[#0D0D0D] transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-6">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-kelo-border dark:border-white/10 bg-white dark:bg-white/5 text-xs font-kelo-mono font-semibold text-kelo-muted dark:text-white/40 tracking-widest uppercase">
             Simple pricing
@@ -92,33 +86,27 @@ export default function Pricing() {
             <br />
             <span className="text-kelo-muted dark:text-white/40 font-semibold text-3xl md:text-4xl">Just flat, honest pricing.</span>
           </h2>
-          <p className="text-base text-kelo-muted dark:text-white/50 mb-8">
+          <p className="text-base text-kelo-muted dark:text-white/50 mb-6">
             Start with a 7-day free trial. Upgrade anytime. Cancel anytime.
           </p>
 
-          <div className="inline-flex items-center gap-1 p-1 bg-white dark:bg-white/5 border border-kelo-border dark:border-white/10 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-            <button
-              onClick={() => setAnnual(false)}
-              className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${!annual ? 'bg-kelo-yellow text-kelo-ink shadow-sm' : 'text-kelo-muted dark:text-white/40 hover:text-kelo-ink dark:hover:text-white'}`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setAnnual(true)}
-              className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 ${annual ? 'bg-kelo-yellow text-kelo-ink shadow-sm' : 'text-kelo-muted dark:text-white/40 hover:text-kelo-ink dark:hover:text-white'}`}
-            >
-              Annual
-              <span className="text-xs font-bold text-kelo-green bg-kelo-green-soft dark:bg-green-500/15 dark:text-green-400 px-1.5 py-0.5 rounded-full">-20%</span>
-            </button>
-          </div>
+          {isEarlyBird && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-kelo-yellow/10 border border-kelo-yellow/30 text-kelo-ink dark:text-white text-sm font-semibold">
+              <span className="w-2 h-2 rounded-full bg-kelo-yellow animate-pulse shrink-0" />
+              Early bird pricing —{' '}
+              <span className="text-kelo-yellow font-bold">
+                {daysLeft} {daysLeft === 1 ? 'day' : 'days'} left
+              </span>{' '}
+              at this price
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {plans.map((plan) => (
-            <PlanCard key={plan.name} plan={plan} annual={annual} />
+            <PlanCard key={plan.name} plan={plan} isEarlyBird={isEarlyBird} />
           ))}
         </div>
-
       </div>
     </section>
   );
@@ -126,7 +114,8 @@ export default function Pricing() {
 
 interface Plan {
   name: string;
-  price: string;
+  earlyBirdPrice: string;
+  regularPrice: string;
   period: string;
   description: string;
   cta: string;
@@ -137,9 +126,9 @@ interface Plan {
   notIncluded: string[];
 }
 
-function PlanCard({ plan, annual }: { plan: Plan; annual: boolean }) {
-  const basePrice = parseInt(plan.price.replace('$', '')) || 0;
-  const displayPrice = annual && basePrice > 0 ? `$${Math.round(basePrice * 0.8)}` : plan.price;
+function PlanCard({ plan, isEarlyBird }: { plan: Plan; isEarlyBird: boolean }) {
+  const displayPrice = isEarlyBird ? plan.earlyBirdPrice : plan.regularPrice;
+  const strikePrice = isEarlyBird ? plan.regularPrice : null;
 
   return (
     <div
@@ -161,6 +150,7 @@ function PlanCard({ plan, annual }: { plan: Plan; annual: boolean }) {
         <div className={`text-xs font-bold mb-2 uppercase tracking-wider ${plan.highlight ? 'text-kelo-yellow' : 'text-kelo-muted dark:text-white/40'}`}>
           {plan.name}
         </div>
+
         {plan.comingSoon ? (
           <div className="flex items-end gap-1 mb-2">
             <span className={`text-2xl font-display font-extrabold leading-none ${plan.highlight ? 'text-white' : 'text-kelo-ink dark:text-white'}`}>
@@ -168,17 +158,23 @@ function PlanCard({ plan, annual }: { plan: Plan; annual: boolean }) {
             </span>
           </div>
         ) : (
-          <div className="flex items-end gap-1 mb-2">
+          <div className="flex items-end gap-2 mb-2">
             <span className={`text-4xl font-display font-extrabold leading-none ${plan.highlight ? 'text-white' : 'text-kelo-ink dark:text-white'}`}>
               {displayPrice}
             </span>
-            {basePrice > 0 && (
-              <span className={`text-sm font-medium mb-0.5 ${plan.highlight ? 'text-white/50' : 'text-kelo-muted dark:text-white/40'}`}>
+            <div className="flex flex-col items-start mb-0.5">
+              <span className={`text-sm font-medium ${plan.highlight ? 'text-white/50' : 'text-kelo-muted dark:text-white/40'}`}>
                 {plan.period}
               </span>
-            )}
+              {strikePrice && (
+                <span className={`text-xs line-through ${plan.highlight ? 'text-white/30' : 'text-kelo-muted/60 dark:text-white/25'}`}>
+                  {strikePrice}
+                </span>
+              )}
+            </div>
           </div>
         )}
+
         <p className={`text-xs leading-relaxed ${plan.highlight ? 'text-white/60' : 'text-kelo-muted dark:text-white/40'}`}>
           {plan.description}
         </p>
