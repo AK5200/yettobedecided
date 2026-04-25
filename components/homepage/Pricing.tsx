@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 
 const EARLY_BIRD_END = new Date('2026-05-25T23:59:59');
@@ -12,8 +12,8 @@ function getDaysLeft(): number {
 const plans = [
   {
     name: 'Starter',
-    earlyBirdPrice: '$19',
-    regularPrice: '$29',
+    earlyBirdPrice: 19,
+    regularPrice: 29,
     period: '/month',
     description: 'For growing products with real user bases.',
     cta: 'Start 7-day free trial',
@@ -30,8 +30,8 @@ const plans = [
   },
   {
     name: 'Pro',
-    earlyBirdPrice: '$39',
-    regularPrice: '$49',
+    earlyBirdPrice: 39,
+    regularPrice: 49,
     period: '/month',
     description: 'For product teams who ship fast and often.',
     cta: 'Start 7-day free trial',
@@ -50,8 +50,8 @@ const plans = [
   },
   {
     name: 'Business',
-    earlyBirdPrice: '',
-    regularPrice: '',
+    earlyBirdPrice: 0,
+    regularPrice: 0,
     period: '/month',
     description: 'For scaling teams with enterprise needs.',
     cta: 'Coming soon',
@@ -71,6 +71,7 @@ const plans = [
 ];
 
 export default function Pricing() {
+  const [annual, setAnnual] = useState(true);
   const daysLeft = getDaysLeft();
   const isEarlyBird = daysLeft > 0;
 
@@ -90,21 +91,39 @@ export default function Pricing() {
             Start with a 7-day free trial. Upgrade anytime. Cancel anytime.
           </p>
 
-          {isEarlyBird && (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-kelo-yellow/10 border border-kelo-yellow/30 text-kelo-ink dark:text-white text-sm font-semibold">
-              <span className="w-2 h-2 rounded-full bg-kelo-yellow animate-pulse shrink-0" />
-              Early bird pricing —{' '}
-              <span className="text-kelo-yellow font-bold">
-                {daysLeft} {daysLeft === 1 ? 'day' : 'days'} left
-              </span>{' '}
-              at this price
+          <div className="flex flex-col items-center gap-4">
+            <div className="inline-flex items-center gap-1 p-1 bg-white dark:bg-white/5 border border-kelo-border dark:border-white/10 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+              <button
+                onClick={() => setAnnual(false)}
+                className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${!annual ? 'bg-kelo-yellow text-kelo-ink shadow-sm' : 'text-kelo-muted dark:text-white/40 hover:text-kelo-ink dark:hover:text-white'}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setAnnual(true)}
+                className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 ${annual ? 'bg-kelo-yellow text-kelo-ink shadow-sm' : 'text-kelo-muted dark:text-white/40 hover:text-kelo-ink dark:hover:text-white'}`}
+              >
+                Annual
+                <span className="text-xs font-bold text-kelo-green bg-kelo-green-soft dark:bg-green-500/15 dark:text-green-400 px-1.5 py-0.5 rounded-full">-20%</span>
+              </button>
             </div>
-          )}
+
+            {isEarlyBird && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-kelo-yellow/10 border border-kelo-yellow/30 text-kelo-ink dark:text-white text-sm font-semibold">
+                <span className="w-2 h-2 rounded-full bg-kelo-yellow animate-pulse shrink-0" />
+                Early bird pricing —{' '}
+                <span className="text-kelo-yellow font-bold">
+                  {daysLeft} {daysLeft === 1 ? 'day' : 'days'} left
+                </span>{' '}
+                at this price
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {plans.map((plan) => (
-            <PlanCard key={plan.name} plan={plan} isEarlyBird={isEarlyBird} />
+            <PlanCard key={plan.name} plan={plan} isEarlyBird={isEarlyBird} annual={annual} />
           ))}
         </div>
       </div>
@@ -114,8 +133,8 @@ export default function Pricing() {
 
 interface Plan {
   name: string;
-  earlyBirdPrice: string;
-  regularPrice: string;
+  earlyBirdPrice: number;
+  regularPrice: number;
   period: string;
   description: string;
   cta: string;
@@ -126,9 +145,13 @@ interface Plan {
   notIncluded: string[];
 }
 
-function PlanCard({ plan, isEarlyBird }: { plan: Plan; isEarlyBird: boolean }) {
-  const displayPrice = isEarlyBird ? plan.earlyBirdPrice : plan.regularPrice;
-  const strikePrice = isEarlyBird ? plan.regularPrice : null;
+function PlanCard({ plan, isEarlyBird, annual }: { plan: Plan; isEarlyBird: boolean; annual: boolean }) {
+  const baseMonthly = isEarlyBird ? plan.earlyBirdPrice : plan.regularPrice;
+  const regularMonthly = isEarlyBird ? plan.regularPrice : null;
+  const displayPrice = baseMonthly > 0 ? `$${annual ? Math.round(baseMonthly * 0.8) : baseMonthly}` : '';
+  const strikePrice = regularMonthly && regularMonthly > 0
+    ? `$${annual ? Math.round(regularMonthly * 0.8) : regularMonthly}`
+    : null;
 
   return (
     <div
@@ -162,16 +185,18 @@ function PlanCard({ plan, isEarlyBird }: { plan: Plan; isEarlyBird: boolean }) {
             <span className={`text-4xl font-display font-extrabold leading-none ${plan.highlight ? 'text-white' : 'text-kelo-ink dark:text-white'}`}>
               {displayPrice}
             </span>
-            <div className="flex flex-col items-start mb-0.5">
-              <span className={`text-sm font-medium ${plan.highlight ? 'text-white/50' : 'text-kelo-muted dark:text-white/40'}`}>
-                {plan.period}
-              </span>
-              {strikePrice && (
-                <span className={`text-xs line-through ${plan.highlight ? 'text-white/30' : 'text-kelo-muted/60 dark:text-white/25'}`}>
-                  {strikePrice}
+            {baseMonthly > 0 && (
+              <div className="flex flex-col items-start mb-0.5">
+                <span className={`text-sm font-medium ${plan.highlight ? 'text-white/50' : 'text-kelo-muted dark:text-white/40'}`}>
+                  {plan.period}
                 </span>
-              )}
-            </div>
+                {strikePrice && (
+                  <span className={`text-xs line-through ${plan.highlight ? 'text-white/30' : 'text-kelo-muted/60 dark:text-white/25'}`}>
+                    {strikePrice}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
 
